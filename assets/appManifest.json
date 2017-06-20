@@ -1,0 +1,39 @@
+{
+  "short_name": "Tiamat",
+  "name": "Tiamat 電玩資訊站",
+  "start_url": "/",
+  "background_color": "#0097a7",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "image/icons/app/android/mipmap-hdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "image/icons/app/android/mipmap-ldpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "36x36"
+    },
+    {
+      "src": "image/icons/app/android/mipmap-ldpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "image/icons/app/android/mipmap-xhdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "image/icons/app/android/mipmap-xxhdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "image/icons/app/android/mipmap-xxxhdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}

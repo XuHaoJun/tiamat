@@ -1,0 +1,36 @@
+/*
+  Global CSS file
+*/
+
+::-webkit-input-placeholder {
+  color: #aaa;
+  font-weight: 300;
+}
+
+::-moz-placeholder {
+  color: #aaa;
+  font-weight: 300;
+}
+
+:-ms-input-placeholder {
+  color: #aaa;
+  font-weight: 300;
+}
+
+input:-moz-placeholder {
+  color: #aaa;
+  font-weight: 300;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  line-height: normal;
+  background: #FFF;
+  font-family: "Helvetica Neue", "Calibri Light", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
