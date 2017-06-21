@@ -23,7 +23,9 @@ const SocketReducer = (state = initialState, action) => {
               const {method, eventName, callback} = handler;
               socket[method](eventName, callback);
             });
-            found.destroy();
+            if (found.connected) {
+              found.destroy();
+            }
             const nextSockets = sockets.set(nsp, socket);
             return state.set('sockets', nextSockets);
           } else {
@@ -44,7 +46,7 @@ const SocketReducer = (state = initialState, action) => {
         const {nsp} = action;
         const sockets = state.get('sockets');
         const found = sockets.get(nsp);
-        if (found) {
+        if (found && found.connected) {
           found.destroy();
         }
         const nextSockets = sockets.delete(nsp);
