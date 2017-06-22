@@ -14,17 +14,26 @@ export function removeSocket(nsp = '') {
   return {type: REMOVE_SOCKET, nsp};
 }
 
-export function createSocket(nsp = '', opts = {}) {
+const defaultActions = {
+  addDiscussion
+};
+
+export function createSocket(nsp = '', opts = {}, actions = defaultActions) {
   return (dispatch) => {
-    const actions = {
-      addDiscussion
-    };
     const handlers = map(actions, (action, eventName) => {
+      const method = 'on';
       const callback = (...args) => {
-        dispatch(action(...args));
+        return dispatch(action(...args));
       };
-      return {method: 'on', eventName, callback};
-    });
+      return {method, eventName, callback};
+    }).concat((() => {
+      const method = 'once';
+      const eventName = 'close';
+      const callback = () => {
+        return dispatch(removeSocket(nsp));
+      };
+      return {method, eventName, callback};
+    })());
     return Promise.resolve(dispatch(addSocket(nsp, opts, handlers)));
   };
 }

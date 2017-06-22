@@ -24,11 +24,13 @@ const SocketReducer = (state = initialState, action) => {
               socket[method](eventName, callback);
             });
             if (found.connected) {
-              found.destroy();
+              found.disconnect();
             }
             const nextSockets = sockets.set(nsp, socket);
             return state.set('sockets', nextSockets);
           } else {
+            // TODO
+            // update socket handlers.
             return state;
           }
         } else {
@@ -46,8 +48,10 @@ const SocketReducer = (state = initialState, action) => {
         const {nsp} = action;
         const sockets = state.get('sockets');
         const found = sockets.get(nsp);
-        if (found && found.connected) {
-          found.destroy();
+        if (found) {
+          if (found.connected) {
+            found.disconnect();
+          }
         }
         const nextSockets = sockets.delete(nsp);
         return state.set('sockets', nextSockets);
