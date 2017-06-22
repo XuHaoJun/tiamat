@@ -17,10 +17,7 @@ module.exports = {
 
   entry: {
     app: ['./client/index.js'],
-    vendor: [
-      'react',
-      'react-dom'
-    ]
+    vendor: ['react', 'react-dom']
   },
 
   output: {
@@ -149,10 +146,11 @@ module.exports = {
     new webpack
       .optimize
       .AggressiveMergingPlugin(),
+    new webpack
+      .optimize
+      .ModuleConcatenationPlugin(),
     new WebpackBundleSizeAnalyzerPlugin('./plain-report.txt'),
-    new ScriptExtHtmlWebpackPlugin({
-      module: /\.js$/
-    }),
+    new ScriptExtHtmlWebpackPlugin({module: /\.js$/}),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(zh-tw|en)/),
     new SWPrecacheWebpackPlugin({
       cacheId: 'tiamat',
