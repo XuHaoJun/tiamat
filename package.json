@@ -19,7 +19,7 @@
     "clean": "rimraf dist build",
     "slate": "rimraf node_modules && npm install",
     "lint": "eslint client server",
-    "publish:heroku": "git rebase master heroku && git push heroku heroku:master",
+    "publish:heroku": "git rebase master heroku && git push --force heroku heroku:master",
     "heroku-postbuild": "npm run build"
   },
   "engines": {
