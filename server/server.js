@@ -7,6 +7,7 @@ import path from 'path';
 import serializeJavascript from 'serialize-javascript';
 import http from 'http';
 import socketIO from 'socket.io';
+import Promise from 'bluebird';
 import IntlWrapper from '../client/modules/Intl/IntlWrapper';
 import {setUserAgent} from '../client/modules/UserAgent/UserAgentActions';
 import {setOauth2Client} from '../client/modules/Oauth2Client/Oauth2ClientActions';
@@ -56,7 +57,7 @@ import passportConfig from './configs/passport';
 passportConfig();
 
 // Set native promises as mongoose promise
-mongoose.Promise = global.Promise;
+mongoose.Promise = Promise;
 
 // MongoDB Connection
 mongoose.connection.on('error', (error) => {
