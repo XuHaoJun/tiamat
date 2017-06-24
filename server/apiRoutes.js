@@ -10,5 +10,6 @@ router.use(require('./routes/wiki.routes').default);
 router.use(require('./routes/rootWiki.routes').default);
 router.use(require('./routes/semanticRule.routes').default);
 router.use(require('./routes/image.routes').default);
+router.use(require('./routes/notFound.routes').default);
 
 export default router;
