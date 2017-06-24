@@ -57,35 +57,38 @@ function oauth2(providerName, accessToken, refreshToken, profile, cb) {
     'passports.providerName': providerName,
     'passports.thirdUserId': thirdUserId
   };
-  User.findOne(query).exec().then((user) => {
-    if (!user) {
-      const email = profile.emails[0].value;
-      const props = {
-        email,
-        password: genRandomPassword(),
-        passports: [
-          {
-            providerName,
-            thirdUserId,
-            profile
+  User
+    .findOne(query)
+    .exec()
+    .then((user) => {
+      if (!user) {
+        const email = profile.emails[0].value;
+        const props = {
+          email,
+          password: genRandomPassword(),
+          passports: [
+            {
+              providerName,
+              thirdUserId,
+              profile
+            }
+          ]
+        };
+        const newUser = new User(props);
+        // TODO check email duplicate.
+        newUser.save((err) => {
+          if (err) {
+            return cb(err, null);
           }
-        ]
-      };
-      const newUser = new User(props);
-      // TODO
-      // check email duplicate.
-      newUser.save((err) => {
-        if (err) {
-          return cb(err, null);
-        }
-        return cb(null, newUser);
-      });
-    } else {
-      cb(null, user);
-    }
-  }).catch((err) => {
-    cb(err, null);
-  });
+          return cb(null, newUser);
+        });
+      } else {
+        cb(null, user);
+      }
+    })
+    .catch((err) => {
+      cb(err, null);
+    });
 }
 
 export default function config() {
@@ -95,23 +98,30 @@ export default function config() {
 
   passport.use(new ClientPasswordStrategy(clientAuth));
 
-  passport.use(new FacebookStrategy(facebookConfig, (accessToken, refreshToken, profile, cb) => {
-    oauth2('facebook', accessToken, refreshToken, profile, cb);
-  }));
+  if (facebookConfig.clientID && facebookConfig.clientSecret) {
+    passport.use(new FacebookStrategy(facebookConfig, (accessToken, refreshToken, profile, cb) => {
+      oauth2('facebook', accessToken, refreshToken, profile, cb);
+    }));
+  }
 
-  passport.use(new GoogleStrategy(googleConfig, (accessToken, refreshToken, profile, cb) => {
-    oauth2('google', accessToken, refreshToken, profile, cb);
-  }));
+  if (googleConfig.clientID && googleConfig.clientSecret) {
+    passport.use(new GoogleStrategy(googleConfig, (accessToken, refreshToken, profile, cb) => {
+      oauth2('google', accessToken, refreshToken, profile, cb);
+    }));
+  }
 
   passport.use(new BearerStrategy((tokenString, done) => {
-    AccessToken.findOne({token: tokenString}).populate('user').exec((err, token) => {
-      if (err) {
-        return done(err);
-      }
-      if (!token) {
-        return done(null, false);
-      }
-      return done(null, token.user, token);
-    });
+    AccessToken
+      .findOne({token: tokenString})
+      .populate('user')
+      .exec((err, token) => {
+        if (err) {
+          return done(err);
+        }
+        if (!token) {
+          return done(null, false);
+        }
+        return done(null, token.user, token);
+      });
   }));
 }
