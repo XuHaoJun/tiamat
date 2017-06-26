@@ -13,6 +13,7 @@ import {setUserAgent} from '../client/modules/UserAgent/UserAgentActions';
 import {setOauth2Client} from '../client/modules/Oauth2Client/Oauth2ClientActions';
 import Oauth2Client from './models/oauth2Client';
 import googleAnalyticsConfig from './configs/googleAnalytics';
+import syncElasticsearch from './util/syncElasticsearch';
 
 // Webpack Requirements
 import webpack from 'webpack';
@@ -70,6 +71,7 @@ mongoose.connection.on('error', (error) => {
 mongoose.connection.on('connected', () => {
   // feed some dummy data in DB.
   dummyData();
+  syncElasticsearch();
   // set oauthClient
   setTimeout(() => {
     Oauth2Client.findOne(appConfig.oauth2Client).exec().then((oauth2Client) => {

@@ -2,6 +2,7 @@ import uuid from 'uuid';
 
 // import Models
 import ForumBoard from './models/forumBoard';
+import Discussion from './models/discussion';
 
 import Oauth2Client from './models/oauth2Client';
 import User from './models/user';
@@ -97,20 +98,29 @@ function importForumBoard() {
       .groups
       .filter((value, index, self) => self.indexOf(value) === index);
   }
-  forumBoards.forEach((forumBoard) => {
-    ForumBoard.findOne({
-      name: forumBoard.name
-    }, (err, doc) => {
-      if (!doc && !err) {
-        const newDoc = new ForumBoard(forumBoard);
-        newDoc.save();
-      }
-    });
+  const ps = forumBoards.map((forumBoard) => {
+    return ForumBoard
+      .findOne({name: forumBoard.name})
+      .then((doc) => {
+        if (!doc) {
+          const newDoc = new ForumBoard(forumBoard);
+          return newDoc.save();
+        }
+        return null;
+      });
   });
+  return ps;
 }
 
 export default function dummy() {
   createDefaultOauth2Client();
   createDefaultAdminUser();
-  importForumBoard();
+  Promise
+    .all(importForumBoard())
+    .then(() => {
+      const stream = ForumBoard.synchronize();
+      stream.on('error', (err) => {
+        console.log(err); // eslint-disable-line
+      });
+    });
 }

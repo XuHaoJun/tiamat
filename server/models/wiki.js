@@ -14,7 +14,7 @@ const wikiSchema = new Schema({
   // forumBoard: { type: Schema.Types.ObjectId, ref: 'ForumBoard', required: true}
   isNickName: { type: Boolean, default: false },
   rootWiki: { type: Schema.Types.ObjectId, ref: 'RootWiki', required: true, index: true },
-  rootWikiGroupTree: { type: Schema.Types.Mixed, default: null },
+  rootWikiGroupTree: { type: Schema.Types.Mixed },
   tags: { type: [String], default: [], index: true},
   popularityCounter: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
