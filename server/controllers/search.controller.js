@@ -9,32 +9,48 @@ export function searchForumBoards(req, res) {
   res.json('not imple');
 }
 
-// TODO
-// add highlight feature
 export function searchDiscussions(req, res) {
   const {q, title, forumBoardId, parentDiscussionId} = req.query;
-  let {from, size, minScore, highlight} = req.query;
-  from = parseInt(from, 10) || 0;
-  size = parseInt(size, 10) || 10;
+  let {page, limit, minScore, highlight} = req.query;
+  page = parseInt(page, 10) || 1;
+  limit = parseInt(limit, 10) || 10;
+  const from = (page - 1) * limit;
+  const size = limit;
+  if (page > 100) {
+    res
+      .status(403)
+      .json('incorrect from');
+    return;
+  }
+  if (limit > 20) {
+    res
+      .status(403)
+      .json('incorrect size');
+    return;
+  }
   if (minScore === '0') {
     minScore = 0;
   } else {
     minScore = parseInt(minScore, 10) || 0.00000001;
   }
-  if (highlight === 'true') {
+  if (highlight === '' || highlight === 'true') {
     highlight = true;
   } else {
     highlight = false;
   }
-  if (from > 100) {
-    res.status(403).json('incorrect from');
-    return;
+  const requestBody = bob
+    .requestBodySearch()
+    .from(from)
+    .size(size);
+  if (highlight) {
+    requestBody.highlight((() => {
+      const h = bob.highlight(['title', 'content']);
+      if (q && !title) {
+        h.requireFieldMatch(false);
+      }
+      return h;
+    })());
   }
-  if (size > 20) {
-    res.status(403).json('incorrect size');
-    return;
-  }
-  const requestBody = bob.requestBodySearch().from(from).size(size);
   const functinoScoreQuery = bob.functionScoreQuery();
   requestBody.query(functinoScoreQuery);
   functinoScoreQuery.functions([
@@ -89,8 +105,7 @@ export function searchDiscussions(req, res) {
   });
 }
 
-export function countDiscussions(req, res) {
-}
+export function countDiscussions(req, res) {}
 
 export function searchWikis(req, res) {
   res.json('not imple');
