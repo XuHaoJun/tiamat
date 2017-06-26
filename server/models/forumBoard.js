@@ -6,7 +6,7 @@ import elasticsearchConfig from '../configs/elasticsearch';
 const Schema = mongoose.Schema;
 
 const forumBoardSchema = new Schema({
-  name: { type: String, required: true, index: {unique: true}, es_indexed: true },
+  name: { type: String, required: true, index: {unique: true}, es_indexed: true, es_type: 'keyword' },
   popularityCounter: { type: Number, default: 0 },
   rootWiki: { type: Schema.Types.ObjectId, ref: 'RootWiki', index: true},
   groups: { type: [String], default: ["綜合討論"], index: true },

@@ -7,7 +7,7 @@ import elasticsearchConfig from '../configs/elasticsearch';
 const Schema = mongoose.Schema;
 
 const discussionSchema = new Schema({
-  title: { type: String, default: '', es_indexed: true, es_boost: 2.0},
+  title: { type: String, default: '', es_indexed: true, es_boost: 2.0, es_type: 'text'},
   // TODO
   // imple user feature and add required: true
   author: { type: Schema.Types.ObjectId, ref: 'User', index: true},
@@ -30,7 +30,7 @@ const discussionSchema = new Schema({
   commentChildrenCount: { type: Number, default: 0, es_indexed: true },
   forumBoardGroup: { type: String, default: '' },
   tags: {type: [{ type: String, default: '' }]},
-  forumBoard: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'ForumBoard', es_indexed: true },
+  forumBoard: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'ForumBoard', es_indexed: true, es_type: 'text' },
   contentEditedAt: { type: Date, default: Date.now, es_indexed: true, es_type: 'date' },
   titleEditedAt: { type: Date, default: Date.now, es_indexed: true, es_type: 'date' },
   repliedAt: { type: Date, default: Date.now, es_indexed: true, es_type: 'date' },
