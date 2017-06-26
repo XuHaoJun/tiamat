@@ -2,6 +2,11 @@
 Tiamat - a modern mobile gaming forum.
 [Online Demo](https://tiamat.herokuapp.com)
 
+## Requirements
+* A version of Node.js at least 6 or greater
+* MongoDB, version 3.x.x
+* elasticsearch, version 5.x.x (optional for search feature)
+
 ## Quickstart
 ```
   git clone https://github.com/XuHaoJun/tiamat.git
@@ -14,10 +19,6 @@ Tiamat - a modern mobile gaming forum.
 **Note : Please make sure your MongoDB is running.** For MongoDB installation guide see [this](https://docs.mongodb.org/v3.0/installation/). Also `npm3` is required to install dependencies properly.
 
 ## Configuration
-### Server
-`/server/configs`
-|Property Name | Default | Meaning |
-| ------| ------ | ------ |
 
 ## mern-starter
 ![title](https://travis-ci.org/Hashnode/mern-starter.svg?branch=v2.0.0)
