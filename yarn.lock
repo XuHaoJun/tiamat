@@ -8021,16 +8021,7 @@ redux-thunk@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.2.0.tgz#e615a16e16b47a19a515766133d1e3e99b7852e5"
 
-redux@^3.2.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.0.tgz#07a623cafd92eee8abe309d13d16538f6707926f"
-  dependencies:
-    lodash "^4.2.1"
-    lodash-es "^4.2.1"
-    loose-envify "^1.1.0"
-    symbol-observable "^1.0.3"
-
-redux@^3.7.1:
+redux@^3.2.0, redux@^3.7.1:
   version "3.7.1"
   resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.1.tgz#bfc535c757d3849562ead0af18ac52122cd7268e"
   dependencies:
@@ -8344,11 +8335,11 @@ schema-utils@^0.3.0:
   dependencies:
     ajv "^5.0.0"
 
-script-ext-html-webpack-plugin@^1.8.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/script-ext-html-webpack-plugin/-/script-ext-html-webpack-plugin-1.8.1.tgz#36bba726c38bcdebc1e69333e3fd7d718a9b3195"
+script-ext-html-webpack-plugin@^1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/script-ext-html-webpack-plugin/-/script-ext-html-webpack-plugin-1.8.3.tgz#04c77e68eb45eb6358bf36554a1a358ca60ca2ed"
   dependencies:
-    debug "^2.6.3"
+    debug "^2.6.8"
 
 scroll-behavior@^0.9.3:
   version "0.9.3"
