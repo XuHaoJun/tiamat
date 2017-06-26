@@ -15,7 +15,7 @@ const discussionSchema = new Schema({
     type: Schema.Types.Mixed,
     required: true,
     es_indexed: true,
-    es_type: 'string',
+    es_type: 'text',
     es_cast: function(content) {
       return contentToText(content);
     }
