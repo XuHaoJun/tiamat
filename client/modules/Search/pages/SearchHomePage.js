@@ -9,10 +9,6 @@ class SearchHomePage extends React.Component {
   }
 }
 
-// SearchHomePage.need = [].concat((params) => {
-//   return
-// })
-
 function mapStateToProps(store, props) {
   return {};
 }

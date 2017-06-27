@@ -1,22 +1,25 @@
-import {ADD_SEARCH_RESULTS, ADD_SEARCH_LOGS, CLIENT_INIT_SEARCH_RESULTS} from './SearchActions';
+import {fromJS} from 'immutable';
+import {ADD_SEARCH_RESULT} from './SearchActions';
 
 // Initial State
-const initialState = {
-  data: [],
-  logs: [],
-};
+const initialState = fromJS({maxResults: 3, results: []});
 
 const SearchReducer = (state = initialState, action) => {
   switch (action.type) {
-    case ADD_SEARCH_RESULTS:
-      return {data: action.searchResults, logs: state.logs};
-
-    case ADD_SEARCH_LOGS:
-      return {logs: action.searchLogs, data: state.data};
-
-    case CLIENT_INIT_SEARCH_RESULTS:
-      return initialState;
-
+    case ADD_SEARCH_RESULT:
+      const result = fromJS(action.searchResult);
+      const maxResults = state.get('maxResults');
+      const results = state.get('results');
+      const nextResults = (() => {
+        let next = results;
+        if (results.count() >= maxResults) {
+          next = next.shift();
+        } else {
+          next = next.push(result);
+        }
+        return next;
+      })();
+      return state.set('results', nextResults);
     default:
       return state;
   }
@@ -24,10 +27,9 @@ const SearchReducer = (state = initialState, action) => {
 
 /* Selectors */
 
-// Get all searchResults
-export const getSearchResults = state => state.search.data;
+// Get all searchHistory
+export const getSearchResults = state => state.search.get('results');
 
-// Get all searchLogs
-export const getSearchLogs = state => state.search.logs;
+export const getLastSearchResult = state => state.search.get('results').last();
 
 export default SearchReducer;

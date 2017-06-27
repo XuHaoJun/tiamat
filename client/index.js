@@ -38,7 +38,7 @@ const defaultBrowserUserAgent = (state = null) => {
 
 
 // Initialize store
-const needImmutableObjectList = ['app', 'wikis', 'rootWikis', 'errors', 'forumBoards', 'discussions', 'semanticRules', 'sockets'];
+const needImmutableObjectList = ['app', 'wikis', 'rootWikis', 'errors', 'forumBoards', 'discussions', 'semanticRules', 'sockets', 'search'];
 for (const field of needImmutableObjectList) {
   window.__INITIAL_STATE__[field] = fromJS(window.__INITIAL_STATE__[field]);
 }

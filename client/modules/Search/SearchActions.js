@@ -1,38 +1,50 @@
+import qs from 'qs';
 import callApi from '../../util/apiCaller';
+import {addError} from '../Error/ErrorActions';
 
 // Export Constants
-export const ADD_SEARCH_RESULTS = 'ADD_SEARCH_RESULTS';
-export const ADD_SEARCH_LOGS = 'ADD_SEARCH_LOGS';
-export const CLIENT_INIT_SEARCH_RESULTS = 'CLIENT_INIT_SEARCH_RESULTS';
+export const ADD_SEARCH_RESULT = 'ADD_SEARCH_RESULT';
+export const ADD_SEARCH_HISTORY = 'ADD_SEARCH_HISTORY';
 
 // Export Actions
-export function addSearchResults(searchResults) {
-  return {type: ADD_SEARCH_RESULTS, searchResults};
+export function addSearchResult(searchResult) {
+  return {type: ADD_SEARCH_RESULT, searchResult};
 }
 
-export function addSearchLogs(searchLogs) {
-  return {type: ADD_SEARCH_LOGS, searchLogs};
+export function addSearchHistory(searchHistory) {
+  return {type: ADD_SEARCH_HISTORY, searchHistory};
 }
 
-export function clientInitSearchResults() {
-  return {type: CLIENT_INIT_SEARCH_RESULTS};
-}
+const defaultQueryOptions = {
+  q: undefined,
+  title: undefined,
+  content: undefined,
+  parentDiscussionId: 'null',
+  highlight: true,
+  page: 1,
+  limit: 5
+};
 
-export function fetchSearchResults(query) {
+export function fetchSearchResult(target = '', _queryOptions = defaultQueryOptions) {
+  const queryOptions = Object.assign({}, defaultQueryOptions, _queryOptions);
+  if (queryOptions.parentDiscussionId === null) {
+    queryOptions.parentDiscussionId = 'null';
+  }
   return (dispatch) => {
-    if (query === '') {
-      return dispatch(addSearchResults([]));
-    }
-    return callApi(`search?query=${query}`).then((res) => {
-      dispatch(addSearchResults(res.searchResults));
+    const resource = target
+      ? `/${target}`
+      : '';
+    return callApi(`search${resource}?${qs.stringify(queryOptions)}`).then((res) => {
+      dispatch(addSearchResult(res));
+      return res;
+    }).catch((err) => {
+      return Promise
+        .resolve(dispatch(addError(err.response.data)))
+        .then(() => {
+          return Promise.reject(err);
+        });
     });
   };
 }
 
-export function fetchSearchLogs() {
-  return (dispatch) => {
-    return callApi('search/logs').then((res) => {
-      dispatch(addSearchLogs(res.searchLogs));
-    });
-  };
-}
+export const search = fetchSearchResult;
