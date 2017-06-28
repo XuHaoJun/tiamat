@@ -4,7 +4,16 @@ import ForumBoard from '../models/forumBoard';
 export default function syncElasticsearch() {
   const models = [ForumBoard, Discussion];
   models.forEach((M) => {
-    M.createMapping(undefined, (err) => {
+    const settings = {
+      analysis: {
+        analyzer: {
+          default: {
+            type: 'smartcn'
+          }
+        }
+      }
+    };
+    M.createMapping(settings, (err) => {
       if (err) {
         console.log(err);
       } else {
