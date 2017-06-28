@@ -5,8 +5,9 @@ import AutoComplete from 'material-ui/AutoComplete';
 import MenuItem from 'material-ui/MenuItem';
 import {connect} from 'react-redux';
 import muiThemeable from 'material-ui/styles/muiThemeable';
-import {fetchSearchResult} from '../SearchActions';
-import {getLastSearchResult} from '../SearchReducer';
+import {fetchSearchResult} from '../../SearchActions';
+import {getLastSearchResult} from '../../SearchReducer';
+import cssStyles from './SearchAutoComplete.css';
 
 class SearchAutoComplete extends React.Component {
   static defaultProps = {
@@ -79,7 +80,7 @@ class SearchAutoComplete extends React.Component {
               const dangerouslySetInnerHTML = {
                 __html: highlightedText
               };
-              return (<span dangerouslySetInnerHTML={dangerouslySetInnerHTML}/>); // eslint-disable-line
+              return (<span className={cssStyles.highlight} dangerouslySetInnerHTML={dangerouslySetInnerHTML}/>); // eslint-disable-line
             } else {
               return (
                 <span>{text}</span>
@@ -116,6 +117,7 @@ function mapStateToProps(store) {
   const lastSearchResult = getLastSearchResult(store);
   const hits = (() => {
     if (lastSearchResult) {
+      // merge {discussions: searchResult1, wiki: searchResult2, author: ....}
       return lastSearchResult
         .valueSeq()
         .map((searchResult) => {
