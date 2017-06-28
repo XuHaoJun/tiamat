@@ -29,6 +29,7 @@ class SearchAutoComplete extends React.Component {
     const {queryType, queryOptions} = this.props;
     const _queryOptions = {
       [queryType]: searchText,
+      highlight: true
     };
     return Object.assign({}, _queryOptions, queryOptions);
   }
