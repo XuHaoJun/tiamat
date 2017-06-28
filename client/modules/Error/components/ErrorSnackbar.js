@@ -1,8 +1,9 @@
+import {Map} from 'immutable';
 import React from 'react';
 import Snackbar from 'material-ui/Snackbar';
 import {connect} from 'react-redux';
+import {shouldComponentUpdate} from 'react-immutable-render-mixin';
 import {getLastError} from '../ErrorReducer';
-import {Map} from 'immutable';
 
 class ErrorSnackbar extends React.PureComponent {
   static defaultProps = {
@@ -11,6 +12,7 @@ class ErrorSnackbar extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
       open: false
     };
