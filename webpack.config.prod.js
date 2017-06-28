@@ -17,7 +17,7 @@ module.exports = {
 
   entry: {
     app: ['./client/index.js'],
-    vendor: ['react', 'react-dom']
+    vendor: ['react', 'react-dom', 'immutable', 'slate', 'intl', 'moment']
   },
 
   output: {
@@ -113,12 +113,6 @@ module.exports = {
       .optimize
       .CommonsChunkPlugin({
         name: 'vendor',
-        minChunks: function(module) {
-          // this assumes your vendor imports exist in the node_modules directory
-          return module.context && module
-            .context
-            .indexOf("node_modules") !== -1;
-        },
         filename: 'vendor.js'
       }),
     new ExtractTextPlugin({filename: 'app.[chunkhash].css', allChunks: true, disable: false}),
