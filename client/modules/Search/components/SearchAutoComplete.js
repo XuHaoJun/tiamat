@@ -2,6 +2,7 @@ import {List} from 'immutable';
 import React from 'react';
 import {shouldComponentUpdate} from 'react-immutable-render-mixin';
 import AutoComplete from 'material-ui/AutoComplete';
+import MenuItem from 'material-ui/MenuItem';
 import {connect} from 'react-redux';
 import muiThemeable from 'material-ui/styles/muiThemeable';
 import {fetchSearchResult} from '../SearchActions';
@@ -11,7 +12,7 @@ class SearchAutoComplete extends React.Component {
   static defaultProps = {
     hits: List(),
     target: 'discussions',
-    queryType: 'title',
+    queryField: 'title',
     queryOptions: {},
     onUpdateInput: () => {},
     onSubmit: () => {}
@@ -26,9 +27,9 @@ class SearchAutoComplete extends React.Component {
   }
 
   getQueryOptions = (searchText) => {
-    const {queryType, queryOptions} = this.props;
+    const {queryField, queryOptions} = this.props;
     const _queryOptions = {
-      [queryType]: searchText,
+      [queryField]: searchText,
       highlight: true
     };
     return Object.assign({}, _queryOptions, queryOptions);
@@ -64,36 +65,32 @@ class SearchAutoComplete extends React.Component {
   }
 
   render() {
-    const {hits} = this.props;
+    const {queryField, hits} = this.props;
     const {searchText} = this.state;
     const dataSource = (() => {
       if (searchText === '') {
         return [];
       } else {
         return hits.map((hit) => {
-          let text;
-          switch (hit.get('_index')) {
-            case 'wikis':
-            case 'discussions':
-              text = hit.getIn(['_source', 'title']);
-              break;
-            case 'forumboards':
-            default:
-              text = hit.getIn(['_source', 'name']);
-              break;
-          }
-          return {
-            text,
-            value: {
-              text,
-              hit
+          const text = hit.getIn(['_source', queryField]);
+          const highlightedText = hit.getIn(['highlight', queryField, 0]);
+          const primaryText = (() => {
+            if (highlightedText) {
+              const dangerouslySetInnerHTML = {
+                __html: highlightedText
+              };
+              return (<span dangerouslySetInnerHTML={dangerouslySetInnerHTML}/>); // eslint-disable-line
+            } else {
+              return (
+                <span>{text}</span>
+              );
             }
-          };
+          })();
+          const value = (<MenuItem primaryText={primaryText}/>);
+          return {text, value};
         }).toJS();
       }
     })();
-    console.log('hits', hits.toJS());
-    console.log('dataSource', dataSource);
     const styles = {
       input: {
         color: this.props.muiTheme.appBar.textColor
