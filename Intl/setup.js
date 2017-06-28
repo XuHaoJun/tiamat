@@ -1,7 +1,7 @@
 // list of available languages
 export const enabledLanguages = [
   'en',
-  'fr',
+  'zh-Hant-TW',
 ];
 
 // this object will have language-specific data added to it which will be placed in the state when that language is active
@@ -12,7 +12,7 @@ export const localizationData = {};
 // (needed as safari doesn't have native intl: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
 // as well as react-intl's language-specific data
 // be sure to use static imports for language or else every language will be included in your build (adds ~800 kb)
-import { addLocaleData } from 'react-intl';
+import {addLocaleData} from 'react-intl';
 
 // need Intl polyfill, Intl not supported in Safari
 import Intl from 'intl';
@@ -52,20 +52,15 @@ function flattenMessages(nestedMessages = {}, prefix = '') {
 import 'intl/locale-data/jsonp/en';
 import en from 'react-intl/locale-data/en';
 import enData from './localizationData/en';
+
 addLocaleData(en);
 localizationData.en = enData;
 localizationData.en.messages = flattenMessages(localizationData.en.messages);
 
-import 'intl/locale-data/jsonp/fr';
-import fr from 'react-intl/locale-data/fr';
-import frData from './localizationData/fr';
-addLocaleData(fr);
-localizationData.fr = frData;
-localizationData.fr.messages = flattenMessages(localizationData.fr.messages);
-
 import 'intl/locale-data/jsonp/zh-Hant-TW';
-import zh from 'react-intl/locale-data/zh'
-import zh_Hant_TW_Data from './localizationData/zh-Hant-TW';
+import zh from 'react-intl/locale-data/zh';
+import zhHantTWData from './localizationData/zh-Hant-TW';
+
 addLocaleData(zh);
-localizationData['zh-Hant-TW'] = zh_Hant_TW_Data;
+localizationData['zh-Hant-TW'] = zhHantTWData;
 localizationData['zh-Hant-TW'].messages = flattenMessages(localizationData['zh-Hant-TW'].messages);
