@@ -4,8 +4,8 @@ Tiamat - a modern mobile gaming forum.
 
 ## Requirements
 * A version of Node.js at least 6 or greater
-* MongoDB, version 3.x.x
-* elasticsearch, version 5.x.x (optional for search feature)
+* [MongoDB](https://www.mongodb.com/), version 3.x.x
+* [elasticsearch](https://www.elastic.co), version 5.x.x (optional for search feature)
 
 ## Quickstart
 ```
