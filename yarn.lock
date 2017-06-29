@@ -1298,13 +1298,13 @@ babel-types@^6.18.0, babel-types@^6.19.0, babel-types@^6.23.0, babel-types@^6.24
     lodash "^4.2.0"
     to-fast-properties "^1.0.1"
 
-babylon@^6.1.0, babylon@^6.11.0, babylon@^6.17.0, babylon@^6.17.2, babylon@^6.3.26:
-  version "6.17.2"
-  resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.2.tgz#201d25ef5f892c41bae49488b08db0dd476e9f5c"
-
-babylon@^6.17.4:
+babylon@^6.1.0, babylon@^6.11.0, babylon@^6.17.4:
   version "6.17.4"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.4.tgz#3e8b7402b88d22c3423e137a1577883b15ff869a"
+
+babylon@^6.17.0, babylon@^6.17.2, babylon@^6.3.26:
+  version "6.17.2"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.2.tgz#201d25ef5f892c41bae49488b08db0dd476e9f5c"
 
 backo2@1.0.2:
   version "1.0.2"
@@ -3259,9 +3259,9 @@ eslint-plugin-import@^2.6.0:
     minimatch "^3.0.3"
     read-pkg-up "^2.0.0"
 
-eslint-plugin-jsx-a11y@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsx-a11y/-/eslint-plugin-jsx-a11y-6.0.0.tgz#d5cdd68f665a89540a55ddc0d898caf80ca94ac5"
+eslint-plugin-jsx-a11y@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsx-a11y/-/eslint-plugin-jsx-a11y-6.0.1.tgz#abcfd3e131448ee836f7f1c7ca1145cdfaed58d2"
   dependencies:
     aria-query "^0.7.0"
     array-includes "^3.0.3"
@@ -5532,9 +5532,9 @@ material-colors@^1.2.1:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/material-colors/-/material-colors-1.2.5.tgz#5292593e6754cb1bcc2b98030e4e0d6a3afc9ea1"
 
-material-ui@^0.18.4:
-  version "0.18.4"
-  resolved "https://registry.yarnpkg.com/material-ui/-/material-ui-0.18.4.tgz#afa0db1658d66b432ec0e0edb83727d65e6390a1"
+material-ui@^0.18.5:
+  version "0.18.5"
+  resolved "https://registry.yarnpkg.com/material-ui/-/material-ui-0.18.5.tgz#3dcd9e2f31a5fb1281224056b51261b8af4738d5"
   dependencies:
     babel-runtime "^6.23.0"
     inline-style-prefixer "^3.0.2"
@@ -7366,11 +7366,11 @@ q@^1.1.2:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.0.tgz#dd01bac9d06d30e6f219aecb8253ee9ebdc308f1"
 
-qs@6.4.0, qs@^6.0.2, qs@^6.1.0:
+qs@6.4.0:
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
 
-qs@^6.5.0:
+qs@^6.0.2, qs@^6.1.0, qs@^6.5.0:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.0.tgz#8d04954d364def3efc55b5a0793e1e2c8b1e6e49"
 
@@ -8493,9 +8493,9 @@ simple-assign@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/simple-assign/-/simple-assign-0.1.0.tgz#17fd3066a5f3d7738f50321bb0f14ca281cc4baa"
 
-sinon@^2.3.5:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-2.3.5.tgz#9a2fc0ff8d526da716f30953aa2c65d518917f6c"
+sinon@^2.3.6:
+  version "2.3.6"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-2.3.6.tgz#95378e7e0f976a9712e9b4591ff5b39e73dc3dde"
   dependencies:
     diff "^3.1.0"
     formatio "1.2.0"
