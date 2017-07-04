@@ -142,21 +142,25 @@ class DiscussionDetail extends React.Component {
   }
 }
 
-let getSemanticRulesHelper = (rootWikiId, semanticRules) => {
-  return semanticRules.filter(ele => ele.get('rootWikiId') === rootWikiId).sortBy(ele => ele.get('name').length);
-};
+const getSemanticRulesHelper = (() => {
+  let f = (rootWikiId, semanticRules) => {
+    return semanticRules.filter(ele => ele.get('rootWikiId') === rootWikiId).sortBy(ele => ele.get('name').length);
+  };
+  if (typeof window === 'object') {
+    f = memoize(f, createFastMemoizeDefaultOptions(3));
+  }
+  return f;
+})();
 
-if (typeof window === 'object') {
-  getSemanticRulesHelper = memoize(getSemanticRulesHelper, createFastMemoizeDefaultOptions(3));
-}
-
-let getChildrenDiscussionsHelper = (parentDiscussionId, discussions) => {
-  return discussions.filter(v => v.get('parentDiscussion') === parentDiscussionId).toSet();
-};
-
-if (typeof window === 'object') {
-  getChildrenDiscussionsHelper = memoize(getChildrenDiscussionsHelper, createFastMemoizeDefaultOptions(3));
-}
+const getChildrenDiscussionsHelper = (() => {
+  let f = (parentDiscussionId, discussions) => {
+    return discussions.filter(v => v.get('parentDiscussion') === parentDiscussionId).toSet();
+  };
+  if (typeof window === 'object') {
+    f = memoize(f, createFastMemoizeDefaultOptions(3));
+  }
+  return f;
+})();
 
 function mapStateToProps(store, props) {
   const {parentDiscussionId, forumBoardId} = props;

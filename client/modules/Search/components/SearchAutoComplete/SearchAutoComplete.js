@@ -33,6 +33,10 @@ class SearchAutoComplete extends React.Component {
       [queryField]: searchText,
       highlight: true
     };
+    const {target} = this.props;
+    if (target === 'discussions') {
+      _queryOptions.parentDiscussionId = null;
+    }
     return Object.assign({}, _queryOptions, queryOptions);
   }
 

@@ -11,6 +11,7 @@ import BackspaceIcon from 'material-ui/svg-icons/hardware/keyboard-backspace';
 import MenuIcon from 'material-ui/svg-icons/navigation/menu';
 import {Motion, spring} from 'react-motion';
 import SendButton from './SendButton';
+import SearchAutoComplete from '../../Search/components/SearchAutoComplete';
 
 const LeftElementMotionWrap = (props) => {
   const defaultStyle = {
@@ -66,7 +67,7 @@ const MenuButton = (props) => {
   );
 };
 
-export default class Header extends Component {
+class Header extends Component {
   static propTypes = {
     browser: PropTypes.object
   };
@@ -228,12 +229,13 @@ export default class Header extends Component {
   render() {
     const open = this.state.open;
     const selectedIndex = this.props.location.pathname;
+    const title = (<SearchAutoComplete/>);
     return (
       <div>
         <AppBar
           zDepth={0}
           style={this.props.appBarStyle}
-          title={this.props.title}
+          title={title}
           iconElementRight={this.renderIconRightElement()}
           showMenuIconButton={true}
           iconElementLeft={this.renderIconLeftElement()}/>
@@ -247,3 +249,5 @@ export default class Header extends Component {
     );
   }
 }
+
+export default Header;
