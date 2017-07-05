@@ -4,7 +4,7 @@ export default function getStyles(context, browser) {
   const styles = {
     slideContainer: {
       height: `calc(100vh - ${tabHeight + appBarHeight}px)`,
-      WebkitOverflowScrolling: 'touch'
+      WebkitOverflowScrolling: "touch"
     },
     swipeableViews: {},
     swipeableViewsWithMedium: {
@@ -13,8 +13,8 @@ export default function getStyles(context, browser) {
     tabs: {},
     tabsWithMedium: {
       zIndex: 1,
-      position: 'fixed',
-      width: '100%'
+      position: "fixed",
+      width: "100%"
     }
   };
   if (browser.lessThan.medium) {

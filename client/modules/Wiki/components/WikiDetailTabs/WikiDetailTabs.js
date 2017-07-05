@@ -1,16 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import {Tabs, Tab} from 'material-ui/Tabs';
-import {shouldComponentUpdate} from 'react-immutable-render-mixin';
-import EnhancedSwipeableViews from '../../../../components/EnhancedSwipableViews';
-import {connect} from 'react-redux';
-import {getWiki} from '../../WikiReducer';
-import {getRootWiki} from '../../../RootWiki/RootWikiReducer';
-import CenterCircularProgress from '../../../../components/CenterCircularProgress';
-import {emptyContent} from '../../../../components/Slate/Editor';
-import WikiContent from '../../components/WikiContent';
-import getStyles from '../../../../styles/Tabs';
-import WikiForm from '../WikiForm';
+import React from "react";
+import PropTypes from "prop-types";
+import { Tabs, Tab } from "material-ui/Tabs";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
+import { connect } from "react-redux";
+import { getWiki } from "../../WikiReducer";
+import { getRootWiki } from "../../../RootWiki/RootWikiReducer";
+import CenterCircularProgress from "../../../../components/CenterCircularProgress";
+import { emptyContent } from "../../../../components/Slate/Editor";
+import WikiContent from "../../components/WikiContent";
+import getStyles from "../../../../styles/Tabs";
+import WikiForm from "../WikiForm";
 
 export const WIKI_CONTENT_SLIDE = 0;
 export const WIKI_EDIT_SLIDE = 1;
@@ -18,12 +18,12 @@ export const WIKI_HITSTORY_SLIDE = 2;
 
 class WikiDetailTabs extends React.Component {
   static defaultProps = {
-    title: '維基',
-    wikiId: '',
+    title: "維基",
+    wikiId: "",
     wiki: null,
     enableEdit: false,
     slideIndex: WIKI_CONTENT_SLIDE,
-    scrollKey: '',
+    scrollKey: "",
     onChangeTab: () => {}
   };
 
@@ -34,7 +34,7 @@ class WikiDetailTabs extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    const {slideIndex} = props;
+    const { slideIndex } = props;
     this.state = {
       slideIndex
     };
@@ -42,12 +42,17 @@ class WikiDetailTabs extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.state.slideIndex !== nextProps.slideIndex) {
-      this.setState({slideIndex: nextProps.slideIndex});
+      this.setState({ slideIndex: nextProps.slideIndex });
     }
   }
 
   getStyles = () => {
-    const {rootStyle, tabsStyle, swipeableViewsStyle, slideContainerStyle} = this.props;
+    const {
+      rootStyle,
+      tabsStyle,
+      swipeableViewsStyle,
+      slideContainerStyle
+    } = this.props;
     const defaultStyles = getStyles(this.context, this.props.browser);
     const propStyles = {
       rootStyle,
@@ -65,37 +70,34 @@ class WikiDetailTabs extends React.Component {
       }
     }
     return styles;
-  }
+  };
 
   handleTransitionEnd = () => {
     if (this.props.onTransitionEnd) {
-      this
-        .props
-        .onTransitionEnd(this.state.slideIndex);
+      this.props.onTransitionEnd(this.state.slideIndex);
     }
-  }
+  };
 
-  handleTabChange = (value) => {
-    this.setState({
-      slideIndex: value
-    }, () => this.props.onChangeTab(value));
+  handleTabChange = value => {
+    this.setState(
+      {
+        slideIndex: value
+      },
+      () => this.props.onChangeTab(value)
+    );
   };
 
   render() {
-    const {wiki} = this.props;
+    const { wiki } = this.props;
     if (!wiki) {
-      return (<CenterCircularProgress/>);
+      return <CenterCircularProgress />;
     }
-    const {scrollKey, enableEdit} = this.props;
-    const {slideIndex} = this.state;
-    const name = wiki
-      ? wiki.get('name')
-      : '';
-    const content = wiki
-      ? wiki.get('content')
-      : emptyContent;
-    const rootWikiId = wiki.get('rootWiki');
-    const rootWikiGroupTree = wiki.get('rootWikiGroupTree');
+    const { scrollKey, enableEdit } = this.props;
+    const { slideIndex } = this.state;
+    const name = wiki ? wiki.get("name") : "";
+    const content = wiki ? wiki.get("content") : emptyContent;
+    const rootWikiId = wiki.get("rootWiki");
+    const rootWikiGroupTree = wiki.get("rootWikiGroupTree");
     const wikiProps = {
       name,
       rootWikiId,
@@ -113,10 +115,14 @@ class WikiDetailTabs extends React.Component {
     const styles = this.getStyles();
     return (
       <div style={styles.root}>
-        <Tabs style={styles.tabs} value={slideIndex} onChange={this.handleTabChange}>
-          <Tab label="閱讀" value={WIKI_CONTENT_SLIDE}/>
-          <Tab label="編輯" value={WIKI_EDIT_SLIDE}/>
-          <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE}/>
+        <Tabs
+          style={styles.tabs}
+          value={slideIndex}
+          onChange={this.handleTabChange}
+        >
+          <Tab label="閱讀" value={WIKI_CONTENT_SLIDE} />
+          <Tab label="編輯" value={WIKI_EDIT_SLIDE} />
+          <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey={scrollKey}
@@ -124,9 +130,10 @@ class WikiDetailTabs extends React.Component {
           containerStyle={styles.slideContainer}
           index={slideIndex}
           onChangeIndex={this.handleTabChange}
-          onTransitionEnd={this.handleTransitionEnd}>
-          <WikiContent {...wikiContentProps}/>
-          <WikiForm {...wikiFormProps}/>
+          onTransitionEnd={this.handleTransitionEnd}
+        >
+          <WikiContent {...wikiContentProps} />
+          <WikiForm {...wikiFormProps} />
           <div>檢視歷史(尚未完成)</div>
         </EnhancedSwipeableViews>
       </div>
@@ -135,10 +142,10 @@ class WikiDetailTabs extends React.Component {
 }
 
 function mapStateToProps(store, props) {
-  const {wikiId, rootWikiId} = props;
+  const { wikiId, rootWikiId } = props;
   const wiki = getWiki(store, wikiId);
   const rootWiki = getRootWiki(store, rootWikiId);
-  return {wiki, rootWiki};
+  return { wiki, rootWiki };
 }
 
 export default connect(mapStateToProps)(WikiDetailTabs);

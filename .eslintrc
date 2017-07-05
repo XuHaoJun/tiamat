@@ -1,11 +1,13 @@
 {
   "extends": [
     "airbnb",
-    "plugin:ava/recommended"
+    "plugin:ava/recommended",
+    "prettier"
   ],
   "parser": "babel-eslint",
   "plugins": [
-    "ava"
+    "ava",
+    "prettier"
   ],
   "env": {
     "browser": true,
@@ -22,6 +24,7 @@
     }
   },
   "rules": {
+    "prettier/prettier": "error",
     "comma-dangle": [1, "only-multiline"],
     "no-else-return": [0],
     "no-underscore-dangle": 0,
@@ -54,7 +57,6 @@
     "no-case-declarations": [0],
     "ava/prefer-async-await": [0],
     "linebreak-style": [0],
-    "object-curly-spacing": [1, "never"],
     "no-restricted-syntax": [0],
     "no-lonely-if": [0],
     "newline-per-chained-call": [0]

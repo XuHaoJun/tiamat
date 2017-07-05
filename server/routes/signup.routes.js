@@ -1,6 +1,6 @@
-import {Router} from 'express';
+import { Router } from "express";
 
-const router = new Router('/signup');
+const router = new Router("/signup");
 
 // router.route('/local').get();
 //

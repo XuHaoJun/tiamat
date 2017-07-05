@@ -1,11 +1,11 @@
-import React from 'react';
-import {Set} from 'immutable';
-import {connect} from 'react-redux';
-import CommonList from '../../../components/List/CommonList';
-import {getForumBoards} from '../ForumBoardReducer';
-import {fetchForumBoards} from '../ForumBoardActions';
-import {shouldComponentUpdate} from 'react-immutable-render-mixin';
-import Avatar from 'material-ui/Avatar';
+import React from "react";
+import { Set } from "immutable";
+import { connect } from "react-redux";
+import CommonList from "../../../components/List/CommonList";
+import { getForumBoards } from "../ForumBoardReducer";
+import { fetchForumBoards } from "../ForumBoardActions";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import Avatar from "material-ui/Avatar";
 
 class ForumBoardList extends React.Component {
   static defaultProps = {
@@ -25,63 +25,64 @@ class ForumBoardList extends React.Component {
   }
 
   componentDidMount() {
-    this
-      .props
-      .dispatch(fetchForumBoards());
+    this.props.dispatch(fetchForumBoards());
   }
 
   onRequestLoadMore = () => {
-    const {page, limit, sort} = this.state;
+    const { page, limit, sort } = this.state;
     const nextPage = page + 1;
-    this
-      .props
+    this.props
       .dispatch(fetchForumBoards(nextPage, limit, sort))
-      .then((forumBoardsJSON) => {
+      .then(forumBoardsJSON => {
         if (forumBoardsJSON.length < limit) {
-          this.setState({enableLoadMore: false});
+          this.setState({ enableLoadMore: false });
         } else {
-          this.setState({page: nextPage});
+          this.setState({ page: nextPage });
         }
       })
       .catch(() => {
-        this.setState({enableLoadMore: false});
+        this.setState({ enableLoadMore: false });
       });
-  }
+  };
 
-  listItemHref = (payload) => {
-    return `/forumBoards/${payload.get('_id')}/rootDiscussions`;
-  }
+  listItemHref = payload => {
+    return `/forumBoards/${payload.get("_id")}/rootDiscussions`;
+  };
 
-  listItemLeftAvatar = (payload) => {
-    return <Avatar>{payload.get('name')[0]}</Avatar>;
-  }
+  listItemLeftAvatar = payload => {
+    return (
+      <Avatar>
+        {payload.get("name")[0]}
+      </Avatar>
+    );
+  };
 
-  listItemSecondaryText = (payload) => {
-    return `${payload.get('popularityCounter')} 人氣`;
-  }
+  listItemSecondaryText = payload => {
+    return `${payload.get("popularityCounter")} 人氣`;
+  };
 
-  sortBy = (payload) => {
-    return -1 * payload.get('popularityCounter');
-  }
+  sortBy = payload => {
+    return -1 * payload.get("popularityCounter");
+  };
 
   render() {
-    const dataSource = this
-      .props
-      .dataSource
-      .sortBy(this.sortBy);
-    return (<CommonList
-      dataSource={dataSource}
-      listItemHref={this.listItemHref}
-      listItemLeftAvatar={this.listItemLeftAvatar}
-      listItemSecondaryText={this.listItemSecondaryText}
-      onRequestLoadMore={this.onRequestLoadMore}
-      enableLoadMore={this.state.enableLoadMore}/>);
+    const dataSource = this.props.dataSource.sortBy(this.sortBy);
+    return (
+      <CommonList
+        dataSource={dataSource}
+        listItemHref={this.listItemHref}
+        listItemLeftAvatar={this.listItemLeftAvatar}
+        listItemSecondaryText={this.listItemSecondaryText}
+        onRequestLoadMore={this.onRequestLoadMore}
+        enableLoadMore={this.state.enableLoadMore}
+      />
+    );
   }
 }
 
 function mapStateToProps(store) {
   const forumBoards = getForumBoards(store);
-  return {dataSource: forumBoards};
+  return { dataSource: forumBoards };
 }
 
 export default connect(mapStateToProps)(ForumBoardList);

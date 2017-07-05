@@ -1,11 +1,11 @@
 export default function createFastMemoizeDefaultOptions(size = 100) {
   return {
     serializer(...args) {
-      return JSON.stringify(args[0].map((arg) => {
-        return typeof arg.hashCode === 'function'
-          ? arg.hashCode()
-          : arg;
-      }));
+      return JSON.stringify(
+        args[0].map(arg => {
+          return typeof arg.hashCode === "function" ? arg.hashCode() : arg;
+        })
+      );
     },
     cache: {
       create() {
@@ -13,7 +13,7 @@ export default function createFastMemoizeDefaultOptions(size = 100) {
         let count = 0;
         return {
           has(key) {
-            return (key in store);
+            return key in store;
           },
           get(key) {
             return store[key];

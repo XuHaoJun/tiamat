@@ -1,4 +1,4 @@
-import spring from 'react-motion/lib/spring';
+import spring from "react-motion/lib/spring";
 
 const fadeConfig = {
   stiffness: 200,
@@ -26,8 +26,8 @@ const fade = {
     opacity: spring(1, fadeConfig),
     zIndex: 1
   },
-  mapStyles: (styles) => {
-    return {opacity: styles.opacity, zIndex: styles.zIndex};
+  mapStyles: styles => {
+    return { opacity: styles.opacity, zIndex: styles.zIndex };
   }
 };
 
@@ -45,7 +45,7 @@ const pop = {
     opacity: 1
   },
   mapStyles(styles) {
-    return {opacity: styles.opacity, transform: `scale(${styles.scale})`};
+    return { opacity: styles.opacity, transform: `scale(${styles.scale})` };
   }
 };
 
@@ -55,15 +55,18 @@ const slideLeft = {
     opacity: 0,
     offset: 100
   },
-  atLeave: {
-  },
+  atLeave: {},
   atActive: {
     zIndex: 1,
     opacity: spring(1, slideConfig),
     offset: spring(0, slideConfig)
   },
   mapStyles(styles) {
-    return {zIndex: styles.zIndex, opacity: styles.opacity, transform: `translateX(${styles.offset}%)`};
+    return {
+      zIndex: styles.zIndex,
+      opacity: styles.opacity,
+      transform: `translateX(${styles.offset}%)`
+    };
   }
 };
 
@@ -80,7 +83,11 @@ const slideRight = {
     offset: spring(0, slideConfig)
   },
   mapStyles(styles) {
-    return {zIndex: styles.zIndex, opacity: styles.opacity, transform: `translateX(${styles.offset}%)`};
+    return {
+      zIndex: styles.zIndex,
+      opacity: styles.opacity,
+      transform: `translateX(${styles.offset}%)`
+    };
   }
 };
 

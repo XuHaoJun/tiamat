@@ -1,7 +1,13 @@
-import {fromJS, Set, List} from 'immutable';
-import defaultSameIdElesMax from '../../util/defaultSameIdElesMax';
-import {connectDB} from '../../localdb';
-import {ADD_DISCUSSIONS, ADD_DISCUSSION, CLEAR_DISCUSSIONS, SET_DISCUSSIONS_UI, SET_CREATE_ROOT_DISCUSSION_PAGE_FORM} from './DiscussionActions';
+import { fromJS, Set, List } from "immutable";
+import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
+import { connectDB } from "../../localdb";
+import {
+  ADD_DISCUSSIONS,
+  ADD_DISCUSSION,
+  CLEAR_DISCUSSIONS,
+  SET_DISCUSSIONS_UI,
+  SET_CREATE_ROOT_DISCUSSION_PAGE_FORM
+} from "./DiscussionActions";
 
 // Initial State
 const initialState = fromJS({
@@ -26,33 +32,34 @@ const DiscussionReducer = (state = initialState, action) => {
         ? fromJS(action.discussions).toSet()
         : Set([fromJS(action.discussion)]);
       const data = state
-        .get('data')
+        .get("data")
         .union(newDiscussions)
-        .groupBy(ele => ele.get('_id'))
+        .groupBy(ele => ele.get("_id"))
         .map(eles => defaultSameIdElesMax(eles))
         .toSet();
-      return state.set('data', data);
+      return state.set("data", data);
 
     case CLEAR_DISCUSSIONS:
-      return state.set('data', Set());
+      return state.set("data", Set());
 
     case SET_CREATE_ROOT_DISCUSSION_PAGE_FORM:
-      const {forumBoardId, form} = action;
-      const newState = state.setIn([
-        'ui', 'CreateRootDiscussionPage', 'forms', forumBoardId
-      ], fromJS(form));
+      const { forumBoardId, form } = action;
+      const newState = state.setIn(
+        ["ui", "CreateRootDiscussionPage", "forms", forumBoardId],
+        fromJS(form)
+      );
       const db = connectDB();
       if (db) {
-        db.setItem('discussion:ui', newState.get('ui').toJSON());
+        db.setItem("discussion:ui", newState.get("ui").toJSON());
       }
       return newState;
 
     case SET_DISCUSSIONS_UI:
-      return state.set('ui', fromJS(action.ui));
+      return state.set("ui", fromJS(action.ui));
 
     default:
-      if (List.isList(state.get('data'))) {
-        return state.set('data', state.get('data').toSet());
+      if (List.isList(state.get("data"))) {
+        return state.set("data", state.get("data").toSet());
       }
       return state;
   }
@@ -62,28 +69,20 @@ const DiscussionReducer = (state = initialState, action) => {
 
 // Get all posts
 export const getRootDiscussions = (state, forumBoardId) => {
-  return state
-    .discussions
-    .get('data')
-    .filter(d => d.get('isRoot') && d.get('forumBoard') === forumBoardId);
+  return state.discussions
+    .get("data")
+    .filter(d => d.get("isRoot") && d.get("forumBoard") === forumBoardId);
 };
 
 export const getDiscussion = (state, id) => {
-  return state
-    .discussions
-    .get('data')
-    .find(v => v.get('_id') === id);
+  return state.discussions.get("data").find(v => v.get("_id") === id);
 };
 
-export const getDiscussions = (state) => {
-  return state
-    .discussions
-    .get('data');
+export const getDiscussions = state => {
+  return state.discussions.get("data");
 };
 
-export const getUI = state => state
-  .discussions
-  .get('ui');
+export const getUI = state => state.discussions.get("ui");
 
 // Export Reducer
 export default DiscussionReducer;

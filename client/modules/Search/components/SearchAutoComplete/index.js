@@ -1,3 +1,3 @@
-import SearchAutoComplete from './SearchAutoComplete';
+import SearchAutoComplete from "./SearchAutoComplete";
 
 export default SearchAutoComplete;

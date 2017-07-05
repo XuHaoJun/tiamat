@@ -1,4 +1,4 @@
-import {SET_OAUTH2_CLIENT} from './Oauth2ClientActions';
+import { SET_OAUTH2_CLIENT } from "./Oauth2ClientActions";
 
 const initialState = {
   app: null,
@@ -8,8 +8,8 @@ const initialState = {
 const Oauth2ClientReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_OAUTH2_CLIENT:
-      const {oauth2Client, source} = action;
-      return Object.assign({}, state, {[source]: oauth2Client});
+      const { oauth2Client, source } = action;
+      return Object.assign({}, state, { [source]: oauth2Client });
     default:
       return state;
   }
@@ -18,7 +18,7 @@ const Oauth2ClientReducer = (state = initialState, action) => {
 /* Selectors */
 
 // Get userAgent
-export const getOauth2Client = (state, source = 'app') => {
+export const getOauth2Client = (state, source = "app") => {
   return state.oauth2Client[source];
 };
 

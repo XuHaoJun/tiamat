@@ -1,11 +1,11 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import TextField from 'material-ui/TextField';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Editor, {emptyContent} from '../../../components/Slate/Editor';
-import {Set} from 'immutable';
-import {shouldComponentUpdate} from 'react-immutable-render-mixin';
+import React from "react";
+import PropTypes from "prop-types";
+import TextField from "material-ui/TextField";
+import DropDownMenu from "material-ui/DropDownMenu";
+import MenuItem from "material-ui/MenuItem";
+import Editor, { emptyContent } from "../../../components/Slate/Editor";
+import { Set } from "immutable";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
 class CreateRootDiscussionForm extends React.Component {
   static propTypes = {
@@ -17,8 +17,8 @@ class CreateRootDiscussionForm extends React.Component {
   };
 
   static defaultProps = {
-    forumBoardId: '',
-    forumBoardGroup: '',
+    forumBoardId: "",
+    forumBoardGroup: "",
     forumBoard: null,
     initForm: null,
     semanticRules: Set()
@@ -28,62 +28,60 @@ class CreateRootDiscussionForm extends React.Component {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
-      title: '',
+      title: "",
       forumBoardGroup: props.forumBoard
-        ? props
-          .forumBoard
-          .get('groups')
-          .get(0)
-        : '',
+        ? props.forumBoard.get("groups").get(0)
+        : "",
       rawContent: emptyContent
     };
     if (props.forumBoardGroup) {
       this.state.forumBoardGroup = props.forumBoardGroup;
     }
-    const {initForm} = props;
+    const { initForm } = props;
     if (initForm) {
-      const title = initForm.get('title');
+      const title = initForm.get("title");
       if (title) {
         this.state.title = title;
       }
-      if (props.initForm.get('content')) {
-        this.state.rawContent = props
-          .initForm
-          .get('content');
+      if (props.initForm.get("content")) {
+        this.state.rawContent = props.initForm.get("content");
       }
     }
   }
 
   getForm = () => {
-    const {forumBoardId} = this.props;
-    const {title, forumBoardGroup} = this.state;
+    const { forumBoardId } = this.props;
+    const { title, forumBoardGroup } = this.state;
     const isRoot = true;
-    const content = this.editor
-      ? this
-        .editor
-        .getJSONContent()
-      : null;
+    const content = this.editor ? this.editor.getJSONContent() : null;
     if (!content || !forumBoardId) {
       return null;
     }
-    return {title, forumBoard: forumBoardId, content, isRoot, forumBoardGroup};
-  }
-
-  setEditorRef = (ele) => {
-    this.editor = ele ? ele.getWrappedInstance() : ele;
-  }
-
-  titleOnChange = (event) => {
-    this.setState({title: event.target.value});
+    return {
+      title,
+      forumBoard: forumBoardId,
+      content,
+      isRoot,
+      forumBoardGroup
+    };
   };
 
-  handleGroupChange = (event, index, forumBoardGroup) => this.setState({forumBoardGroup});
+  setEditorRef = ele => {
+    this.editor = ele ? ele.getWrappedInstance() : ele;
+  };
+
+  titleOnChange = event => {
+    this.setState({ title: event.target.value });
+  };
+
+  handleGroupChange = (event, index, forumBoardGroup) =>
+    this.setState({ forumBoardGroup });
 
   render() {
     const editorStyleContainer = {
       marginTop: 20
     };
-    const {semanticRules} = this.props;
+    const { semanticRules } = this.props;
     return (
       <div>
         <TextField
@@ -92,33 +90,30 @@ class CreateRootDiscussionForm extends React.Component {
           }}
           floatingLabelText="標題"
           value={this.state.title}
-          onChange={this.titleOnChange}/>
+          onChange={this.titleOnChange}
+        />
         <div>
-          {
-            this.props.forumBoard
-              ? (
-                <DropDownMenu value={this.state.forumBoardGroup} onChange={this.handleGroupChange}>
-                  {
-                    this
-                      .props
-                      .forumBoard
-                      .get('groups')
-                      .map((group) => {
-                        const key = group;
-                        return (<MenuItem key={key} value={group} primaryText={group}/>);
-                      })
-                  }
-                </DropDownMenu>
-              )
-              : null
-          }
+          {this.props.forumBoard
+            ? <DropDownMenu
+                value={this.state.forumBoardGroup}
+                onChange={this.handleGroupChange}
+              >
+                {this.props.forumBoard.get("groups").map(group => {
+                  const key = group;
+                  return (
+                    <MenuItem key={key} value={group} primaryText={group} />
+                  );
+                })}
+              </DropDownMenu>
+            : null}
         </div>
         <div style={editorStyleContainer}>
           <Editor
             ref={this.setEditorRef}
             semanticRules={semanticRules}
             rawContent={this.state.rawContent}
-            onChangeContent={this.props.onChangeContent}/>
+            onChangeContent={this.props.onChangeContent}
+          />
         </div>
       </div>
     );

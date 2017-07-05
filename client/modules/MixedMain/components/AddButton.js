@@ -1,14 +1,14 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import CreateIcon from 'material-ui/svg-icons/content/create';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import Portal from 'react-portal-minimal';
+import React from "react";
+import PropTypes from "prop-types";
+import CreateIcon from "material-ui/svg-icons/content/create";
+import AddIcon from "material-ui/svg-icons/content/add";
+import FloatingActionButton from "material-ui/FloatingActionButton";
+import Portal from "react-portal-minimal";
 
 class AddButton extends React.PureComponent {
   static propTypes = {
     isOpened: PropTypes.bool,
-    iconType: PropTypes.oneOf(['create', 'add']),
+    iconType: PropTypes.oneOf(["create", "add"]),
     href: PropTypes.string,
     onTouchTap: PropTypes.func,
     onClick: PropTypes.func
@@ -20,43 +20,36 @@ class AddButton extends React.PureComponent {
 
   static defaultProps = {
     isOpened: true,
-    iconType: 'create',
-    href: '',
+    iconType: "create",
+    href: "",
     onTouchTap: () => {},
     onClick: () => {}
-  }
+  };
 
-  onTouchTap = (e) => {
+  onTouchTap = e => {
     if (e.nativeEvent.which === 3 || !this.props.href) {
       return;
     }
     const href = this.props.href;
     if (href) {
-      this
-        .context
-        .router
-        .push(this.props.href);
+      this.context.router.push(this.props.href);
     }
     e.preventDefault();
     if (this.props.onTouchTap) {
-      this
-        .props
-        .onTouchTap(e);
+      this.props.onTouchTap(e);
     }
-  }
+  };
 
-  onClick = (e) => {
+  onClick = e => {
     e.preventDefault();
     if (this.props.onClick) {
-      this
-        .props
-        .onClick(e);
+      this.props.onClick(e);
     }
-  }
+  };
 
-  setPortalRef = (v) => {
+  setPortalRef = v => {
     this.portal = v;
-  }
+  };
 
   render() {
     const {
@@ -72,7 +65,7 @@ class AddButton extends React.PureComponent {
       return null;
     }
     const _style = {
-      position: 'fixed',
+      position: "fixed",
       bottom: 20,
       right: 20
     };
@@ -84,12 +77,9 @@ class AddButton extends React.PureComponent {
           style={finalStyle}
           href={href}
           onTouchTap={this.onTouchTap}
-          onClick={this.onClick}>
-          {
-            iconType === 'create'
-              ? (<CreateIcon/>)
-              : (<AddIcon/>)
-          }
+          onClick={this.onClick}
+        >
+          {iconType === "create" ? <CreateIcon /> : <AddIcon />}
         </FloatingActionButton>
       </Portal>
     );

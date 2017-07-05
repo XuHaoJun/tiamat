@@ -1,4 +1,4 @@
 export default {
-  code: '',
-  'google-site-verification': ''
+  code: "",
+  "google-site-verification": ""
 };

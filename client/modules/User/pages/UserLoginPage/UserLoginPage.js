@@ -1,18 +1,18 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import Helmet from 'react-helmet';
-import Paper from 'material-ui/Paper';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import Helmet from "react-helmet";
+import Paper from "material-ui/Paper";
 
-import LoginForm from './LoginForm';
-import {getCurrentUser} from '../../UserReducer';
+import LoginForm from "./LoginForm";
+import { getCurrentUser } from "../../UserReducer";
 
 const styles = {
   paper: {
-    textAlign: 'center',
-    verticalAlign: 'middle',
+    textAlign: "center",
+    verticalAlign: "middle",
     width: 500,
-    margin: 'auto'
+    margin: "auto"
   },
   loginForm: {
     padding: 15
@@ -31,7 +31,7 @@ class UserLoginPage extends Component {
 
   componentDidMount() {
     if (this.props.currentUser) {
-      setTimeout(this.context.router.replace.bind(this, '/'), 0);
+      setTimeout(this.context.router.replace.bind(this, "/"), 0);
     }
   }
 
@@ -39,7 +39,7 @@ class UserLoginPage extends Component {
     return (
       <Paper style={styles.paper}>
         <div style={styles.loginForm}>
-          <LoginForm/>
+          <LoginForm />
         </div>
       </Paper>
     );
@@ -48,7 +48,7 @@ class UserLoginPage extends Component {
   renderMobile = () => {
     return (
       <div style={styles.loginForm}>
-        <LoginForm/>
+        <LoginForm />
       </div>
     );
   };
@@ -59,7 +59,7 @@ class UserLoginPage extends Component {
       : this.renderDesktop();
     return (
       <div>
-        <Helmet title="登入"/>
+        <Helmet title="登入" />
         <div>
           {content}
         </div>
@@ -72,7 +72,7 @@ function mapStateToProps(state, props) {
   const currentUser = getCurrentUser(state);
   const browser = state.browser;
   const location = state.routing.locationBeforeTransitions || props.location;
-  return {currentUser, browser, location};
+  return { currentUser, browser, location };
 }
 
 export default connect(mapStateToProps)(UserLoginPage);

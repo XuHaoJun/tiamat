@@ -1,7 +1,7 @@
-import SoftBreak from 'slate-soft-break';
-import SuggestionsPlugin from '@xuhaojun/slate-suggestions';
-import PluginEditTable from 'slate-edit-table';
-import EnterScrollWindow from './EnterScrollWindow';
+import SoftBreak from "slate-soft-break";
+import SuggestionsPlugin from "@xuhaojun/slate-suggestions";
+import PluginEditTable from "slate-edit-table";
+import EnterScrollWindow from "./EnterScrollWindow";
 
 function getCurrentWord(text, index, initialIndex) {
   if (index === initialIndex) {
@@ -10,7 +10,7 @@ function getCurrentWord(text, index, initialIndex) {
       end: getCurrentWord(text, index + 1, initialIndex)
     };
   }
-  if (text[index] === ' ' || text[index] === '@' || text[index] === undefined) {
+  if (text[index] === " " || text[index] === "@" || text[index] === undefined) {
     return index;
   }
   if (index < initialIndex) {
@@ -25,13 +25,13 @@ function getCurrentWord(text, index, initialIndex) {
 function createPlugins() {
   const tablePlugin = PluginEditTable();
   const suggestionsPlugin = SuggestionsPlugin({
-    trigger: '@',
+    trigger: "@",
     capture: /@([\w]*)/,
     onEnter: (suggestion, state) => {
-      const {anchorText, anchorOffset, selection, document} = state;
-      const hasMention = state
-        .inlines
-        .some(inline => inline.type === 'mention');
+      const { anchorText, anchorOffset, selection, document } = state;
+      const hasMention = state.inlines.some(
+        inline => inline.type === "mention"
+      );
       if (hasMention) {
         return;
       }
@@ -40,11 +40,11 @@ function createPlugins() {
         start: anchorOffset - 1,
         end: anchorOffset
       };
-      if (text[anchorOffset - 1] !== '@') {
+      if (text[anchorOffset - 1] !== "@") {
         index = getCurrentWord(text, anchorOffset - 1, anchorOffset - 1);
       }
       if (!index || !suggestion) {
-        console.log('returned')
+        console.log("returned");
         return;
       }
       return state
@@ -53,13 +53,13 @@ function createPlugins() {
         .insertText(suggestion.suggestion)
         .extend(0 - suggestion.suggestion.length)
         .wrapInline({
-          type: 'link',
+          type: "link",
           data: {
             href: suggestion.value
           }
         })
         .collapseToStartOfNextText()
-        .insertText(' ')
+        .insertText(" ")
         .collapseToEnd()
         .focus()
         .apply();
@@ -68,7 +68,7 @@ function createPlugins() {
 
   const enterScrollWindowPlugin = EnterScrollWindow();
   const softBreakPlugin = SoftBreak({
-    onlyIn: ['code']
+    onlyIn: ["code"]
   });
 
   const plugins = {

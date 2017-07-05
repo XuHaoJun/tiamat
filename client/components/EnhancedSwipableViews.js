@@ -1,12 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import memoize from 'fast-memoize';
-import SwipeableViews from '@xuhaojun/react-swipeable-views';
-import ReactDOM from 'react-dom';
-import warning from 'warning';
-import {connect} from 'react-redux';
-import {getUserAgent} from '../modules/UserAgent/UserAgentReducer';
-import MobileDetect from 'mobile-detect';
+import React from "react";
+import PropTypes from "prop-types";
+import memoize from "fast-memoize";
+import SwipeableViews from "@xuhaojun/react-swipeable-views";
+import ReactDOM from "react-dom";
+import warning from "warning";
+import { connect } from "react-redux";
+import { getUserAgent } from "../modules/UserAgent/UserAgentReducer";
+import MobileDetect from "mobile-detect";
 
 export class EnhancedSwipableViews extends React.Component {
   static propTypes = {
@@ -21,10 +21,10 @@ export class EnhancedSwipableViews extends React.Component {
   static defaultProps = {
     disableOnDrawerStart: true,
     resistance: true,
-    scrollKey: '',
+    scrollKey: "",
     onFirstRenderComplete: () => {},
     scrollBehaviorShouldUpdateScroll: undefined,
-    userAgent: ''
+    userAgent: ""
   };
 
   static contextTypes = {
@@ -37,97 +37,88 @@ export class EnhancedSwipableViews extends React.Component {
     this.state = {
       disabled: false
     };
-    const getMobileDetect = memoize((userAgent) => {
+    const getMobileDetect = memoize(userAgent => {
       return new MobileDetect(userAgent);
     });
     this.getMobileDetect = getMobileDetect;
   }
 
   componentDidMount() {
-    document
-      .body
-      .addEventListener('touchstart', this.onBodyTouchStart);
-    document
-      .body
-      .addEventListener('touchend', this.onBodyTouchEnd);
+    document.body.addEventListener("touchstart", this.onBodyTouchStart);
+    document.body.addEventListener("touchend", this.onBodyTouchEnd);
   }
 
   componentWillReceiveProps(nextProps) {
-    warning(nextProps.scrollKey === this.props.scrollKey,
-      '<ScrollContainer> does not support changing scrollKey.',
+    warning(
+      nextProps.scrollKey === this.props.scrollKey,
+      "<ScrollContainer> does not support changing scrollKey."
     );
   }
 
   componentWillUnmount() {
-    document
-      .body
-      .removeEventListener('touchstart', this.onBodyTouchStart);
-    document
-      .body
-      .removeEventListener('touchend', this.onBodyTouchEnd);
+    document.body.removeEventListener("touchstart", this.onBodyTouchStart);
+    document.body.removeEventListener("touchend", this.onBodyTouchEnd);
     if (this._registed && this._scrollKey) {
-      this
-        .context
-        .scrollBehavior
-        .unregisterElement(this._scrollKey);
+      this.context.scrollBehavior.unregisterElement(this._scrollKey);
     }
   }
 
-  onBodyTouchStart = (event) => {
+  onBodyTouchStart = event => {
     if (this.props.disableOnDrawerStart && document) {
       const touchStartX = event.touches[0].pageX;
       const appDrawerSwipAreaWidth = 30;
-      if (touchStartX <= appDrawerSwipAreaWidth || touchStartX >= (document.body.offsetWidth - appDrawerSwipAreaWidth)) {
+      if (
+        touchStartX <= appDrawerSwipAreaWidth ||
+        touchStartX >= document.body.offsetWidth - appDrawerSwipAreaWidth
+      ) {
         if (!this.state.disableSwipableViews) {
-          this.setState({disabled: true});
+          this.setState({ disabled: true });
         }
       } else {
         if (this.state.disableSwipableViews) {
-          this.setState({disabled: false});
+          this.setState({ disabled: false });
         }
       }
     }
     if (this.props.onTouchStart) {
-      this
-        .props
-        .onTouchStart(event);
+      this.props.onTouchStart(event);
     }
-  }
+  };
 
-  onBodyTouchEnd = (event) => {
+  onBodyTouchEnd = event => {
     if (this.props.disableOnDrawerStart) {
       if (this.state.disabled) {
-        this.setState({disabled: false});
+        this.setState({ disabled: false });
       }
     }
     if (this.props.onTouchEnd) {
-      this
-        .props
-        .onTouchEnd(event);
+      this.props.onTouchEnd(event);
     }
-  }
+  };
 
   onFirstRenderComplete = () => {
-    const {scrollKey, animateHeight} = this.props;
+    const { scrollKey, animateHeight } = this.props;
     if (scrollKey && !animateHeight) {
       this._scrollKey = this.props.scrollKey;
       this._registed = true;
-      const targetScrollElement = ReactDOM.findDOMNode(this.originalSwipableViews._activeSlide);
-      let {scrollBehaviorShouldUpdateScroll} = this.props;
-      scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior.shouldUpdateScroll;
-      this
-        .context
-        .scrollBehavior
-        .registerElement(scrollKey, targetScrollElement, scrollBehaviorShouldUpdateScroll);
+      const targetScrollElement = ReactDOM.findDOMNode(
+        this.originalSwipableViews._activeSlide
+      );
+      let { scrollBehaviorShouldUpdateScroll } = this.props;
+      scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior
+        .shouldUpdateScroll;
+      this.context.scrollBehavior.registerElement(
+        scrollKey,
+        targetScrollElement,
+        scrollBehaviorShouldUpdateScroll
+      );
     }
-    this
-      .props
-      .onFirstRenderComplete();
-  }
+    this.props.onFirstRenderComplete();
+  };
 
-  setOriginalSwipableViewsRef = (ori) => {
+  setOriginalSwipableViewsRef = ori => {
     this.originalSwipableViews = ori;
-  }
+  };
 
   render() {
     const {
@@ -145,7 +136,7 @@ export class EnhancedSwipableViews extends React.Component {
     const mobileDetect = this.getMobileDetect(userAgent);
     // TODO workarund way for fix SwipableViews render nothing on first rendering, can't suit for google
     // bot crawler. I didn't know why SwipableViews design to not render on first time....
-    if (mobileDetect.is('bot')) {
+    if (mobileDetect.is("bot")) {
       return (
         <div>
           {this.props.children}
@@ -160,7 +151,8 @@ export class EnhancedSwipableViews extends React.Component {
         ref={this.setOriginalSwipableViewsRef}
         onTouchStart={this.onBodyTouchStart}
         onTouchEnd={this.onBodyTouchEnd}
-        disabled={this.state.disabled}>
+        disabled={this.state.disabled}
+      >
         {this.props.children}
       </SwipeableViews>
     );
@@ -168,7 +160,7 @@ export class EnhancedSwipableViews extends React.Component {
 }
 
 function mapStateToProps(store) {
-  return {userAgent: getUserAgent(store)};
+  return { userAgent: getUserAgent(store) };
 }
 
 export default connect(mapStateToProps)(EnhancedSwipableViews);

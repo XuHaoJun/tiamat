@@ -1,31 +1,31 @@
-import Discussion from '../models/discussion';
-import ForumBoard from '../models/forumBoard';
+import Discussion from "../models/discussion";
+import ForumBoard from "../models/forumBoard";
 
 export default function syncElasticsearch() {
   const models = [ForumBoard, Discussion];
-  models.forEach((M) => {
+  models.forEach(M => {
     const settings = {
       analysis: {
         analyzer: {
           default: {
-            type: 'smartcn'
+            type: "smartcn"
           }
         }
       }
     };
-    M.createMapping(settings, (err) => {
+    M.createMapping(settings, err => {
       if (err) {
         console.log(err);
       } else {
         const stream = M.synchronize();
         let count = 0;
-        stream.on('data', function(err, doc) {
+        stream.on("data", function(err, doc) {
           count += 1;
         });
-        stream.on('close', function() {
-          console.log('indexed ' + count + ' documents!');
+        stream.on("close", function() {
+          console.log("indexed " + count + " documents!");
         });
-        stream.on('error', function(err) {
+        stream.on("error", function(err) {
           console.log(err);
         });
       }

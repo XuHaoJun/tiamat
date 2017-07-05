@@ -1,16 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import CommonList from '../../../components/List/CommonList';
-import {Set} from 'immutable';
-import {fetchRootDiscussions} from '../DiscussionActions';
-import {getRootDiscussions} from '../DiscussionReducer';
-import {connect} from 'react-redux';
-import {shouldComponentUpdate} from 'react-immutable-render-mixin';
-import Avatar from 'material-ui/Avatar';
-import DiscussionIcon from 'material-ui/svg-icons/communication/comment';
-import moment from 'moment';
+import React from "react";
+import PropTypes from "prop-types";
+import CommonList from "../../../components/List/CommonList";
+import { Set } from "immutable";
+import { fetchRootDiscussions } from "../DiscussionActions";
+import { getRootDiscussions } from "../DiscussionReducer";
+import { connect } from "react-redux";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import Avatar from "material-ui/Avatar";
+import DiscussionIcon from "material-ui/svg-icons/communication/comment";
+import moment from "moment";
 
-moment.locale('zh-tw');
+moment.locale("zh-tw");
 
 class RootDiscussionList extends React.Component {
   static propTypes = {
@@ -18,7 +18,7 @@ class RootDiscussionList extends React.Component {
   };
 
   static defaultProps = {
-    forumBoardId: '',
+    forumBoardId: "",
     dataSource: Set()
   };
 
@@ -30,7 +30,7 @@ class RootDiscussionList extends React.Component {
     this.state = {
       page,
       limit,
-      sort: '-updatedAt',
+      sort: "-updatedAt",
       enableLoadMore: true
     };
   }
@@ -42,75 +42,76 @@ class RootDiscussionList extends React.Component {
   }
 
   onRequestLoadMore = () => {
-    const {page, limit, sort} = this.state;
-    const {forumBoardId, forumBoardGroup} = this.props;
+    const { page, limit, sort } = this.state;
+    const { forumBoardId, forumBoardGroup } = this.props;
     const nextPage = page + 1;
-    this
-      .props
-      .dispatch(fetchRootDiscussions(forumBoardId, {
-        page: nextPage,
-        limit,
-        sort,
-        forumBoardGroup
-      }))
-      .then((discussionsJSON) => {
+    this.props
+      .dispatch(
+        fetchRootDiscussions(forumBoardId, {
+          page: nextPage,
+          limit,
+          sort,
+          forumBoardGroup
+        })
+      )
+      .then(discussionsJSON => {
         if (discussionsJSON.length < limit) {
-          this.setState({enableLoadMore: false});
+          this.setState({ enableLoadMore: false });
         } else {
-          this.setState({page: nextPage});
+          this.setState({ page: nextPage });
         }
       })
       .catch(() => {
-        this.setState({enableLoadMore: false});
+        this.setState({ enableLoadMore: false });
       });
-  }
+  };
 
-  sortBy = (payload) => {
-    return -1 * new Date(payload.get('updatedAt')).getTime();
-  }
+  sortBy = payload => {
+    return -1 * new Date(payload.get("updatedAt")).getTime();
+  };
 
-  listItemHref = (payload) => {
-    return `/forumBoards/${payload.get('forumBoard')}/rootDiscussions/${payload.get('_id')}`;
-  }
+  listItemHref = payload => {
+    return `/forumBoards/${payload.get(
+      "forumBoard"
+    )}/rootDiscussions/${payload.get("_id")}`;
+  };
 
-  listItemSecondaryText = (payload) => {
-    const fromNowTime = moment(payload.get('updatedAt')).fromNow();
-    const descendantCount = payload.get('descendantCount') || 0;
+  listItemSecondaryText = payload => {
+    const fromNowTime = moment(payload.get("updatedAt")).fromNow();
+    const descendantCount = payload.get("descendantCount") || 0;
     return `${fromNowTime}, ${descendantCount} 留言`;
-  }
+  };
 
-  listItemLeftAvatar = (payload) => {
-    return (
-      <Avatar icon={<DiscussionIcon/>}/>
-    );
-  }
+  listItemLeftAvatar = payload => {
+    return <Avatar icon={<DiscussionIcon />} />;
+  };
 
   render() {
-    const dataSource = this
-      .props
-      .dataSource
-      .sortBy(this.sortBy);
-    return (<CommonList
-      dataSource={dataSource}
-      listItemHref={this.listItemHref}
-      listItemSecondaryText={this.listItemSecondaryText}
-      listItemLeftAvatar={this.listItemLeftAvatar}
-      onRequestLoadMore={this.onRequestLoadMore}
-      enableLoadMore={this.state.enableLoadMore}/>);
+    const dataSource = this.props.dataSource.sortBy(this.sortBy);
+    return (
+      <CommonList
+        dataSource={dataSource}
+        listItemHref={this.listItemHref}
+        listItemSecondaryText={this.listItemSecondaryText}
+        listItemLeftAvatar={this.listItemLeftAvatar}
+        onRequestLoadMore={this.onRequestLoadMore}
+        enableLoadMore={this.state.enableLoadMore}
+      />
+    );
   }
 }
 
 function mapStateToProps(store, props) {
-  const {forumBoardId, forumBoardGroup} = props;
+  const { forumBoardId, forumBoardGroup } = props;
   let dataSource = forumBoardId
     ? getRootDiscussions(store, forumBoardId)
     : Set();
   if (forumBoardGroup) {
-    dataSource = dataSource.filter((rootDiscussion) => {
-      return rootDiscussion.get('forumBoardGroup') === forumBoardGroup;
+    dataSource = dataSource.filter(rootDiscussion => {
+      return rootDiscussion.get("forumBoardGroup") === forumBoardGroup;
     });
   }
-  return {forumBoardId, forumBoardGroup, dataSource};
+  return { forumBoardId, forumBoardGroup, dataSource };
 }
 
 export default connect(mapStateToProps)(RootDiscussionList);

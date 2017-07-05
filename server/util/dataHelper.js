@@ -1,5 +1,5 @@
-const ss = require('../../assets/stages.json');
-const ms = require('../../assets/monsters.json');
+const ss = require("../../assets/stages.json");
+const ms = require("../../assets/monsters.json");
 
 let si;
 let mi;

@@ -1,3 +1,3 @@
-import AddImageDialog from './AddImageDialog';
+import AddImageDialog from "./AddImageDialog";
 
 export default AddImageDialog;

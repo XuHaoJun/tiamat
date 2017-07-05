@@ -1,14 +1,14 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import {shouldComponentUpdate} from 'react-immutable-render-mixin';
-import {Tabs, Tab} from 'material-ui/Tabs';
-import EnhancedSwipeableViews from '../../../components/EnhancedSwipableViews';
-import RootDiscussionList from '../../Discussion/components/RootDiscussionList';
-import ForumBoardGroupsList from '../../ForumBoard/components/ForumBoardGroupsList';
-import RootWikiDetail from '../../RootWiki/components/RootWikiDetail';
-import RootWikiGroupTreeList from '../../RootWiki/components/RootWikiGroupTreeList';
-import WikiList from '../../Wiki/components/WikiList';
-import AddButton from './AddButton';
+import React from "react";
+import PropTypes from "prop-types";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { Tabs, Tab } from "material-ui/Tabs";
+import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
+import RootDiscussionList from "../../Discussion/components/RootDiscussionList";
+import ForumBoardGroupsList from "../../ForumBoard/components/ForumBoardGroupsList";
+import RootWikiDetail from "../../RootWiki/components/RootWikiDetail";
+import RootWikiGroupTreeList from "../../RootWiki/components/RootWikiGroupTreeList";
+import WikiList from "../../Wiki/components/WikiList";
+import AddButton from "./AddButton";
 
 export const FORUMBOARD_GROUPS_SLIDE = 0;
 export const ROOT_DISCUSSIONS_SLIDE = 1;
@@ -17,11 +17,16 @@ export const ROOT_WIKI_OR_WIKI_SLIDE = 3;
 
 class RootWikiDetailOrWikiList extends React.Component {
   render() {
-    const {rootWikiId, rootWikiGroupTree} = this.props;
+    const { rootWikiId, rootWikiGroupTree } = this.props;
     if (rootWikiGroupTree) {
-      return (<WikiList rootWikiId={rootWikiId} rootWikiGroupTree={rootWikiGroupTree}/>);
+      return (
+        <WikiList
+          rootWikiId={rootWikiId}
+          rootWikiGroupTree={rootWikiGroupTree}
+        />
+      );
     }
-    return (<RootWikiDetail rootWikiId={rootWikiId}/>);
+    return <RootWikiDetail rootWikiId={rootWikiId} />;
   }
 }
 
@@ -31,7 +36,7 @@ export function getStyles(context, browser) {
   const styles = {
     slideContainer: {
       height: `calc(100vh - ${tabHeight + appBarHeight}px)`,
-      WebkitOverflowScrolling: 'touch'
+      WebkitOverflowScrolling: "touch"
     },
     swipeableViews: {},
     swipeableViewsWithMedium: {
@@ -40,8 +45,8 @@ export function getStyles(context, browser) {
     tabs: {},
     tabsWithMedium: {
       zIndex: 1,
-      position: 'fixed',
-      width: '100%'
+      position: "fixed",
+      width: "100%"
     }
   };
   if (browser.lessThan.medium) {
@@ -75,8 +80,8 @@ class MixedMainTabs extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    const {slideIndex} = props;
-    const lastScrollDirection = 'up';
+    const { slideIndex } = props;
+    const lastScrollDirection = "up";
     this.state = {
       slideIndex,
       lastScrollDirection
@@ -89,12 +94,17 @@ class MixedMainTabs extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.slideIndex !== nextProps.slideIndex) {
       const slideIndex = nextProps.slideIndex;
-      this.setState({slideIndex});
+      this.setState({ slideIndex });
     }
   }
 
   getStyles = () => {
-    const {rootStyle, tabsStyle, swipeableViewsStyle, slideContainerStyle} = this.props;
+    const {
+      rootStyle,
+      tabsStyle,
+      swipeableViewsStyle,
+      slideContainerStyle
+    } = this.props;
     const defaultStyles = getStyles(this.context, this.props.browser);
     const propStyles = {
       rootStyle,
@@ -112,23 +122,23 @@ class MixedMainTabs extends React.Component {
       }
     }
     return styles;
-  }
+  };
 
-  getAddButtonIsOpened = (slideIndex) => {
-    if (this.state.lastScrollDirection === 'down') {
+  getAddButtonIsOpened = slideIndex => {
+    if (this.state.lastScrollDirection === "down") {
       return false;
     }
     return true;
-  }
+  };
 
-  getAddButtonHref = (slideIndex, forumBoardGroup = '') => {
-    const {forumBoardId, rootWiki} = this.props;
-    const rootWikiId = rootWiki ? rootWiki.get('_id') : '';
-    let href = '';
+  getAddButtonHref = (slideIndex, forumBoardGroup = "") => {
+    const { forumBoardId, rootWiki } = this.props;
+    const rootWikiId = rootWiki ? rootWiki.get("_id") : "";
+    let href = "";
     if (slideIndex === ROOT_DISCUSSIONS_SLIDE && forumBoardId) {
       const search = forumBoardGroup
         ? `?forumBoardGroup=${encodeURIComponent(forumBoardGroup)}`
-        : '';
+        : "";
       href = `/create/forumBoards/${forumBoardId}/rootDiscussion${search}`;
     } else if (slideIndex === ROOT_WIKI_OR_WIKI_SLIDE) {
       if (rootWikiId && forumBoardId) {
@@ -142,64 +152,75 @@ class MixedMainTabs extends React.Component {
       }
     }
     return href;
-  }
+  };
 
-  getAddButtonIconType = (slideIndex) => {
-    if (slideIndex === FORUMBOARD_GROUPS_SLIDE || slideIndex === ROOT_WIKI_GROUPS_SLIDE) {
-      return 'add';
+  getAddButtonIconType = slideIndex => {
+    if (
+      slideIndex === FORUMBOARD_GROUPS_SLIDE ||
+      slideIndex === ROOT_WIKI_GROUPS_SLIDE
+    ) {
+      return "add";
     }
-    return 'create';
-  }
+    return "create";
+  };
 
   getAddButtonProps = (slideIndex, forumBoardGroup) => {
     const isOpened = this.getAddButtonIsOpened(slideIndex);
     const iconType = this.getAddButtonIconType(slideIndex);
     const href = this.getAddButtonHref(slideIndex, forumBoardGroup);
-    return {isOpened, iconType, href};
-  }
+    return { isOpened, iconType, href };
+  };
 
   handleTransitionEnd = () => {
     if (this.props.onTransitionEnd) {
-      this
-        .props
-        .onTransitionEnd(this.state.slideIndex);
+      this.props.onTransitionEnd(this.state.slideIndex);
     }
-  }
+  };
 
-  handleTabChange = (value) => {
+  handleTabChange = value => {
     const slideIndex = value;
     this.lastScrollTop[slideIndex] = 0;
-    this.setState({
-      slideIndex,
-      lastScrollDirection: 'up'
-    }, () => this.props.onChangeTab(value));
-  }
+    this.setState(
+      {
+        slideIndex,
+        lastScrollDirection: "up"
+      },
+      () => this.props.onChangeTab(value)
+    );
+  };
 
-  handleScroll = (e) => {
+  handleScroll = e => {
     const lastScrollTop = this.lastScrollTop[this.state.slideIndex];
     const scrollTop = e.target.scrollTop;
-    const lastScrollDirection = scrollTop > lastScrollTop
-      ? 'down'
-      : 'up';
+    const lastScrollDirection = scrollTop > lastScrollTop ? "down" : "up";
     if (this.state.lastScrollDirection !== lastScrollDirection) {
-      this.setState({lastScrollDirection});
+      this.setState({ lastScrollDirection });
     }
     this.lastScrollTop[this.state.slideIndex] = scrollTop;
-  }
+  };
 
   render() {
-    const {forumBoardId, rootWikiId, forumBoardGroup, rootWikiGroupTree} = this.props;
-    const {scrollKey} = this.props;
-    const {slideIndex} = this.state;
+    const {
+      forumBoardId,
+      rootWikiId,
+      forumBoardGroup,
+      rootWikiGroupTree
+    } = this.props;
+    const { scrollKey } = this.props;
+    const { slideIndex } = this.state;
     const styles = this.getStyles();
     const addButtonProps = this.getAddButtonProps(slideIndex, forumBoardGroup);
     return (
       <div style={styles.root}>
-        <Tabs style={styles.tabs} value={slideIndex} onChange={this.handleTabChange}>
-          <Tab label="看板分類" value={FORUMBOARD_GROUPS_SLIDE}/>
-          <Tab label="文章列表" value={ROOT_DISCUSSIONS_SLIDE}/>
-          <Tab label="維基分類" value={ROOT_WIKI_GROUPS_SLIDE}/>
-          <Tab label="維基列表" value={ROOT_WIKI_OR_WIKI_SLIDE}/>
+        <Tabs
+          style={styles.tabs}
+          value={slideIndex}
+          onChange={this.handleTabChange}
+        >
+          <Tab label="看板分類" value={FORUMBOARD_GROUPS_SLIDE} />
+          <Tab label="文章列表" value={ROOT_DISCUSSIONS_SLIDE} />
+          <Tab label="維基分類" value={ROOT_WIKI_GROUPS_SLIDE} />
+          <Tab label="維基列表" value={ROOT_WIKI_OR_WIKI_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey={scrollKey}
@@ -208,16 +229,27 @@ class MixedMainTabs extends React.Component {
           index={slideIndex}
           onScroll={this.handleScroll}
           onChangeIndex={this.handleTabChange}
-          onTransitionEnd={this.handleTransitionEnd}>
-          <ForumBoardGroupsList forumBoardId={forumBoardId} forumBoardGroup={forumBoardGroup}/>
-          <RootDiscussionList forumBoardId={forumBoardId} forumBoardGroup={forumBoardGroup}/>
+          onTransitionEnd={this.handleTransitionEnd}
+        >
+          <ForumBoardGroupsList
+            forumBoardId={forumBoardId}
+            forumBoardGroup={forumBoardGroup}
+          />
+          <RootDiscussionList
+            forumBoardId={forumBoardId}
+            forumBoardGroup={forumBoardGroup}
+          />
           <RootWikiGroupTreeList
             forumBoardId={forumBoardId}
             rootWikiId={rootWikiId}
-            queryRootWikiGroupTree={rootWikiGroupTree}/>
-          <RootWikiDetailOrWikiList rootWikiId={rootWikiId} rootWikiGroupTree={rootWikiGroupTree}/>
+            queryRootWikiGroupTree={rootWikiGroupTree}
+          />
+          <RootWikiDetailOrWikiList
+            rootWikiId={rootWikiId}
+            rootWikiGroupTree={rootWikiGroupTree}
+          />
         </EnhancedSwipeableViews>
-        <AddButton {...addButtonProps}/>
+        <AddButton {...addButtonProps} />
       </div>
     );
   }

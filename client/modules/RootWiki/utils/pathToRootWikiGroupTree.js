@@ -1,14 +1,14 @@
-import car from 'lodash/first';
-import cdr from 'lodash/tail';
+import car from "lodash/first";
+import cdr from "lodash/tail";
 
 export function pathToRootWikiGroupTreeIter(path = [], depth = 0) {
   if (path.length === 1) {
     const name = car(path);
-    return {name};
+    return { name };
   } else if (path.length > 1) {
     const name = car(path);
     const children = [pathToRootWikiGroupTreeIter(cdr(path), depth + 1)];
-    return {name, children};
+    return { name, children };
   } else {
     return null;
   }
@@ -18,7 +18,12 @@ export default function pathToRootWikiGroupTree(path = []) {
   return [pathToRootWikiGroupTreeIter(path, 0)];
 }
 
-export function pathToRootWikiGroupTree2(path, pathEndIsLeaf = true, result = {}, depth = 0) {
+export function pathToRootWikiGroupTree2(
+  path,
+  pathEndIsLeaf = true,
+  result = {},
+  depth = 0
+) {
   if (depth >= 3) {
     // throw error ?
   }
@@ -27,7 +32,7 @@ export function pathToRootWikiGroupTree2(path, pathEndIsLeaf = true, result = {}
     if (pathEndIsLeaf) {
       return k;
     } else {
-      return {[k]: '1'};
+      return { [k]: "1" };
     }
   } else if (path.length > 1) {
     const k = car(path);

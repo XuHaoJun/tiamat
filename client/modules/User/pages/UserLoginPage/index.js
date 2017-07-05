@@ -1,6 +1,4 @@
-import UserLoginPage from './UserLoginPage';
-import LoginForm from './LoginForm';
+import UserLoginPage from "./UserLoginPage";
+import LoginForm from "./LoginForm";
 
-export LoginForm;
-
-export default UserLoginPage;
+export { UserLoginPage as default, LoginForm };

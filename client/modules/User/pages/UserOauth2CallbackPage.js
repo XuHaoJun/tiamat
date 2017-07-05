@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
 class UserOauth2CallbackPage extends Component {
   static contextTypes = {
@@ -9,7 +9,7 @@ class UserOauth2CallbackPage extends Component {
 
   componentDidMount() {
     const router = this.context.router;
-    router.replace('/');
+    router.replace("/");
   }
 
   shouldComponentUpdate() {
@@ -17,14 +17,12 @@ class UserOauth2CallbackPage extends Component {
   }
 
   render() {
-    return (
-      <div>Redirecting....</div>
-    );
+    return <div>Redirecting....</div>;
   }
 }
 
 function mapStateToProps(state, props) {
-  return {state, props};
+  return { state, props };
 }
 
 export default connect(mapStateToProps)(UserOauth2CallbackPage);

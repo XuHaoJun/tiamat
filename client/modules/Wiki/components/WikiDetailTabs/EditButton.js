@@ -1,8 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import CreateIcon from 'material-ui/svg-icons/content/create';
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import Portal from 'react-portal-minimal';
+import React from "react";
+import PropTypes from "prop-types";
+import CreateIcon from "material-ui/svg-icons/content/create";
+import FloatingActionButton from "material-ui/FloatingActionButton";
+import Portal from "react-portal-minimal";
 
 class EditButton extends React.PureComponent {
   static propTypes = {
@@ -18,40 +18,33 @@ class EditButton extends React.PureComponent {
 
   static defaultProps = {
     isOpened: true,
-    iconType: 'create',
-    href: '',
+    iconType: "create",
+    href: "",
     onTouchTap: () => {},
     onClick: () => {}
-  }
+  };
 
-  onTouchTap = (e) => {
+  onTouchTap = e => {
     if (e.nativeEvent.which === 3 || !this.props.href) {
       return;
     }
-    this
-      .context
-      .router
-      .push(this.props.href);
+    this.context.router.push(this.props.href);
     e.preventDefault();
     if (this.props.onTouchTap) {
-      this
-        .props
-        .onTouchTap(e);
+      this.props.onTouchTap(e);
     }
-  }
+  };
 
-  onClick = (e) => {
+  onClick = e => {
     e.preventDefault();
     if (this.props.onClick) {
-      this
-        .props
-        .onClick(e);
+      this.props.onClick(e);
     }
-  }
+  };
 
-  setPortalRef = (v) => {
+  setPortalRef = v => {
     this.portal = v;
-  }
+  };
 
   render() {
     const {
@@ -64,7 +57,7 @@ class EditButton extends React.PureComponent {
       ...other
     } = this.props;
     const _style = {
-      position: 'fixed',
+      position: "fixed",
       bottom: 20,
       right: 20
     };
@@ -76,8 +69,9 @@ class EditButton extends React.PureComponent {
           style={finalStyle}
           href={href}
           onTouchTap={this.onTouchTap}
-          onClick={this.onClick}>
-          <CreateIcon/>
+          onClick={this.onClick}
+        >
+          <CreateIcon />
         </FloatingActionButton>
       </Portal>
     );

@@ -1,11 +1,14 @@
-import Immutable from 'immutable';
+import Immutable from "immutable";
 // Import Actions
-import {SET_HEADER_TITLE, UPDATE_APP_BAR_SEND_BUTTON_PROPS} from './MyAppActions';
+import {
+  SET_HEADER_TITLE,
+  UPDATE_APP_BAR_SEND_BUTTON_PROPS
+} from "./MyAppActions";
 
 // Initial State
 const initialState = Immutable.fromJS({
   ui: {
-    headerTitle: 'Tiamat',
+    headerTitle: "Tiamat",
     styles: {
       body: {
         backgroundColor: null
@@ -24,17 +27,13 @@ const initialState = Immutable.fromJS({
 const AppReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_HEADER_TITLE:
-      return state.setIn([
-        'ui', 'headerTitle'
-      ], action.headerTitle);
+      return state.setIn(["ui", "headerTitle"], action.headerTitle);
     case UPDATE_APP_BAR_SEND_BUTTON_PROPS:
       let newState = state;
       for (const key in action.props) {
         if ({}.hasOwnProperty.call(action.props, key)) {
           const prop = action.props[key];
-          newState = newState.setIn([
-            'ui', 'sendButton', key
-          ], prop);
+          newState = newState.setIn(["ui", "sendButton", key], prop);
         }
       }
       return newState;
@@ -46,9 +45,7 @@ const AppReducer = (state = initialState, action) => {
 /* Selectors */
 
 // get headerTitle
-export const getUI = state => state
-  .app
-  .get('ui');
+export const getUI = state => state.app.get("ui");
 
 // Export Reducer
 export default AppReducer;

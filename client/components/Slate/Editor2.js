@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   SlateEditor,
   SlateToolbar,
@@ -6,18 +6,17 @@ import {
   BoldPlugin,
   BoldButton,
   GridPlugin
-} from 'slate-editor';
+} from "slate-editor";
 
 const plugins = [BoldPlugin()];
 
-const SlateRichTextEditor = () => (
+const SlateRichTextEditor = () =>
   <SlateEditor plugins={plugins}>
     <SlateToolbar>
-      <BoldButton/>
+      <BoldButton />
     </SlateToolbar>
 
-    <SlateContent/>
-  </SlateEditor>
-);
+    <SlateContent />
+  </SlateEditor>;
 
 export default SlateRichTextEditor;

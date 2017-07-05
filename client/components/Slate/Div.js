@@ -1,10 +1,12 @@
-import React from 'react';
+import React from "react";
 
 class Div extends React.PureComponent {
   render() {
     const props = this.props;
     return (
-      <div {...props}>{props.children}</div>
+      <div {...props}>
+        {props.children}
+      </div>
     );
   }
 }

@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
+import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate";
 
 const Schema = mongoose.Schema;
 
@@ -13,15 +13,20 @@ const wikiSchema = new Schema({
   // rootParent: { type: Schema.Types.ObjectId, default: null },
   // forumBoard: { type: Schema.Types.ObjectId, ref: 'ForumBoard', required: true}
   isNickName: { type: Boolean, default: false },
-  rootWiki: { type: Schema.Types.ObjectId, ref: 'RootWiki', required: true, index: true },
+  rootWiki: {
+    type: Schema.Types.ObjectId,
+    ref: "RootWiki",
+    required: true,
+    index: true
+  },
   rootWikiGroupTree: { type: Schema.Types.Mixed },
-  tags: { type: [String], default: [], index: true},
+  tags: { type: [String], default: [], index: true },
   popularityCounter: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
-wikiSchema.index({name: 1, rootWiki: 1}, {unique: true});
+wikiSchema.index({ name: 1, rootWiki: 1 }, { unique: true });
 
 // TODO
 // dynamic create index of rootWikiGroupTree
@@ -40,8 +45,8 @@ wikiSchema.index({name: 1, rootWiki: 1}, {unique: true});
 // }
 // wikiSchema.index({rootWikiGroupTree: 1, rootWiki: 1});
 
-wikiSchema.index({tags: 1, rootWiki: 1});
+wikiSchema.index({ tags: 1, rootWiki: 1 });
 
 wikiSchema.plugin(mongoosePaginate);
 
-export default mongoose.model('Wiki', wikiSchema);
+export default mongoose.model("Wiki", wikiSchema);
