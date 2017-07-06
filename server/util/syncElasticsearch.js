@@ -1,5 +1,6 @@
 import Discussion from "../models/discussion";
 import ForumBoard from "../models/forumBoard";
+import * as Debug from "debug";
 
 export default function syncElasticsearch() {
   const models = [ForumBoard, Discussion];
@@ -13,20 +14,21 @@ export default function syncElasticsearch() {
         }
       }
     };
+    const debug = Debug("app:elasticsearch");
     M.createMapping(settings, err => {
       if (err) {
-        console.log(err);
+        debug(err);
       } else {
         const stream = M.synchronize();
         let count = 0;
-        stream.on("data", function(err, doc) {
+        stream.on("data", (err, doc) => {
           count += 1;
         });
-        stream.on("close", function() {
-          console.log("indexed " + count + " documents!");
+        stream.on("close", () => {
+          debug(`indexed ${count} documents!`);
         });
-        stream.on("error", function(err) {
-          console.log(err);
+        stream.on("error", err => {
+          debug(err);
         });
       }
     });

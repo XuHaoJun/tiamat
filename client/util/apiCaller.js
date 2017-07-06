@@ -1,10 +1,9 @@
 import axios from "axios";
-import Config from "../../server/configs/server";
+import { port } from "../../server/configs/server";
 
 export const API_URL =
   typeof window === "undefined" || process.env.NODE_ENV === "test"
-    ? process.env.BASE_URL ||
-      `http://localhost:${process.env.PORT || Config.port}/api`
+    ? process.env.BASE_URL || `http://localhost:${process.env.PORT || port}/api`
     : "/api";
 
 // in server-side call this skip error for no crush when not handle rejection.

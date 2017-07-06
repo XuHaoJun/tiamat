@@ -8,7 +8,7 @@ import serializeJavascript from "serialize-javascript";
 import http from "http";
 import socketIO from "socket.io";
 import Promise from "bluebird";
-import * as Debug from "debug";
+import Debug from "debug";
 import IntlWrapper from "../client/modules/Intl/IntlWrapper";
 import { setUserAgent } from "../client/modules/UserAgent/UserAgentActions";
 import { setOauth2Client } from "../client/modules/Oauth2Client/Oauth2ClientActions";

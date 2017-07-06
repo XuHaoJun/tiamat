@@ -1,10 +1,8 @@
-export const port = process.env.PORT || 8000;
-
-export const callbackURLPrefix = "https://yoursite.com";
-
 const serverConfig = {
-  port,
-  callbackURLPrefix
+  port: process.env.PORT || 8000,
+  callbackURLPrefix: "https://yoursite.com"
 };
 
-export default serverConfig;
+const { port, callbackURLPrefix } = serverConfig;
+
+export { serverConfig as default, port, callbackURLPrefix };

@@ -3,7 +3,7 @@ import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { fromJS, is, Map, List } from "immutable";
 import isUrl from "is-url";
 import isImage from "is-image";
-import Slate, { Raw, Block, Inline, Text, Selection } from "slate";
+import Slate, { Raw, Block } from "slate";
 import memoize from "fast-memoize";
 import Portal from "react-portal-minimal";
 import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
@@ -20,9 +20,11 @@ import { addImage } from "../../modules/Image/ImageActions";
 import { addError } from "../../modules/Error/ErrorActions";
 import Div from "./Div";
 
-const DEFAULT_NODE = "paragraph";
+import Debug from "debug";
 
-const stateJson = require("./state.json");
+const debug = Debug("app:editor");
+
+const DEFAULT_NODE = "paragraph";
 
 const emptyContent = fromJS(emptyContnetJSON);
 
@@ -216,14 +218,14 @@ class Editor extends React.Component {
       state = state.transform().unwrapInline("link").apply();
     } else if (state.isExpanded) {
       const href = window.prompt("Enter the URL of the link:");
-      console.log("data.text", href);
+      debug("onClickLink", "data.text", href);
       const inlineProps = {
         type: "link",
         data: {
           href: normalizeHref(href)
         }
       };
-      console.log("href", inlineProps.data.href);
+      debug("onClickLink", "href", inlineProps.data.href);
       state = state
         .transform()
         .wrapInline(inlineProps)
@@ -608,7 +610,7 @@ class Editor extends React.Component {
 
   logState = () => {
     const content = JSON.stringify(Raw.serialize(this.state.state), null, 2);
-    console.log(content);
+    debug("logState", content);
   };
 
   handleToggleReadOnly = () => {
@@ -624,7 +626,7 @@ class Editor extends React.Component {
   };
 
   handleOpen = () => {
-    console.log("open");
+    debug("open");
   };
 
   getSlate = () => {
@@ -739,8 +741,8 @@ class Editor extends React.Component {
             transform.unwrapInline("link");
           }
           const href = normalizeHref(data.text);
-          console.log("data.text", data.text);
-          console.log("href", href);
+          debug("data.text", data.text);
+          debug("onPaste", "href", href);
           const linkProp = {
             type: "link",
             data: {
