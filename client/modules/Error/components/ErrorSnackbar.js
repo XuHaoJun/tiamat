@@ -5,6 +5,15 @@ import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { getLastError } from "../ErrorReducer";
 
+export function getStyles() {
+  const styles = {
+    snackbarBody: {
+      backgroundColor: "rgba(100, 0, 0, 0.87)"
+    }
+  };
+  return styles;
+}
+
 class ErrorSnackbar extends React.PureComponent {
   static defaultProps = {
     error: null
@@ -29,9 +38,10 @@ class ErrorSnackbar extends React.PureComponent {
   };
 
   render() {
+    const styles = getStyles();
     const { error } = this.props;
     const { open } = this.state;
-    let message = "";
+    let message;
     if (typeof error === "string") {
       message = error;
     } else if (Map.isMap(error)) {
@@ -40,12 +50,12 @@ class ErrorSnackbar extends React.PureComponent {
         error.get("errmsg") ||
         error.get("msg") ||
         error.get("name");
+    } else {
+      message = "";
     }
     return (
       <Snackbar
-        bodyStyle={{
-          backgroundColor: "rgba(100, 0, 0, 0.87)"
-        }}
+        bodyStyle={styles.snackbarBody}
         open={message ? open : false}
         message={message}
         autoHideDuration={3333}
