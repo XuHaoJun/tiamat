@@ -39,7 +39,7 @@ class SettingDetailPage extends React.PureComponent {
   }
 }
 
-function mapStateToProps(store, props) {
+function mapStateToProps(store, routerProps) {
   return {};
 }
 

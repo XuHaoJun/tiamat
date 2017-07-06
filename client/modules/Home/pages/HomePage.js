@@ -91,8 +91,9 @@ HomePage.need = [].concat(() => {
   return fetchForumBoards();
 });
 
-function mapStateToProps(state, props) {
-  const location = state.routing.locationBeforeTransitions || props.location;
+function mapStateToProps(state, routerProps) {
+  const location =
+    state.routing.locationBeforeTransitions || routerProps.location;
   const browser = state.browser;
   const slideIndex = Number.parseInt(location.query.slideIndex, 10) || 0;
   return { browser, location, slideIndex };

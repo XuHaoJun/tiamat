@@ -89,7 +89,7 @@ class CreateForumBoardPage extends React.PureComponent {
   }
 }
 
-function mapStateToProps(state, props) {
+function mapStateToProps(state, routerProps) {
   const browser = state.browser;
   return { browser };
 }

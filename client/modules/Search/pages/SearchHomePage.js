@@ -7,7 +7,7 @@ class SearchHomePage extends React.Component {
   }
 }
 
-function mapStateToProps(store, props) {
+function mapStateToProps(store, routerProps) {
   return {};
 }
 

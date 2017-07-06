@@ -260,15 +260,17 @@ const parseRootWikiGroupTree = memoize(queryString => {
   return fromJS(rootWikiGroupTree);
 });
 
-function mapStateToProps(store, props) {
-  const { forumBoardGroup } = props.location.query;
+function mapStateToProps(store, routerProps) {
+  const { forumBoardGroup } = routerProps.location.query;
   const rootWikiGroupTree = parseRootWikiGroupTree(
-    props.location.search.length > 0 ? props.location.search.slice(1) : ""
+    routerProps.location.search.length > 0
+      ? routerProps.location.search.slice(1)
+      : ""
   );
-  const isWikis = props.location.pathname.split("/").pop() === "wikis";
+  const isWikis = routerProps.location.pathname.split("/").pop() === "wikis";
   const isRootDiscussions =
-    props.location.pathname.split("/").pop() === "rootDiscussions";
-  let { forumBoardId, rootWikiId } = props.params;
+    routerProps.location.pathname.split("/").pop() === "rootDiscussions";
+  let { forumBoardId, rootWikiId } = routerProps.params;
   let forumBoard = getForumBoardById(store, forumBoardId);
   if (!rootWikiId && forumBoard) {
     rootWikiId = forumBoard.get("rootWiki");
@@ -288,8 +290,8 @@ function mapStateToProps(store, props) {
     forumBoardId: 1,
     rootWikiId: 3
   };
-  for (const key in props.params) {
-    if ({}.hasOwnProperty.call(props.params, key)) {
+  for (const key in routerProps.params) {
+    if ({}.hasOwnProperty.call(routerProps.params, key)) {
       slideIndex = slideIndexMapping[key];
     }
   }

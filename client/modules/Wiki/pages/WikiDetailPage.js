@@ -80,9 +80,9 @@ WikiDetailPage.need = []
     return rootWikiId ? fetchRootWikiById(rootWikiId) : emptyThunkAction;
   });
 
-function mapStateToProps(store, props) {
-  const { wikiId, rootWikiId } = props.params;
-  let { enableEdit } = props.location.query;
+function mapStateToProps(store, routerProps) {
+  const { wikiId, rootWikiId } = routerProps.params;
+  let { enableEdit } = routerProps.location.query;
   enableEdit = enableEdit === true;
   const wiki = getWiki(store, wikiId);
   const rootWiki = getRootWiki(store, rootWikiId);

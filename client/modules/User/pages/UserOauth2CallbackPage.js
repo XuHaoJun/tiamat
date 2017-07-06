@@ -21,8 +21,8 @@ class UserOauth2CallbackPage extends Component {
   }
 }
 
-function mapStateToProps(state, props) {
-  return { state, props };
+function mapStateToProps(state, routerProps) {
+  return { state, routerProps };
 }
 
 export default connect(mapStateToProps)(UserOauth2CallbackPage);

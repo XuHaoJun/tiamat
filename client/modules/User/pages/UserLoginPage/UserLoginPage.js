@@ -68,10 +68,11 @@ class UserLoginPage extends Component {
   }
 }
 
-function mapStateToProps(state, props) {
+function mapStateToProps(state, routerProps) {
   const currentUser = getCurrentUser(state);
   const browser = state.browser;
-  const location = state.routing.locationBeforeTransitions || props.location;
+  const location =
+    state.routing.locationBeforeTransitions || routerProps.location;
   return { currentUser, browser, location };
 }
 
