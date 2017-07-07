@@ -4,6 +4,7 @@
   "description": "Tiamat - a modern mobile gaming forum.",
   "scripts": {
     "test": "cross-env NODE_ENV=test PORT=8080 MONGO_URL=mongodb://localhost:27017/mern-test node_modules/.bin/nyc node --harmony-proxies node_modules/.bin/ava",
+    "_test": "echo disable test",
     "watch:test": "npm run test -- --watch",
     "cover": "nyc npm run test",
     "check-coverage": "nyc check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
@@ -24,6 +25,9 @@
     "format": "npm run prettier:write",
     "publish:heroku": "git rebase master heroku && git push --force heroku heroku:master",
     "heroku-postbuild": "npm run build"
+  },
+  "pre-commit": {
+    "run": ["_test"]
   },
   "engines": {
     "node": "8.1.3",
