@@ -24,7 +24,7 @@ function initDebug() {
   if (window.localStorage) {
     if (process.env.DEBUG) {
       localStorage.setItem("debug", process.env.DEBUG);
-      debug(`init env DEBUG: ${process.env.DEBUG}`)
+      debug(`init env DEBUG: ${process.env.DEBUG}`);
     } else {
       localStorage.removeItem("debug");
     }
@@ -110,7 +110,7 @@ render(
 
 // For hot reloading of react components
 if (module.hot) {
-  debug("start hot reload!")
+  debug("start hot reload!");
   module.hot.accept("./App", () => {
     // If you use Webpack 2 in ES modules mode, you can use <App /> here rather than require() a
     // <NextApp />.
@@ -122,7 +122,7 @@ if (module.hot) {
       mountApp
     );
   });
-  debug("end hot reload!")
+  debug("end hot reload!");
 }
 
 debug("Application started");
