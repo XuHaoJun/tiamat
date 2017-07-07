@@ -113,7 +113,7 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env': {
         CLIENT: JSON.stringify(true),
-        DEBUG: JSON.stringify(process.env.DEBUG) || "app:*",
+        DEBUG: JSON.stringify(process.env.DEBUG || "app:*"),
         'NODE_ENV': JSON.stringify('development')
       }
     }),
