@@ -48,12 +48,16 @@ export default (
     <Route
       path="/setting"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/Setting/pages/SettingDetailPage").default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/Setting/pages/SettingDetailPage").default
+            );
+          },
+          "SettingDetailPage"
+        );
       }}
     />
     <Route
@@ -67,9 +71,13 @@ export default (
     <Route
       path="/rootWikis/:rootWikiId/wikis/:wikiId"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./modules/Wiki/pages/WikiDetailPage").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./modules/Wiki/pages/WikiDetailPage").default);
+          },
+          "WikiDetailPage"
+        );
       }}
     />
     <Route path="/rootWikis/:rootWikiId/wikis" component={MixedMainPage} />
@@ -77,133 +85,190 @@ export default (
     <Route
       path="/edit/rootWikis/:rootWikiId/rootWikiGroupTree"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/RootWiki/pages/EditRootWikiGroupTreePage")
-              .default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/RootWiki/pages/EditRootWikiGroupTreePage")
+                .default
+            );
+          },
+          "EditRootWikiGroupTreePage"
+        );
       }}
     />
     <Route
       path="/create/forumBoards/:forumBoardId/rootDiscussion"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/Discussion/pages/CreateRootDiscussionPage")
-              .default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/Discussion/pages/CreateRootDiscussionPage")
+                .default
+            );
+          },
+          "CreateRootDiscussionPage"
+        );
       }}
     />
     <Route
       path="/create/forumBoard"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/ForumBoard/pages/CreateForumBoardPage").default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/ForumBoard/pages/CreateForumBoardPage").default
+            );
+          },
+          "CreateForumBoardPage"
+        );
       }}
     />
     <Route
       path="/create/forumBoards/:forumBoardId/rootWiki"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/RootWiki/pages/CreateRootWikiPage").default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/RootWiki/pages/CreateRootWikiPage").default
+            );
+          },
+          "CreateRootWikiPage"
+        );
       }}
     />
     <Route
       path="/create/forumBoards/:forumBoardId/rootWikis/:rootWikiId/wiki"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./modules/Wiki/pages/CreateWikiPage").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./modules/Wiki/pages/CreateWikiPage").default);
+          },
+          "CreateWikiPage"
+        );
       }}
     />
     <Route
       path="/testEditor3"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./components/Slate/Editor2").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./components/Slate/Editor2").default);
+          },
+          "testEditor3"
+        );
       }}
     />
     <Route
       path="/testEditor2"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./components/Slate/Editor").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./components/Slate/Editor").default);
+          },
+          "testEditor2"
+        );
       }}
     />
     <Route
       path="/testEditor"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./components/Editor/Editor").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./components/Editor/Editor").default);
+          },
+          "testEditor"
+        );
       }}
     />
     <Route
       path="/signup"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./modules/User/pages/UserSignUpPage").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./modules/User/pages/UserSignUpPage").default);
+          },
+          "UserSignUpPage"
+        );
       }}
     />
     <Route
       path="/login"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/User/pages/UserLoginPage/UserLoginPage").default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/User/pages/UserLoginPage/UserLoginPage")
+                .default
+            );
+          },
+          "UserLoginPage"
+        );
       }}
     />
     <Route
       path="/api/oauth2/:providerName/callback"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(
-            null,
-            require("./modules/User/pages/UserOauth2CallbackPage").default
-          );
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(
+              null,
+              require("./modules/User/pages/UserOauth2CallbackPage").default
+            );
+          },
+          "UserOauth2CallbackPage"
+        );
       }}
     />
     <Route
       path="/search"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./modules/Search/pages/SearchHomePage").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./modules/Search/pages/SearchHomePage").default);
+          },
+          "SearchHomePage"
+        );
       }}
     />
     <Route
       path="/about"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./modules/About/pages/AboutPage").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./modules/About/pages/AboutPage").default);
+          },
+          "AboutPage"
+        );
       }}
     />
     <Route
       path="*"
       getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require("./modules/Error/pages/NotFoundPage").default);
-        });
+        require.ensure(
+          [],
+          require => {
+            cb(null, require("./modules/Error/pages/NotFoundPage").default);
+          },
+          "NotFoundPage"
+        );
       }}
     />
   </Route>
