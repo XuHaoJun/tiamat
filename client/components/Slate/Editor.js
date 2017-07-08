@@ -2,7 +2,6 @@ import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { fromJS, is, Map, List } from "immutable";
 import isUrl from "is-url";
-import isImage from "is-image";
 import Slate, { Raw, Block } from "slate";
 import memoize from "fast-memoize";
 import Portal from "react-portal-minimal";
@@ -711,18 +710,6 @@ class Editor extends React.Component {
     return state.transform().insertBlock(imageBlock).apply();
   };
 
-  onPasteText = (e, data, state) => {
-    const { text } = data;
-    if (isUrl(text)) {
-      // TODO insertUrl
-      return undefined;
-    } else if (isImage(text)) {
-      return this.insertImage(state, text);
-    } else {
-      return undefined;
-    }
-  };
-
   onPaste = (e, data, state, editor) => {
     if (data.isShift) {
       return undefined;
@@ -732,8 +719,6 @@ class Editor extends React.Component {
         return state.transform().insertFragment(document).apply();
       } else if (data.type === "files") {
         return this.onDropOrPasteFiles(e, data, state, editor);
-      } else if (isImage(data.text)) {
-        return this.insertImage(state, data.text);
       } else if (isUrl(data.text)) {
         if (state.isCollapsed) {
           const transform = state.transform();
