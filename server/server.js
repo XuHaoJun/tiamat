@@ -101,13 +101,14 @@ app.use(bodyParser.urlencoded({ limit: "20mb", extended: false }));
 app.use(Express.static(path.resolve(__dirname, "../dist")));
 app.use(Express.static(path.resolve(__dirname, "../assets")));
 app.use(passport.initialize());
+const hotModuleDebug = Debug("app:hotModule");
 if (module.hot) {
   module.hot.accept(["./apiRoutes", "../client/routes"], () => {
-    console.log("🔁  HMR Reloading `./app`..."); // eslint-disable-line
+  hotModuleDebug("🔁  HMR Reloading `./app`..."); // eslint-disable-line
   });
-  console.info("✅  Server-side HMR Enabled!"); // eslint-disable-line
+  hotModuleDebug("✅  Server-side HMR Enabled!"); // eslint-disable-line
 } else {
-  console.info("❌  Server-side HMR Not Supported."); // eslint-disable-line
+  hotModuleDebug("❌  Server-side HMR Not Supported."); // eslint-disable-line
 }
 app.use("/api", (req, res) => apiRoutes.handle(req, res));
 
