@@ -55,9 +55,7 @@ class WikiContent extends React.Component {
         <div style={styles.rootWikiGroupTree}>
           <RootWikiGroupTreeNavLinks {...rootWikiGroupTreeNavLinksProps} />
         </div>
-        <h1 style={styles.name}>
-          {name}
-        </h1>
+        <h1 style={styles.name}>{name}</h1>
         <Editor rawContent={content} readOnly={true} />
       </div>
     );

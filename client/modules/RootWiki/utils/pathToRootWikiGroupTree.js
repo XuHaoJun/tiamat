@@ -14,11 +14,11 @@ export function pathToRootWikiGroupTreeIter(path = [], depth = 0) {
   }
 }
 
-export default function pathToRootWikiGroupTree(path = []) {
+export default function pathToRootWikiGroupTree2(path = []) {
   return [pathToRootWikiGroupTreeIter(path, 0)];
 }
 
-export function pathToRootWikiGroupTree2(
+export function pathToRootWikiGroupTree(
   path,
   pathEndIsLeaf = true,
   result = {},

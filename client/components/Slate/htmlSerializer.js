@@ -1,4 +1,9 @@
-import { Html } from "slate";
+import Html from "slate-html-serializer";
+import { Editor, getEventTransfer } from "slate-react";
+import { State } from "slate";
+
+import React from "react";
+import initialState from "./state.json";
 
 /**
  * Tags to blocks.
@@ -44,53 +49,204 @@ const MARK_TAGS = {
 const RULES = [
   {
     deserialize(el, next) {
-      const block = BLOCK_TAGS[el.tagName];
+      const block = BLOCK_TAGS[el.tagName.toLowerCase()];
       if (!block) return;
       return {
         kind: "block",
         type: block,
-        nodes: next(el.children)
+        nodes: next(el.childNodes)
       };
     }
   },
   {
     deserialize(el, next) {
-      const mark = MARK_TAGS[el.tagName];
+      const mark = MARK_TAGS[el.tagName.toLowerCase()];
       if (!mark) return;
       return {
         kind: "mark",
         type: mark,
-        nodes: next(el.children)
+        nodes: next(el.childNodes)
       };
     }
   },
   {
-    // Special case for code blocks, which need to grab the nested children.
+    // Special case for code blocks, which need to grab the nested childNodes.
     deserialize(el, next) {
-      if (el.tagName != "pre") return;
-      const code = el.children[0];
-      const children =
-        code && code.tagName == "code" ? code.children : el.children;
+      if (el.tagName.toLowerCase() != "pre") return;
+      const code = el.childNodes[0];
+      const childNodes =
+        code && code.tagName.toLowerCase() == "code"
+          ? code.childNodes
+          : el.childNodes;
 
-      return { kind: "block", type: "code", nodes: next(children) };
+      return {
+        kind: "block",
+        type: "code",
+        nodes: next(childNodes)
+      };
     }
   },
   {
     // Special case for links, to grab their href.
     deserialize(el, next) {
-      if (el.tagName != "a") return;
+      if (el.tagName.toLowerCase() != "a") return;
       return {
         kind: "inline",
         type: "link",
-        nodes: next(el.children),
+        nodes: next(el.childNodes),
         data: {
-          href: el.attribs.href
+          href: el.getAttribute("href")
         }
       };
     }
   }
 ];
 
+/**
+ * Create a new HTML serializer with `RULES`.
+ *
+ * @type {Html}
+ */
+
 const serializer = new Html({ rules: RULES });
 
-export default serializer;
+/**
+ * The pasting html example.
+ *
+ * @type {Component}
+ */
+
+class PasteHtml extends React.Component {
+  /**
+   * Deserialize the raw initial state.
+   *
+   * @type {Object}
+   */
+
+  state = {
+    state: State.fromJSON(initialState)
+  };
+
+  /**
+   * On change, save the new state.
+   *
+   * @param {Change} change
+   */
+
+  onChange = ({ state }) => {
+    this.setState({ state });
+  };
+
+  /**
+   * On paste, deserialize the HTML and then insert the fragment.
+   *
+   * @param {Event} event
+   * @param {Change} change
+   */
+
+  onPaste = (event, change) => {
+    const transfer = getEventTransfer(event);
+    if (transfer.type != "html") return;
+    const { document } = serializer.deserialize(transfer.html);
+    change.insertFragment(document);
+    return true;
+  };
+
+  /**
+   * Render.
+   *
+   * @return {Component}
+   */
+
+  render() {
+    return (
+      <div className="editor">
+        <Editor
+          placeholder="Paste in some HTML..."
+          state={this.state.state}
+          onPaste={this.onPaste}
+          onChange={this.onChange}
+          renderNode={this.renderNode}
+          renderMark={this.renderMark}
+        />
+      </div>
+    );
+  }
+
+  /**
+   * Render a Slate node.
+   *
+   * @param {Object} props
+   * @return {Element}
+   */
+
+  renderNode = props => {
+    const { attributes, children, node } = props;
+    switch (node.type) {
+      case "quote":
+        return <blockquote {...attributes}>{children}</blockquote>;
+      case "code":
+        return (
+          <pre>
+            <code {...attributes}>{children}</code>
+          </pre>
+        );
+      case "bulleted-list":
+        return <ul {...attributes}>{children}</ul>;
+      case "heading-one":
+        return <h1 {...attributes}>{children}</h1>;
+      case "heading-two":
+        return <h2 {...attributes}>{children}</h2>;
+      case "heading-three":
+        return <h3 {...attributes}>{children}</h3>;
+      case "heading-four":
+        return <h4 {...attributes}>{children}</h4>;
+      case "heading-five":
+        return <h5 {...attributes}>{children}</h5>;
+      case "heading-six":
+        return <h6 {...attributes}>{children}</h6>;
+      case "list-item":
+        return <li {...attributes}>{children}</li>;
+      case "numbered-list":
+        return <ol {...attributes}>{children}</ol>;
+      case "link": {
+        const { data } = node;
+        const href = data.get("href");
+        return (
+          <a href={href} {...attributes}>
+            {children}
+          </a>
+        );
+      }
+    }
+  };
+
+  /**
+   * Render a Slate mark.
+   *
+   * @param {Object} props
+   * @return {Element}
+   */
+
+  renderMark = props => {
+    const { children, mark } = props;
+    switch (mark.type) {
+      case "bold":
+        return <strong>{children}</strong>;
+      case "code":
+        return <code>{children}</code>;
+      case "italic":
+        return <em>{children}</em>;
+      case "underlined":
+        return <u>{children}</u>;
+      default:
+        console.log("should never look this line.");
+    }
+  };
+}
+
+/**
+ * Export.
+ */
+
+export default PasteHtml;

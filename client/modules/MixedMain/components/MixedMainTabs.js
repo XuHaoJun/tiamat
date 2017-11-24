@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { Tabs, Tab } from "material-ui/Tabs";
+
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
 import RootDiscussionList from "../../Discussion/components/RootDiscussionList";
 import ForumBoardGroupsList from "../../ForumBoard/components/ForumBoardGroupsList";
@@ -16,6 +17,11 @@ export const ROOT_WIKI_GROUPS_SLIDE = 2;
 export const ROOT_WIKI_OR_WIKI_SLIDE = 3;
 
 class RootWikiDetailOrWikiList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+  }
+
   render() {
     const { rootWikiId, rootWikiGroupTree } = this.props;
     if (rootWikiGroupTree) {
@@ -38,14 +44,20 @@ export function getStyles(context, browser) {
       height: `calc(100vh - ${tabHeight + appBarHeight}px)`,
       WebkitOverflowScrolling: "touch"
     },
-    swipeableViews: {},
+    swipeableViews: {
+      paddingTop: tabHeight
+    },
     swipeableViewsWithMedium: {
       paddingTop: tabHeight
     },
-    tabs: {},
-    tabsWithMedium: {
-      zIndex: 1,
+    tabs: {
       position: "fixed",
+      zIndex: 1,
+      width: "calc(100% - 256px)"
+    },
+    tabsWithMedium: {
+      position: "fixed",
+      zIndex: 1,
       width: "100%"
     }
   };
@@ -93,7 +105,7 @@ class MixedMainTabs extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.state.slideIndex !== nextProps.slideIndex) {
-      const slideIndex = nextProps.slideIndex;
+      const { slideIndex } = nextProps;
       this.setState({ slideIndex });
     }
   }
@@ -142,7 +154,9 @@ class MixedMainTabs extends React.Component {
       href = `/create/forumBoards/${forumBoardId}/rootDiscussion${search}`;
     } else if (slideIndex === ROOT_WIKI_OR_WIKI_SLIDE) {
       if (rootWikiId && forumBoardId) {
-        href = `/create/forumBoards/${forumBoardId}/rootWikis/${rootWikiId}/wiki`;
+        href = `/create/forumBoards/${forumBoardId}/rootWikis/${
+          rootWikiId
+        }/wiki`;
       } else {
         href = `/create/forumBoards/${forumBoardId}/rootWiki`;
       }
@@ -165,10 +179,10 @@ class MixedMainTabs extends React.Component {
   };
 
   getAddButtonProps = (slideIndex, forumBoardGroup) => {
-    const isOpened = this.getAddButtonIsOpened(slideIndex);
+    const isOpen = this.getAddButtonIsOpened(slideIndex);
     const iconType = this.getAddButtonIconType(slideIndex);
     const href = this.getAddButtonHref(slideIndex, forumBoardGroup);
-    return { isOpened, iconType, href };
+    return { isOpen, iconType, href };
   };
 
   handleTransitionEnd = () => {
@@ -191,7 +205,7 @@ class MixedMainTabs extends React.Component {
 
   handleScroll = e => {
     const lastScrollTop = this.lastScrollTop[this.state.slideIndex];
-    const scrollTop = e.target.scrollTop;
+    const { scrollTop } = e.target;
     const lastScrollDirection = scrollTop > lastScrollTop ? "down" : "up";
     if (this.state.lastScrollDirection !== lastScrollDirection) {
       this.setState({ lastScrollDirection });

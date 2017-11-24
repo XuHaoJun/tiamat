@@ -34,7 +34,10 @@ export function searchDiscussions(req, res) {
   } else {
     highlight = false;
   }
-  const requestBody = bob.requestBodySearch().from(from).size(size);
+  const requestBody = bob
+    .requestBodySearch()
+    .from(from)
+    .size(size);
   if (highlight) {
     requestBody.highlight(
       (() => {
@@ -55,11 +58,14 @@ export function searchDiscussions(req, res) {
       .factor(1.5)
       .missing(0),
     bob
-      .fieldValueFactorFunction("discussionChildrenCount")
+      .fieldValueFactorFunction("childrenDiscussionCount")
       .modifier("log2p")
       .factor(1.1)
       .missing(0),
-    bob.decayScoreFunction("gauss", "repliedAt").offset("1d").scale("7d")
+    bob
+      .decayScoreFunction("gauss", "repliedAt")
+      .offset("1d")
+      .scale("7d")
   ]);
   functinoScoreQuery.minScore(minScore);
   functinoScoreQuery.query(

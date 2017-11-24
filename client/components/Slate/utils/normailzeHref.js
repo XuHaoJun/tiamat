@@ -2,7 +2,7 @@ import URL from "url";
 import isUrl from "is-url";
 import Debug from "debug";
 
-const debug = Debug("app:editor");
+const debug = Debug("app:editor:normalizeHref");
 
 function sameOriginReplace(href) {
   const url = URL.parse(href);
@@ -28,7 +28,7 @@ function sameOriginReplace(href) {
 }
 
 export default function normalizeHref(href) {
-  debug("normalizeHref", href);
+  debug(href);
   if (isUrl(href)) {
     debug("sameOriginReplace", sameOriginReplace(href));
     return sameOriginReplace(href);

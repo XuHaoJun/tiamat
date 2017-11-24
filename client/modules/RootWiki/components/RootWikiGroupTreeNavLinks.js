@@ -6,54 +6,62 @@ import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
 import getRootWikiHref from "../utils/getRootWikiHref";
 import getWikisHref from "../utils/getWikisHref";
 
-export function getRootWikiGroupTreeNavLinksHelper(
+function rootWikiGroupTreeToNavLinksHelper(
   rootWikiGroupTree,
+  getHrefFunc,
   path = [],
-  getHrefFunc = () => "",
-  hrefs = []
+  links = List(),
+  leaves = [],
+  depth = 0
 ) {
   if (Map.isMap(rootWikiGroupTree)) {
-    return rootWikiGroupTree
-      .map((node, k) => {
-        const finalPath = path.concat(k);
-        const href = getHrefFunc(pathToRootWikiGroupTree(finalPath, false));
-        const newHrefs = hrefs.concat([[k, href]]);
-        return getRootWikiGroupTreeNavLinksHelper(
-          node,
-          finalPath,
-          getHrefFunc,
-          newHrefs
-        );
-      })
-      .toList()
-      .flatten(1);
+    const name = rootWikiGroupTree.get("name");
+    const children = rootWikiGroupTree.get("children");
+    const nextPath = path.concat(name);
+    const href = getHrefFunc(pathToRootWikiGroupTree(nextPath));
+    const link = Map({ name, href });
+    const nextLinks = links.push(link);
+    if (children) {
+      return rootWikiGroupTreeToNavLinksHelper(
+        children,
+        getHrefFunc,
+        nextPath,
+        nextLinks,
+        leaves,
+        depth + 1
+      );
+    } else {
+      leaves.push(nextLinks);
+      return nextLinks;
+    }
   } else if (List.isList(rootWikiGroupTree)) {
-    return rootWikiGroupTree.map(leaf => {
-      const finalPath = path.concat(leaf);
-      const href = getHrefFunc(pathToRootWikiGroupTree(finalPath, true));
-      const newHrefs = hrefs.concat([[leaf, href]]);
-      return newHrefs;
+    rootWikiGroupTree.map(node => {
+      return rootWikiGroupTreeToNavLinksHelper(
+        node,
+        getHrefFunc,
+        path,
+        links,
+        leaves,
+        depth
+      );
     });
-  } else {
-    return null;
+    return List(leaves);
   }
+  return undefined;
 }
 
-export function getRootWikiGroupTreeNavLinks(
+function rootWikiGroupTreeToNavLinks(
   rootWikiGroupTree,
   getHrefFunc = () => ""
 ) {
-  return getRootWikiGroupTreeNavLinksHelper(
-    rootWikiGroupTree,
-    undefined,
-    getHrefFunc
-  ).toJS();
+  return rootWikiGroupTreeToNavLinksHelper(rootWikiGroupTree, getHrefFunc);
 }
 
 const delimeterStyle = {
   marginLeft: 5,
   marginRight: 5
 };
+
 const Delimeter = props => {
   const delimeter = props.delimeter || ">";
   return (
@@ -93,36 +101,42 @@ class RootWikiGroupTreeNavLinks extends React.Component {
       const href = this.getWikisHref("null");
       return <Link to={href}>未分類</Link>;
     }
-    // /forumBoards/:forumBoardId/rootWikis/:rootWikiId/wikis
-    const navLinks = getRootWikiGroupTreeNavLinks(
+    const navLinks = rootWikiGroupTreeToNavLinks(
       rootWikiGroupTree,
       this.getWikisHref
     );
     return (
       <span>
-        {navLinks.map((line, lineIndex) => {
-          const lineDOM = line.map(([name, href], index, array) => {
-            const link = (
-              <Link to={href} key={href}>
-                {name}
-              </Link>
-            );
-            let delimeter;
-            if (index + 1 === array.length) {
-              delimeter = null;
+        {navLinks
+          .map((line, lineIndex) => {
+            const lineDOM = line.map((node, index, array) => {
+              const href = node.get("href");
+              const name = node.get("name");
+              const key = `${lineIndex}/${href}`;
+              const link = (
+                <Link to={href} key={key}>
+                  {name}
+                </Link>
+              );
+              let delimeter;
+              if (index + 1 === array.count()) {
+                delimeter = null;
+              } else {
+                const dkey = `${lineIndex}/delimter/${href}`;
+                delimeter = <Delimeter key={dkey} />;
+              }
+              return [link, delimeter];
+            });
+            let _lineDOM;
+            if (lineIndex + 1 === navLinks.count()) {
+              _lineDOM = [lineDOM];
             } else {
-              delimeter = <Delimeter key={`delimter/${href}`} />;
+              const bkey = `${lineIndex}/br`;
+              _lineDOM = [lineDOM, <br key={bkey} />];
             }
-            return [link, delimeter];
-          });
-          let _lineDOM;
-          if (lineIndex + 1 === navLinks.length) {
-            _lineDOM = [lineDOM];
-          } else {
-            _lineDOM = [lineDOM, <br />];
-          }
-          return _lineDOM;
-        })}
+            return _lineDOM;
+          })
+          .toJSON()}
       </span>
     );
   }

@@ -4,12 +4,11 @@ import CircularProgress from "material-ui/CircularProgress";
 const CenterCircularProgress = () => {
   const styles = {
     container: {
-      marginTop: 25,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       height: "100%",
-      padding: 0,
+      padding: 20,
       margin: 0
     },
     progress: {

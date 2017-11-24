@@ -15,6 +15,7 @@ import WikiForm from "../WikiForm";
 export const WIKI_CONTENT_SLIDE = 0;
 export const WIKI_EDIT_SLIDE = 1;
 export const WIKI_HITSTORY_SLIDE = 2;
+export const WIKI_RELATED_DISCUSSION = 3;
 
 class WikiDetailTabs extends React.Component {
   static defaultProps = {
@@ -123,6 +124,7 @@ class WikiDetailTabs extends React.Component {
           <Tab label="閱讀" value={WIKI_CONTENT_SLIDE} />
           <Tab label="編輯" value={WIKI_EDIT_SLIDE} />
           <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE} />
+          <Tab label="相關文章" value={WIKI_RELATED_DISCUSSION} />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey={scrollKey}
@@ -135,6 +137,7 @@ class WikiDetailTabs extends React.Component {
           <WikiContent {...wikiContentProps} />
           <WikiForm {...wikiFormProps} />
           <div>檢視歷史(尚未完成)</div>
+          <div>相關文章(尚未完成)</div>
         </EnhancedSwipeableViews>
       </div>
     );

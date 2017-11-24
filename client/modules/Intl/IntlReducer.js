@@ -2,7 +2,7 @@ import { enabledLanguages, localizationData } from "../../../Intl/setup";
 import { SWITCH_LANGUAGE } from "./IntlActions";
 
 const initLocale =
-  (global.navigator && global.navigator.language) || "zh-Hant-TW" || "en";
+  (global.navigator && global.navigator.language) || "zh-tw" || "en";
 
 const initialState = {
   locale: initLocale,

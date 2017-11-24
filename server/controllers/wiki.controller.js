@@ -126,9 +126,7 @@ export function getWikis(req, res) {
   if (rootWikiGroupTree === "null") {
     query.rootWikiGroupTree = null;
   } else if (rootWikiGroupTree && rootWikiGroupTree !== "all") {
-    console.log("rootWikiGroupTree", JSON.stringify(rootWikiGroupTree));
     const q = rootWikiGroupTreeToMongoQuery(rootWikiGroupTree);
-    console.log("q", JSON.stringify(q));
     query = Object.assign(query, q);
   }
   Wiki.paginate(
@@ -150,7 +148,7 @@ export function getWikis(req, res) {
 
 export function addWiki(req, res) {
   const wikiForm = req.body.wiki;
-  const rootWikiId = wikiForm.rootWikiId;
+  const { rootWikiId } = wikiForm;
   const newWiki = new Wiki({
     name: wikiForm.name,
     content: wikiForm.content,

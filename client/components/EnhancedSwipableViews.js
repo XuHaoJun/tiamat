@@ -1,28 +1,24 @@
 import React from "react";
 import PropTypes from "prop-types";
-import memoize from "fast-memoize";
 import SwipeableViews from "@xuhaojun/react-swipeable-views";
 import ReactDOM from "react-dom";
 import warning from "warning";
-import { connect } from "react-redux";
-import { getUserAgent } from "../modules/UserAgent/UserAgentReducer";
-import MobileDetect from "mobile-detect";
 
 export class EnhancedSwipableViews extends React.Component {
   static propTypes = {
     disableOnDrawerStart: PropTypes.bool,
     resistance: PropTypes.bool,
     scrollKey: PropTypes.string,
-    onFirstRenderComplete: PropTypes.func,
     scrollBehaviorShouldUpdateScroll: PropTypes.func,
-    userAgent: PropTypes.string
+    userAgent: PropTypes.string,
+    disableLazyLoading: PropTypes.bool
   };
 
   static defaultProps = {
     disableOnDrawerStart: true,
+    disableLazyLoading: true,
     resistance: true,
     scrollKey: "",
-    onFirstRenderComplete: () => {},
     scrollBehaviorShouldUpdateScroll: undefined,
     userAgent: ""
   };
@@ -37,15 +33,12 @@ export class EnhancedSwipableViews extends React.Component {
     this.state = {
       disabled: false
     };
-    const getMobileDetect = memoize(userAgent => {
-      return new MobileDetect(userAgent);
-    });
-    this.getMobileDetect = getMobileDetect;
   }
 
   componentDidMount() {
     document.body.addEventListener("touchstart", this.onBodyTouchStart);
     document.body.addEventListener("touchend", this.onBodyTouchEnd);
+    this._scrollSpy();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -63,9 +56,20 @@ export class EnhancedSwipableViews extends React.Component {
     }
   }
 
+  onChangeIndex = (prevIndex, currentIndex) => {
+    if (prevIndex !== currentIndex) {
+      this._scrollSpy();
+    }
+    if (this.props.onChangeIndex) {
+      this.props.onChangeIndex(prevIndex, currentIndex);
+    }
+  };
+
   onBodyTouchStart = event => {
     if (this.props.disableOnDrawerStart && document) {
       const touchStartX = event.touches[0].pageX;
+      // FIXME
+      // remove magic number
       const appDrawerSwipAreaWidth = 30;
       if (
         touchStartX <= appDrawerSwipAreaWidth ||
@@ -80,9 +84,6 @@ export class EnhancedSwipableViews extends React.Component {
         }
       }
     }
-    if (this.props.onTouchStart) {
-      this.props.onTouchStart(event);
-    }
   };
 
   onBodyTouchEnd = event => {
@@ -91,19 +92,22 @@ export class EnhancedSwipableViews extends React.Component {
         this.setState({ disabled: false });
       }
     }
-    if (this.props.onTouchEnd) {
-      this.props.onTouchEnd(event);
-    }
   };
 
-  onFirstRenderComplete = () => {
+  setOriginalSwipableViewsRef = ori => {
+    this.originalSwipableViews = ori;
+  };
+
+  _scrollSpy = () => {
     const { scrollKey, animateHeight } = this.props;
-    if (scrollKey && !animateHeight) {
+    const { activeNode } = this.originalSwipableViews;
+    if (scrollKey && !animateHeight && activeNode) {
+      if (this._registed && this.scrollKey) {
+        this.context.scrollBehavior.unregisterElement(this._scrollKey);
+      }
       this._scrollKey = this.props.scrollKey;
       this._registed = true;
-      const targetScrollElement = ReactDOM.findDOMNode(
-        this.originalSwipableViews._activeSlide
-      );
+      const targetScrollElement = ReactDOM.findDOMNode(activeNode);
       let { scrollBehaviorShouldUpdateScroll } = this.props;
       scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior
         .shouldUpdateScroll;
@@ -113,45 +117,28 @@ export class EnhancedSwipableViews extends React.Component {
         scrollBehaviorShouldUpdateScroll
       );
     }
-    this.props.onFirstRenderComplete();
-  };
-
-  setOriginalSwipableViewsRef = ori => {
-    this.originalSwipableViews = ori;
   };
 
   render() {
     const {
       disableOnDrawerStart,
       scrollKey,
-      onFirstRenderComplete,
       resistance,
       dispatch,
       scrollBehaviorShouldUpdateScroll,
-      onTouchStart,
-      onTouchEnd,
       userAgent,
+      disableLazyLoading,
       ...other
     } = this.props;
-    const mobileDetect = this.getMobileDetect(userAgent);
-    // TODO workarund way for fix SwipableViews render nothing on first rendering, can't suit for google
-    // bot crawler. I didn't know why SwipableViews design to not render on first time....
-    if (mobileDetect.is("bot")) {
-      return (
-        <div>
-          {this.props.children}
-        </div>
-      );
-    }
+    const { disabled } = this.state;
     return (
       <SwipeableViews
         {...other}
         resistance={resistance}
-        onFirstRenderComplete={this.onFirstRenderComplete}
         ref={this.setOriginalSwipableViewsRef}
-        onTouchStart={this.onBodyTouchStart}
-        onTouchEnd={this.onBodyTouchEnd}
-        disabled={this.state.disabled}
+        disabled={disabled}
+        onChangeIndex={this.onChangeIndex}
+        disableLazyLoading={disableLazyLoading}
       >
         {this.props.children}
       </SwipeableViews>
@@ -159,8 +146,4 @@ export class EnhancedSwipableViews extends React.Component {
   }
 }
 
-function mapStateToProps(store) {
-  return { userAgent: getUserAgent(store) };
-}
-
-export default connect(mapStateToProps)(EnhancedSwipableViews);
+export default EnhancedSwipableViews;

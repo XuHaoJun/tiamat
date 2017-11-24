@@ -1,20 +1,28 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Scrollbars } from "react-custom-scrollbars";
-import Avatar from "material-ui/Avatar";
+import { Link } from "react-router";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { connect } from "react-redux";
 import Divider from "material-ui/Divider";
 import Subheader from "material-ui/Subheader";
 import { List, ListItem, makeSelectable } from "material-ui/List";
+import RaisedButton from "material-ui/RaisedButton";
 import ActionSettings from "material-ui/svg-icons/action/settings";
 import ActionHome from "material-ui/svg-icons/action/home";
 import ActionHelp from "material-ui/svg-icons/action/help";
 import GuestPersonIcon from "material-ui/svg-icons/social/person";
+import WatchIcon from "material-ui/svg-icons/image/remove-red-eye";
 import DiscussionIcon from "material-ui/svg-icons/communication/comment";
 import ForumBoardIcon from "material-ui/svg-icons/av/library-books";
 import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
 import AddIcon from "material-ui/svg-icons/content/add";
-import RaisedButton from "material-ui/RaisedButton";
-import { Link } from "react-router";
+
+import { getCurrentUser } from "../../User/UserReducer";
+import logOutRequestComposeEvent from "../../User/composes/logOutRequestComposeEvent";
+import UserAvatar from "../../User/components/UserAvatar";
+
+const LogOutListItem = logOutRequestComposeEvent(ListItem, "onClick");
 
 const SelectableList = makeSelectable(List);
 
@@ -23,7 +31,7 @@ export function getStyles(muiTheme) {
     whiteText: {
       color: "white"
     },
-    login: {
+    userPanel: {
       background: muiTheme.palette.primary2Color,
       width: "100%",
       maxWidth: "100%",
@@ -34,41 +42,74 @@ export function getStyles(muiTheme) {
   };
 }
 
-class NavList extends React.PureComponent {
+class NavList extends React.Component {
   static contextTypes = {
     muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
 
+  static propTypes = {
+    requestChangeNavDrawer: PropTypes.func,
+    user: PropTypes.object
+  };
+
+  static defaultProps = {
+    requestChangeNavDrawer: () => {},
+    user: null
+  };
+
+  constructor(props) {
+    super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+  }
+
   preventDefault = e => {
     e.preventDefault();
+  };
+
+  requestChangeNavDrawer = open => {
+    if (this.props.requestChangeNavDrawer) {
+      this.props.requestChangeNavDrawer(open);
+    }
   };
 
   handleTouchTap = (path, e) => {
     if (e.nativeEvent.which === 3) {
       return;
     }
-    this.props.onRequestChangeNavDrawer(false);
+    this.requestChangeNavDrawer(false);
     this.context.router.push(path);
   };
 
   render() {
     const styles = getStyles(this.context.muiTheme);
+    const { user, browser } = this.props;
+    const userPanel = (
+      <div style={styles.userPanel}>
+        <UserAvatar user={user} />
+        <div style={styles.whiteText}>
+          {user ? user.get("displayName") : "Guest"}
+        </div>
+        <div
+          style={{
+            marginTop: 10
+          }}
+        >
+          {!user ? (
+            <Link
+              to="/login"
+              href="/login"
+              onClick={this.requestChangeNavDrawer.bind(this, false)}
+            >
+              <RaisedButton label="登入" primary={true} />
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
     return (
       <Scrollbars universal={true} autoHide={true}>
-        <div style={styles.login}>
-          <Avatar icon={<GuestPersonIcon />} />
-          <div style={styles.whiteText}>Guest</div>
-          <div
-            style={{
-              marginTop: 10
-            }}
-          >
-            <Link to="/login">
-              <RaisedButton label="登入(尚未完成)" primary={true} />
-            </Link>
-          </div>
-        </div>
+        {browser.lessThan.medium ? userPanel : null}
         <SelectableList value={this.props.selectedIndex}>
           <ListItem
             primaryText="首頁"
@@ -81,6 +122,17 @@ class NavList extends React.PureComponent {
           <ListItem
             primaryText="我的文章(尚未完成)"
             leftIcon={<GuestPersonIcon />}
+            value="/users/guest/discussions"
+            href="/users/guest/discussions"
+            onClick={this.preventDefault}
+            onTouchTap={this.handleTouchTap.bind(
+              this,
+              "/users/guest/discussions"
+            )}
+          />
+          <ListItem
+            primaryText="我的訂閱(尚未完成)"
+            leftIcon={<WatchIcon />}
             value="/users/guest/discussions"
             href="/users/guest/discussions"
             onClick={this.preventDefault}
@@ -108,7 +160,7 @@ class NavList extends React.PureComponent {
             onTouchTap={this.handleTouchTap.bind(this, "/wikis")}
           />
           <Divider />
-          <Subheader>近期瀏覽</Subheader>
+          <Subheader>近期瀏覽(4個)尚未完成</Subheader>
           <ListItem
             primaryText="某個文章(尚未完成)"
             leftIcon={<DiscussionIcon />}
@@ -151,10 +203,24 @@ class NavList extends React.PureComponent {
             onClick={this.preventDefault}
             onTouchTap={this.handleTouchTap.bind(this, "/setting")}
           />
+          {user ? (
+            <LogOutListItem
+              primaryText="登出"
+              onClick={() => {
+                this.requestChangeNavDrawer(false);
+              }}
+            />
+          ) : null}
         </SelectableList>
       </Scrollbars>
     );
   }
 }
 
-export default NavList;
+function mapStateToProps(state) {
+  const user = getCurrentUser(state);
+  const { browser } = state;
+  return { user, browser };
+}
+
+export default connect(mapStateToProps)(NavList);

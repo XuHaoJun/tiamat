@@ -1,13 +1,28 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import Immutable, { Map, OrderedSet } from "immutable";
 import { List, ListItem, makeSelectable } from "material-ui/List";
-import Divider from "material-ui/Divider";
+import MaterialDivider from "material-ui/Divider";
 import CircularProgress from "material-ui/CircularProgress";
 import LazyLoad from "react-lazyload";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import memoize from "fast-memoize";
 import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
+import FlipMove from "react-flip-move";
+import RefreshIndicator from "material-ui/RefreshIndicator";
+
+import Debug from "debug";
+
+const debug = Debug("app:CommonList");
+
+// FlipMove need non-stateless compoent,
+// but material-ui divider is stateless functional component.
+class Divider extends React.Component {
+  render() {
+    return <MaterialDivider {...this.props} />;
+  }
+}
 
 let SelectableList = makeSelectable(List);
 
@@ -43,26 +58,38 @@ SelectableList = wrapState(SelectableList);
 
 export class DefaultCircularProgress extends React.PureComponent {
   static defaultProps = {
-    size: 48,
-    thickness: 7,
+    size: 32,
+    thickness: 6,
     style: {
       margin: 0
     }
   };
 
   render() {
+    // FIXME
+    // Progress Indicators Animation
+    // https://github.com/callemall/material-ui/issues/5252
     return <CircularProgress {...this.props} />;
+    // return "Loading...";
   }
 }
 
-export class LoadingListItem extends React.Component {
+export class LoadingListItem extends ListItem {
+  static propTypes = {
+    onRequestLoadMore: PropTypes.func,
+    direction: PropTypes.oneOf(["bottom", "top"])
+  };
+
   static defaultProps = {
-    onRequestLoadMore: undefined
+    onRequestLoadMore: undefined,
+    direction: "bottom"
   };
 
   componentDidMount() {
     if (this.props.onRequestLoadMore) {
-      this.props.onRequestLoadMore(this);
+      debug("componentDidMount");
+      const { direction } = this.props;
+      this.props.onRequestLoadMore(direction, this);
     }
   }
 
@@ -76,8 +103,60 @@ export class LoadingListItem extends React.Component {
       }
     };
     return (
-      <ListItem disabled={true} style={styles.listItem}>
+      <ListItem style={styles.listItem}>
         <DefaultCircularProgress />
+      </ListItem>
+    );
+  }
+}
+
+class RefreshIndicatorListItem extends ListItem {
+  state = {
+    status: "ready"
+  };
+
+  timeouts = [];
+
+  componentWillUnmount() {
+    for (const t of this.timeouts) {
+      clearTimeout(t);
+    }
+  }
+
+  handleClick = e => {
+    if (this.props.onRequestLoadMore) {
+      e.preventDefault();
+      this.setState({ status: "loading" });
+      const p = this.props.onRequestLoadMore("bottom");
+      if (p && p.then) {
+        p.then(() => {
+          const t = setTimeout(() => {
+            this.setState({ status: "ready" });
+          }, 500);
+          this.timeouts.push(t);
+        });
+      } else {
+        const t = setTimeout(() => {
+          this.setState({ status: "ready" });
+        }, 3000);
+        this.timeouts.push(t);
+      }
+    }
+  };
+
+  render() {
+    const { status } = this.state;
+    return (
+      <ListItem disabled={true}>
+        <RefreshIndicator
+          onClick={this.handleClick}
+          percentage={100}
+          size={60}
+          left={152}
+          top={0}
+          status={status}
+          zDepth={0}
+        />
       </ListItem>
     );
   }
@@ -100,16 +179,21 @@ export class CommonListItem extends ListItem {
   }
 
   onTouchTap = e => {
-    if (e.nativeEvent.which === 3) {
-      return;
-    }
+    // if (e.nativeEvent.which === 3) {
+    //   return;
+    // }
     const { href, routerMethod } = this.props;
     if (href) {
       this.context.router[routerMethod](href);
       e.preventDefault();
     }
-    if (this.props.onTouchTap) {
-      this.props.onTouchTap(e);
+    // if (this.props.onTouchTap) {
+    //   this.props.onTouchTap(e);
+    // }
+    // FIX
+    // Due to material-ui turn onTouchTap to onClick, not prepare migrate to onClick.
+    if (this.props.onClick) {
+      this.props.onClick(e);
     }
   };
 
@@ -126,8 +210,8 @@ export class CommonListItem extends ListItem {
       <ListItem
         {...other}
         href={href}
-        onTouchTap={this.onTouchTap}
-        onClick={this.onClick}
+        // onTouchTap={this.onTouchTap}
+        onClick={this.onTouchTap}
       >
         {this.props.children}
       </ListItem>
@@ -142,6 +226,7 @@ class CommonList extends React.Component {
     onRequestLoadMore: PropTypes.func,
     enableLoadMore: PropTypes.bool,
     enableSelectable: PropTypes.bool,
+    enableRefreshIndicator: PropTypes.bool,
     defaultValue: PropTypes.any,
     listItemHref: PropTypes.func,
     listItemRouterMethod: PropTypes.string,
@@ -152,9 +237,11 @@ class CommonList extends React.Component {
 
   static defaultProps = {
     dataSource: Immutable.List(),
+    customListItemRender: null,
     onRequestLoadMore: () => {},
     enableLoadMore: true,
     enableSelectable: false,
+    enableRefreshIndicator: false,
     defaultValue: 0,
     listItemHref: () => "",
     listStyle: {
@@ -167,9 +254,9 @@ class CommonList extends React.Component {
     listItemValue: payload => {
       return Map.isMap(payload)
         ? payload.get("_id") ||
-          payload.get("name") ||
-          payload.get("title") ||
-          payload.hashCode()
+            payload.get("name") ||
+            payload.get("title") ||
+            payload.hashCode()
         : payload;
     },
     listItemSecondaryText: () => {}
@@ -185,7 +272,7 @@ class CommonList extends React.Component {
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.getListItems = memoize(
       this.getListItems.bind(this),
-      createFastMemoizeDefaultOptions(3)
+      createFastMemoizeDefaultOptions(2)
     );
   }
 
@@ -194,7 +281,7 @@ class CommonList extends React.Component {
       ? payload.get("_id") || Math.random()
       : Math.random();
     const updatedAt = Map.isMap(payload) ? payload.get("updatedAt") || "" : "";
-    return `ListItem/${_id}${updatedAt}`;
+    return `ListItem/${_id}/${updatedAt}`;
   };
 
   getListItems(dataSource) {
@@ -241,24 +328,72 @@ class CommonList extends React.Component {
       dataSource,
       enableLoadMore,
       enableSelectable,
+      enableRefreshIndicator,
       onRequestLoadMore,
-      defaultValue
+      defaultValue,
+      listStyle
     } = this.props;
+    const lazyLoadBottom = enableLoadMore ? (
+      <LazyLoad
+        key="loader"
+        offset={72}
+        height={72}
+        overflow={true}
+        unmountIfInvisible={true}
+      >
+        <LoadingListItem
+          key="loading"
+          onRequestLoadMore={onRequestLoadMore}
+          direction="bottom"
+        />
+      </LazyLoad>
+    ) : null;
+    const refreshIndicator =
+      enableRefreshIndicator && !enableLoadMore ? (
+        <RefreshIndicatorListItem
+          key="refresh-more"
+          onRequestLoadMore={onRequestLoadMore}
+          direction="bottom"
+        />
+      ) : null;
+    const empty =
+      !enableLoadMore && dataSource.count() === 0 ? (
+        <ListItem key="empty" disabled={true}>
+          沒有任何內容
+        </ListItem>
+      ) : null;
     const listItems = this.getListItems(dataSource);
     const ListComponent = enableSelectable ? SelectableList : List;
-    return (
-      <ListComponent style={this.props.listStyle} defaultValue={defaultValue}>
+    const listProps = {
+      style: listStyle,
+      defaultValue
+    };
+    const flipMoveProps = {
+      typeName: ListComponent,
+      getPosition: node => {
+        const rect = (() => {
+          if (node.getBoundingClientRect) {
+            return node.getBoundingClientRect();
+          } else {
+            return ReactDOM.findDOMNode(node).getBoundingClientRect();
+          }
+        })();
+        return rect;
+      }
+    };
+    const list = (
+      <FlipMove key="list" {...flipMoveProps} {...listProps}>
         {listItems}
-        {enableLoadMore
-          ? <LazyLoad height={80} overflow={true} unmountIfInvisible={true}>
-              <LoadingListItem onRequestLoadMore={onRequestLoadMore} />
-            </LazyLoad>
-          : null}
-        {!enableLoadMore && dataSource.count() === 0
-          ? <ListItem>沒有任何內容</ListItem>
-          : null}
+      </FlipMove>
+    );
+    const bottom = (
+      <ListComponent key="foo" {...listProps}>
+        {empty}
+        {lazyLoadBottom}
+        {refreshIndicator}
       </ListComponent>
     );
+    return [list, bottom];
   }
 }
 

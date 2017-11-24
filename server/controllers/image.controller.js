@@ -7,8 +7,11 @@ const ImgurPrefix = "https://api.imgur.com/3";
 export function getImages(req, res) {}
 
 export function addImage(req, res) {
-  if (!req.body.image) {
-    res.status(403).send("not found image.");
+  const { clientID } = imgurConfig;
+  if (!clientID) {
+    res.status(403).send(new Error("not enable image service."));
+  } else if (!req.body.image) {
+    res.status(403).send(new Error("not found image."));
   } else {
     const {
       type,
@@ -29,7 +32,7 @@ export function addImage(req, res) {
       if (provider === "imgur") {
         const method = "post";
         const headers = {
-          authorization: `Client-ID ${imgurConfig.clientID}`
+          authorization: `Client-ID ${clientID}`
         };
         const uploadUrl = `${ImgurPrefix}/image`;
         const form = {

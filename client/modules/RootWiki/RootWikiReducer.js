@@ -44,5 +44,7 @@ export const getUI = state => state.rootWikis.get("ui");
 export const getRootWiki = (state, _id) =>
   state.rootWikis.get("data").find(v => v.get("_id") === _id);
 
+export const getRootWikiById = getRootWiki;
+
 // Export Reducer
 export default RootWikiReducer;

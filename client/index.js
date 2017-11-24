@@ -3,7 +3,7 @@
  */
 import Debug from "debug";
 import React from "react";
-import { render } from "react-dom";
+import { render, hydrate } from "react-dom";
 import { AppContainer } from "react-hot-loader";
 import { fromJS } from "immutable";
 import { calculateResponsiveState } from "redux-responsive";
@@ -13,10 +13,14 @@ import App from "./App";
 import { configureStore } from "./store";
 import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
 import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
-import { connectDB, initWithStore } from "./localdb";
+import { connectDB, initWithStore, initAccessToken } from "./localdb";
 import { setSocket } from "./modules/Socket/SocketActions";
+import { loadComponents } from "loadable-components";
 import ReactGA from "react-ga";
 import googleAnalyticsConfig from "../server/configs/googleAnalytics";
+import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
+import Loadable from "react-loadable";
+import moment from "moment";
 
 const debug = Debug("app:main");
 
@@ -43,9 +47,11 @@ initAnalytics();
 
 // Initialize store
 function deserializeJSONState(jsonState) {
-  const initState = {};
-  const needImmutableObjectList = [
+  const initState = Object.assign({}, jsonState);
+  const needImmutableObjectNames = [
     "app",
+    "oauth2Client",
+    "user",
     "wikis",
     "rootWikis",
     "errors",
@@ -55,26 +61,28 @@ function deserializeJSONState(jsonState) {
     "sockets",
     "search"
   ];
-  for (const field of needImmutableObjectList) {
+  for (const field of needImmutableObjectNames) {
     initState[field] = fromJS(jsonState[field]);
   }
   return initState;
 }
 const initState = deserializeJSONState(window.__INITIAL_STATE__);
 const store = configureStore(initState);
-function injectTapEventPluginHelper() {
-  function defaultBrowserUserAgent(state) {
-    const userAgent = getUserAgent(state);
-    if (!userAgent) {
-      if (window) {
-        return window.navigator.userAgent;
-      } else {
-        return "Node.js/6.8.0 (OS X Yosemite; x64)";
-      }
+
+function defaultBrowserUserAgent(state) {
+  const userAgent = getUserAgent(state);
+  if (!userAgent) {
+    if (window) {
+      return window.navigator.userAgent;
     } else {
-      return userAgent;
+      return "Node.js/6.8.0 (OS X Yosemite; x64)";
     }
+  } else {
+    return userAgent;
   }
+}
+
+function injectTapEventPluginHelper() {
   const userAgent = defaultBrowserUserAgent(store.getState());
   const md = new MobileDetect(userAgent);
   injectTapEventPlugin({
@@ -91,38 +99,47 @@ function injectTapEventPluginHelper() {
   });
 }
 injectTapEventPluginHelper();
-store.dispatch(calculateResponsiveState(window));
-const db = connectDB();
-if (db) {
-  initWithStore(db, store);
-}
 
 const mountElementId = "root";
 const mountApp = document.getElementById(mountElementId);
 debug(`mount application element id: ${mountElementId}`);
 
-render(
-  <AppContainer>
-    <App store={store} />
-  </AppContainer>,
-  mountApp
-);
+Loadable.preloadReady().then(() => {
+  // sync locale by intl module
+  moment.locale(store.getState().intl.locale);
+  // sync with server-side responsive state.
+  const userAgent = defaultBrowserUserAgent(store.getState());
+  store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
+  debug("first hydrate start");
+  hydrate(
+    <AppContainer>
+      <App store={store} />
+    </AppContainer>,
+    mountApp
+  );
+  debug("first hydrate end");
+  // client-slide update responsive state by window.
+  store.dispatch(calculateResponsiveState(window));
+  // db init
+  // must after hydrate because have user(access Token) for logIn, some ui data for restore
+  // will hydrate fail if init db before hydrate.
+  const db = connectDB();
+  if (db) {
+    initWithStore(db, store);
+  }
+  debug("Application started");
+});
 
 // For hot reloading of react components
 if (module.hot) {
   debug("start hot reload!");
   module.hot.accept("./App", () => {
-    // If you use Webpack 2 in ES modules mode, you can use <App /> here rather than require() a
-    // <NextApp />.
-    const NextApp = require("./App").default; // eslint-disable-line global-require
-    render(
+    hydrate(
       <AppContainer>
-        <NextApp store={store} />
+        <App store={store} />
       </AppContainer>,
       mountApp
     );
   });
   debug("end hot reload!");
 }
-
-debug("Application started");

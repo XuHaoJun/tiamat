@@ -1,6 +1,8 @@
-import Slate from "slate";
+import { Value } from "slate";
+import Plain from "slate-plain-serializer";
 
 export default function contentToText(content) {
-  const state = Slate.Raw.deserialize(content, { terse: true });
-  return state.document.text;
+  const value = Value.fromJSON(content);
+  const text = Plain.serialize(value);
+  return text;
 }

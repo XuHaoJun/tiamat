@@ -3,15 +3,20 @@ import memoize from "fast-memoize";
 import PropTypes from "prop-types";
 import AppBar from "material-ui/AppBar";
 import { getStyles as appBarGetStyles } from "material-ui/AppBar/AppBar";
-import AppNavDrawer from "./AppNavDrawer";
 import IconButton from "material-ui/IconButton";
-import TextField from "material-ui/TextField";
 import SearchVerIcon from "material-ui/svg-icons/action/search";
 import BackspaceIcon from "material-ui/svg-icons/hardware/keyboard-backspace";
 import MenuIcon from "material-ui/svg-icons/navigation/menu";
+import FlatButton from "material-ui/FlatButton";
 import { Motion, spring } from "react-motion";
+
+import AppNavDrawer from "./AppNavDrawer";
 import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
+import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
+
+const LogInDialogButton = makeLogInDialogable(FlatButton);
+LogInDialogButton.muiName = "FlatButton";
 
 const LeftElementMotionWrap = props => {
   const defaultStyle = {
@@ -19,7 +24,7 @@ const LeftElementMotionWrap = props => {
   };
   const style = {
     deg: spring(0, {
-      stiffness: 500,
+      stiffness: 222,
       damping: 30
     })
   };
@@ -29,47 +34,37 @@ const LeftElementMotionWrap = props => {
         const divStyle = {
           transform: `rotate(${deg}deg)`
         };
-        return (
-          <div style={divStyle}>
-            {props.children}
-          </div>
-        );
+        return <div style={divStyle}>{props.children}</div>;
       }}
     </Motion>
   );
 };
 
 const BackspaceButton = props => {
-  const iconStyle = {
-    color: "rgb(255, 255, 255)"
-  };
   return (
     <LeftElementMotionWrap>
-      <IconButton iconStyle={iconStyle} {...props}>
+      <IconButton {...props}>
         <BackspaceIcon />
       </IconButton>
     </LeftElementMotionWrap>
   );
 };
 
+BackspaceButton.muiName = "IconButton";
+
 const MenuButton = props => {
-  const iconStyle = {
-    color: "rgb(255, 255, 255)"
-  };
   return (
     <LeftElementMotionWrap initDeg={-45}>
-      <IconButton iconStyle={iconStyle} {...props}>
+      <IconButton {...props}>
         <MenuIcon />
       </IconButton>
     </LeftElementMotionWrap>
   );
 };
 
-class Header extends Component {
-  static propTypes = {
-    browser: PropTypes.object
-  };
+MenuButton.muiName = "IconButton";
 
+class Header extends Component {
   static contextTypes = {
     muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
@@ -87,12 +82,26 @@ class Header extends Component {
     if (this._isInSearchPage()) {
       defaultQuery = props.location.query.query;
     }
+    const open = props.browser.greaterThan.medium;
     this.state = {
-      open: this.props.browser.greaterThan.medium,
+      open,
       prevQuery: "",
       textValue: defaultQuery || "",
       textFieldFocused: false
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const nextState = {};
+    if (nextProps.browser !== this.props.browser) {
+      const open = nextProps.browser.greaterThan.medium;
+      if (this.state.open !== open) {
+        nextState.open = open;
+      }
+    }
+    if (Object.keys(nextState).length > 0) {
+      this.setState(nextState);
+    }
   }
 
   componentDidUpdate() {
@@ -104,31 +113,33 @@ class Header extends Component {
       this.setState({ textValue: "" });
     }
     if (this._isInSearchPage() && this.state.textFieldFocused === false) {
-      const query = this.props.location.query.query;
+      const { query } = this.props.location.query;
       if (this.state.textValue === "" && query) {
         this.setState({ textValue: query });
       }
     }
   }
 
-  _isInSearchPage = () => {
-    return /^\/search/.test(this.props.location.pathname);
+  getIconStyles = () => {
+    const { prepareStyles } = this.context.muiTheme;
+    const iconStyle = appBarGetStyles(this.props, this.context);
+    return prepareStyles(iconStyle);
   };
 
-  handleTextChange = event => {
-    const v = event.target.value;
-    this.setState({ textValue: v });
-    if (v === "" && !this.state.textFieldFocused) {
-      // this.props.dispatch(clientInitSearchResults());
+  handleOnSubmit = e => {
+    e.preventDefault();
+    this._fetchSearchResults(this.state.textValue);
+    if (this._textField) {
+      this._textField.blur();
     }
   };
 
-  handleFocus = () => {
-    this.setState({ textFieldFocused: true });
+  _bindTextField = tf => {
+    this._textField = tf;
   };
 
-  handleBlur = () => {
-    this.setState({ textFieldFocused: false });
+  handleBack = () => {
+    setTimeout(this.context.router.goBack, 0);
   };
 
   _fetchSearchResults = v => {
@@ -148,26 +159,24 @@ class Header extends Component {
     routerAction(`/search?query=${query}`);
   };
 
-  handleOnSubmit = e => {
-    e.preventDefault();
-    this._fetchSearchResults(this.state.textValue);
-    if (this._textField) {
-      this._textField.blur();
+  handleBlur = () => {
+    this.setState({ textFieldFocused: false });
+  };
+
+  handleFocus = () => {
+    this.setState({ textFieldFocused: true });
+  };
+
+  handleTextChange = event => {
+    const v = event.target.value;
+    this.setState({ textValue: v });
+    if (v === "" && !this.state.textFieldFocused) {
+      // this.props.dispatch(clientInitSearchResults());
     }
   };
 
-  _bindTextField = tf => {
-    this._textField = tf;
-  };
-
-  handleBack = () => {
-    setTimeout(this.context.router.goBack, 0);
-  };
-
-  getIconStyles = () => {
-    const { prepareStyles } = this.context.muiTheme;
-    const iconStyle = appBarGetStyles(this.props, this.context);
-    return prepareStyles(iconStyle);
+  _isInSearchPage = () => {
+    return /^\/search/.test(this.props.location.pathname);
   };
 
   handleRequestChangeNavDrawer = open => {
@@ -180,19 +189,19 @@ class Header extends Component {
     }
   };
 
-  handleToggle = () =>
+  handleToggle = e => {
+    e.preventDefault();
     this.setState({
       open: !this.state.open
     });
+  };
 
   handleClose = () => this.setState({ open: false });
 
   shouldBackspaceButton = pathname => {
     const createPage = new RegExp("^/(create)/.+");
     const etcPage = new RegExp("^/(setting|about|search)");
-    const discussionDetailPage = new RegExp(
-      "^/forumBoards/(.+)/rootDiscussions/(.+)"
-    );
+    const discussionDetailPage = new RegExp("^/rootDiscussions/(.+)");
     const wikiDetailPage = new RegExp("^/rootWikis/(.+)/wikis/(.+)");
     const enableBackspaceButtonRules = [
       createPage,
@@ -206,6 +215,14 @@ class Header extends Component {
     return enableBackspaceButton;
   };
 
+  handleSearchIconTouchTap = e => {
+    if (e.nativeEvent.which === 3) {
+      return;
+    }
+    e.preventDefault();
+    this.context.router.push("/search");
+  };
+
   renderIconLeftElement = () => {
     const enableBackspaceButton = this.shouldBackspaceButton(
       this.props.location.pathname
@@ -216,45 +233,46 @@ class Header extends Component {
     return <MenuButton onTouchTap={this.handleToggle} />;
   };
 
-  handleSearchIconTouchTap = e => {
-    if (e.nativeEvent.which === 3) {
-      return;
-    }
-    e.preventDefault();
-    this.context.router.push("/search");
-  };
-
   renderIconRightElement = () => {
-    const pathname = this.props.location.pathname;
-    const enableSendButtonRules = [/\/create/];
+    const { pathname } = this.props.location;
+    const enableSendButtonRules = [/\/create/, /\update/];
     const enableSendButton = enableSendButtonRules.some(regexp =>
       regexp.test(pathname)
     );
     if (enableSendButton) {
-      const { prepareStyles } = this.context.muiTheme;
-      const styles = prepareStyles(appBarGetStyles(this.props, this.context));
-      return <SendButton iconStyle={styles.iconButtonIconStyle} />;
+      return <SendButton />;
     }
-    return (
-      <IconButton onTouchTap={this.handleSearchIconTouchTap} href="/search">
-        <SearchVerIcon />
-      </IconButton>
-    );
+    const { browser } = this.props;
+    if (browser.lessThan.medium) {
+      return (
+        <IconButton
+          onTouchTap={this.handleSearchIconTouchTap}
+          onClick={e => e.preventDefault()}
+          href="/search"
+        >
+          <SearchVerIcon />
+        </IconButton>
+      );
+    } else {
+      return <LogInDialogButton label="登入" primary={true} />;
+    }
   };
 
   render() {
-    const open = this.state.open;
+    const { open } = this.state;
     const selectedIndex = this.props.location.pathname;
-    const title = <SearchAutoComplete />;
+    let { title } = this.props;
+    if (this._isInSearchPage()) {
+      title = <SearchAutoComplete />;
+    }
     return (
       <div>
         <AppBar
-          zDepth={0}
+          zDepth={this.props.browser.lessThan.medium ? 0 : 1}
           style={this.props.appBarStyle}
           title={title}
-          iconElementRight={this.renderIconRightElement()}
-          showMenuIconButton={true}
           iconElementLeft={this.renderIconLeftElement()}
+          iconElementRight={this.renderIconRightElement()}
         />
         <AppNavDrawer
           browser={this.props.browser}

@@ -1,7 +1,7 @@
 .suggestion-portal {
   display: none;
   position: absolute;
-  z-index: 1105;
+  z-index: 10000;
   margin-top: 30px;
   width: 200px;
 }

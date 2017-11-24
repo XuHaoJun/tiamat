@@ -1,29 +1,27 @@
-var fs = require('fs');
-var path = require('path');
-var ExternalsPlugin = require('webpack2-externals-plugin');
+const fs = require("fs");
+const path = require("path");
+const ExternalsPlugin = require("webpack2-externals-plugin");
 
 module.exports = {
-
-  entry: path.resolve(__dirname, 'server/server.js'),
-
-  output: {
-    path: __dirname + '/build/',
-    filename: 'server.bundle.js',
+  entry: {
+    server: ["babel-polyfill", "./server/server.js"]
   },
 
-  target: 'node',
+  output: {
+    path: `${__dirname}/build/`,
+    filename: "server.bundle.js"
+  },
+
+  target: "node",
 
   node: {
     __filename: true,
-    __dirname: true,
+    __dirname: true
   },
 
   resolve: {
-    extensions: ['.js', '.jsx'],
-    modules: [
-      'client',
-      'node_modules',
-    ],
+    extensions: [".js", ".jsx"],
+    modules: ["client", "node_modules"]
   },
 
   module: {
@@ -31,32 +29,30 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
+        loader: "babel-loader",
         query: {
-          presets: [
-            'react',
-            'es2015',
-            'stage-0',
-          ],
+          presets: ["react", "es2015", "stage-0"],
           plugins: [
             [
-              'babel-plugin-webpack-loaders', {
-                'config': './webpack.config.babel.js',
-                "verbose": false
+              "babel-plugin-webpack-loaders",
+              {
+                config: "./webpack.config.babel.js",
+                verbose: false
               }
             ]
           ]
-        },
-      }, {
-        test: /\.json$/,
-        loader: 'json-loader',
+        }
       },
-    ],
+      {
+        test: /\.json$/,
+        loader: "json-loader"
+      }
+    ]
   },
   plugins: [
     new ExternalsPlugin({
-      type: 'commonjs',
-      include: path.join(__dirname, './node_modules/'),
-    }),
-  ],
+      type: "commonjs",
+      include: path.join(__dirname, "./node_modules/")
+    })
+  ]
 };

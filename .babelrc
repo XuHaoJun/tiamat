@@ -1,9 +1,11 @@
 {
   "presets": ["react", ["es2015", { "modules": false }], "stage-0"],
-  "plugins": ["lodash", "react-hot-loader/babel"],
+  "plugins": ["lodash", "react-hot-loader/babel", "react-loadable/babel", [
+    "extensible-destructuring", { "mode": "optout", "impl": "immutable" }
+  ]],
   "env": {
     "production": {
-      "plugins": ["lodash", "transform-object-assign"],
+      "plugins": ["lodash", "react-loadable/babel", ["extensible-destructuring", { "mode": "optout", "impl": "immutable" }]],
       "presets": ["react", ["es2015", { "modules": false }], "stage-0"]
     }
   }

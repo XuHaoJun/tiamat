@@ -2,6 +2,7 @@
   Global CSS file
 */
 
+
 ::-webkit-input-placeholder {
   color: #aaa;
   font-weight: 300;
@@ -25,6 +26,7 @@ input:-moz-placeholder {
 body {
   margin: 0;
   padding: 0;
+  max-height: 100%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;

@@ -1,7 +1,6 @@
 import SoftBreak from "slate-soft-break";
 import SuggestionsPlugin from "@xuhaojun/slate-suggestions";
 import PluginEditTable from "slate-edit-table";
-import EnterScrollWindow from "./EnterScrollWindow";
 
 function getCurrentWord(text, index, initialIndex) {
   if (index === initialIndex) {
@@ -27,15 +26,14 @@ function createPlugins() {
   const suggestionsPlugin = SuggestionsPlugin({
     trigger: "@",
     capture: /@([\w]*)/,
-    onEnter: (suggestion, state) => {
-      const { anchorText, anchorOffset, selection, document } = state;
-      const hasMention = state.inlines.some(
-        inline => inline.type === "mention"
-      );
-      if (hasMention) {
-        return;
+    onEnter(suggestion, change) {
+      const state = change.value;
+      const { anchorText, anchorOffset } = state;
+      const hasLink = state.inlines.some(inline => inline.type === "link");
+      if (hasLink) {
+        return undefined;
       }
-      const text = anchorText.text;
+      const { text } = anchorText;
       let index = {
         start: anchorOffset - 1,
         end: anchorOffset
@@ -44,11 +42,9 @@ function createPlugins() {
         index = getCurrentWord(text, anchorOffset - 1, anchorOffset - 1);
       }
       if (!index || !suggestion) {
-        console.log("returned");
-        return;
+        return undefined;
       }
-      return state
-        .transform()
+      return change
         .deleteBackward(1)
         .insertText(suggestion.suggestion)
         .extend(0 - suggestion.suggestion.length)
@@ -61,18 +57,15 @@ function createPlugins() {
         .collapseToStartOfNextText()
         .insertText(" ")
         .collapseToEnd()
-        .focus()
-        .apply();
+        .focus();
     }
   });
 
-  const enterScrollWindowPlugin = EnterScrollWindow();
   const softBreakPlugin = SoftBreak({
     onlyIn: ["code"]
   });
 
   const plugins = {
-    enterScrollWindowPlugin,
     suggestionsPlugin,
     softBreakPlugin,
     tablePlugin

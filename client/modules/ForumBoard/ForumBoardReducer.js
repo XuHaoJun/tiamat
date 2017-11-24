@@ -43,5 +43,7 @@ export const getForumBoards = state => state.forumBoards.get("data");
 export const getForumBoardById = (state, _id) =>
   state.forumBoards.get("data").find(v => v.get("_id") === _id);
 
+export const getForumBoard = getForumBoardById;
+
 // Export Reducer
 export default ForumBoardReducer;

@@ -67,7 +67,7 @@ function oauth2(providerName, accessToken, refreshToken, profile, cb) {
     .exec()
     .then(user => {
       if (!user) {
-        const email = profile.emails[0].value;
+        const email = profile.emails[0].value.toLowerCase();
         const props = {
           email,
           password: genRandomPassword(),
@@ -97,6 +97,7 @@ function oauth2(providerName, accessToken, refreshToken, profile, cb) {
 }
 
 export default function config() {
+  // login by email and password
   passport.use("basic", new BasicStrategy(userAuth));
 
   passport.use("clientBasic", new BasicStrategy(clientAuth));
@@ -125,18 +126,82 @@ export default function config() {
     );
   }
 
+  //   Don't need validate again token, just trust json web token(https://tools.ietf.org/html/rfc7519)
+  // that will verify it, and either trust token's json payload(userid, clientid....) for auth.
+  //   Token generally store in browser indexedDB(default) and it's follow same-origin policy,
+  // that will protect your token from XSS attack.
   passport.use(
+    "bearer-jwt",
     new BearerStrategy((tokenString, done) => {
-      AccessToken.findOne({ token: tokenString })
+      AccessToken.verify(tokenString, (err, payload) => {
+        if (err) {
+          done(err);
+        } else {
+          const { target, sub, scope } = payload;
+          if (!target || !sub || !scope) {
+            done(null, false);
+          } else {
+            if (target === "client") {
+              Client.findOne({ _id: sub })
+                .exec()
+                .then(client => {
+                  if (!client) {
+                    done(null, false);
+                  } else {
+                    done(null, client, scope);
+                  }
+                  return null;
+                })
+                .catch(er => {
+                  done(er);
+                  return er;
+                });
+            } else if (target === "user") {
+              User.findById(sub)
+                .select({ password: 0 })
+                .exec()
+                .then(user => {
+                  if (!user) {
+                    done(null, false);
+                  } else {
+                    done(null, user, scope);
+                  }
+                  return null;
+                })
+                .catch(er => {
+                  done(er);
+                  return er;
+                });
+            } else {
+              done(null, false);
+            }
+          }
+        }
+      });
+    })
+  );
+
+  passport.use(
+    "bearer",
+    new BearerStrategy((tokenString, done) => {
+      // TODO
+      // improve performance by find user or client on demand
+      return AccessToken.findOne({ token: tokenString })
         .populate("user")
+        .populate("client")
         .exec((err, token) => {
           if (err) {
             return done(err);
           }
           if (!token) {
             return done(null, false);
+          } else if (token.user) {
+            return done(null, token.user, token.scope);
+          } else if (token.client) {
+            return done(null, token.client, token.scope);
+          } else {
+            return done(null, false);
           }
-          return done(null, token.user, token);
         });
     })
   );

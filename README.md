@@ -8,12 +8,15 @@ Tiamat - a modern mobile gaming forum.
 * [elasticsearch](https://www.elastic.co), version 5.x.x (optional for search feature)
 
 ## Quickstart
-```
+```sh
   git clone https://github.com/XuHaoJun/tiamat.git
   cd tiamat
   npm install -g yarn
   yarn
   yarn run start
+  # production run
+  yarn run build
+  yarn run start:production
 ```
 
 **Note : Please make sure your MongoDB is running.** For MongoDB installation guide see [this](https://docs.mongodb.org/v3.0/installation/). Also `npm3` is required to install dependencies properly.

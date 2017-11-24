@@ -14,8 +14,6 @@ import memoize from "fast-memoize";
 import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
 import moment from "moment";
 
-moment.locale("zh-tw");
-
 class WikiList extends React.Component {
   static propTypes = {
     rootWikiId: PropTypes.string.isRequired
@@ -49,29 +47,30 @@ class WikiList extends React.Component {
   onRequestLoadMore = () => {
     const { page, limit, sort } = this.state;
     const { rootWikiId, rootWikiGroupTree } = this.props;
-    if (!rootWikiId) {
-      return;
-    }
-    const nextPage = page + 1;
-    this.props
-      .dispatch(
-        fetchWikis(rootWikiId, {
-          page: nextPage,
-          limit,
-          sort,
-          rootWikiGroupTree
+    if (rootWikiId) {
+      const nextPage = page + 1;
+      return this.props
+        .dispatch(
+          fetchWikis(rootWikiId, {
+            page: nextPage,
+            limit,
+            sort,
+            rootWikiGroupTree
+          })
+        )
+        .then(wikisJSON => {
+          if (wikisJSON.length < limit) {
+            this.setState({ enableLoadMore: false });
+          } else {
+            this.setState({ page: nextPage });
+          }
         })
-      )
-      .then(wikisJSON => {
-        if (wikisJSON.length < limit) {
+        .catch(() => {
           this.setState({ enableLoadMore: false });
-        } else {
-          this.setState({ page: nextPage });
-        }
-      })
-      .catch(() => {
-        this.setState({ enableLoadMore: false });
-      });
+        });
+    } else {
+      return undefined;
+    }
   };
 
   sortBy = payload => {
@@ -92,16 +91,18 @@ class WikiList extends React.Component {
   };
 
   render() {
+    const { enableLoadMore } = this.state;
     let { dataSource } = this.props;
     dataSource = dataSource.sortBy(this.sortBy);
     return (
       <CommonList
         dataSource={dataSource}
+        enableLoadMore={enableLoadMore}
+        enableRefreshIndicator={true}
         listItemHref={this.listItemHref}
         listItemSecondaryText={this.listItemSecondaryText}
         listItemLeftAvatar={this.listItemLeftAvatar}
         onRequestLoadMore={this.onRequestLoadMore}
-        enableLoadMore={this.state.enableLoadMore}
       />
     );
   }

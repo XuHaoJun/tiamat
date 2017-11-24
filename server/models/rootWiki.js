@@ -21,14 +21,4 @@ const rootWikiSchema = new Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// 物品: {
-//   武器: [
-//     '長劍', '斧'
-//   ],
-//   防具: ['重甲', '皮革']
-// },
-// 技能: [
-//   '戰士', '法師'
-// ],
-
 export default mongoose.model("RootWiki", rootWikiSchema);

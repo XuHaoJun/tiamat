@@ -55,11 +55,15 @@ const DiscussionReducer = (state = initialState, action) => {
       return newState;
 
     case SET_DISCUSSIONS_UI:
+      // const nextUI = state.get("ui")action.ui;
       return state.set("ui", fromJS(action.ui));
 
     default:
-      if (List.isList(state.get("data"))) {
-        return state.set("data", state.get("data").toSet());
+      const list2set = ["data"];
+      for (const field of list2set) {
+        if (List.isList(state.get(field))) {
+          return state.set(field, state.get(field).toSet());
+        }
       }
       return state;
   }

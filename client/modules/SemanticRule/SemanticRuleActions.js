@@ -21,11 +21,11 @@ export function fetchSemanticRules(scope = "") {
         return res.semanticRules;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }

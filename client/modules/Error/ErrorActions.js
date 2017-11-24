@@ -10,3 +10,5 @@ export function defaultRequestCatchHandler(dispatch, err) {
     return Promise.reject(err);
   });
 }
+
+export const defaultRequestErrorHandler = defaultRequestCatchHandler;

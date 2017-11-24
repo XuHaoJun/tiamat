@@ -5,7 +5,9 @@ import IconButton from "material-ui/IconButton";
 import { getUI } from "../MyAppReducer";
 import CircularProgress from "material-ui/CircularProgress";
 
-class SendButton extends React.PureComponent {
+class SendButton extends React.Component {
+  static muiName = "IconButton";
+
   static defaultProps = {
     onTouchTap: () => {},
     loading: false

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import CommonList from "../../../components/List/CommonList";
-import { Set } from "immutable";
+import { Set, is } from "immutable";
 import { fetchRootDiscussions } from "../DiscussionActions";
 import { getRootDiscussions } from "../DiscussionReducer";
 import { connect } from "react-redux";
@@ -10,23 +10,22 @@ import Avatar from "material-ui/Avatar";
 import DiscussionIcon from "material-ui/svg-icons/communication/comment";
 import moment from "moment";
 
-moment.locale("zh-tw");
-
 class RootDiscussionList extends React.Component {
   static propTypes = {
-    forumBoardId: PropTypes.string.isRequired
+    forumBoardId: PropTypes.string.isRequired,
+    dataSource: PropTypes.object
   };
 
   static defaultProps = {
-    forumBoardId: "",
     dataSource: Set()
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+    const { dataSource } = props;
     const limit = props.limit || 10;
-    const page = props.page || 1;
+    const page = props.page || Math.floor(dataSource.count() / limit) || 1;
     this.state = {
       page,
       limit,
@@ -45,7 +44,13 @@ class RootDiscussionList extends React.Component {
     const { page, limit, sort } = this.state;
     const { forumBoardId, forumBoardGroup } = this.props;
     const nextPage = page + 1;
-    this.props
+    const prevDataSource = this.props.dataSource;
+    this.props.dispatch(
+      fetchRootDiscussions(forumBoardId, 1, limit, sort, forumBoardGroup)
+    );
+    // TODO
+    // cancel fetch when componemntWillUnmount
+    return this.props
       .dispatch(
         fetchRootDiscussions(forumBoardId, {
           page: nextPage,
@@ -55,7 +60,11 @@ class RootDiscussionList extends React.Component {
         })
       )
       .then(discussionsJSON => {
-        if (discussionsJSON.length < limit) {
+        const currentDataSource = this.props.dataSource;
+        if (
+          discussionsJSON.length < limit ||
+          is(prevDataSource, currentDataSource)
+        ) {
           this.setState({ enableLoadMore: false });
         } else {
           this.setState({ page: nextPage });
@@ -71,9 +80,7 @@ class RootDiscussionList extends React.Component {
   };
 
   listItemHref = payload => {
-    return `/forumBoards/${payload.get(
-      "forumBoard"
-    )}/rootDiscussions/${payload.get("_id")}`;
+    return `/rootDiscussions/${payload.get("_id")}`;
   };
 
   listItemSecondaryText = payload => {
@@ -87,15 +94,24 @@ class RootDiscussionList extends React.Component {
   };
 
   render() {
-    const dataSource = this.props.dataSource.sortBy(this.sortBy);
+    const { enableLoadMore } = this.state;
+    const { forumBoardGroup } = this.props;
+    let { dataSource } = this.props;
+    if (forumBoardGroup) {
+      dataSource = dataSource.filter(rootDiscussion => {
+        return rootDiscussion.get("forumBoardGroup") === forumBoardGroup;
+      });
+    }
+    dataSource = dataSource.sortBy(this.sortBy);
     return (
       <CommonList
         dataSource={dataSource}
+        enableRefreshIndicator={true}
+        enableLoadMore={enableLoadMore}
         listItemHref={this.listItemHref}
         listItemSecondaryText={this.listItemSecondaryText}
         listItemLeftAvatar={this.listItemLeftAvatar}
         onRequestLoadMore={this.onRequestLoadMore}
-        enableLoadMore={this.state.enableLoadMore}
       />
     );
   }
@@ -103,14 +119,9 @@ class RootDiscussionList extends React.Component {
 
 function mapStateToProps(store, props) {
   const { forumBoardId, forumBoardGroup } = props;
-  let dataSource = forumBoardId
+  const dataSource = forumBoardId
     ? getRootDiscussions(store, forumBoardId)
     : Set();
-  if (forumBoardGroup) {
-    dataSource = dataSource.filter(rootDiscussion => {
-      return rootDiscussion.get("forumBoardGroup") === forumBoardGroup;
-    });
-  }
   return { forumBoardId, forumBoardGroup, dataSource };
 }
 

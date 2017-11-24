@@ -8,11 +8,13 @@ class Loading extends React.PureComponent {
       container: {
         border: "1px #ccc solid",
         background: "#eee",
-        width: size * 2.5,
-        height: size * 4
+        width: size * 1.5,
+        height: size * 1.5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
       },
       progress: {
-        display: "block",
         margin: "auto",
         width: "40%"
       }

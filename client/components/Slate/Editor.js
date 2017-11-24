@@ -1,25 +1,32 @@
 import React from "react";
+import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { fromJS, is, Map, List } from "immutable";
 import isUrl from "is-url";
-import Slate, { Raw, Block } from "slate";
-import memoize from "fast-memoize";
-import Portal from "react-portal-minimal";
-import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
+import { Value, Block } from "slate";
+// FIXME
+// Input is wonky on Android devices
+// https://github.com/ianstormtaylor/slate/issues/725
+import {
+  Editor as SlateEditor,
+  getEventTransfer,
+  getEventRange
+} from "slate-react";
+import { Portal } from "react-portal";
+
 import schema from "./schema";
 import htmlSerializer from "./htmlSerializer";
-import "./plugin.css";
 import { defaultPlugins } from "./plugins";
 import emptyContnetJSON from "./emptyContent.json";
-import semanticReplace from "./semanticReplace2";
+import semanticReplace from "./utils/semanticReplace";
 import normalizeHref from "./utils/normailzeHref";
-import { connect } from "react-redux";
-import AddImageDialog from "./AddImageDialog";
-import { addImage } from "../../modules/Image/ImageActions";
+import AddImageDialog from "./components/AddImageDialog";
+import AddWikiPartDialog from "./components/AddWikiPartDialog";
+import { addImageRequest } from "../../modules/Image/ImageActions";
 import { addError } from "../../modules/Error/ErrorActions";
-import Div from "./Div";
-
+import Div from "./components/Div";
 import Debug from "debug";
+import "./plugin.css";
 
 const debug = Debug("app:editor");
 
@@ -27,7 +34,7 @@ const DEFAULT_NODE = "paragraph";
 
 const emptyContent = fromJS(emptyContnetJSON);
 
-export const getStyles = memoize(() => {
+export const getStyles = () => {
   const styles = {
     editorContainer: {
       boxSizing: "border-box",
@@ -52,23 +59,25 @@ export const getStyles = memoize(() => {
       maxHeight: "calc(100vh - 100px)"
     },
     editor: {
-      minHeight: 250
+      minHeight: 250,
+      maxHeight: 250,
+      overflow: "auto"
     },
     editorFullScreen: {
       minHeight: "calc(100vh - 100px)",
-      width: "calc(100vw - 20px)"
+      maxHeight: "calc(100vh - 100px)",
+      width: "calc(100vw - 20px)",
+      overflow: "auto"
     }
   };
   return styles;
-}, createFastMemoizeDefaultOptions(1));
-
-let serialize = content => {
-  const rawContent = Map.isMap(content) ? content.toJS() : emptyContent.toJS();
-  const state = Slate.Raw.deserialize(rawContent, { terse: true });
-  return state;
 };
 
-serialize = memoize(serialize, createFastMemoizeDefaultOptions(30));
+const serialize = content => {
+  const rawContent = Map.isMap(content) ? content.toJS() : emptyContent.toJS();
+  const state = Value.fromJS(rawContent);
+  return state;
+};
 
 function semanticRulesToSuggestions(semanticRules) {
   return semanticRules.map(rule => {
@@ -97,33 +106,25 @@ class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    const {
-      enterScrollWindowPlugin,
-      suggestionsPlugin,
-      tablePlugin,
-      softBreakPlugin
-    } = defaultPlugins;
-    const plugins = [
-      tablePlugin,
-      enterScrollWindowPlugin,
-      suggestionsPlugin,
-      softBreakPlugin
-    ];
-    const state = serialize(props.rawContent);
+    const { suggestionsPlugin, softBreakPlugin } = defaultPlugins;
+    const plugins = [suggestionsPlugin, softBreakPlugin];
+    let state = serialize(props.rawContent);
     const { readOnly, semanticRules, semanticReplaceMode } = props;
+    if (semanticReplaceMode) {
+      state = semanticReplace(state, props.semanticRules).value;
+    }
     const suggestions = semanticRulesToSuggestions(semanticRules);
     this.state = {
       state,
       suggestions,
       plugins,
-      tablePlugin,
       suggestionsPlugin,
       semanticRules,
       semanticReplaceMode,
       readOnly,
       addImageDialogOpen: false,
-      softKeyboardIsOpen: false,
-      fullScreen: false
+      addWikiPartDialog: false,
+      softKeyboardIsOpen: false
     };
   }
 
@@ -142,22 +143,34 @@ class Editor extends React.Component {
       nextState.readOnly = nextProps.readOnly;
     }
     if (!is(nextProps.rawContent, this.props.rawContent)) {
-      const rawContent = nextProps.rawContent;
+      const { rawContent } = nextProps;
       if (Map.isMap(rawContent)) {
-        nextState.state = Slate.Raw.deserialize(rawContent.toJS(), {
-          terse: true
-        });
+        nextState.state = serialize(rawContent);
       }
     }
     if (!is(nextProps.semanticRules, this.state.semanticRules)) {
       nextState.semanticRules = nextProps.semanticRules;
       const suggestions = semanticRulesToSuggestions(nextProps.semanticRules);
       nextState.suggestions = suggestions;
+      if (nextProps.semanticReplaceMode) {
+        nextState = Object.assign(nextState, {
+          state: semanticReplace(
+            typeof nextState.state !== "undefined"
+              ? nextState.state
+              : this.state.state,
+            nextProps.semanticRules
+          ).value
+        });
+      }
     }
     if (nextProps.semanticReplaceMode !== this.state.semanticReplaceMode) {
       nextState = Object.assign(
         nextState,
-        this.toggleSemanticReplaceHelper(nextProps.semanticReplaceMode)
+        this.toggleSemanticReplaceHelper(
+          nextState.state,
+          this.state.semanticReplaceMode,
+          nextState.semanticRules
+        )
       );
     }
     if (Object.keys(nextState).length > 0) {
@@ -214,7 +227,10 @@ class Editor extends React.Component {
     let { state } = this.state;
     const hasLinks = this.hasLinks();
     if (hasLinks) {
-      state = state.transform().unwrapInline("link").apply();
+      state = state
+        .transform()
+        .unwrapInline("link")
+        .apply();
     } else if (state.isExpanded) {
       const href = window.prompt("Enter the URL of the link:");
       debug("onClickLink", "data.text", href);
@@ -255,18 +271,21 @@ class Editor extends React.Component {
     }
   };
 
-  onChange = state => {
+  onChange = change => {
     this.setState(
       {
-        state
+        state: change.value
       },
       () => {
-        this.props.onChangeContent(state);
+        if (this.props.onChangeContent) {
+          this.props.onChangeContent(change);
+        }
       }
     );
   };
 
   onInsertTable = () => {
+    alert("table plugin broken.");
     const { state, tablePlugin } = this.state;
     this.onChange(
       tablePlugin.transforms.insertTable(state.transform()).apply()
@@ -311,65 +330,10 @@ class Editor extends React.Component {
     );
   };
 
-  renderNormalToolbar = () => {
-    return (
-      <div>
-        <button onClick={this.onInsertTable}>Insert Table</button>
-      </div>
-    );
-  };
-
-  renderTableToolbar = () => {
-    return (
-      <div>
-        <button onClick={this.onInsertColumn}>Insert Column</button>
-        <button onClick={this.onInsertRow}>Insert Row</button>
-        <button onClick={this.onRemoveColumn}>Remove Column</button>
-        <button onClick={this.onRemoveRow}>Remove Row</button>
-        <button onClick={this.onRemoveTable}>Remove Table</button>
-        <br />
-        <button onClick={e => this.onSetAlign(e, "left")}>
-          Set align left
-        </button>
-        <button onClick={e => this.onSetAlign(e, "center")}>
-          Set align center
-        </button>
-        <button onClick={e => this.onSetAlign(e, "right")}>
-          Set align right
-        </button>
-      </div>
-    );
-  };
-
-  hasMark = type => {
-    const { state } = this.state;
-    return state.marks.some(mark => mark.type === type);
-  };
-
-  hasBlock = type => {
-    const { state } = this.state;
-    return state.blocks.some(node => node.type === type);
-  };
-
-  /**
-   * On change, save the new state.
-   *
-   * @param {State} state
-   */
-
-  /**
-   * On key down, if it's a formatting command toggle a mark.
-   *
-   * @param {Event} e
-   * @param {Object} data
-   * @param {State} state
-   * @return {State}
-   */
-
-  onKeyDown = (e, data, state) => {
-    if (data.isMod) {
+  onKeyDown = (event, change) => {
+    if (event.isMod) {
       let mark = "";
-      switch (data.key) {
+      switch (event.key) {
         case "b":
           mark = "bold";
           break;
@@ -386,18 +350,20 @@ class Editor extends React.Component {
           mark = "";
       }
       if (mark !== "") {
-        e.preventDefault();
-        return state.transform().toggleMark(mark).apply();
+        event.preventDefault();
+        change.toggleMark(mark).apply();
+        return true;
       }
     } else {
-      if (data.key === "enter") {
+      if (event.key === "Enter") {
         const breakoutRules = ["heading-one", "heading-two"];
         const shouldBreakout = breakoutRules.some(
-          rule => state.startBlock.type === rule
+          rule => change.value.startBlock.type === rule
         );
         if (shouldBreakout) {
-          e.preventDefault();
-          return state.transform().splitBlock().setBlock(DEFAULT_NODE).apply();
+          event.preventDefault();
+          change.splitBlock().setBlock(DEFAULT_NODE);
+          return true;
         }
       }
     }
@@ -414,21 +380,14 @@ class Editor extends React.Component {
   onClickMark = (e, type) => {
     e.preventDefault();
     const { state } = this.state;
-    const nextState = state.transform().toggleMark(type).apply();
-    this.setState({ state: nextState });
+    const change = state.change().toggleMark(type);
+    this.onChange(change);
   };
-
-  /**
-   * When a block button is clicked, toggle the block type.
-   *
-   * @param {Event} e
-   * @param {String} type
-   */
 
   onClickBlock = (e, type) => {
     e.preventDefault();
-    let { state } = this.state;
-    const transform = state.transform();
+    const { state } = this.state;
+    const transform = state.change();
     const { document } = state;
     // Handle everything but list buttons.
     if (type !== "bulleted-list" && type !== "numbered-list") {
@@ -449,8 +408,11 @@ class Editor extends React.Component {
             type: isActive ? DEFAULT_NODE : type
           })
         );
-      } else if (type === "link") {
+      } else if (isLink) {
         return this.onClickLink(e);
+      } else if (type === "wiki-part") {
+        this.setState({ addWikiPartDialog: true });
+        return undefined;
       } else if (type === "image") {
         this.setState({ addImageDialogOpen: true });
         return undefined;
@@ -477,8 +439,201 @@ class Editor extends React.Component {
         transform.setBlock("list-item").wrapBlock(type);
       }
     }
-    state = transform.apply();
-    this.setState({ state });
+    this.onChange(transform);
+    return undefined;
+  };
+
+  onDrop = (event, change, editor) => {
+    const target = getEventRange(event);
+    if (!target) return;
+    const transfer = getEventTransfer(event);
+    const { type } = transfer;
+    switch (type) {
+      case "files":
+        return this.onDropOrPasteFiles(event, change, editor);
+      case "node":
+        return this.onDropNode(event, change, editor);
+      default:
+        break;
+    }
+  };
+
+  // TODO fix this
+  onDropNode = (event, data, state) => {
+    return state
+      .transform()
+      .deselect()
+      .removeNodeByKey(data.node.key)
+      .select(data.target)
+      .insertBlock(data.node)
+      .apply();
+  };
+
+  onDropOrPasteFiles = (event, change, editor) => {
+    const target = getEventRange(event);
+    if (!target) return;
+    const { sourceType, sourceId } = this.props;
+    const onLoadFile = () => {
+      const reader = new FileReader();
+      const dataUrl = reader.result;
+      const dataUrlWithoutHeading = dataUrl.replace(
+        /^data:image\/(.+);base64,/,
+        ""
+      );
+      const form = {
+        type: "base64",
+        image: dataUrlWithoutHeading,
+        sourceType,
+        sourceId
+      };
+      if (this.props.sendAddImage) {
+        this.props.sendAddImage(form).then(image => {
+          const { url } = image;
+          const nextChange = this.insertImage(change, url);
+          editor.onChange(nextChange);
+        });
+      } else {
+        const nextChange = this.insertImage(change, dataUrl);
+        editor.onChange(nextChange);
+      }
+    };
+    const transfer = getEventTransfer(event);
+    const { files } = transfer;
+    for (const file of files) {
+      const reader = new FileReader();
+      const [type] = file.type.split("/");
+      if (type === "image") {
+        // TODO componentWillUnmount reader.removeEventListener(onLoadFile)
+        reader.addEventListener("load", onLoadFile);
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  onPaste = (event, change) => {
+    const state = change.vaule;
+    const transfer = getEventTransfer(event);
+    if (transfer.isShift) {
+      return undefined;
+    } else {
+      if (transfer.type === "html") {
+        const { document } = htmlSerializer.deserialize(transfer.html);
+        change.insertFragment(document);
+        return true;
+      } else if (transfer.type === "files") {
+        return this.onDropOrPasteFiles(event, change);
+      } else if (isUrl(transfer.text)) {
+        if (state.isCollapsed) {
+          const transform = state.transform();
+          if (this.hasLinks()) {
+            transform.unwrapInline("link");
+          }
+          const href = normalizeHref(transfer.text);
+          debug("data.text", transfer.text);
+          debug("onPaste", "href", href);
+          const linkProp = {
+            type: "link",
+            data: {
+              href
+            }
+          };
+          return transform
+            .wrapInline(linkProp)
+            .collapseToEnd()
+            .apply();
+        }
+      } else {
+        return undefined;
+      }
+    }
+    return undefined;
+  };
+
+  setEditorRef = ref => {
+    this.editor = ref;
+  };
+
+  getContent = () => {
+    return this.state.state;
+  };
+
+  getSlate = () => {
+    return this.ref.editor;
+  };
+
+  getJSONContent = () => {
+    return this.state.state.toJS();
+  };
+
+  toggleReadOnly = () => {
+    this.setState({
+      readOnly: !this.state.readOnly
+    });
+  };
+
+  insertImage = (change, src) => {
+    const imageProp = {
+      type: "image",
+      isVoid: true,
+      data: {
+        src
+      }
+    };
+    const imageBlock = Block.create(imageProp);
+    return change.insertBlock(imageBlock);
+  };
+
+  toggleSemanticReplace = () => {
+    const nextState = this.toggleSemanticReplaceHelper();
+    this.setState(nextState);
+  };
+
+  toggleSemanticReplaceHelper = (
+    _state,
+    _semanticReplaceMode,
+    _semanticRules
+  ) => {
+    let { state, semanticReplaceMode, semanticRules } = this.state;
+    state = typeof _state !== "undefined" ? _state : state;
+    semanticReplaceMode =
+      typeof _semanticReplaceMode !== "undefined"
+        ? _semanticReplaceMode
+        : semanticReplaceMode;
+    semanticRules =
+      typeof _semanticRules !== "undefined" ? _semanticRules : semanticRules;
+    if (!semanticReplaceMode) {
+      return {
+        state: semanticReplace(state, semanticRules).value,
+        semanticReplaceMode: !semanticReplaceMode
+      };
+    }
+    return {
+      state: serialize(this.props.rawContent),
+      semanticReplaceMode: !semanticReplaceMode
+    };
+  };
+
+  hasLinks = () => {
+    const { state } = this.state;
+    return state.inlines.some(inline => inline.type === "link");
+  };
+
+  shouldFullScreen = () => {
+    const { enableAutoFullScreen } = this.props;
+    const { readOnly, softKeyboardIsOpen } = this.state;
+    const { isFocused } = this.state.state;
+    return !readOnly && enableAutoFullScreen && isFocused && softKeyboardIsOpen;
+  };
+
+  handleToggleReadOnly = () => {
+    this.setState({
+      readOnly: !this.state.readOnly
+    });
+  };
+
+  logState = () => {
+    const content = JSON.stringify(this.state.state.toJSON(), null, 2);
+    debug("logState", content);
   };
 
   handleAddImageDialogClose = (e, reason) => {
@@ -487,100 +642,26 @@ class Editor extends React.Component {
     const { state } = this.state;
     if (reason.action === "submit") {
       const image = reason.payload;
-      nextState.state = this.insertImage(state, image.url);
+      nextState.state = this.insertImage(state.change(), image.url).value;
     } else {
-      nextState.state = state.transform().focus().apply();
+      nextState.state = state.change().focus().value;
     }
     this.setState(nextState);
   };
 
-  /**
-   * Render the toolbar.
-   *
-   * @return {Element}
-   */
-
-  renderToolbar = () => {
-    let style;
-    if (this.shouldFullScreen()) {
-      style = {
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        zIndex: 1102,
-        maxWidth: "100vw",
-        overflow: "auto"
-      };
-    } else {
-      style = {
-        maxWidth: "100vw",
-        overflow: "auto"
-      };
-    }
-    return (
-      <div>
-        <div className="menu toolbar-menu" style={style}>
-          {this.renderBlockButton("heading-one", "looks_one")}
-          {this.renderBlockButton("heading-two", "looks_two")}
-          {this.renderMarkButton("bold", "format_bold")}
-          {this.renderBlockButton("image", "image")}
-          {this.renderBlockButton("link", "link")}
-          {this.renderBlockButton("numbered-list", "format_list_numbered")}
-          {this.renderBlockButton("bulleted-list", "format_list_bulleted")}
-          {this.renderBlockButton("block-quote", "format_quote")}
-          {this.renderMarkButton("italic", "format_italic")}
-          {this.renderMarkButton("underlined", "format_underlined")}
-          {this.renderMarkButton("code", "code")}
-        </div>
-        <AddImageDialog
-          open={this.state.addImageDialogOpen}
-          sendAddImage={this.props.sendAddImage}
-          onRequestClose={this.handleAddImageDialogClose}
-        />
-      </div>
-    );
+  hasBlock = type => {
+    const { state } = this.state;
+    return state.blocks.some(node => node.type === type);
   };
 
-  /**
-   * Render a mark-toggling toolbar button.
-   *
-   * @param {String} type
-   * @param {String} icon
-   * @return {Element}
-   */
-
-  renderMarkButton = (type, icon) => {
-    const isActive = this.hasMark(type);
-    const onMouseDown = e => this.onClickMark(e, type);
-    const styles = {
-      container: {
-        color: isActive ? "black" : "#ccc",
-        cursor: "pointer"
-      },
-      icon: {
-        fontSize: "30px"
-      }
-    };
-    return (
-      <span
-        style={styles.container}
-        onMouseDown={onMouseDown}
-        data-active={isActive}
-      >
-        <span style={styles.icon} className="material-icons">
-          {icon}
-        </span>
-      </span>
-    );
+  hasMark = type => {
+    const { state } = this.state;
+    return state.marks.some(mark => mark.type === type);
   };
 
-  /**
-   * Render a block-toggling toolbar button.
-   *
-   * @param {String} type
-   * @param {String} icon
-   * @return {Element}
-   */
+  handleOpen = () => {
+    debug("open");
+  };
 
   renderBlockButton = (type, icon) => {
     const isActive = this.hasBlock(type);
@@ -607,180 +688,121 @@ class Editor extends React.Component {
     );
   };
 
-  logState = () => {
-    const content = JSON.stringify(Raw.serialize(this.state.state), null, 2);
-    debug("logState", content);
-  };
-
-  handleToggleReadOnly = () => {
-    this.setState({
-      readOnly: !this.state.readOnly
-    });
-  };
-
-  toggleReadOnly = () => {
-    this.setState({
-      readOnly: !this.state.readOnly
-    });
-  };
-
-  handleOpen = () => {
-    debug("open");
-  };
-
-  getSlate = () => {
-    return this.ref.editor;
-  };
-
-  getContent = () => {
-    return this.state.state;
-  };
-
-  getJSONContent = () => {
-    return Raw.serialize(this.state.state);
-  };
-
-  onDrop = (e, data, state, editor) => {
-    switch (data.type) {
-      case "files":
-        return this.onDropOrPasteFiles(e, data, state, editor);
-      case "node":
-        return this.onDropNode(e, data, state);
-      default:
-        break;
-    }
-    return undefined;
-  };
-
-  onDropNode = (e, data, state) => {
-    return state
-      .transform()
-      .deselect()
-      .removeNodeByKey(data.node.key)
-      .select(data.target)
-      .insertBlock(data.node)
-      .apply();
-  };
-
-  onDropOrPasteFiles = (e, data, state, editor) => {
-    for (const file of data.files) {
-      const reader = new FileReader();
-      const [type] = file.type.split("/");
-      if (type === "image") {
-        // TODO componentWillUnmount reader.removeEventListener(onLoadFile)
-        const { sourceType, sourceId } = this.props;
-        const onLoadFile = () => {
-          const dataUrl = reader.result;
-          const dataUrlWithoutHeading = dataUrl.replace(
-            /^data:image\/(.+);base64,/,
-            ""
-          );
-          const form = {
-            type: "base64",
-            image: dataUrlWithoutHeading,
-            sourceType,
-            sourceId
-          };
-          if (this.props.sendAddImage) {
-            this.props.sendAddImage(form).then(image => {
-              const url = image.url;
-              const nextState = this.insertImage(editor.getState(), url);
-              editor.onChange(nextState);
-            });
-          } else {
-            const nextState = this.insertImage(editor.getState(), dataUrl);
-            editor.onChange(nextState);
-          }
-        };
-        reader.addEventListener("load", onLoadFile);
-        reader.readAsDataURL(file);
-      }
-    }
-  };
-
-  insertImage = (state, src) => {
-    const imageProp = {
-      type: "image",
-      isVoid: true,
-      data: {
-        src
+  renderMarkButton = (type, icon) => {
+    const isActive = this.hasMark(type);
+    const onMouseDown = e => this.onClickMark(e, type);
+    const styles = {
+      container: {
+        color: isActive ? "black" : "#ccc",
+        cursor: "pointer"
+      },
+      icon: {
+        fontSize: "30px"
       }
     };
-    const imageBlock = Block.create(imageProp);
-    return state.transform().insertBlock(imageBlock).apply();
+    return (
+      <span
+        style={styles.container}
+        onMouseDown={onMouseDown}
+        data-active={isActive}
+        role="button"
+        tabIndex={0}
+      >
+        <span style={styles.icon} className="material-icons">
+          {icon}
+        </span>
+      </span>
+    );
   };
 
-  onPaste = (e, data, state, editor) => {
-    if (data.isShift) {
-      return undefined;
+  renderToolbar = () => {
+    let style;
+    if (this.shouldFullScreen()) {
+      style = {
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        zIndex: 1102,
+        maxWidth: "100vw",
+        overflow: "auto"
+      };
     } else {
-      if (data.type === "html") {
-        const { document } = htmlSerializer.deserialize(data.html);
-        return state.transform().insertFragment(document).apply();
-      } else if (data.type === "files") {
-        return this.onDropOrPasteFiles(e, data, state, editor);
-      } else if (isUrl(data.text)) {
-        if (state.isCollapsed) {
-          const transform = state.transform();
-          if (this.hasLinks()) {
-            transform.unwrapInline("link");
-          }
-          const href = normalizeHref(data.text);
-          debug("data.text", data.text);
-          debug("onPaste", "href", href);
-          const linkProp = {
-            type: "link",
-            data: {
-              href
-            }
-          };
-          return transform.wrapInline(linkProp).collapseToEnd().apply();
-        }
-      } else {
-        return undefined;
-      }
-    }
-    return undefined;
-  };
-
-  toggleSemanticReplace = () => {
-    const newState = this.toggleSemanticReplaceHelper();
-    this.setState(newState);
-  };
-
-  toggleSemanticReplaceHelper = () => {
-    const { state, semanticReplaceMode, semanticRules } = this.state;
-    if (!semanticReplaceMode) {
-      return {
-        state: semanticReplace(state, semanticRules),
-        semanticReplaceMode: !semanticReplaceMode
+      style = {
+        maxWidth: "100vw",
+        overflow: "auto"
       };
     }
-    return {
-      state: serialize(this.props.rawContent),
-      semanticReplaceMode: !semanticReplaceMode
-    };
+    return (
+      <div>
+        <div className="menu toolbar-menu" style={style}>
+          {this.renderBlockButton("heading-one", "looks_one")}
+          {this.renderBlockButton("heading-two", "looks_two")}
+          {this.renderBlockButton("wiki-part", "import_contacts")}
+          {this.renderMarkButton("bold", "format_bold")}
+          {this.renderBlockButton("image", "image")}
+          {this.renderBlockButton("link", "link")}
+          {this.renderBlockButton("numbered-list", "format_list_numbered")}
+          {this.renderBlockButton("bulleted-list", "format_list_bulleted")}
+          {this.renderBlockButton("block-quote", "format_quote")}
+          {this.renderMarkButton("italic", "format_italic")}
+          {this.renderMarkButton("underlined", "format_underlined")}
+          {this.renderMarkButton("code", "code")}
+        </div>
+        <AddImageDialog
+          open={this.state.addImageDialogOpen}
+          sendAddImage={this.props.sendAddImage}
+          onRequestClose={this.handleAddImageDialogClose}
+        />
+        <AddWikiPartDialog open={this.state.addWikiPartDialog} />
+      </div>
+    );
   };
 
-  hasLinks = () => {
-    const { state } = this.state;
-    return state.inlines.some(inline => inline.type === "link");
+  renderTableToolbar = () => {
+    return (
+      <div>
+        <button onClick={this.onInsertColumn}>Insert Column</button>
+        <button onClick={this.onInsertRow}>Insert Row</button>
+        <button onClick={this.onRemoveColumn}>Remove Column</button>
+        <button onClick={this.onRemoveRow}>Remove Row</button>
+        <button onClick={this.onRemoveTable}>Remove Table</button>
+        <br />
+        <button onClick={e => this.onSetAlign(e, "left")}>
+          Set align left
+        </button>
+        <button onClick={e => this.onSetAlign(e, "center")}>
+          Set align center
+        </button>
+        <button onClick={e => this.onSetAlign(e, "right")}>
+          Set align right
+        </button>
+      </div>
+    );
   };
 
-  shouldFullScreen = () => {
-    const { enableAutoFullScreen } = this.props;
-    const { readOnly, softKeyboardIsOpen } = this.state;
-    const isFocused = this.state.state.isFocused;
-    return !readOnly && enableAutoFullScreen && isFocused && softKeyboardIsOpen;
+  renderNormalToolbar = () => {
+    return (
+      <div>
+        <button onClick={this.onInsertTable}>Insert Table</button>
+      </div>
+    );
   };
 
-  setEditorRef = ref => {
-    this.editor = ref;
+  renderNode = props => {
+    const { node } = props;
+    const Element = schema.nodes[node.type];
+    return <Element {...props} />;
+  };
+
+  renderMark = props => {
+    const { mark, children } = props;
+    const Element = schema.marks[mark.type];
+    return <Element>{children}</Element>;
   };
 
   renderEditor = () => {
-    const { state, tablePlugin, suggestionsPlugin, plugins } = this.state;
-    const isTable = tablePlugin.utils.isSelectionInTable(state);
+    const { state, suggestionsPlugin, plugins } = this.state;
+    // const isTable = tablePlugin.utils.isSelectionInTable(state);
     const { SuggestionPortal } = suggestionsPlugin;
     const styles = getStyles();
     const { readOnly } = this.state;
@@ -792,48 +814,43 @@ class Editor extends React.Component {
     }
     return (
       <div style={editorContainerStyle}>
-        <div>
-          {/* {this.renderTableToolbar()} */}
-        </div>
-        <div>
-          {/* {this.renderNormalToolbar()} */}
-        </div>
+        <div>{/* {this.renderTableToolbar()} */}</div>
+        <div>{/* {this.renderNormalToolbar()} */}</div>
         <div>
           {/* <button onTouchTap={this.logState}>logState</button>
           <button onTouchTap={this.toggleReadOnly}>ReadOnly</button> */}
         </div>
-        <Slate.Editor
+        <SlateEditor
           ref={this.setEditorRef}
+          renderNode={this.renderNode}
+          renderMark={this.renderMark}
           autoFocus={false}
-          state={state}
+          value={state}
           style={editorStyle}
-          schema={schema}
           plugins={plugins}
           onKeyDown={this.onKeyDown}
           onChange={this.onChange}
           onPaste={this.onPaste}
           onDrop={this.onDrop}
-          readOnly={this.state.readOnly}
-          spellCheck={false}
-          autoComplete={false}
-          autoCorrect={false}
+          readOnly={readOnly}
         />
-        <SuggestionPortal
-          state={this.state.state}
-          suggestions={this.state.suggestions}
-        />
+        {readOnly ? null : (
+          <SuggestionPortal
+            state={this.state.state}
+            suggestions={this.state.suggestions.toJS()}
+          />
+        )}
       </div>
     );
   };
 
   render() {
     const ContainerComponent = this.shouldFullScreen() ? Portal : Div;
+    const { readOnly } = this.state;
     return (
       <ContainerComponent>
-        <div>
-          {this.state.readOnly ? null : this.renderToolbar()}
-          {this.renderEditor()}
-        </div>
+        {readOnly ? null : this.renderToolbar()}
+        {this.renderEditor()}
       </ContainerComponent>
     );
   }
@@ -841,13 +858,14 @@ class Editor extends React.Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    sendAddImage: (form, reqConfig) => dispatch(addImage(form, reqConfig)),
+    sendAddImage: (form, reqConfig) =>
+      dispatch(addImageRequest(form, reqConfig)),
     onError: err => dispatch(addError(err))
   };
 }
 
 function mapStateToProps(store, props) {
-  return props;
+  return {};
 }
 
 export default connect(mapStateToProps, mapDispatchToProps, null, {

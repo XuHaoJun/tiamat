@@ -7,6 +7,36 @@ import ActionHome from "material-ui/svg-icons/action/home";
 import ForumBoardList from "../../ForumBoard/components/ForumBoardList";
 import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import _reduce from "lodash/reduce";
+
+export const HOME_SLIDE = 0;
+export const WHAT_HOT_SLIDE = 1;
+export const WIKI_SLIDE = 2;
+export const SLIDE_COUNT = 3;
+
+const _slideIndexEnMapping = {
+  [HOME_SLIDE]: "home",
+  [WHAT_HOT_SLIDE]: "what_hot",
+  [WIKI_SLIDE]: "wiki"
+};
+
+const _slideIndexEnReverseMapping = _reduce(
+  _slideIndexEnMapping,
+  (result, v, k) => {
+    const en = v;
+    const i = Number.parseInt(k, 10);
+    return Object.assign(result, { [en]: i });
+  },
+  {}
+);
+
+export const getSlideIndexEnAlias = slideIndex => {
+  return _slideIndexEnMapping[slideIndex];
+};
+
+export const getSlideIndexFromEnAlias = enAlias => {
+  return _slideIndexEnReverseMapping[enAlias];
+};
 
 class HomeTabs extends React.Component {
   static propTypes = {
@@ -64,9 +94,9 @@ class HomeTabs extends React.Component {
           onChange={this.handleChange}
           value={this.state.slideIndex}
         >
-          <Tab icon={<ActionHome />} value={0} />
-          <Tab icon={<WhatHotIcon />} value={1} />
-          <Tab icon={<WikiIcon />} value={2} />
+          <Tab icon={<ActionHome />} value={HOME_SLIDE} />
+          <Tab icon={<WhatHotIcon />} value={WHAT_HOT_SLIDE} />
+          <Tab icon={<WikiIcon />} value={WIKI_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey="hometabs"
@@ -79,9 +109,9 @@ class HomeTabs extends React.Component {
           onChangeIndex={this.handleChange}
           onTransitionEnd={this.handleTransitionEnd}
         >
-          <div>主頁</div>
+          <div>主頁，放訂閱的文章或看板等最新或熱門資訊(尚未完成)</div>
           <ForumBoardList />
-          <div>維基特色條目</div>
+          <div>維基特色條目(尚未完成)</div>
         </EnhancedSwipeableViews>
       </div>
     );

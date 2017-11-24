@@ -1,15 +1,17 @@
 import { createResponsiveStateReducer } from "redux-responsive";
 
-const breakPoint = {
-  extraSmall: 412,
-  small: 500,
-  medium: 768,
-  large: 992,
-  extraLarge: 1200
+const breakPoints = {
+  extraSmall: 1,
+  small: 600,
+  medium: 960,
+  large: 1280,
+  extraLarge: 1920
 };
 
-const browser = createResponsiveStateReducer(breakPoint, {
+const browser = createResponsiveStateReducer(breakPoints, {
   initialMediaType: "small"
 });
 
 export default browser;
+
+export { breakPoints };

@@ -2,6 +2,37 @@ import qs from "qs";
 import _ from "lodash";
 import Discussion from "../models/discussion";
 
+import Ajv from "ajv";
+import rootDiscussionFormSchema from "../../client/modules/Discussion/components/RootDiscussionForm/schema.json";
+import childDiscussionFormSchema from "../../client/modules/Discussion/components/ChildDiscussionForm/schema.json";
+import { loadSchema } from "../../client/modules/JSONSchema/JSONSchemaActions";
+
+const ajv = new Ajv({
+  allErrors: true,
+  extendRefs: true,
+  loadSchema
+});
+
+let validateRoot = () => {
+  this.errors = [new Error("load schema fail.")];
+  return false;
+};
+
+ajv.compileAsync(rootDiscussionFormSchema).then(_validate => {
+  validateRoot = _validate;
+  return validateRoot;
+});
+
+let validateChild = () => {
+  this.errors = [new Error("load schema fail.")];
+  return false;
+};
+
+ajv.compileAsync(childDiscussionFormSchema).then(_validate => {
+  validateChild = _validate;
+  return validateChild;
+});
+
 function parseSelect(select) {
   if (!select) {
     return select;
@@ -70,23 +101,47 @@ export function getRootDiscussions(req, res) {
  * @returns void
  */
 export function addDiscussion(req, res) {
-  const newDiscussion = new Discussion(req.body.discussion);
-  const validateError = newDiscussion.validateSync();
-  if (validateError) {
-    res.status(403).send(validateError);
+  const form = req.body.discussion;
+  if (!form) {
+    res.status(403).send(new Error("Discussion form is required."));
+    return;
+  }
+  let validate;
+  if (form.isRoot) {
+    validate = validateRoot;
   } else {
-    newDiscussion.save((err, saved) => {
-      if (err) {
-        res.status(403).send(err);
-        return;
-      }
+    validate = validateChild;
+  }
+  const valid = validate(form);
+  if (!valid) {
+    res.status(403).send(validate.errors);
+    return;
+  }
+  const { user } = req;
+  const author = user._id;
+  const authorBasicInfo = user.getBasicInfo();
+  const props = {
+    ...form,
+    author,
+    authorBasicInfo
+  };
+  // TODO
+  // strict validate parentDiscussion or forumBoard is exists
+  const newDiscussion = new Discussion(props);
+  newDiscussion
+    .save()
+    .then(saved => {
       const io = req.app.get("io");
-      const nsp = `/forumBoards/${saved.get("forumBoard")}/discussions`;
+      const nsp = `/forumBoards/${saved.forumBoard}/discussions`;
       const socket = io.of(nsp);
       socket.emit("addDiscussion", saved);
       res.json({ discussion: saved });
+      return saved;
+    })
+    .catch(err => {
+      res.status(403).send(err);
+      return err;
     });
-  }
 }
 
 /**
@@ -111,27 +166,26 @@ export function getDiscussion(req, res) {
 }
 
 export function getDiscussions(req, res) {
-  const { parentDiscussionId, forumBoardId } = req.query;
-  if (!parentDiscussionId || !forumBoardId) {
-    res
-      .status(403)
-      .send(new Error("must have parentDiscussionId and forumBoardId."));
+  const { parentDiscussionId } = req.query;
+  if (!parentDiscussionId) {
+    res.status(403).send(new Error("must have parentDiscussionId"));
     return;
   }
   const rawQuery = req._parsedOriginalUrl.query;
   const reqQuery = qs.parse(rawQuery);
   const select = parseSelect(reqQuery.select) || {};
   const query = {
-    parentDiscussion: parentDiscussionId,
-    forumBoard: forumBoardId
+    parentDiscussion: parentDiscussionId
   };
-  Discussion.find(query).select(select).exec((err, discussions) => {
-    if (err) {
-      res.status(403).send(err);
-      return;
-    }
-    res.json({ discussions });
-  });
+  Discussion.find(query)
+    .select(select)
+    .exec((err, discussions) => {
+      if (err) {
+        res.status(403).send(err);
+        return;
+      }
+      res.json({ discussions });
+    });
 }
 
 /**

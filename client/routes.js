@@ -2,9 +2,75 @@
 import React from "react";
 import { Route, IndexRoute } from "react-router";
 import MyApp from "./modules/MyApp/MyApp";
-import MixedMainPage from "./modules/MixedMain/pages/MixedMainPage";
-import HomePage from "./modules/Home/pages/HomePage";
-import DiscussionDetailPage from "./modules/Discussion/pages/DiscussionDetailPage";
+import Loadable from "react-loadable";
+import Loading from "./components/CenterCircularProgress";
+
+// FIXME
+// can't wrap loading option by function
+export const HomePage = Loadable({
+  loader: () => import("./modules/Home/pages/HomePage"),
+  loading: Loading
+});
+export const MixedMainPage = Loadable({
+  loader: () => import("./modules/MixedMain/pages/MixedMainPage"),
+  loading: Loading
+});
+export const DiscussionDetailPage = Loadable({
+  loader: () => import("./modules/Discussion/pages/DiscussionDetailPage"),
+  loading: Loading
+});
+export const EditRootWikiGroupTreePage = Loadable({
+  loader: () => import("./modules/RootWiki/pages/EditRootWikiGroupTreePage"),
+  loading: Loading
+});
+export const UpsertDiscussionPage = Loadable({
+  loader: () => import("./modules/Discussion/pages/UpsertDiscussionPage"),
+  loading: Loading
+});
+export const CreateForumBoardPage = Loadable({
+  loader: () => import("./modules/ForumBoard/pages/CreateForumBoardPage"),
+  loading: Loading
+});
+export const CreateRootWikiPage = Loadable({
+  loader: () => import("./modules/RootWiki/pages/CreateRootWikiPage"),
+  loading: Loading
+});
+export const CreateWikiPage = Loadable({
+  loader: () => import("./modules/Wiki/pages/CreateWikiPage"),
+  loading: Loading
+});
+export const SettingDetailPage = Loadable({
+  loader: () => import("./modules/Setting/pages/SettingDetailPage"),
+  loading: Loading
+});
+export const WikiDetailPage = Loadable({
+  loader: () => import("./modules/Wiki/pages/WikiDetailPage"),
+  loading: Loading
+});
+export const UserSignUpPage = Loadable({
+  loader: () => import("./modules/User/pages/UserSignUpPage"),
+  loading: Loading
+});
+export const UserLogInPage = Loadable({
+  loader: () => import("./modules/User/pages/UserLogInPage"),
+  loading: Loading
+});
+export const UserOauth2CallbackPage = Loadable({
+  loader: () => import("./modules/User/pages/UserOauth2CallbackPage"),
+  loading: Loading
+});
+export const SearchHomePage = Loadable({
+  loader: () => import("./modules/Search/pages/SearchHomePage"),
+  loading: Loading
+});
+export const AboutPage = Loadable({
+  loader: () => import("./modules/About/pages/AboutPage"),
+  loading: Loading
+});
+export const NotFoundPage = Loadable({
+  loader: () => import("./modules/Error/pages/NotFoundPage"),
+  loading: Loading
+});
 
 // require.ensure polyfill for node
 if (typeof require.ensure !== "function") {
@@ -14,6 +80,7 @@ if (typeof require.ensure !== "function") {
 }
 
 /* Workaround for async react routes to work with react-hot-reloader till
+  and it fixed in react-router v4 but react-router-scroll must use v3.
   https://github.com/reactjs/react-router/issues/2182 and
   https://github.com/gaearon/react-hot-loader/issues/288 is fixed.
  */
@@ -22,18 +89,15 @@ if (process.env.NODE_ENV !== "production") {
   require("./modules/Home/pages/HomePage");
   require("./modules/Search/pages/SearchHomePage");
   require("./modules/About/pages/AboutPage");
-  require("./modules/User/pages/UserLoginPage/UserLoginPage");
+  require("./modules/User/pages/UserLogInPage");
   require("./modules/User/pages/UserOauth2CallbackPage");
   require("./modules/User/pages/UserSignUpPage");
-  require("./components/Editor/Editor");
-  require("./components/Slate/Editor");
-  require("./components/Slate/Editor2");
   require("./modules/ForumBoard/pages/CreateForumBoardPage");
   require("./modules/Wiki/pages/CreateWikiPage");
   require("./modules/Wiki/pages/WikiDetailPage");
   require("./modules/RootWiki/pages/CreateRootWikiPage");
   require("./modules/MixedMain/pages/MixedMainPage");
-  require("./modules/Discussion/pages/CreateRootDiscussionPage");
+  require("./modules/Discussion/pages/UpsertDiscussionPage");
   require("./modules/Discussion/pages/DiscussionDetailPage");
   require("./modules/Setting/pages/SettingDetailPage");
   require("./modules/Error/pages/NotFoundPage");
@@ -45,23 +109,13 @@ if (process.env.NODE_ENV !== "production") {
 export default (
   <Route path="/" component={MyApp}>
     <IndexRoute component={HomePage} />
-    <Route
-      path="/setting"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/Setting/pages/SettingDetailPage").default
-            );
-          },
-          "SettingDetailPage"
-        );
-      }}
-    />
+    <Route path="/setting" component={SettingDetailPage} />
     <Route
       path="/forumBoards/:forumBoardId/rootDiscussions/:parentDiscussionId"
+      component={DiscussionDetailPage}
+    />
+    <Route
+      path="/rootDiscussions/:parentDiscussionId"
       component={DiscussionDetailPage}
     />
     <Route
@@ -70,206 +124,43 @@ export default (
     />
     <Route
       path="/rootWikis/:rootWikiId/wikis/:wikiId"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./modules/Wiki/pages/WikiDetailPage").default);
-          },
-          "WikiDetailPage"
-        );
-      }}
+      component={WikiDetailPage}
     />
     <Route path="/rootWikis/:rootWikiId/wikis" component={MixedMainPage} />
     <Route path="/rootWikis/:rootWikiId" component={MixedMainPage} />
     <Route
       path="/edit/rootWikis/:rootWikiId/rootWikiGroupTree"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/RootWiki/pages/EditRootWikiGroupTreePage")
-                .default
-            );
-          },
-          "EditRootWikiGroupTreePage"
-        );
-      }}
+      component={EditRootWikiGroupTreePage}
     />
     <Route
       path="/create/forumBoards/:forumBoardId/rootDiscussion"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/Discussion/pages/CreateRootDiscussionPage")
-                .default
-            );
-          },
-          "CreateRootDiscussionPage"
-        );
-      }}
+      component={UpsertDiscussionPage}
     />
     <Route
-      path="/create/forumBoard"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/ForumBoard/pages/CreateForumBoardPage").default
-            );
-          },
-          "CreateForumBoardPage"
-        );
-      }}
+      path="/create/rootDiscussions/:parentDiscussionId/childDiscussion"
+      component={UpsertDiscussionPage}
     />
+    <Route
+      path="/update/discussions/:discussionId"
+      component={UpsertDiscussionPage}
+    />
+    <Route path="/create/forumBoard" component={CreateForumBoardPage} />
     <Route
       path="/create/forumBoards/:forumBoardId/rootWiki"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/RootWiki/pages/CreateRootWikiPage").default
-            );
-          },
-          "CreateRootWikiPage"
-        );
-      }}
+      component={CreateRootWikiPage}
     />
     <Route
       path="/create/forumBoards/:forumBoardId/rootWikis/:rootWikiId/wiki"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./modules/Wiki/pages/CreateWikiPage").default);
-          },
-          "CreateWikiPage"
-        );
-      }}
+      component={CreateWikiPage}
     />
-    <Route
-      path="/testEditor3"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./components/Slate/Editor2").default);
-          },
-          "testEditor3"
-        );
-      }}
-    />
-    <Route
-      path="/testEditor2"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./components/Slate/Editor").default);
-          },
-          "testEditor2"
-        );
-      }}
-    />
-    <Route
-      path="/testEditor"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./components/Editor/Editor").default);
-          },
-          "testEditor"
-        );
-      }}
-    />
-    <Route
-      path="/signup"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./modules/User/pages/UserSignUpPage").default);
-          },
-          "UserSignUpPage"
-        );
-      }}
-    />
-    <Route
-      path="/login"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/User/pages/UserLoginPage/UserLoginPage")
-                .default
-            );
-          },
-          "UserLoginPage"
-        );
-      }}
-    />
+    <Route path="/signup" component={UserSignUpPage} />
+    <Route path="/login" component={UserLogInPage} />
     <Route
       path="/api/oauth2/:providerName/callback"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(
-              null,
-              require("./modules/User/pages/UserOauth2CallbackPage").default
-            );
-          },
-          "UserOauth2CallbackPage"
-        );
-      }}
+      component={UserOauth2CallbackPage}
     />
-    <Route
-      path="/search"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./modules/Search/pages/SearchHomePage").default);
-          },
-          "SearchHomePage"
-        );
-      }}
-    />
-    <Route
-      path="/about"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./modules/About/pages/AboutPage").default);
-          },
-          "AboutPage"
-        );
-      }}
-    />
-    <Route
-      path="*"
-      getComponent={(nextState, cb) => {
-        require.ensure(
-          [],
-          require => {
-            cb(null, require("./modules/Error/pages/NotFoundPage").default);
-          },
-          "NotFoundPage"
-        );
-      }}
-    />
+    <Route path="/search" component={SearchHomePage} />
+    <Route path="/about" component={AboutPage} />
+    <Route path="*" component={NotFoundPage} />
   </Route>
 );

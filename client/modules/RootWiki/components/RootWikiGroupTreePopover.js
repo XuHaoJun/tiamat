@@ -32,7 +32,6 @@ export function getRootWikiGroupTreeMenuItemsHelper(
       return (
         <MenuItem
           value={value}
-          onTouchTap={e => e.preventDefault()}
           rightIcon={<ArrowDropRight />}
           key={value}
           primaryText={k}
@@ -44,14 +43,7 @@ export function getRootWikiGroupTreeMenuItemsHelper(
     return rootWikiGroupTree
       .map(leaf => {
         const value = `${prefix}${delimiter}${leaf}`;
-        return (
-          <MenuItem
-            value={value}
-            onTouchTap={e => e.preventDefault()}
-            key={value}
-            primaryText={leaf}
-          />
-        );
+        return <MenuItem value={value} key={value} primaryText={leaf} />;
       })
       .toJS();
   }
@@ -66,20 +58,17 @@ class RootWikiGroupTreePopover extends React.PureComponent {
     };
   }
 
-  handleTouchTap = event => {
+  onItemTouchTap = (event, menuItem, index) => {
+    event.preventDefault();
+  };
+
+  handleClick = event => {
     // This prevents ghost click.
     event.preventDefault();
-
     this.setState({ open: true, anchorEl: event.currentTarget });
   };
 
-  onItemTouchTap = (event, menuItem, index) => {
-    event.preventDefault();
-    console.log(event, menuItem, index);
-  };
-
   handleRequestClose = reason => {
-    console.log(reason);
     this.setState({ open: false });
   };
 
@@ -116,7 +105,7 @@ class RootWikiGroupTreePopover extends React.PureComponent {
         <Paper style={style}>
           <RaisedButton
             label="未分類(尚未完成)可以選好幾組"
-            onTouchTap={this.handleTouchTap}
+            onClick={this.handleClick}
             icon={<ArrowDropDown />}
             labelPosition="before"
           />

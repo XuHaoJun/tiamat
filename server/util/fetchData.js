@@ -4,21 +4,34 @@ This was inspired from https://github.com/caljrimmer/isomorphic-redux-app/blob/7
 */
 import { sequence } from "./promiseUtils";
 
-export function fetchComponentData(store, components, params, query) {
-  const needs = components.reduce((prev, current) => {
-    return (current.need || [])
-      .concat(
-        (current.WrappedComponent &&
-        current.WrappedComponent.need !== current.need
-          ? current.WrappedComponent.need
-          : []) || []
-      )
-      .concat(prev);
-  }, []);
-
-  return sequence(needs, need =>
-    store.dispatch(need(params, store.getState(), query))
-  );
+export function fetchComponentData(store, _components, params, query) {
+  const ps = _components.map(c => {
+    if (c.load) {
+      return c.load();
+    } else if (c.preload) {
+      return c.preload().then(m => m.default);
+    }
+    return c;
+  });
+  return Promise.all(ps)
+    .then(components => {
+      const needs = components.reduce((prev, current) => {
+        return (current.need || [])
+          .concat(
+            (current.WrappedComponent &&
+            current.WrappedComponent.need !== current.need
+              ? current.WrappedComponent.need
+              : []) || []
+          )
+          .concat(prev);
+      }, []);
+      return needs;
+    })
+    .then(needs => {
+      return sequence(needs, need =>
+        store.dispatch(need(params, store.getState(), query))
+      );
+    });
 }
 
 export default fetchComponentData;

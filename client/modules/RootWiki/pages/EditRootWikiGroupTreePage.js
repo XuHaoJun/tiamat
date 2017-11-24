@@ -123,6 +123,10 @@ class CreateRootWikiPage extends React.PureComponent {
     }
   }
 
+  onChangeRootWikiGroupTree = rootWikiGroupTree => {
+    this.setState({ rootWikiGroupTree });
+  };
+
   setFormRef = formComponent => {
     if (formComponent) {
       this.formComponent = formComponent;
@@ -136,12 +140,6 @@ class CreateRootWikiPage extends React.PureComponent {
       );
     }
   };
-
-  onChangeRootWikiGroupTree = rootWikiGroupTree => {
-    this.setState({ rootWikiGroupTree });
-  };
-
-  sendForm = () => {};
 
   getSortableTreeComponent = () => {
     if (this.SortableTree) {
@@ -162,14 +160,16 @@ class CreateRootWikiPage extends React.PureComponent {
           }
         ]
       };
-      const SortableTreeWithoutDndContext = require("@xuhaojun/react-sortable-tree")
-        .SortableTreeWithoutDndContext; // eslint-disable-line global-require
+      const SortableTreeWithoutDndContext = require("react-sortable-tree") // eslint-disable-line global-require
+        .SortableTreeWithoutDndContext;
       this.SortableTree = DragDropContext(MultiBackend(HTML5toTouch))(
         SortableTreeWithoutDndContext
       );
       return this.SortableTree;
     }
   };
+
+  sendForm = () => {};
 
   render() {
     const SortableTree = this.getSortableTreeComponent();

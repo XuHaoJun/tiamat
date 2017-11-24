@@ -4,6 +4,29 @@ import { ADD_SOCKET, REMOVE_SOCKET } from "./SocketActions";
 
 const initialState = fromJS({ sockets: {} });
 
+function createSocket(nsp, _opts = {}, handlers = []) {
+  const opts = _opts;
+  let query = {};
+  if (opts.accessToken) {
+    query = { access_token: opts.accessToken.get("token") };
+    // don't need pass to io.
+    delete opts.accessToken;
+  }
+  if (!opts.query) {
+    opts.query = query;
+  } else {
+    opts.query = Object.assign(opts.query, query);
+  }
+  const socket = io(nsp, opts);
+  handlers.forEach(handler => {
+    const { method, eventName, callback } = handler;
+    socket[method](eventName, callback);
+  });
+  return socket;
+}
+
+// TODO
+// drop guest socket connection if logIn and then use access token connect.
 const SocketReducer = (state = initialState, action) => {
   // never create socket client on server-side.
   if (typeof window === "undefined") {
@@ -18,14 +41,8 @@ const SocketReducer = (state = initialState, action) => {
         // reuse same namespace.
         if (found) {
           if (opts.forceNew) {
-            const socket = io(nsp, opts);
-            handlers.forEach(handler => {
-              const { method, eventName, callback } = handler;
-              socket[method](eventName, callback);
-            });
-            if (found.connected) {
-              found.disconnect();
-            }
+            found.disconnect();
+            const socket = createSocket(nsp, opts, handlers);
             const nextSockets = sockets.set(nsp, socket);
             return state.set("sockets", nextSockets);
           } else {
@@ -34,11 +51,7 @@ const SocketReducer = (state = initialState, action) => {
             return state;
           }
         } else {
-          const socket = io(nsp, opts);
-          handlers.forEach(handler => {
-            const { method, eventName, callback } = handler;
-            socket[method](eventName, callback);
-          });
+          const socket = createSocket(nsp, opts, handlers);
           const nextSockets = sockets.set(nsp, socket);
           return state.set("sockets", nextSockets);
         }
@@ -49,9 +62,7 @@ const SocketReducer = (state = initialState, action) => {
         const sockets = state.get("sockets");
         const found = sockets.get(nsp);
         if (found) {
-          if (found.connected) {
-            found.disconnect();
-          }
+          found.disconnect();
         }
         const nextSockets = sockets.delete(nsp);
         return state.set("sockets", nextSockets);

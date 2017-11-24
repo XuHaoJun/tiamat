@@ -5,7 +5,7 @@ import { fetchWiki } from "../WikiActions";
 import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
 import { getWiki } from "../WikiReducer";
 import { getRootWiki } from "../../RootWiki/RootWikiReducer";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
+import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
 import CenterCircularProgress from "../../../components/CenterCircularProgress";
 import WikiDetailTabs, {
   WIKI_CONTENT_SLIDE,
@@ -78,6 +78,12 @@ WikiDetailPage.need = []
   .concat(params => {
     const { rootWikiId } = params;
     return rootWikiId ? fetchRootWikiById(rootWikiId) : emptyThunkAction;
+  })
+  .concat((params, store) => {
+    const { rootWikiId } = params;
+    const rootWiki = getRootWiki(store, rootWikiId);
+    const title = rootWiki ? rootWiki.get("name") : undefined;
+    return title ? setHeaderTitleThunk(title) : emptyThunkAction;
   });
 
 function mapStateToProps(store, routerProps) {
@@ -86,8 +92,8 @@ function mapStateToProps(store, routerProps) {
   enableEdit = enableEdit === true;
   const wiki = getWiki(store, wikiId);
   const rootWiki = getRootWiki(store, rootWikiId);
-  const title = rootWiki ? rootWiki.get("name") : "維基";
-  const browser = store.browser;
+  const title = rootWiki ? rootWiki.get("name") : "";
+  const { browser } = store;
   return {
     browser,
     title,

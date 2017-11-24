@@ -1,6 +1,6 @@
 import Discussion from "../models/discussion";
 import ForumBoard from "../models/forumBoard";
-import * as Debug from "debug";
+import Debug from "debug";
 
 export default function syncElasticsearch() {
   const models = [ForumBoard, Discussion];

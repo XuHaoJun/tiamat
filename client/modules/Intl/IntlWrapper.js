@@ -4,11 +4,7 @@ import { IntlProvider } from "react-intl";
 import { connect } from "react-redux";
 
 export function IntlWrapper(props) {
-  return (
-    <IntlProvider {...props.intl}>
-      {props.children}
-    </IntlProvider>
-  );
+  return <IntlProvider {...props.intl}>{props.children}</IntlProvider>;
 }
 
 IntlWrapper.propTypes = {

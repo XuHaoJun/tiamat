@@ -5,6 +5,8 @@ import { fromJS } from "immutable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import Debug from "debug";
+
 import MixedMainTabs, {
   FORUMBOARD_GROUPS_SLIDE,
   ROOT_DISCUSSIONS_SLIDE,
@@ -19,9 +21,13 @@ import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
 import { fetchRootDiscussions } from "../../Discussion/DiscussionActions";
 import { createSocket, removeSocket } from "../../Socket/SocketActions";
+import { getCurrentAccessToken } from "../../User/UserReducer";
+
+const debug = Debug("app:MixedMainPage");
 
 class MixedMainPage extends React.Component {
   static propTypes = {
+    title: PropTypes.string,
     browser: PropTypes.object.isRequired
   };
 
@@ -40,7 +46,7 @@ class MixedMainPage extends React.Component {
   }
 
   componentWillMount() {
-    const title = this.props.title;
+    const { title } = this.props;
     this.props.dispatch(setHeaderTitle(title));
   }
 
@@ -69,12 +75,17 @@ class MixedMainPage extends React.Component {
       }
     }
     if (forumBoardId) {
-      dispatch(createSocket(`/forumBoards/${forumBoardId}/discussions`));
+      const { accessToken } = this.props;
+      dispatch(
+        createSocket(`/forumBoards/${forumBoardId}/discussions`, {
+          accessToken
+        })
+      );
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const title = nextProps.title;
+    const { title } = nextProps;
     if (this.props.title !== title) {
       this.props.dispatch(setHeaderTitle(title));
     }
@@ -126,7 +137,7 @@ class MixedMainPage extends React.Component {
       this.props.forumBoardId || (rootWiki && rootWiki.get("forumBoard"));
     const rootWikiId =
       this.props.rootWikiId || (forumBoard && forumBoard.get("rootWiki"));
-    const router = this.context.router;
+    const { router } = this.context;
     const currentURL = `${router.location.pathname}${router.location.search}`;
     if (slideIndex === ROOT_DISCUSSIONS_SLIDE) {
       let { forumBoardGroup } = this.props;
@@ -166,7 +177,7 @@ class MixedMainPage extends React.Component {
   };
 
   render() {
-    const title = this.props.title;
+    const { title } = this.props;
     const metaDescription = "Tiamat | Game forum and wiki.";
     const meta = [
       {
@@ -217,6 +228,8 @@ const emptyThunkAction = () => {
   return Promise.resolve(null);
 };
 
+// TODO
+// optimize need by Promise.all by default need behavior is sequence
 MixedMainPage.need = []
   .concat(params => {
     const { forumBoardId } = params;
@@ -243,11 +256,14 @@ MixedMainPage.need = []
     return rootWikiId ? fetchWikis(rootWikiId) : emptyThunkAction;
   })
   .concat((params, store) => {
-    const { forumBoardId } = params;
+    const { forumBoardId, rootWikiId } = params;
     const forumBoard = forumBoardId
       ? getForumBoardById(store, forumBoardId)
       : null;
-    const title = forumBoard ? forumBoard.get("name") : "";
+    const rootWiki = rootWikiId ? getRootWiki(store, rootWikiId) : null;
+    const fName = forumBoard ? forumBoard.get("name") : "";
+    const rName = rootWiki ? rootWiki.get("name") : "";
+    const title = fName || rName;
     return title ? setHeaderTitleThunk(title) : emptyThunkAction;
   });
 
@@ -255,12 +271,15 @@ const parseRootWikiGroupTree = memoize(queryString => {
   if (!queryString) {
     return queryString;
   }
+  // TODO
+  // let depth limit to 3 or 4?
   const parsed = qs.parse(queryString, { depth: Infinity });
   const { rootWikiGroupTree } = parsed;
   return fromJS(rootWikiGroupTree);
 });
 
 function mapStateToProps(store, routerProps) {
+  const accessToken = getCurrentAccessToken(store);
   const { forumBoardGroup } = routerProps.location.query;
   const rootWikiGroupTree = parseRootWikiGroupTree(
     routerProps.location.search.length > 0
@@ -284,7 +303,7 @@ function mapStateToProps(store, routerProps) {
   }
   const forumBoardName = forumBoard ? forumBoard.get("name") : "";
   const rootWikiName = rootWiki ? rootWiki.get("name") : "";
-  const browser = store.browser;
+  const { browser } = store;
   let slideIndex = 1;
   const slideIndexMapping = {
     forumBoardId: 1,
@@ -297,6 +316,7 @@ function mapStateToProps(store, routerProps) {
   }
   const title = forumBoardName || rootWikiName;
   return {
+    accessToken,
     browser,
     isWikis,
     isRootDiscussions,

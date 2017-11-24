@@ -49,62 +49,63 @@ export function fetchRootDiscussions(forumBoardId, _opts, reqConfig = {}) {
         return res.discussions;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }
 
-export function fetchDiscussions(forumBoardId = "", parentDiscussionId = "") {
+export function fetchDiscussions({ parentDiscussionId = "" }) {
   return dispatch => {
-    return callApi(
-      `discussions?forumBoardId=${forumBoardId}&parentDiscussionId=${parentDiscussionId}`
-    )
+    return callApi(`discussions?parentDiscussionId=${parentDiscussionId}`)
       .then(res => {
-        return dispatch(addDiscussions(res.discussions));
+        dispatch(addDiscussions(res.discussions));
+        return res;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }
 
-export function fetchDiscussion(id) {
+export function fetchDiscussion(id = "") {
   return dispatch => {
     return callApi(`discussions/${id}`)
       .then(res => {
         dispatch(addDiscussion(res.discussion));
+        return res;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }
 
-export function addDiscussionRequest(discussion) {
+export function addDiscussionRequest(discussion, accessToken) {
+  const q = qs.stringify({ access_token: accessToken.get("token") });
   return dispatch => {
-    return callApi("discussions", "post", { discussion })
+    return callApi(`discussions?${q}`, "post", { discussion })
       .then(res => {
         dispatch(addDiscussion(res.discussion));
         return res.discussion;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }

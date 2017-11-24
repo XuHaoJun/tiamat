@@ -1,5 +1,5 @@
 // list of available languages
-export const enabledLanguages = ["en", "zh-Hant-TW"];
+export const enabledLanguages = ["en", "zh-tw"];
 
 // this object will have language-specific data added to it which will be placed in the state when that language is active
 // if localization data get to big, stop importing in all languages and switch to using API requests to load upon switching languages
@@ -56,10 +56,10 @@ localizationData.en.messages = flattenMessages(localizationData.en.messages);
 
 import "intl/locale-data/jsonp/zh-Hant-TW";
 import zh from "react-intl/locale-data/zh";
-import zhHantTWData from "./localizationData/zh-Hant-TW";
+import zhTWData from "./localizationData/zh-tw";
 
 addLocaleData(zh);
-localizationData["zh-Hant-TW"] = zhHantTWData;
-localizationData["zh-Hant-TW"].messages = flattenMessages(
-  localizationData["zh-Hant-TW"].messages
+localizationData["zh-tw"] = zhTWData;
+localizationData["zh-tw"].messages = flattenMessages(
+  localizationData["zh-tw"].messages
 );

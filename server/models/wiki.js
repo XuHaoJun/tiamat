@@ -7,7 +7,6 @@ const wikiSchema = new Schema({
   name: { type: String, required: true, index: true },
   // languages: { zhtw: {name: ?, content: ?}, en: {}, jp: }
   content: { type: Schema.Types.Mixed, required: true },
-  // creator: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   // author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   // parent: { type: Schema.Types.ObjectId },
   // rootParent: { type: Schema.Types.ObjectId, default: null },

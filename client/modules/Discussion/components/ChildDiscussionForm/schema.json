@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "ChildDiscussionForm",
+  "description": "ChildDiscussionForm from Tiamat",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["parentDiscussion", "content", "isRoot"],
+  "properties": {
+    "parentDiscussion": {
+      "type": "string",
+      "minLength": 24,
+      "maxLength": 24
+    },
+    "isRoot": {
+      "const": false
+    },
+    "content": {
+      "$ref": "slate.json#/definitions/value"
+    }
+  }
+}

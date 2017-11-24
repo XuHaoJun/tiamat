@@ -1,11 +1,14 @@
 import React from "react";
-import { Set } from "immutable";
+import { Set, is } from "immutable";
 import { connect } from "react-redux";
 import CommonList from "../../../components/List/CommonList";
 import { getForumBoards } from "../ForumBoardReducer";
 import { fetchForumBoards } from "../ForumBoardActions";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import Avatar from "material-ui/Avatar";
+import Debug from "debug";
+
+const debug = Debug("app:ForumBoardList");
 
 class ForumBoardList extends React.Component {
   static defaultProps = {
@@ -15,8 +18,9 @@ class ForumBoardList extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+    const { dataSource } = props;
     const limit = props.limit || 10;
-    const page = props.page || 1;
+    const page = props.page || Math.floor(dataSource.count() / limit) || 1;
     this.state = {
       page,
       limit,
@@ -31,14 +35,23 @@ class ForumBoardList extends React.Component {
   onRequestLoadMore = () => {
     const { page, limit, sort } = this.state;
     const nextPage = page + 1;
-    this.props
+    const prevDataSource = this.props.dataSource;
+    debug("onRequestLoadMore start");
+    return this.props
       .dispatch(fetchForumBoards(nextPage, limit, sort))
-      .then(forumBoardsJSON => {
-        if (forumBoardsJSON.length < limit) {
-          this.setState({ enableLoadMore: false });
+      .then(() => {
+        debug("onRequestLoadMore end1");
+        const currentDataSource = this.props.dataSource;
+        const nextState = {};
+        const changed = !is(prevDataSource, currentDataSource);
+        if (changed) {
+          nextState.enableLoadMore = true;
+          nextState.page = nextPage;
         } else {
-          this.setState({ page: nextPage });
+          nextState.enableLoadMore = false;
         }
+        this.setState(nextState);
+        debug("onRequestLoadMore end2");
       })
       .catch(() => {
         this.setState({ enableLoadMore: false });
@@ -50,11 +63,7 @@ class ForumBoardList extends React.Component {
   };
 
   listItemLeftAvatar = payload => {
-    return (
-      <Avatar>
-        {payload.get("name")[0]}
-      </Avatar>
-    );
+    return <Avatar>{payload.get("name")[0]}</Avatar>;
   };
 
   listItemSecondaryText = payload => {
@@ -66,15 +75,17 @@ class ForumBoardList extends React.Component {
   };
 
   render() {
+    const { enableLoadMore } = this.state;
     const dataSource = this.props.dataSource.sortBy(this.sortBy);
     return (
       <CommonList
         dataSource={dataSource}
+        enableLoadMore={enableLoadMore}
+        enableRefreshIndicator={true}
         listItemHref={this.listItemHref}
         listItemLeftAvatar={this.listItemLeftAvatar}
         listItemSecondaryText={this.listItemSecondaryText}
         onRequestLoadMore={this.onRequestLoadMore}
-        enableLoadMore={this.state.enableLoadMore}
       />
     );
   }

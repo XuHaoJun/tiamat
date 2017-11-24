@@ -9,6 +9,7 @@ import { fromJS, Map, List as ImmutableList } from "immutable";
 import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
 import getRootWikiHref from "../utils/getRootWikiHref";
 import getWikisHref from "../utils/getWikisHref";
+import { Link } from "react-router";
 
 function wrapState(ComposedComponent) {
   return class _SelectableList extends Component {
@@ -47,33 +48,21 @@ class LinkableListItem extends ListItem {
     router: PropTypes.object.isRequired
   };
 
-  preventDefault = e => {
-    e.preventDefault();
-  };
-
-  handleTouchTap = e => {
-    if (e.nativeEvent.which === 3) {
-      return;
-    }
+  _handleLinkClick = e => {
     if (this.props.to) {
       e.preventDefault();
       this.context.router.replace(this.props.to);
     }
-    if (this.props.onTouchTap) {
-      this.props.onTouchTap(e);
+    if (this.props.onClick) {
+      this.props.onClick(e);
     }
   };
 
   render() {
     const { to, ...other } = this.props;
-    return (
-      <ListItem
-        {...other}
-        href={to}
-        onTouchTap={this.handleTouchTap}
-        onClick={this.preventDefault}
-      />
-    );
+    // FIX
+    // add href to listitem, can't disable rightIconButon preventDefault.
+    return <ListItem {...other} onClick={this._handleLinkClick} />;
   }
 }
 
@@ -107,24 +96,21 @@ export function getRootWikiGroupTreeListItemsHelper2(
           />
         );
       })
-      .toList()
-      .toJS();
+      .toList();
   } else if (ImmutableList.isList(rootWikiGroupTree)) {
-    return rootWikiGroupTree
-      .map(leaf => {
-        const finalPath = path.concat(leaf);
-        const href = getHrefFunc(pathToRootWikiGroupTree(finalPath, true));
-        const value = href;
-        return (
-          <LinkableListItem
-            to={href}
-            value={value}
-            key={value}
-            primaryText={leaf}
-          />
-        );
-      })
-      .toJS();
+    return rootWikiGroupTree.map(leaf => {
+      const finalPath = path.concat(leaf);
+      const href = getHrefFunc(pathToRootWikiGroupTree(finalPath, true));
+      const value = href;
+      return (
+        <LinkableListItem
+          to={href}
+          value={value}
+          key={value}
+          primaryText={leaf}
+        />
+      );
+    });
   } else {
     return null;
   }
@@ -148,7 +134,11 @@ export function getRootWikiGroupTreeListItemsIter(
     const children = rootWikiGroupTree.get("children");
     const finalPath = path.concat(name);
     const nestedItems = children
-      ? getRootWikiGroupTreeListItemsIter(children, finalPath, getHrefFunc)
+      ? getRootWikiGroupTreeListItemsIter(
+          children,
+          finalPath,
+          getHrefFunc
+        ).toJSON()
       : undefined;
     const href = getHrefFunc(pathToRootWikiGroupTree(finalPath));
     const value = href;
@@ -162,11 +152,9 @@ export function getRootWikiGroupTreeListItemsIter(
       />
     );
   } else if (ImmutableList.isList(rootWikiGroupTree)) {
-    return rootWikiGroupTree
-      .map(node => {
-        return getRootWikiGroupTreeListItemsIter(node, path, getHrefFunc);
-      })
-      .toJS();
+    return rootWikiGroupTree.map(node => {
+      return getRootWikiGroupTreeListItemsIter(node, path, getHrefFunc);
+    });
   } else {
     return null;
   }
@@ -177,7 +165,7 @@ export function getRootWikiGroupTreeListItems(rootWikiGroupTree, getHrefFunc) {
     rootWikiGroupTree,
     undefined,
     getHrefFunc
-  );
+  ).toJSON();
 }
 
 class RootWikiGroupTreeList extends React.Component {

@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import FacebookProvider, { Comments } from "react-facebook";
 import { getOauth2Client } from "../../Oauth2Client/Oauth2ClientReducer";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
+import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
 
 export class AboutPage extends React.PureComponent {
   static defaultProps = {
@@ -24,16 +24,21 @@ export class AboutPage extends React.PureComponent {
       <div>
         <Helmet title={title} />
         <div>
-          {facebookClientID
-            ? <FacebookProvider appId={facebookClientID}>
-                <Comments width="100%" />
-              </FacebookProvider>
-            : null}
+          {facebookClientID ? (
+            <FacebookProvider appId={facebookClientID}>
+              <Comments width="100%" />
+            </FacebookProvider>
+          ) : null}
         </div>
       </div>
     );
   }
 }
+
+AboutPage.need = [].concat(() => {
+  const title = "說明";
+  return setHeaderTitleThunk(title);
+});
 
 function mapStateToProps(state) {
   const facebookOauth2Client = getOauth2Client(state, "facebook");

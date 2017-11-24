@@ -1,4 +1,4 @@
-import { Map } from "immutable";
+import { Map, List } from "immutable";
 import React from "react";
 import Snackbar from "material-ui/Snackbar";
 import { connect } from "react-redux";
@@ -14,7 +14,7 @@ export function getStyles() {
   return styles;
 }
 
-class ErrorSnackbar extends React.PureComponent {
+class ErrorSnackbar extends React.Component {
   static defaultProps = {
     error: null
   };
@@ -39,7 +39,10 @@ class ErrorSnackbar extends React.PureComponent {
 
   render() {
     const styles = getStyles();
-    const { error } = this.props;
+    let { error } = this.props;
+    if (List.isList(error)) {
+      error = error.get(0);
+    }
     const { open } = this.state;
     let message;
     if (typeof error === "string") {
@@ -49,7 +52,10 @@ class ErrorSnackbar extends React.PureComponent {
         error.get("message") ||
         error.get("errmsg") ||
         error.get("msg") ||
-        error.get("name");
+        error.get("name") ||
+        error.get("error_description") ||
+        error.get("error") ||
+        "";
     } else {
       message = "";
     }
@@ -58,7 +64,7 @@ class ErrorSnackbar extends React.PureComponent {
         bodyStyle={styles.snackbarBody}
         open={message ? open : false}
         message={message}
-        autoHideDuration={3333}
+        autoHideDuration={6666}
         onRequestClose={this.handleRequestClose}
       />
     );

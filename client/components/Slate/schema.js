@@ -68,11 +68,7 @@ export class Mention extends React.Component {
 
 export class Paragraph extends React.Component {
   render() {
-    return (
-      <p {...this.props.attributes}>
-        {this.props.children}
-      </p>
-    );
+    return <p {...this.props.attributes}>{this.props.children}</p>;
   }
 }
 
@@ -80,13 +76,14 @@ export function createSchema() {
   const schema = {
     nodes: {
       image: props => {
-        const { node, state } = props;
-        const active = state.isFocused && state.selection.hasEdgeIn(node);
+        const { node, value } = props;
+        const active = value.isFocused && value.selection.hasEdgeIn(node);
         const src = node.data.get("src");
         const className = active ? "active" : null;
         const style = {
           maxWidth: "100%",
-          height: "auto"
+          height: "auto",
+          width: "auto"
         };
         return (
           <Img
@@ -105,97 +102,46 @@ export function createSchema() {
         const className = active ? "active" : null;
         return (
           <Table {...props.attributes}>
-            <TableBody {...props.attributes}>
-              {props.children}
-            </TableBody>
+            <TableBody {...props.attributes}>{props.children}</TableBody>
           </Table>
         );
       },
-      table_row: props =>
-        <TableRow {...props.attributes}>
-          {props.children}
-        </TableRow>,
+      table_row: props => (
+        <TableRow {...props.attributes}>{props.children}</TableRow>
+      ),
       table_cell: props => {
         const align = props.node.get("data").get("align") || "left";
         const style = {
           textAlign: align
         };
-        return (
-          <TableRowColumn style={style}>
-            {props.children}
-          </TableRowColumn>
-        );
+        return <TableRowColumn style={style}>{props.children}</TableRowColumn>;
       },
       paragraph: Paragraph,
       link: Link,
-      heading: props =>
-        <h1 {...props.attributes}>
-          {props.children}
-        </h1>,
-      code: props =>
+      heading: props => <h1 {...props.attributes}>{props.children}</h1>,
+      code: props => (
         <pre>
-          <code {...props.attributes}>
-            {props.children}
-          </code>
-        </pre>,
-      quote: props =>
-        <blockquote {...props.attributes}>
-          {props.children}
-        </blockquote>,
-      "bulleted-list": props =>
-        <ul {...props.attributes}>
-          {props.children}
-        </ul>,
-      "heading-one": props =>
-        <h1 {...props.attributes}>
-          {props.children}
-        </h1>,
-      "heading-two": props =>
-        <h2 {...props.attributes}>
-          {props.children}
-        </h2>,
-      "heading-three": props =>
-        <h3 {...props.attributes}>
-          {props.children}
-        </h3>,
-      "heading-four": props =>
-        <h4 {...props.attributes}>
-          {props.children}
-        </h4>,
-      "heading-five": props =>
-        <h5 {...props.attributes}>
-          {props.children}
-        </h5>,
-      "heading-six": props =>
-        <h6 {...props.attributes}>
-          {props.children}
-        </h6>,
-      "list-item": props =>
-        <li {...props.attributes}>
-          {props.children}
-        </li>,
-      "numbered-list": props =>
-        <ol {...props.attributes}>
-          {props.children}
-        </ol>
+          <code {...props.attributes}>{props.children}</code>
+        </pre>
+      ),
+      quote: props => (
+        <blockquote {...props.attributes}>{props.children}</blockquote>
+      ),
+      "bulleted-list": props => <ul {...props.attributes}>{props.children}</ul>,
+      "heading-one": props => <h1 {...props.attributes}>{props.children}</h1>,
+      "heading-two": props => <h2 {...props.attributes}>{props.children}</h2>,
+      "heading-three": props => <h3 {...props.attributes}>{props.children}</h3>,
+      "heading-four": props => <h4 {...props.attributes}>{props.children}</h4>,
+      "heading-five": props => <h5 {...props.attributes}>{props.children}</h5>,
+      "heading-six": props => <h6 {...props.attributes}>{props.children}</h6>,
+      "list-item": props => <li {...props.attributes}>{props.children}</li>,
+      "numbered-list": props => <ol {...props.attributes}>{props.children}</ol>
     },
     marks: {
-      bold: props =>
-        <strong>
-          {props.children}
-        </strong>,
-      code: props =>
-        <code>
-          {props.children}
-        </code>,
-      italic: props =>
-        <em>
-          {props.children}
-        </em>,
-      underlined: props =>
-        <u>
-          {props.children}
-        </u>
+      bold: props => <strong>{props.children}</strong>,
+      code: props => <code>{props.children}</code>,
+      italic: props => <em>{props.children}</em>,
+      underlined: props => <u>{props.children}</u>
     },
     rules: [
       // Rule to insert a paragraph block if the document is empty.

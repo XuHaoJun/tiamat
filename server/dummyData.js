@@ -1,5 +1,3 @@
-import uuid from "uuid";
-
 // import Models
 import ForumBoard from "./models/forumBoard";
 import Discussion from "./models/discussion";
@@ -13,15 +11,15 @@ function createDefaultOauth2Client() {
   const oauth2ClientName = appOauth2ClientConfig.name;
   Oauth2Client.findOne(
     {
-      name: oauth2ClientName
+      name: oauth2ClientName,
+      isOffical: true
     },
     (err, oauth2Client) => {
       if (!oauth2Client) {
-        const secret = uuid.v4();
         const name = oauth2ClientName;
         const args = {
           name,
-          secret
+          isOffical: true
         };
         const newOauth2Client = new Oauth2Client(args);
         newOauth2Client.save();

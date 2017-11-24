@@ -28,7 +28,6 @@ class WikiForm extends React.Component {
   };
 
   static defaultProps = {
-    rootWikiId: "",
     name: "",
     content: null,
     rootWikiGroupTree: null,
@@ -69,25 +68,30 @@ class WikiForm extends React.Component {
 
   render() {
     const { name, content, rootWikiGroupTree } = this.props;
-    const { nameReadOnly, editorEnableAutoFullScreen } = this.props;
+    const {
+      nameReadOnly,
+      editorEnableAutoFullScreen,
+      onChangeContent
+    } = this.props;
     const styles = getStyles();
     return (
       <div>
-        {nameReadOnly
-          ? <h1 style={styles.name}>
-              {name}
-            </h1>
-          : <TextField
-              floatingLabelText="您的維基名稱"
-              value={this.state.name}
-              onChange={this.onNameChange}
-            />}
+        {nameReadOnly ? (
+          <h1 style={styles.name}>{name}</h1>
+        ) : (
+          <TextField
+            floatingLabelText="您的維基名稱"
+            value={this.state.name}
+            onChange={this.onNameChange}
+          />
+        )}
         <RootWikiGroupTreePopover rootWikiGroupTree={rootWikiGroupTree} />
         <div style={styles.editorStyleContainer}>
           <Editor
             ref={this.setEditorRef}
+            readOnly={false}
             rawContent={content}
-            onChangeContent={this.props.onChangeContent}
+            onChangeContent={onChangeContent}
             enableAutoFullScreen={editorEnableAutoFullScreen}
           />
         </div>

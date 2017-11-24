@@ -1,7 +1,10 @@
-import { List, fromJS } from "immutable";
+import { fromJS } from "immutable";
 import memoize from "fast-memoize";
-import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
-import { Selection } from "slate";
+import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
+import { Range } from "slate";
+import Debug from "debug";
+
+const debug = Debug("app:editor:semanticReplace");
 
 export const exampleSemanticRules = fromJS([
   {
@@ -21,11 +24,12 @@ export const exampleSemanticRules = fromJS([
 ]);
 
 function semanticReplace(state, semanticRules) {
-  const transform = state.transform();
+  debug("start", state, semanticRules);
+  const change = state.change();
   const { document } = state;
   const startNode = document;
   if (!semanticRules || semanticRules.count() === 0) {
-    return state;
+    return change;
   }
   const calcedParentKeys = [];
   startNode.filterDescendants(node => {
@@ -61,12 +65,12 @@ function semanticReplace(state, semanticRules) {
           let focusKey = anchorKey;
           let anchorOffset = match.index;
           let focusOffset = anchorOffset + nameLength;
-          parent = transform.state.document.getDescendant(parent.key);
-          const text = parent.getTextAtOffset(focusOffset);
-          anchorKey = text.key;
+          parent = change.value.document.getDescendant(parent.key);
+          const textComponent = parent.getTextAtOffset(focusOffset);
+          anchorKey = textComponent.key;
           focusKey = anchorKey;
           const tmpReg = new RegExp(name, "gm");
-          const tmpMatch = tmpReg.exec(text.text);
+          const tmpMatch = tmpReg.exec(textComponent.text);
           if (tmpMatch) {
             anchorOffset = tmpMatch.index;
             focusOffset = anchorOffset + nameLength;
@@ -76,15 +80,17 @@ function semanticReplace(state, semanticRules) {
               focusKey,
               focusOffset
             };
-            selection = Selection.create(seleProps);
-            transform.wrapInlineAtRange(selection, inlineLinkProps);
+            selection = Range.create(seleProps);
+            change.wrapInlineAtRange(selection, inlineLinkProps);
           }
-          match = re.exec(parent.text);
+          const nextMatch = re.exec(parent.text);
+          match = nextMatch;
         }
       }
     });
   });
-  return transform.apply();
+  debug("end", change);
+  return change;
 }
 
-export default memoize(semanticReplace, createFastMemoizeDefaultOptions(10));
+export default memoize(semanticReplace, createFastMemoizeDefaultOptions(2));

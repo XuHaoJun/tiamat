@@ -254,21 +254,17 @@ class AddImageDialog extends React.PureComponent {
           onChange={this.handleUrlTextFieldChange}
         />
         <div style={styles.imgContainer}>
-          {uploading
-            ? <LinearProgress
-                mode="determinate"
-                min={0}
-                max={200}
-                value={progressValue}
-              />
-            : null}
-          {previewImageUrl
-            ? <img
-                style={styles.img}
-                src={previewImageUrl}
-                alt="previewImage"
-              />
-            : null}
+          {uploading ? (
+            <LinearProgress
+              mode="determinate"
+              min={0}
+              max={200}
+              value={progressValue}
+            />
+          ) : null}
+          {previewImageUrl ? (
+            <img style={styles.img} src={previewImageUrl} alt="previewImage" />
+          ) : null}
         </div>
       </Dialog>
     );

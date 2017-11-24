@@ -3,11 +3,10 @@ import PropTypes from "prop-types";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import AddIcon from "material-ui/svg-icons/content/add";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import Portal from "react-portal-minimal";
 
 class AddButton extends React.PureComponent {
   static propTypes = {
-    isOpened: PropTypes.bool,
+    isOpen: PropTypes.bool,
     iconType: PropTypes.oneOf(["create", "add"]),
     href: PropTypes.string,
     onTouchTap: PropTypes.func,
@@ -19,7 +18,7 @@ class AddButton extends React.PureComponent {
   };
 
   static defaultProps = {
-    isOpened: true,
+    isOpen: true,
     iconType: "create",
     href: "",
     onTouchTap: () => {},
@@ -47,21 +46,17 @@ class AddButton extends React.PureComponent {
     }
   };
 
-  setPortalRef = v => {
-    this.portal = v;
-  };
-
   render() {
     const {
       style,
-      isOpened,
+      isOpen,
       iconType,
       href,
       onTouchTap,
       onClick,
       ...other
     } = this.props;
-    if (!isOpened) {
+    if (!isOpen) {
       return null;
     }
     const _style = {
@@ -71,17 +66,15 @@ class AddButton extends React.PureComponent {
     };
     const finalStyle = Object.assign(_style, style || {});
     return (
-      <Portal ref={this.setPortalRef}>
-        <FloatingActionButton
-          {...other}
-          style={finalStyle}
-          href={href}
-          onTouchTap={this.onTouchTap}
-          onClick={this.onClick}
-        >
-          {iconType === "create" ? <CreateIcon /> : <AddIcon />}
-        </FloatingActionButton>
-      </Portal>
+      <FloatingActionButton
+        {...other}
+        style={finalStyle}
+        href={href}
+        onTouchTap={this.onTouchTap}
+        onClick={this.onClick}
+      >
+        {iconType === "create" ? <CreateIcon /> : <AddIcon />}
+      </FloatingActionButton>
     );
   }
 }

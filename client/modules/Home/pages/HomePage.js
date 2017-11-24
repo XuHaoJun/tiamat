@@ -2,7 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import HomeTabs from "../components/HomeTabs";
+import HomeTabs, {
+  HOME_SLIDE,
+  SLIDE_COUNT,
+  getSlideIndexEnAlias,
+  getSlideIndexFromEnAlias
+} from "../components/HomeTabs";
 import { getStyles as myAppGetStyles } from "../../MyApp/MyApp";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchForumBoards } from "../../ForumBoard/ForumBoardActions";
@@ -48,20 +53,21 @@ class HomePage extends React.Component {
   };
 
   componentWillMount() {
-    const title = this.props.title;
+    const { title } = this.props;
     this.props.dispatch(setHeaderTitle(title));
   }
 
   handleTransitionEnd = slideIndex => {
-    if (slideIndex > 0) {
-      this.context.router.replace(`/?slideIndex=${slideIndex}`);
-    } else {
+    if (slideIndex === HOME_SLIDE) {
       this.context.router.replace("/");
+    } else {
+      const slideIndexEN = getSlideIndexEnAlias(slideIndex);
+      this.context.router.replace(`/?slideIndex=${slideIndexEN}`);
     }
   };
 
   render() {
-    const title = this.props.title;
+    const { title } = this.props;
     const styles = getStyles(this.props.browser);
     const metaDescription = "Tiamat | Game forum and wiki.";
     const meta = [
@@ -92,10 +98,19 @@ HomePage.need = [].concat(() => {
 });
 
 function mapStateToProps(state, routerProps) {
-  const location =
-    state.routing.locationBeforeTransitions || routerProps.location;
-  const browser = state.browser;
-  const slideIndex = Number.parseInt(location.query.slideIndex, 10) || 0;
+  const { location } = routerProps;
+  const { browser } = state;
+  const slideIndex = (() => {
+    const qsi = location.query.slideIndex;
+    let si = Number.parseInt(qsi, 10);
+    if (!si) {
+      si = getSlideIndexFromEnAlias(qsi) || 0;
+    }
+    if (si > SLIDE_COUNT - 1) {
+      si = 0;
+    }
+    return si;
+  })();
   return { browser, location, slideIndex };
 }
 

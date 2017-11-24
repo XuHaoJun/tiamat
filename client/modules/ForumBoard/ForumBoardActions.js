@@ -33,15 +33,16 @@ export function fetchForumBoards(
       reqConfig
     )
       .then(res => {
-        dispatch(addForumBoards(res.forumBoards));
-        return res.forumBoards;
+        const { forumBoards } = res;
+        dispatch(addForumBoards(forumBoards));
+        return forumBoards;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }
@@ -54,11 +55,11 @@ export function fetchForumBoardById(_id) {
         return res.forumBoard;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }
@@ -71,11 +72,11 @@ export function addForumBoardRequest(forumBoard) {
         return res.forumBoard;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }
