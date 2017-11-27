@@ -8,14 +8,11 @@ import HomeTabs, {
   getSlideIndexEnAlias,
   getSlideIndexFromEnAlias
 } from "../components/HomeTabs";
-import { getStyles as myAppGetStyles } from "../../MyApp/MyApp";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchForumBoards } from "../../ForumBoard/ForumBoardActions";
 
 export function getStyles(browser) {
-  const maStyles = myAppGetStyles(browser);
   const styles = {
-    root: Object.assign({}, maStyles.disableRoot),
     slideContainer: {
       height: "calc(100vh - 112px)",
       WebkitOverflowScrolling: "touch"
@@ -76,14 +73,15 @@ class HomePage extends React.Component {
         content: metaDescription
       }
     ];
+    const { slideIndex, browser } = this.props;
     return (
       <div>
         <Helmet title={title} meta={meta} />
         <HomeTabs
           onTransitionEnd={this.handleTransitionEnd}
-          slideIndex={this.props.slideIndex}
+          slideIndex={slideIndex}
           disableOnDrawerStart={true}
-          browser={this.props.browser}
+          browser={browser}
           tabsStyle={styles.tabs}
           swipeableViewsStyle={styles.swipeableViews}
           slideContainerStyle={styles.slideContainer}

@@ -2,14 +2,30 @@ import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { Tabs, Tab } from "material-ui/Tabs";
+import Loadable from "react-loadable";
 
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
+// import RootWikiDetail from "../../RootWiki/components/RootWikiDetail";
 import RootDiscussionList from "../../Discussion/components/RootDiscussionList";
 import ForumBoardGroupsList from "../../ForumBoard/components/ForumBoardGroupsList";
-import RootWikiDetail from "../../RootWiki/components/RootWikiDetail";
 import RootWikiGroupTreeList from "../../RootWiki/components/RootWikiGroupTreeList";
 import WikiList from "../../Wiki/components/WikiList";
 import AddButton from "./AddButton";
+import Loading from "../../../components/CenterCircularProgress";
+
+// optimize size beacuse RootWikiDetail use Editor module.
+const RootWikiDetail = Loadable({
+  loader: () => {
+    const isServer = typeof window === "undefined";
+    // use same Component with client-side and server-side for hydrate.
+    if (isServer) {
+      return Promise.resolve(Loading);
+    } else {
+      return import(/* webpackChunkName: "RootWikiDetail" */ "../../RootWiki/components/RootWikiDetail");
+    }
+  },
+  loading: Loading
+});
 
 export const FORUMBOARD_GROUPS_SLIDE = 0;
 export const ROOT_DISCUSSIONS_SLIDE = 1;

@@ -1,13 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
+import _reduce from "lodash/reduce";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+
 import { Tabs, Tab } from "material-ui/Tabs";
 import WhatHotIcon from "material-ui/svg-icons/social/whatshot";
 import ActionHome from "material-ui/svg-icons/action/home";
-import ForumBoardList from "../../ForumBoard/components/ForumBoardList";
 import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import _reduce from "lodash/reduce";
+
+import ForumBoardList from "../../ForumBoard/components/ForumBoardList";
+import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
 
 export const HOME_SLIDE = 0;
 export const WHAT_HOT_SLIDE = 1;
@@ -86,26 +88,52 @@ class HomeTabs extends React.Component {
     }
   };
 
+  handleTabMouseOver = slideIndex => {
+    this.setState({ slideIndex });
+  };
+
+  handleTabMouseOvers = {
+    [HOME_SLIDE]: this.handleTabMouseOver.bind(this, HOME_SLIDE),
+    [WHAT_HOT_SLIDE]: this.handleTabMouseOver.bind(this, WHAT_HOT_SLIDE),
+    [WIKI_SLIDE]: this.handleTabMouseOver.bind(this, WIKI_SLIDE)
+  };
+
   render() {
+    const { slideIndex } = this.state;
     return (
       <div style={this.props.style}>
         <Tabs
           style={this.props.tabsStyle}
           onChange={this.handleChange}
-          value={this.state.slideIndex}
+          value={slideIndex}
         >
-          <Tab icon={<ActionHome />} value={HOME_SLIDE} />
-          <Tab icon={<WhatHotIcon />} value={WHAT_HOT_SLIDE} />
-          <Tab icon={<WikiIcon />} value={WIKI_SLIDE} />
+          <Tab
+            icon={<ActionHome />}
+            value={HOME_SLIDE}
+            onFocus={() => undefined}
+            onMouseOver={this.handleTabMouseOvers[HOME_SLIDE]}
+          />
+          <Tab
+            icon={<WhatHotIcon />}
+            value={WHAT_HOT_SLIDE}
+            onFocus={() => undefined}
+            onMouseOver={this.handleTabMouseOvers[WHAT_HOT_SLIDE]}
+          />
+          <Tab
+            icon={<WikiIcon />}
+            value={WIKI_SLIDE}
+            onFocus={() => undefined}
+            onMouseOver={this.handleTabMouseOvers[WIKI_SLIDE]}
+          />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey="hometabs"
+          index={slideIndex}
           scrollBehaviorShouldUpdateScroll={
             this.props.scrollBehaviorShouldUpdateScroll
           }
           style={this.props.swipeableViewsStyle}
           containerStyle={this.props.slideContainerStyle}
-          index={this.state.slideIndex}
           onChangeIndex={this.handleChange}
           onTransitionEnd={this.handleTransitionEnd}
         >

@@ -2,11 +2,15 @@ import Immutable from "immutable";
 // Import Actions
 import {
   SET_HEADER_TITLE,
-  UPDATE_APP_BAR_SEND_BUTTON_PROPS
+  UPDATE_APP_BAR_SEND_BUTTON_PROPS,
+  SET_DB_IS_INITIALIZED
 } from "./MyAppActions";
 
 // Initial State
 const initialState = Immutable.fromJS({
+  db: {
+    isInitialized: false
+  },
   ui: {
     headerTitle: "Tiamat",
     styles: {
@@ -37,6 +41,10 @@ const AppReducer = (state = initialState, action) => {
         }
       }
       return newState;
+    // may be add a DB module?
+    case SET_DB_IS_INITIALIZED:
+      const { isInitialized } = action;
+      return state.setIn(["db", "isInitialized"], isInitialized);
     default:
       return state;
   }
@@ -44,8 +52,12 @@ const AppReducer = (state = initialState, action) => {
 
 /* Selectors */
 
-// get headerTitle
+// get ui
 export const getUI = state => state.app.get("ui");
+
+// get db is initialized
+export const getDBisInitialized = state =>
+  state.app.getIn(["db", "isInitialized"]);
 
 // Export Reducer
 export default AppReducer;

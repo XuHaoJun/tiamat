@@ -1,6 +1,8 @@
-import React, { Component } from "react";
-import memoize from "fast-memoize";
+import React from "react";
 import PropTypes from "prop-types";
+import memoize from "fast-memoize";
+import { connect } from "react-redux";
+
 import AppBar from "material-ui/AppBar";
 import { getStyles as appBarGetStyles } from "material-ui/AppBar/AppBar";
 import IconButton from "material-ui/IconButton";
@@ -9,14 +11,39 @@ import BackspaceIcon from "material-ui/svg-icons/hardware/keyboard-backspace";
 import MenuIcon from "material-ui/svg-icons/navigation/menu";
 import FlatButton from "material-ui/FlatButton";
 import { Motion, spring } from "react-motion";
+import { Link } from "react-router";
 
+import { getIsLoggedIn } from "../../User/UserReducer";
+import CurrentUserIconMenu from "../../User/components/CurrentUserIconMenu";
 import AppNavDrawer from "./AppNavDrawer";
 import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
 
-const LogInDialogButton = makeLogInDialogable(FlatButton);
-LogInDialogButton.muiName = "FlatButton";
+function makeLinkable(WrappedComponent) {
+  const LinkableComponent = props => {
+    const { to, children, ...other } = props;
+    return (
+      <Link to={to} href={to}>
+        <WrappedComponent {...other}>{children}</WrappedComponent>
+      </Link>
+    );
+  };
+  return LinkableComponent;
+}
+
+const LogInButton = makeLogInDialogable(FlatButton);
+LogInButton.muiName = FlatButton.muiName;
+
+const LinkIconButton = makeLinkable(IconButton);
+const SearchButton = props => {
+  return (
+    <LinkIconButton {...props} to="/search">
+      <SearchVerIcon />
+    </LinkIconButton>
+  );
+};
+SearchButton.muiName = IconButton.muiName;
 
 const LeftElementMotionWrap = props => {
   const defaultStyle = {
@@ -50,7 +77,7 @@ const BackspaceButton = props => {
   );
 };
 
-BackspaceButton.muiName = "IconButton";
+BackspaceButton.muiName = IconButton.muiName;
 
 const MenuButton = props => {
   return (
@@ -62,9 +89,9 @@ const MenuButton = props => {
   );
 };
 
-MenuButton.muiName = "IconButton";
+MenuButton.muiName = IconButton.muiName;
 
-class Header extends Component {
+class Header extends React.Component {
   static contextTypes = {
     muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
@@ -72,7 +99,9 @@ class Header extends Component {
 
   static defaultProps = {
     defaultQuery: "",
-    title: ""
+    title: "",
+    onDrawerOpen: undefined,
+    onDrawerClose: undefined
   };
 
   constructor(props) {
@@ -85,7 +114,6 @@ class Header extends Component {
     const open = props.browser.greaterThan.medium;
     this.state = {
       open,
-      prevQuery: "",
       textValue: defaultQuery || "",
       textFieldFocused: false
     };
@@ -104,7 +132,7 @@ class Header extends Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     if (
       !this._isInSearchPage() &&
       this.state.textValue !== "" &&
@@ -118,7 +146,22 @@ class Header extends Component {
         this.setState({ textValue: query });
       }
     }
+    if (prevState.open !== this.state.open) {
+      if (this.state.open) {
+        if (this.props.onDrawerOpen) {
+          this.props.onDrawerOpen();
+        }
+      } else {
+        if (this.props.onDrawerClose) {
+          this.props.onDrawerClose();
+        }
+      }
+    }
   }
+
+  getDrawerIsOpen = () => {
+    return this.state.open;
+  };
 
   getIconStyles = () => {
     const { prepareStyles } = this.context.muiTheme;
@@ -199,6 +242,9 @@ class Header extends Component {
   handleClose = () => this.setState({ open: false });
 
   shouldBackspaceButton = pathname => {
+    if (this.props.browser.greaterThan.medium) {
+      return false;
+    }
     const createPage = new RegExp("^/(create)/.+");
     const etcPage = new RegExp("^/(setting|about|search)");
     const discussionDetailPage = new RegExp("^/rootDiscussions/(.+)");
@@ -213,14 +259,6 @@ class Header extends Component {
       regexp.test(pathname)
     );
     return enableBackspaceButton;
-  };
-
-  handleSearchIconTouchTap = e => {
-    if (e.nativeEvent.which === 3) {
-      return;
-    }
-    e.preventDefault();
-    this.context.router.push("/search");
   };
 
   renderIconLeftElement = () => {
@@ -244,17 +282,14 @@ class Header extends Component {
     }
     const { browser } = this.props;
     if (browser.lessThan.medium) {
-      return (
-        <IconButton
-          onTouchTap={this.handleSearchIconTouchTap}
-          onClick={e => e.preventDefault()}
-          href="/search"
-        >
-          <SearchVerIcon />
-        </IconButton>
-      );
+      return <SearchButton />;
     } else {
-      return <LogInDialogButton label="登入" primary={true} />;
+      const { isLoggedIn } = this.props;
+      if (isLoggedIn) {
+        return <CurrentUserIconMenu />;
+      } else {
+        return <LogInButton label="登入" />;
+      }
     }
   };
 
@@ -286,4 +321,10 @@ class Header extends Component {
   }
 }
 
-export default Header;
+export const HeaderWithoutConnect = Header;
+
+export default connect(store => {
+  const { browser } = store;
+  const isLoggedIn = getIsLoggedIn(store);
+  return { browser, isLoggedIn };
+})(Header);

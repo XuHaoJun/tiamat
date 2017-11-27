@@ -48,10 +48,16 @@ module.exports = {
               [
                 "extensible-destructuring",
                 { mode: "optout", impl: "immutable" }
-              ]
+              ],
+              "react-loadable/babel"
             ]
           }
         }
+      },
+      {
+        test: /\.gz$/,
+        enforce: "pre",
+        use: "gzip-loader"
       },
       {
         test: /\.json$/,
@@ -95,7 +101,7 @@ module.exports = {
   },
 
   plugins: [
-    new StartServerPlugin(),
+    new StartServerPlugin({ name: "server.js" }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin()

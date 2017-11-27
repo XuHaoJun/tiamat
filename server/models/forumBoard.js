@@ -15,7 +15,7 @@ const forumBoardSchema = new Schema({
   },
   popularityCounter: { type: Number, default: 0 },
   rootWiki: { type: Schema.Types.ObjectId, ref: "RootWiki", index: true },
-  groups: { type: [String], default: ["綜合討論"], index: true },
+  groups: { type: [String], default: [], index: true },
   category: { type: String, default: "game" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

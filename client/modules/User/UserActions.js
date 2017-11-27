@@ -69,9 +69,6 @@ export function fetchAccessToken(
 // may be rename it?
 function getToken(accessToken) {
   let token;
-  if (!token) {
-    return "";
-  }
   if (typeof accessToken === "string") {
     token = accessToken;
   } else if (accessToken.token) {

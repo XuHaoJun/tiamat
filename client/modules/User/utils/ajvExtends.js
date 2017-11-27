@@ -1,12 +1,17 @@
 import { fetchValidateUser } from "../UserActions";
 
 function checkEmailExists(schema, data) {
-  const email = data.toLowerCase();
+  let email = data;
   let shouldExists = schema;
-  if (typeof shouldExists !== "boolean") {
+  if (typeof schema === "boolean") {
+    shouldExists = schema;
+  } else if (typeof schema === "string") {
     shouldExists = true;
+    email = schema;
+  } else {
+    // should handle by metaSchema never see this line.
   }
-  return fetchValidateUser({ emailExists: email })
+  return fetchValidateUser({ emailExists: email.toLowerCase() })
     .then(() => {
       if (shouldExists) {
         return true;
@@ -27,7 +32,10 @@ function ajvExtends(ajv) {
   ajv.addKeyword("emailExists", {
     async: true,
     type: "string",
-    validate: checkEmailExists
+    validate: checkEmailExists,
+    metaSchema: {
+      type: ["boolean", "string"]
+    }
   });
   return ajv;
 }

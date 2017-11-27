@@ -66,6 +66,8 @@ class ReplyButton extends React.PureComponent {
       right: 20
     };
     const finalStyle = Object.assign(_style, style || {});
+    // TODO
+    // use dialog on browser large size
     return (
       <FloatingActionButton
         {...other}

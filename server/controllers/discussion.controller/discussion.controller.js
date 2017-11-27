@@ -1,15 +1,19 @@
 import qs from "qs";
 import _ from "lodash";
-import Discussion from "../models/discussion";
+import Discussion from "../../models/discussion";
+import ForumBoard from "../../models/forumBoard";
 
 import Ajv from "ajv";
-import rootDiscussionFormSchema from "../../client/modules/Discussion/components/RootDiscussionForm/schema.json";
-import childDiscussionFormSchema from "../../client/modules/Discussion/components/ChildDiscussionForm/schema.json";
-import { loadSchema } from "../../client/modules/JSONSchema/JSONSchemaActions";
+import rootDiscussionFormSchema from "../../../client/modules/Discussion/components/RootDiscussionForm/schema.json";
+import childDiscussionFormSchema from "../../../client/modules/Discussion/components/ChildDiscussionForm/schema.json";
+import serverRootDiscussionFormSchema from "./schemas/rootDiscussionFormSchema.json";
+import serverChildDiscussionFormSchema from "./schemas/childDiscussionFormSchema.json";
+import { loadSchema } from "../../../client/modules/JSONSchema/JSONSchemaActions";
 
 const ajv = new Ajv({
   allErrors: true,
   extendRefs: true,
+  $data: true,
   loadSchema
 });
 
@@ -32,6 +36,10 @@ ajv.compileAsync(childDiscussionFormSchema).then(_validate => {
   validateChild = _validate;
   return validateChild;
 });
+
+const validateServerRoot = ajv.compile(serverRootDiscussionFormSchema);
+
+const validateServerChild = ajv.compile(serverChildDiscussionFormSchema);
 
 function parseSelect(select) {
   if (!select) {
@@ -117,26 +125,60 @@ export function addDiscussion(req, res) {
     res.status(403).send(validate.errors);
     return;
   }
+  let validP;
+  if (form.isRoot) {
+    validP = ForumBoard.findById(form.forumBoard)
+      .select({ _id: 1, groups: 1 })
+      .then(forumBoard => {
+        let { _id, groups } = forumBoard;
+        _id = _id ? _id.toString() : "";
+        groups = groups || [];
+        const { forumBoardGroup } = form;
+        const validServer = validateServerRoot({
+          forumBoard: _.omitBy({ _id, groups }, _.isEmpty),
+          forumBoardGroup
+        });
+        if (!validServer) {
+          return Promise.reject(validateServerRoot.errors);
+        }
+        return forumBoard;
+      });
+  } else {
+    validP = Discussion.findById(form.parentDiscussion)
+      .select({ _id: 1 })
+      .then(parentDiscussion => {
+        let { _id } = parentDiscussion;
+        _id = _id ? _id.toString() : "";
+        const validServer = validateServerChild({
+          parentDiscussion: {
+            _id
+          }
+        });
+        if (!validServer) {
+          return Promise.reject(validateServerChild.errors);
+        }
+        return parentDiscussion;
+      });
+  }
   const { user } = req;
-  const author = user._id;
-  const authorBasicInfo = user.getBasicInfo();
-  const props = {
-    ...form,
-    author,
-    authorBasicInfo
-  };
-  // TODO
-  // strict validate parentDiscussion or forumBoard is exists
-  const newDiscussion = new Discussion(props);
-  newDiscussion
-    .save()
-    .then(saved => {
-      const io = req.app.get("io");
-      const nsp = `/forumBoards/${saved.forumBoard}/discussions`;
-      const socket = io.of(nsp);
-      socket.emit("addDiscussion", saved);
-      res.json({ discussion: saved });
-      return saved;
+  validP
+    .then(() => {
+      const author = user._id;
+      const authorBasicInfo = user.getBasicInfo();
+      const props = {
+        ...form,
+        author,
+        authorBasicInfo
+      };
+      const newDiscussion = new Discussion(props);
+      return newDiscussion.save().then(saved => {
+        const io = req.app.get("io");
+        const nsp = `/forumBoards/${saved.forumBoard}/discussions`;
+        const socket = io.of(nsp);
+        socket.emit("addDiscussion", saved);
+        res.json({ discussion: saved });
+        return saved;
+      });
     })
     .catch(err => {
       res.status(403).send(err);

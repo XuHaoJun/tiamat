@@ -4,7 +4,7 @@
   "description": "RootDiscussionForm from Tiamat",
   "type": "object",
   "additionalProperties": false,
-  "required": ["title", "forumBoard", "content", "isRoot"],
+  "required": ["title", "forumBoard", "content", "isRoot", "forumBoardGroup"],
   "properties": {
     "title": {
       "type": "string",
@@ -16,8 +16,7 @@
     },
     "forumBoard": {
       "type": "string",
-      "minLength": 24,
-      "maxLength": 24
+      "pattern": "^[0-9a-fA-F]{24}$"
     },
     "isRoot": {
       "const": true

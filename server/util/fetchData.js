@@ -4,7 +4,14 @@ This was inspired from https://github.com/caljrimmer/isomorphic-redux-app/blob/7
 */
 import { sequence } from "./promiseUtils";
 
-export function fetchComponentData(store, _components, params, query) {
+export function fetchComponentData(
+  store,
+  _components,
+  params,
+  query,
+  routes,
+  routerProps
+) {
   const ps = _components.map(c => {
     if (c.load) {
       return c.load();
@@ -29,7 +36,9 @@ export function fetchComponentData(store, _components, params, query) {
     })
     .then(needs => {
       return sequence(needs, need =>
-        store.dispatch(need(params, store.getState(), query))
+        store.dispatch(
+          need(params, store.getState(), query, routes, routerProps)
+        )
       );
     });
 }

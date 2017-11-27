@@ -7,7 +7,6 @@ import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import {
   cyan500,
   cyan700,
-  pinkA200,
   grey100,
   grey300,
   grey400,
@@ -45,6 +44,13 @@ export function getStyles(browser) {
   };
   if (browser.greaterThan.medium) {
     styles.root.paddingLeft = 256;
+    // if (header) {
+    //   const open = header.getDrawerIsOpen();
+    //   if (!open) {
+    //     delete styles.root.paddingLeft;
+    //     styles.root.padding = "0 50px 0 50px";
+    //   }
+    // }
     styles.disableRoot.paddingLeft = -1 * styles.root.paddingLeft;
     styles.content = Object.assign(styles.content, styles.contentWhenMedium);
     const topdown = -spacing.desktopGutter;
@@ -78,10 +84,6 @@ export class MyApp extends React.Component {
     }
   }
 
-  getStyles = browser => {
-    return getStyles(browser);
-  };
-
   getMuiTheme = () => {
     const fontFamily =
       '"Noto Sans TC", "Helvetica Neue", "Calibri Light", Roboto, sans-serif, sans-serif';
@@ -108,20 +110,22 @@ export class MyApp extends React.Component {
           textColor: fade(darkBlack, 0.4),
           selectedTextColor: darkBlack
         },
-        primary1Color: cyan500,
-        primary2Color: cyan700,
-        primary3Color: grey400,
-        accent1Color: pinkA200,
-        accent2Color: grey100,
-        accent3Color: grey500,
-        textColor: darkBlack,
-        alternateTextColor: white,
-        canvasColor: white,
-        borderColor: grey300,
-        disabledColor: fade(darkBlack, 0.3),
-        pickerHeaderColor: cyan500,
-        clockCircleColor: fade(darkBlack, 0.07),
-        shadowColor: fullBlack
+        palette: {
+          primary1Color: cyan500,
+          primary2Color: cyan700,
+          primary3Color: grey400,
+          accent1Color: "#6E6E6E",
+          accent2Color: grey100,
+          accent3Color: grey500,
+          textColor: darkBlack,
+          alternateTextColor: white,
+          canvasColor: white,
+          borderColor: grey300,
+          disabledColor: fade(darkBlack, 0.3),
+          pickerHeaderColor: cyan500,
+          clockCircleColor: fade(darkBlack, 0.07),
+          shadowColor: fullBlack
+        }
       });
     }
     return muiTheme;
@@ -161,7 +165,7 @@ export class MyApp extends React.Component {
   };
 
   render() {
-    const styles = this.getStyles(this.props.browser);
+    const styles = getStyles(this.props.browser);
     const muiTheme = this.getMuiTheme();
     const meta = this.getHeadMeta();
     const headerTitle = this.props.ui.get("headerTitle");
@@ -171,11 +175,10 @@ export class MyApp extends React.Component {
         <MuiThemeProvider muiTheme={muiTheme}>
           <div>
             <Header
+              id="MyAppMainHeader"
               title={headerTitle}
               appBarStyle={styles.appBar}
-              browser={this.props.browser}
               location={this.props.location}
-              dispatch={this.props.dispatch}
             />
             <div
               style={{
@@ -196,18 +199,17 @@ export class MyApp extends React.Component {
 }
 
 MyApp.propTypes = {
-  children: PropTypes.object.isRequired,
-  dispatch: PropTypes.func.isRequired
+  children: PropTypes.object.isRequired
   // intl: PropTypes.object.isRequired
 };
 
 // Retrieve data from store as props
-function mapStateToProps(store, props) {
+function mapStateToProps(store, routerProps) {
   const { intl, browser } = store;
   const userAgent = getUserAgent(store);
-  const { location } = props;
+  const { location } = routerProps;
   const ui = getUI(store);
-  return { ui, intl, browser, userAgent, location };
+  return { ui, intl, userAgent, browser, location };
 }
 
 export default connect(mapStateToProps)(MyApp);

@@ -27,6 +27,7 @@ class LogInForm extends React.Component {
   static propTypes = {
     initEmail: PropTypes.string,
     initPassword: PropTypes.string,
+    onClickSignUpButton: PropTypes.func,
     login: PropTypes.func
     // loginByFacebook: PropTypes.func,
     // loginByGoogle: PropTypes.func
@@ -35,6 +36,7 @@ class LogInForm extends React.Component {
   static defaultProps = {
     initEmail: "",
     initPassword: "",
+    onClickSignUpButton: undefined,
     login: undefined
     // loginByFacebook: undefined,
     // loginByGoogle: undefine
@@ -206,8 +208,11 @@ class LogInForm extends React.Component {
           />
           <br />
           <FlatButton
-            onClick={() => {
+            onClick={(...args) => {
               this.context.router.push("/signup");
+              if (this.props.onClickSignUpButton) {
+                this.props.onClickSignUpButton(...args);
+              }
             }}
             label="註冊新帳號"
           />

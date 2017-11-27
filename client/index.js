@@ -9,18 +9,19 @@ import { fromJS } from "immutable";
 import { calculateResponsiveState } from "redux-responsive";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import MobileDetect from "mobile-detect";
+import ReactGA from "react-ga";
+import Loadable from "react-loadable";
+import moment from "moment";
+
 import App from "./App";
 import { configureStore } from "./store";
 import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
 import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
 import { connectDB, initWithStore, initAccessToken } from "./localdb";
 import { setSocket } from "./modules/Socket/SocketActions";
-import { loadComponents } from "loadable-components";
-import ReactGA from "react-ga";
 import googleAnalyticsConfig from "../server/configs/googleAnalytics";
 import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
-import Loadable from "react-loadable";
-import moment from "moment";
+import { setDBisInitialized } from "./modules/MyApp/MyAppActions";
 
 const debug = Debug("app:main");
 
@@ -104,12 +105,13 @@ const mountElementId = "root";
 const mountApp = document.getElementById(mountElementId);
 debug(`mount application element id: ${mountElementId}`);
 
+// sync locale by intl module
+moment.locale(store.getState().intl.locale);
+// sync with server-side responsive state.
+const userAgent = defaultBrowserUserAgent(store.getState());
+store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
+// for dynamic preload Component.
 Loadable.preloadReady().then(() => {
-  // sync locale by intl module
-  moment.locale(store.getState().intl.locale);
-  // sync with server-side responsive state.
-  const userAgent = defaultBrowserUserAgent(store.getState());
-  store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
   debug("first hydrate start");
   hydrate(
     <AppContainer>
@@ -125,7 +127,13 @@ Loadable.preloadReady().then(() => {
   // will hydrate fail if init db before hydrate.
   const db = connectDB();
   if (db) {
-    initWithStore(db, store);
+    Promise.all(initWithStore(db, store))
+      .then(() => {
+        store.dispatch(setDBisInitialized(null, true));
+      })
+      .catch(err => {
+        store.dispatch(setDBisInitialized(err, true));
+      });
   }
   debug("Application started");
 });

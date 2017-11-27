@@ -8,67 +8,83 @@ import Loading from "./components/CenterCircularProgress";
 // FIXME
 // can't wrap loading option by function
 export const HomePage = Loadable({
-  loader: () => import("./modules/Home/pages/HomePage"),
+  loader: () =>
+    import(/* webpackChunkName: "HomePage" */ "./modules/Home/pages/HomePage"),
   loading: Loading
 });
 export const MixedMainPage = Loadable({
-  loader: () => import("./modules/MixedMain/pages/MixedMainPage"),
+  loader: () =>
+    import(/* webpackChunkName: "MixedMainPage" */ "./modules/MixedMain/pages/MixedMainPage"),
   loading: Loading
 });
 export const DiscussionDetailPage = Loadable({
-  loader: () => import("./modules/Discussion/pages/DiscussionDetailPage"),
+  loader: () =>
+    import(/* webpackChunkName: "DiscussionDetailPage" */ "./modules/Discussion/pages/DiscussionDetailPage"),
   loading: Loading
 });
 export const EditRootWikiGroupTreePage = Loadable({
-  loader: () => import("./modules/RootWiki/pages/EditRootWikiGroupTreePage"),
+  loader: () =>
+    import(/* webpackChunkName: "EditRootWikiGroupTreePage" */ "./modules/RootWiki/pages/EditRootWikiGroupTreePage"),
   loading: Loading
 });
 export const UpsertDiscussionPage = Loadable({
-  loader: () => import("./modules/Discussion/pages/UpsertDiscussionPage"),
+  loader: () =>
+    import(/* webpackChunkName: "UpsertDiscussionPage" */ "./modules/Discussion/pages/UpsertDiscussionPage"),
   loading: Loading
 });
 export const CreateForumBoardPage = Loadable({
-  loader: () => import("./modules/ForumBoard/pages/CreateForumBoardPage"),
+  loader: () =>
+    import(/* webpackChunkName: "CreateForumBoardPage" */ "./modules/ForumBoard/pages/CreateForumBoardPage"),
   loading: Loading
 });
 export const CreateRootWikiPage = Loadable({
-  loader: () => import("./modules/RootWiki/pages/CreateRootWikiPage"),
+  loader: () =>
+    import(/* webpackChunkName: "CreateRootWikiPage" */ "./modules/RootWiki/pages/CreateRootWikiPage"),
   loading: Loading
 });
 export const CreateWikiPage = Loadable({
-  loader: () => import("./modules/Wiki/pages/CreateWikiPage"),
+  loader: () =>
+    import(/* webpackChunkName: "CreateWikiPage" */ "./modules/Wiki/pages/CreateWikiPage"),
   loading: Loading
 });
 export const SettingDetailPage = Loadable({
-  loader: () => import("./modules/Setting/pages/SettingDetailPage"),
+  loader: () =>
+    import(/* webpackChunkName: "SettingDetailPage" */ "./modules/Setting/pages/SettingDetailPage"),
   loading: Loading
 });
 export const WikiDetailPage = Loadable({
-  loader: () => import("./modules/Wiki/pages/WikiDetailPage"),
+  loader: () =>
+    import(/* webpackChunkName: "WikiDetailPage" */ "./modules/Wiki/pages/WikiDetailPage"),
   loading: Loading
 });
 export const UserSignUpPage = Loadable({
-  loader: () => import("./modules/User/pages/UserSignUpPage"),
+  loader: () =>
+    import(/* webpackChunkName: "UserSignUpPage" */ "./modules/User/pages/UserSignUpPage"),
   loading: Loading
 });
 export const UserLogInPage = Loadable({
-  loader: () => import("./modules/User/pages/UserLogInPage"),
+  loader: () =>
+    import(/* webpackChunkName: "UserLogInPage" */ "./modules/User/pages/UserLogInPage"),
   loading: Loading
 });
 export const UserOauth2CallbackPage = Loadable({
-  loader: () => import("./modules/User/pages/UserOauth2CallbackPage"),
+  loader: () =>
+    import(/* webpackChunkName: "UserOauth2CallbackPage" */ "./modules/User/pages/UserOauth2CallbackPage"),
   loading: Loading
 });
 export const SearchHomePage = Loadable({
-  loader: () => import("./modules/Search/pages/SearchHomePage"),
+  loader: () =>
+    import(/* webpackChunkName: "SearchHomePage" */ "./modules/Search/pages/SearchHomePage"),
   loading: Loading
 });
 export const AboutPage = Loadable({
-  loader: () => import("./modules/About/pages/AboutPage"),
+  loader: () =>
+    import(/* webpackChunkName: "AboutPage" */ "./modules/About/pages/AboutPage"),
   loading: Loading
 });
 export const NotFoundPage = Loadable({
-  loader: () => import("./modules/Error/pages/NotFoundPage"),
+  loader: () =>
+    import(/* webpackChunkName: "NotFoundPage" */ "./modules/Error/pages/NotFoundPage"),
   loading: Loading
 });
 
@@ -110,6 +126,7 @@ export default (
   <Route path="/" component={MyApp}>
     <IndexRoute component={HomePage} />
     <Route path="/setting" component={SettingDetailPage} />
+    <Route path="/settings" component={SettingDetailPage} />
     <Route
       path="/forumBoards/:forumBoardId/rootDiscussions/:parentDiscussionId"
       component={DiscussionDetailPage}
@@ -135,14 +152,20 @@ export default (
     <Route
       path="/create/forumBoards/:forumBoardId/rootDiscussion"
       component={UpsertDiscussionPage}
+      actionType="create"
+      targetKind="rootDiscussion"
     />
     <Route
       path="/create/rootDiscussions/:parentDiscussionId/childDiscussion"
       component={UpsertDiscussionPage}
+      actionType="create"
+      targetKind="childDiscussion"
     />
     <Route
       path="/update/discussions/:discussionId"
       component={UpsertDiscussionPage}
+      actionType="update"
+      targetKind="discussion"
     />
     <Route path="/create/forumBoard" component={CreateForumBoardPage} />
     <Route

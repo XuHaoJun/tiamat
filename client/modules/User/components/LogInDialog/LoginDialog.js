@@ -9,12 +9,14 @@ import LogInForm from "../LogInForm";
 class LoginDialog extends React.PureComponent {
   static propTypes = {
     open: PropTypes.bool,
-    onRequestClose: PropTypes.func
+    onRequestClose: PropTypes.func,
+    loginFormProps: PropTypes.object
   };
 
   static defaultProps = {
     open: false,
-    onRequestClose: undefined
+    onRequestClose: undefined,
+    loginFormProps: undefined
   };
 
   handleClose = () => {
@@ -46,6 +48,8 @@ class LoginDialog extends React.PureComponent {
         onClick={this.handleLogin}
       />
     ];
+    let { loginFormProps } = this.props;
+    loginFormProps = loginFormProps || {};
     return (
       <Dialog modal={true} actions={actions} open={this.props.open}>
         <div
@@ -55,6 +59,7 @@ class LoginDialog extends React.PureComponent {
             ref={form => {
               this.form = form;
             }}
+            {...loginFormProps}
           />
         </div>
       </Dialog>

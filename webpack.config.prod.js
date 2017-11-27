@@ -18,7 +18,7 @@ module.exports = {
 
   entry: {
     app: ["./client/index.js"],
-    vendor: ["babel-polyfill", "react", "react-dom", "immutable", "intl"]
+    vendor: ["babel-polyfill", "react", "react-dom", "immutable", "intl", "redux", "react-router"]
   },
 
   output: {
@@ -53,6 +53,11 @@ module.exports = {
         ]
       },
       {
+        test: /\.gz$/,
+        enforce: "pre",
+        use: "gzip-loader"
+      },
+      {
         test: /\.css$/,
         exclude: [/node_modules/, /plugin\.css$/],
         use: ExtractTextPlugin.extract({
@@ -83,7 +88,7 @@ module.exports = {
       },
       {
         test: /\.jsx*$/,
-        exclude: /(localforage|history|disposables)/,
+        exclude: /(localforage|history|disposables|match-media-mock)/,
         loader: "babel-loader"
       },
       {
@@ -110,7 +115,9 @@ module.exports = {
     new LodashModuleReplacementPlugin({ shorthands: true, collections: true }),
     new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
-      filename: "vendor.js"
+      filename: "vendor.js",
+      chunks: ["app"],
+      minChunks: ({ resource }) => /node_modules/.test(resource)
     }),
     new ExtractTextPlugin({
       filename: "app.[chunkhash].css",
@@ -139,7 +146,10 @@ module.exports = {
       mangle: true,
       minimize: true
     }),
-    new webpack.optimize.AggressiveMergingPlugin(),
+    new webpack.optimize.AggressiveMergingPlugin({
+      minSizeReduce: 1.5,
+      moveToParents: true
+    }),
     new webpack.optimize.ModuleConcatenationPlugin(),
     new WebpackBundleSizeAnalyzerPlugin("./plain-report.txt"),
     new ScriptExtHtmlWebpackPlugin({ module: /\.js$/ }),

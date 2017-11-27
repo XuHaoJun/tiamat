@@ -308,6 +308,10 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const { dispatch } = dispatchProps;
   return {
     ...ownProps,
+    signUp(form) {
+      // TODO
+      // signUp
+    },
     onSubmit(event, form) {
       if (ownProps.onSubmit) {
         return ownProps.onSubmit(event.form);

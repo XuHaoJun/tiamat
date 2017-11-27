@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { Set } from "immutable";
@@ -10,6 +11,7 @@ import {
   setHeaderTitleThunk,
   updateSendButtonProps
 } from "../../MyApp/MyAppActions";
+import { getDBisInitialized } from "../../MyApp/MyAppReducer";
 import {
   setCreateRootDiscussionPageForm,
   addDiscussionRequest,
@@ -20,12 +22,29 @@ import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
 import { getSemanticRules } from "../../SemanticRule/SemanticRuleReducer";
-import { getCurrentAccessToken } from "../../User/UserReducer";
+import { getIsLoggedIn } from "../../User/UserReducer";
 
 import RootDiscussionForm from "../components/RootDiscussionForm";
 import ChildDiscussionForm from "../components/ChildDiscussionForm";
 
+const CREATE_ACTION = "create";
+const UPDATE_ACTION = "update";
+const ACTIONS = [CREATE_ACTION, UPDATE_ACTION];
+
 class UpsertRootDiscussionPage extends React.Component {
+  static propTypes = {
+    actionType: PropTypes.oneOf(ACTIONS).isRequired,
+    targetKind: PropTypes.oneOf([
+      "rootDiscussion",
+      "discussion",
+      "childDiscussion"
+    ]).isRequired
+  };
+
+  static contextTypes = {
+    router: PropTypes.object.isRequired
+  };
+
   static defaultProps = {
     headerTitle: "建立文章"
   };
@@ -37,16 +56,18 @@ class UpsertRootDiscussionPage extends React.Component {
 
   componentDidMount() {
     this.fetchData(this.props);
+    this.ensureLoggedIn(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
     this.fetchData(nextProps);
+    this.ensureLoggedIn(nextProps);
   }
 
   componentWillUnmount() {
     // cancel debounce
-    this.saveToLocalDB.cancel();
-    this._saveToLocalDB();
+    this.debouncedSaveToLocalDB.cancel();
+    this.saveToLocalDB();
   }
 
   setFormRef = form => {
@@ -63,7 +84,17 @@ class UpsertRootDiscussionPage extends React.Component {
     }
   };
 
-  _saveToLocalDB = () => {
+  ensureLoggedIn = props => {
+    const { dbIsInitialized } = props;
+    if (dbIsInitialized) {
+      const { isLoggedIn } = props;
+      if (!isLoggedIn) {
+        this.context.router.replace("/login");
+      }
+    }
+  };
+
+  saveToLocalDB = () => {
     if (this.form && this.form.getForm) {
       const formData = this.form.getForm();
       if (formData) {
@@ -79,8 +110,8 @@ class UpsertRootDiscussionPage extends React.Component {
     }
   };
 
-  saveToLocalDB = debounce(() => {
-    return this._saveToLocalDB();
+  debouncedSaveToLocalDB = debounce(() => {
+    return this.saveToLocalDB();
   }, 5000);
 
   fetchData = props => {
@@ -173,7 +204,9 @@ class UpsertRootDiscussionPage extends React.Component {
       forumBoard,
       initForm,
       parentDiscussionId,
-      discussionId
+      discussionId,
+      actionType,
+      targetKind
     } = this.props;
     const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
     // TODO
@@ -188,26 +221,39 @@ class UpsertRootDiscussionPage extends React.Component {
     } else {
       semanticRules = Set();
     }
+    let form;
+    if (targetKind === "childDiscussion") {
+      form = (
+        <ChildDiscussionForm
+          ref={this.setFormRef}
+          actionType={actionType}
+          parentDiscussionId={parentDiscussionId}
+          initForm={initForm}
+          semanticRules={semanticRules}
+        />
+      );
+    } else if (targetKind === "rootDiscussion") {
+      form = (
+        <RootDiscussionForm
+          ref={this.setFormRef}
+          actionType={actionType}
+          forumBoardId={forumBoardId}
+          forumBoardGroup={forumBoardGroup}
+          forumBoard={forumBoard}
+          initForm={initForm}
+          onChange={this.handleFormChange}
+          semanticRules={semanticRules}
+        />
+      );
+    } else if (targetKind === "discussion") {
+      form = <div>尚未完成</div>;
+    } else {
+      form = <div>{`unknown targetKind ${targetKind}`}</div>;
+    }
     return (
       <div>
         <Helmet title={this.props.headerTitle} />
-        {parentDiscussionId ? (
-          <ChildDiscussionForm
-            ref={this.setFormRef}
-            parentDiscussionId={parentDiscussionId}
-            initForm={initForm}
-          />
-        ) : (
-          <RootDiscussionForm
-            ref={this.setFormRef}
-            forumBoardId={forumBoardId}
-            forumBoardGroup={forumBoardGroup}
-            forumBoard={forumBoard}
-            initForm={initForm}
-            semanticRules={semanticRules}
-            onChange={this.handleFormChange}
-          />
-        )}
+        {form}
       </div>
     );
   }
@@ -276,13 +322,16 @@ UpsertRootDiscussionPage.need = []
       return emptyThunk;
     }
   })
-  .concat((params, store) => {
+  .concat((params, store, query, routes) => {
     const headerTitle = getHeaderTitle(params, store);
     return setHeaderTitleThunk(headerTitle);
   });
 
 function mapStateToProps(store, routerProps) {
-  const accessToken = getCurrentAccessToken(store);
+  const route = routerProps.routes[routerProps.routes.length - 1];
+  const { actionType, targetKind } = route;
+  const dbIsInitialized = getDBisInitialized(store);
+  const isLoggedIn = getIsLoggedIn(store);
   const { forumBoardId, parentDiscussionId, discussionId } = routerProps.params;
   const { forumBoardGroup } = routerProps.location.query;
   const forumBoard = getForumBoardById(store, forumBoardId);
@@ -297,8 +346,11 @@ function mapStateToProps(store, routerProps) {
   const semanticRules = getSemanticRules(store);
   const headerTitle = getHeaderTitle(routerProps.params, store);
   return {
+    actionType,
+    targetKind,
+    dbIsInitialized,
     headerTitle,
-    accessToken,
+    isLoggedIn,
     forumBoardId,
     forumBoardGroup,
     forumBoard,

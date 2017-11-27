@@ -174,12 +174,13 @@ export function renderClientRoute(req, res, next) {
         const { clientID } = appConfig.oauth2.facebook;
         store.dispatch(setOauth2Client({ clientID }, "facebook"));
       }
-
       return fetchComponentData(
         store,
         renderProps.components,
         renderProps.params,
-        renderProps.location.query
+        renderProps.location.query,
+        renderProps.routes,
+        renderProps
       )
         .then(() => {
           res.set("Content-Type", "text/html").status(200);
@@ -192,6 +193,8 @@ export function renderClientRoute(req, res, next) {
             n += 1;
             return `${n}`;
           });
+          // TODO
+          // locale by request langa.
           moment.locale(store.getState().intl.locale);
           const stream = renderToNodeStream(
             <Provider store={store}>
