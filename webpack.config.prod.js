@@ -18,7 +18,7 @@ module.exports = {
 
   entry: {
     app: ["./client/index.js"],
-    vendor: ["babel-polyfill", "react", "react-dom", "immutable", "intl", "redux", "react-router"]
+    vendor: ["react", "react-dom", "immutable", "intl", "redux", "react-router"]
   },
 
   output: {
@@ -34,6 +34,10 @@ module.exports = {
 
   module: {
     rules: [
+      {
+        test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
+        loader: "file-loader?name=fonts/[name].[ext]"
+      },
       {
         test: /\.css$/,
         include: [/node_modules/, /plugin\.css/],
@@ -88,7 +92,7 @@ module.exports = {
       },
       {
         test: /\.jsx*$/,
-        exclude: /(localforage|history|disposables|match-media-mock)/,
+        exclude: /node_modules/,
         loader: "babel-loader"
       },
       {
@@ -108,7 +112,6 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
-        DEBUG: JSON.stringify(process.env.DEBUG || "app:production:*"),
         NODE_ENV: JSON.stringify("production")
       }
     }),

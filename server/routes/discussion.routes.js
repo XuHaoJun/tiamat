@@ -2,7 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import login from "connect-ensure-login";
 
-import * as Controller from "../controllers/discussion.controller";
+import Controller from "../controllers/discussion.controller";
 
 const router = new Router();
 

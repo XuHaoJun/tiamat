@@ -1,5 +1,5 @@
 # Tiamat
-Tiamat - a modern mobile gaming forum.
+Tiamat - a modern gaming forum.
 [Online Demo](https://tiamat.herokuapp.com)
 
 ## Requirements

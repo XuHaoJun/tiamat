@@ -25,11 +25,11 @@ export function addRootWikiRequest(rootWiki, reqConfig) {
         return res.rootWiki;
       })
       .catch(err => {
-        return Promise.resolve(
-          dispatch(addError(err.response.data))
-        ).then(() => {
-          return Promise.reject(err);
-        });
+        return Promise.resolve(dispatch(addError(err.response.data))).then(
+          () => {
+            return Promise.reject(err);
+          }
+        );
       });
   };
 }

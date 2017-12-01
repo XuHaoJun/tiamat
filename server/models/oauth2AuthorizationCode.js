@@ -4,7 +4,12 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const oauth2AuthorizationCodeSchema = new Schema({
-  code: { type: String, default: uuidv4, unique: true, required: true },
+  code: {
+    type: String,
+    default: uuidv4,
+    index: { unique: true },
+    required: true
+  },
   client: { type: Schema.Types.ObjectId, ref: "Oauth2Client", required: true },
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   redirectURI: { type: String, default: "" },

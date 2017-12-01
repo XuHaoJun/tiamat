@@ -65,7 +65,7 @@ class ForumBoardGroupsList extends React.Component {
 
 function mapStateToProps(store, props) {
   const { groups, forumBoardId, forumBoardGroup } = props;
-  const forumBoard = getForumBoardById(store, forumBoardId);
+  const forumBoard = props.forumBoard || getForumBoardById(store, forumBoardId);
   return {
     forumBoardId,
     forumBoard,

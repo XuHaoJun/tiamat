@@ -13,7 +13,7 @@ import {
 } from "../../MyApp/MyAppActions";
 import { getDBisInitialized } from "../../MyApp/MyAppReducer";
 import {
-  setCreateRootDiscussionPageForm,
+  setUpsertDiscussionPageForm,
   addDiscussionRequest,
   fetchDiscussion
 } from "../DiscussionActions";
@@ -103,7 +103,7 @@ class UpsertRootDiscussionPage extends React.Component {
         // imple it.
         if (forumBoardId) {
           this.props.dispatch(
-            setCreateRootDiscussionPageForm(forumBoardId, formData)
+            setUpsertDiscussionPageForm(forumBoardId, formData)
           );
         }
       }
@@ -181,9 +181,7 @@ class UpsertRootDiscussionPage extends React.Component {
           .then(() => {
             if (backUrl) dispatch(replace(backUrl));
           })
-          .then(() =>
-            dispatch(setCreateRootDiscussionPageForm(forumBoardId, null))
-          )
+          .then(() => dispatch(setUpsertDiscussionPageForm(forumBoardId, null)))
           .catch(() => dispatch(updateSendButtonProps({ loading: false })));
       });
     } else {
@@ -328,8 +326,8 @@ UpsertRootDiscussionPage.need = []
   });
 
 function mapStateToProps(store, routerProps) {
-  const route = routerProps.routes[routerProps.routes.length - 1];
-  const { actionType, targetKind } = route;
+  const leafRoute = routerProps.routes[routerProps.routes.length - 1];
+  const { actionType, targetKind } = leafRoute;
   const dbIsInitialized = getDBisInitialized(store);
   const isLoggedIn = getIsLoggedIn(store);
   const { forumBoardId, parentDiscussionId, discussionId } = routerProps.params;
@@ -341,7 +339,7 @@ function mapStateToProps(store, routerProps) {
   if (parentDiscussionId) {
     initForm = null;
   } else {
-    initForm = ui.getIn(["CreateRootDiscussionPage", "forms", forumBoardId]);
+    initForm = ui.getIn(["UpsertDiscussionPage", "forms", forumBoardId]);
   }
   const semanticRules = getSemanticRules(store);
   const headerTitle = getHeaderTitle(routerProps.params, store);

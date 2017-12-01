@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import _cloneDeep from "lodash/cloneDeep";
 
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import {
@@ -24,7 +25,9 @@ import Header from "./components/Header";
 import spacing from "material-ui/styles/spacing";
 import ErrorSnackbar from "../Error/components/ErrorSnackbar";
 
-export function getStyles(browser) {
+const defaultMuiTheme = getMuiTheme();
+
+export function getStyles(browser, drawerOpen) {
   const styles = {
     appBar: {
       position: "fixed"
@@ -42,15 +45,11 @@ export function getStyles(browser) {
     disableRoot: {},
     disableContent: {}
   };
-  if (browser.greaterThan.medium) {
+  if (!browser.lessThan.medium) {
     styles.root.paddingLeft = 256;
-    // if (header) {
-    //   const open = header.getDrawerIsOpen();
-    //   if (!open) {
-    //     delete styles.root.paddingLeft;
-    //     styles.root.padding = "0 50px 0 50px";
-    //   }
-    // }
+    if (typeof drawerOpen === "boolean" && !drawerOpen) {
+      delete styles.root.paddingLeft;
+    }
     styles.disableRoot.paddingLeft = -1 * styles.root.paddingLeft;
     styles.content = Object.assign(styles.content, styles.contentWhenMedium);
     const topdown = -spacing.desktopGutter;
@@ -66,7 +65,9 @@ export function getStyles(browser) {
   return styles;
 }
 
-export class MyApp extends React.Component {
+class MyApp extends React.Component {
+  state = {};
+
   componentDidMount() {
     if (typeof window === "object" && typeof document === "object") {
       const backgroundColor = this.props.ui.getIn([
@@ -83,53 +84,6 @@ export class MyApp extends React.Component {
       document.body.style.backgroundColor = null;
     }
   }
-
-  getMuiTheme = () => {
-    const fontFamily =
-      '"Noto Sans TC", "Helvetica Neue", "Calibri Light", Roboto, sans-serif, sans-serif';
-    const { userAgent, browser } = this.props;
-    let muiTheme;
-    if (browser.lessThan.medium) {
-      muiTheme = getMuiTheme({
-        fontFamily,
-        userAgent
-      });
-    } else {
-      muiTheme = getMuiTheme({
-        fontFamily,
-        userAgent,
-        appBar: {
-          color: white,
-          textColor: darkBlack
-        },
-        drawer: {
-          color: "#FAFAFA"
-        },
-        tabs: {
-          backgroundColor: white,
-          textColor: fade(darkBlack, 0.4),
-          selectedTextColor: darkBlack
-        },
-        palette: {
-          primary1Color: cyan500,
-          primary2Color: cyan700,
-          primary3Color: grey400,
-          accent1Color: "#6E6E6E",
-          accent2Color: grey100,
-          accent3Color: grey500,
-          textColor: darkBlack,
-          alternateTextColor: white,
-          canvasColor: white,
-          borderColor: grey300,
-          disabledColor: fade(darkBlack, 0.3),
-          pickerHeaderColor: cyan500,
-          clockCircleColor: fade(darkBlack, 0.07),
-          shadowColor: fullBlack
-        }
-      });
-    }
-    return muiTheme;
-  };
 
   getHeadMeta = () => {
     return [
@@ -164,9 +118,80 @@ export class MyApp extends React.Component {
     ];
   };
 
+  _getMuiTheme = () => {
+    const fontFamily =
+      '"Noto Sans TC", "Helvetica Neue", "Calibri Light", Roboto, sans-serif, sans-serif';
+    const { userAgent, browser } = this.props;
+    if (browser.lessThan.medium) {
+      if (this._muiThemeWithMedium) {
+        return this._muiThemeWithMedium;
+      }
+      this._muiThemeWithMedium = getMuiTheme(_cloneDeep(defaultMuiTheme), {
+        fontFamily,
+        userAgent
+      });
+      return this._muiThemeWithMedium;
+    } else {
+      if (this._muiTheme) {
+        return this._muiTheme;
+      }
+      this._muiTheme = getMuiTheme(_cloneDeep(defaultMuiTheme), {
+        fontFamily,
+        userAgent,
+        appBar: {
+          color: white,
+          textColor: darkBlack
+        },
+        drawer: {
+          color: "#FAFAFA"
+        },
+        tabs: {
+          backgroundColor: white,
+          textColor: fade(darkBlack, 0.45),
+          selectedTextColor: darkBlack
+        },
+        inkBar: {
+          backgroundColor: "#6E6E6E"
+        },
+        palette: {
+          primary1Color: cyan500,
+          primary2Color: cyan700,
+          primary3Color: grey400,
+          accent2Color: grey100,
+          accent3Color: grey500,
+          textColor: darkBlack,
+          alternateTextColor: white,
+          canvasColor: white,
+          borderColor: grey300,
+          disabledColor: fade(darkBlack, 0.3),
+          pickerHeaderColor: cyan500,
+          clockCircleColor: fade(darkBlack, 0.07),
+          shadowColor: fullBlack
+        },
+        zIndex: {
+          menu: 1000,
+          drawerOverlay: 1200,
+          drawer: 1300,
+          appBar: 1301,
+          dialogOverlay: 1400,
+          dialog: 1500,
+          layer: 2000,
+          popover: 2100,
+          snackbar: 2900,
+          tooltip: 3000
+        }
+      });
+      return this._muiTheme;
+    }
+  };
+
+  handleChangeDrawerOpen = drawerOpen => {
+    this.setState({ drawerOpen });
+  };
+
   render() {
-    const styles = getStyles(this.props.browser);
-    const muiTheme = this.getMuiTheme();
+    const styles = getStyles(this.props.browser, this.state.drawerOpen);
+    const muiTheme = this._getMuiTheme();
     const meta = this.getHeadMeta();
     const headerTitle = this.props.ui.get("headerTitle");
     return (
@@ -175,10 +200,10 @@ export class MyApp extends React.Component {
         <MuiThemeProvider muiTheme={muiTheme}>
           <div>
             <Header
-              id="MyAppMainHeader"
               title={headerTitle}
               appBarStyle={styles.appBar}
               location={this.props.location}
+              onChangeDrawerOpen={this.handleChangeDrawerOpen}
             />
             <div
               style={{
@@ -202,6 +227,8 @@ MyApp.propTypes = {
   children: PropTypes.object.isRequired
   // intl: PropTypes.object.isRequired
 };
+
+export const MyAppWithoutConnect = MyApp;
 
 // Retrieve data from store as props
 function mapStateToProps(store, routerProps) {

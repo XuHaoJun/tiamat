@@ -1,6 +1,7 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
+
 import { fetchWiki } from "../WikiActions";
 import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
 import { getWiki } from "../WikiReducer";
@@ -44,7 +45,7 @@ class WikiDetailPage extends React.Component {
   };
 
   render() {
-    const { title, wiki, wikiId, rootWikiId, enableEdit } = this.props;
+    const { title, wiki, wikiId, rootWikiId } = this.props;
     if (!wiki) {
       return <CenterCircularProgress />;
     }
@@ -58,7 +59,6 @@ class WikiDetailPage extends React.Component {
           scrollKey="WikiDetailPage/WikiDetailTabs"
           wikiId={wikiId}
           rootWikiId={rootWikiId}
-          enableEdit={enableEdit}
           browser={browser}
         />
       </div>
@@ -72,12 +72,14 @@ const emptyThunkAction = () => {
 
 WikiDetailPage.need = []
   .concat(params => {
-    const { wikiId } = params;
-    return wikiId ? fetchWiki(wikiId) : emptyThunkAction;
-  })
-  .concat(params => {
-    const { rootWikiId } = params;
-    return rootWikiId ? fetchRootWikiById(rootWikiId) : emptyThunkAction;
+    const { wikiId, rootWikiId } = params;
+    return dispatch => {
+      const wikiThunk = wikiId ? fetchWiki(wikiId) : emptyThunkAction;
+      const rootWikiThunk = rootWikiId
+        ? fetchRootWikiById(rootWikiId)
+        : emptyThunkAction;
+      return Promise.all([wikiThunk(dispatch), rootWikiThunk(dispatch)]);
+    };
   })
   .concat((params, store) => {
     const { rootWikiId } = params;
@@ -88,8 +90,6 @@ WikiDetailPage.need = []
 
 function mapStateToProps(store, routerProps) {
   const { wikiId, rootWikiId } = routerProps.params;
-  let { enableEdit } = routerProps.location.query;
-  enableEdit = enableEdit === true;
   const wiki = getWiki(store, wikiId);
   const rootWiki = getRootWiki(store, rootWikiId);
   const title = rootWiki ? rootWiki.get("name") : "";
@@ -100,8 +100,7 @@ function mapStateToProps(store, routerProps) {
     wikiId,
     wiki,
     rootWikiId,
-    rootWiki,
-    enableEdit
+    rootWiki
   };
 }
 

@@ -53,13 +53,15 @@ class MixedMainPage extends React.Component {
   componentDidMount() {
     const {
       dispatch,
-      forumBoardId,
       forumBoardGroup,
       forumBoard,
+      rootWiki,
       rootWikiGroupTree
     } = this.props;
     const rootWikiId =
       this.props.rootWikiId || (forumBoard && forumBoard.get("rootWiki"));
+    const forumBoardId =
+      this.props.forumBoardId || (rootWiki && rootWiki.get("forumBoard"));
     if (forumBoardId) {
       dispatch(fetchForumBoardById(forumBoardId));
       dispatch(fetchRootDiscussions(forumBoardId, { forumBoardGroup }));
@@ -186,6 +188,7 @@ class MixedMainPage extends React.Component {
       }
     ];
     const {
+      targetKind,
       forumBoardId,
       forumBoard,
       rootWikiId,
@@ -206,6 +209,7 @@ class MixedMainPage extends React.Component {
         <Helmet title={title} meta={meta} />
         <MixedMainTabs
           scrollKey="MixedMainPage/MixedMainTabs"
+          targetKind={targetKind}
           forumBoardId={forumBoardId}
           forumBoard={forumBoard}
           forumBoardGroup={forumBoardGroup}
@@ -247,6 +251,15 @@ MixedMainPage.need = []
     return rootWikiId ? fetchRootWikiById(rootWikiId) : emptyThunkAction;
   })
   .concat((params, store) => {
+    const { rootWikiId } = params;
+    const rootWiki = rootWikiId ? getRootWiki(store, rootWikiId) : null;
+    let forumBoardId;
+    if (rootWiki) {
+      forumBoardId = rootWiki.get("forumBoard");
+    }
+    return forumBoardId ? fetchForumBoardById(forumBoardId) : emptyThunkAction;
+  })
+  .concat((params, store) => {
     let { rootWikiId } = params;
     const { forumBoardId } = params;
     const forumBoard = forumBoardId
@@ -279,6 +292,8 @@ const parseRootWikiGroupTree = memoize(queryString => {
 });
 
 function mapStateToProps(store, routerProps) {
+  const leafRoute = routerProps.routes[routerProps.routes.length - 1];
+  const { targetKind } = leafRoute;
   const accessToken = getCurrentAccessToken(store);
   const { forumBoardGroup } = routerProps.location.query;
   const rootWikiGroupTree = parseRootWikiGroupTree(
@@ -295,7 +310,7 @@ function mapStateToProps(store, routerProps) {
     rootWikiId = forumBoard.get("rootWiki");
   }
   const rootWiki = getRootWiki(store, rootWikiId);
-  if (rootWiki) {
+  if (!forumBoardId && rootWiki) {
     forumBoardId = rootWiki.get("forumBoard");
   }
   if (!forumBoard) {
@@ -316,6 +331,7 @@ function mapStateToProps(store, routerProps) {
   }
   const title = forumBoardName || rootWikiName;
   return {
+    targetKind,
     accessToken,
     browser,
     isWikis,

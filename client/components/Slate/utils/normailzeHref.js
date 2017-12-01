@@ -12,7 +12,7 @@ function sameOriginReplace(href) {
       : "";
     const port = url.port ? url.port : "";
     const host = `${hostname}:${port}`;
-    const location = window.location;
+    const { location } = window;
     const windowHost = `${location.hostname.replace(
       "127.0.0.1",
       "localhost"

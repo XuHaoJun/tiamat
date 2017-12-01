@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+
 const Schema = mongoose.Schema;
 
 const searchLogSchema = new Schema({
-  query: { type: "String", required: true, index: true, unique: true },
+  query: { type: "String", required: true, index: { unique: true } },
   count: { type: "Number", required: true, default: 1 }
 });
 

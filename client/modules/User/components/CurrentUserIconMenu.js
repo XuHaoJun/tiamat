@@ -1,8 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
 import IconMenu from "material-ui/IconMenu";
+import FlatButton from "material-ui/FlatButton";
 import MaterialMenuItem from "material-ui/MenuItem";
 import SettingIcon from "material-ui/svg-icons/action/settings";
 import LogOutIcon from "material-ui/svg-icons/action/input";
@@ -36,24 +38,40 @@ function makeLinkable(WrappedComponent) {
 const MenuItem = makeLinkable(MaterialMenuItem);
 MenuItem.muiName = MaterialMenuItem.muiName;
 
-const CurrentUserIconMenu = ({ user, iconButtonElement }) => {
-  let _iconButtonElement;
-  if (iconButtonElement) {
-    _iconButtonElement = iconButtonElement;
-  } else {
-    _iconButtonElement = <UserAvatar user={user} />;
+class CurrentUserIconMenu extends React.Component {
+  constructor(props) {
+    super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate;
   }
-  return (
-    <IconMenu
-      iconButtonElement={_iconButtonElement}
-      anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
-      targetOrigin={{ horizontal: "left", vertical: "bottom" }}
-    >
-      <MenuItem primaryText="設定" leftIcon={<SettingIcon />} to="/settings" />
-      <MenuItem primaryText="登出(尚未完成)" leftIcon={<LogOutIcon />} />
-    </IconMenu>
-  );
-};
+
+  render() {
+    const { user, iconButtonElement } = this.props;
+    let _iconButtonElement;
+    if (iconButtonElement) {
+      _iconButtonElement = iconButtonElement;
+    } else {
+      _iconButtonElement = (
+        <FlatButton>
+          <UserAvatar size={34} user={user} />
+        </FlatButton>
+      );
+    }
+    return (
+      <IconMenu
+        iconButtonElement={_iconButtonElement}
+        anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
+        targetOrigin={{ horizontal: "left", vertical: "bottom" }}
+      >
+        <MenuItem
+          primaryText="設定"
+          leftIcon={<SettingIcon />}
+          to="/settings"
+        />
+        <MenuItem primaryText="登出(尚未完成)" leftIcon={<LogOutIcon />} />
+      </IconMenu>
+    );
+  }
+}
 
 CurrentUserIconMenu.muiName = IconMenu.muiName;
 

@@ -100,6 +100,7 @@ class Header extends React.Component {
   static defaultProps = {
     defaultQuery: "",
     title: "",
+    onChangeDrawerOpen: undefined,
     onDrawerOpen: undefined,
     onDrawerClose: undefined
   };
@@ -111,7 +112,7 @@ class Header extends React.Component {
     if (this._isInSearchPage()) {
       defaultQuery = props.location.query.query;
     }
-    const open = props.browser.greaterThan.medium;
+    const open = !props.browser.lessThan.medium;
     this.state = {
       open,
       textValue: defaultQuery || "",
@@ -122,7 +123,7 @@ class Header extends React.Component {
   componentWillReceiveProps(nextProps) {
     const nextState = {};
     if (nextProps.browser !== this.props.browser) {
-      const open = nextProps.browser.greaterThan.medium;
+      const open = !nextProps.browser.lessThan.medium;
       if (this.state.open !== open) {
         nextState.open = open;
       }
@@ -147,6 +148,9 @@ class Header extends React.Component {
       }
     }
     if (prevState.open !== this.state.open) {
+      if (this.props.onChangeDrawerOpen) {
+        this.props.onChangeDrawerOpen(this.state.open);
+      }
       if (this.state.open) {
         if (this.props.onDrawerOpen) {
           this.props.onDrawerOpen();
@@ -226,7 +230,7 @@ class Header extends React.Component {
     if (this.props.browser.lessThan.medium) {
       this.setState({ open });
     } else {
-      if (!(this.state.open && this.props.browser.greaterThan.medium)) {
+      if (!(this.state.open && !this.props.browser.lessThan.medium)) {
         this.setState({ open });
       }
     }
@@ -242,7 +246,7 @@ class Header extends React.Component {
   handleClose = () => this.setState({ open: false });
 
   shouldBackspaceButton = pathname => {
-    if (this.props.browser.greaterThan.medium) {
+    if (!this.props.browser.lessThan.medium) {
       return false;
     }
     const createPage = new RegExp("^/(create)/.+");
@@ -313,7 +317,7 @@ class Header extends React.Component {
           browser={this.props.browser}
           selectedIndex={selectedIndex}
           open={open}
-          docked={this.props.browser.greaterThan.medium}
+          docked={!this.props.browser.lessThan.medium}
           onRequestChangeNavDrawer={this.handleRequestChangeNavDrawer}
         />
       </div>

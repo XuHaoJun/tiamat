@@ -118,7 +118,11 @@ class RootDiscussionList extends React.Component {
 }
 
 function mapStateToProps(store, props) {
-  const { forumBoardId, forumBoardGroup } = props;
+  const { forumBoard, forumBoardGroup } = props;
+  let { forumBoardId } = props;
+  forumBoardId = forumBoard
+    ? forumBoard.get("_id") || forumBoardId
+    : forumBoardId;
   const dataSource = forumBoardId
     ? getRootDiscussions(store, forumBoardId)
     : Set();

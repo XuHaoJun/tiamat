@@ -84,18 +84,9 @@ class SearchAutoComplete extends React.Component {
                 const dangerouslySetInnerHTML = {
                   __html: highlightedText
                 };
-                return (
-                  <span
-                    className={cssStyles.highlight}
-                    dangerouslySetInnerHTML={dangerouslySetInnerHTML}
-                  />
-                ); // eslint-disable-line
+                return <span className={cssStyles.highlight} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />; // eslint-disable-line
               } else {
-                return (
-                  <span>
-                    {text}
-                  </span>
-                );
+                return <span>{text}</span>;
               }
             })();
             const value = <MenuItem primaryText={primaryText} />;

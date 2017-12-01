@@ -1,4 +1,7 @@
 import React from "react";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import randomColor from "randomcolor";
+
 import Avatar from "material-ui/Avatar";
 import GuestPersonIcon from "material-ui/svg-icons/social/person";
 
@@ -28,18 +31,35 @@ function getTextOrSrcOrIcon(user) {
   }
 }
 
-const UserAvatar = ({ user, ...other }) => {
-  const { text, src, icon } = getTextOrSrcOrIcon(user);
-  if (src) {
-    return <Avatar src={src} {...other} />;
-  } else if (text) {
-    return <Avatar {...other}>{text}</Avatar>;
-  } else if (icon) {
-    return <Avatar icon={icon} {...other} />;
-  } else {
-    return <Avatar {...other} />;
+class UserAvatar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate;
   }
-};
+
+  render() {
+    const { user, ...other } = this.props;
+    const { text, src, icon } = getTextOrSrcOrIcon(user);
+    if (src) {
+      return <Avatar src={src} {...other} />;
+    } else if (text) {
+      const { _id } = user;
+      const backgroundColor = randomColor({
+        luminosity: "dark",
+        seed: _id || text
+      });
+      return (
+        <Avatar backgroundColor={backgroundColor} {...other}>
+          {text}
+        </Avatar>
+      );
+    } else if (icon) {
+      return <Avatar icon={icon} {...other} />;
+    } else {
+      return <Avatar {...other} />;
+    }
+  }
+}
 
 UserAvatar.muiName = Avatar.muiName;
 

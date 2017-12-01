@@ -4,7 +4,7 @@ const ExternalsPlugin = require("webpack2-externals-plugin");
 
 module.exports = {
   entry: {
-    server: ["babel-polyfill", "./server/server.js"]
+    server: ["./server/server.js"]
   },
 
   output: {

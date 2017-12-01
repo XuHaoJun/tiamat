@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 import CreateIcon from "material-ui/svg-icons/content/create";
 import AddIcon from "material-ui/svg-icons/content/add";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -29,7 +30,7 @@ class AddButton extends React.PureComponent {
     if (e.nativeEvent.which === 3 || !this.props.href) {
       return;
     }
-    const href = this.props.href;
+    const { href } = this.props;
     if (href) {
       this.context.router.push(this.props.href);
     }

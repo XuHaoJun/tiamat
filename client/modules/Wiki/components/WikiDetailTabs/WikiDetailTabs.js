@@ -1,9 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Tabs, Tab } from "material-ui/Tabs";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
 import { connect } from "react-redux";
+import Loadable from "react-loadable";
+
+import { Tabs, Tab } from "material-ui/Tabs";
+
+import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
 import { getWiki } from "../../WikiReducer";
 import { getRootWiki } from "../../../RootWiki/RootWikiReducer";
 import CenterCircularProgress from "../../../../components/CenterCircularProgress";
@@ -12,17 +15,31 @@ import WikiContent from "../../components/WikiContent";
 import getStyles from "../../../../styles/Tabs";
 import WikiForm from "../WikiForm";
 
+const Loading = () => <div>Loading...</div>;
+
+const WikiDataForm = Loadable({
+  loader: () => {
+    // render Loading on server-side
+    if (typeof window === "undefined") {
+      return Promise.resolve(Loading);
+    } else {
+      return import(/* webpackChunkName: "WikiDataForm" */ "../WikiDataForm");
+    }
+  },
+  loading: Loading
+});
+
 export const WIKI_CONTENT_SLIDE = 0;
-export const WIKI_EDIT_SLIDE = 1;
-export const WIKI_HITSTORY_SLIDE = 2;
-export const WIKI_RELATED_DISCUSSION = 3;
+export const WIKI_RELATED_DISCUSSION = 1;
+export const WIKI_EDIT_SLIDE = 2;
+export const WIKI_HITSTORY_SLIDE = 3;
+export const WIKI_DATA_SLIDE = 4;
 
 class WikiDetailTabs extends React.Component {
   static defaultProps = {
     title: "維基",
     wikiId: "",
     wiki: null,
-    enableEdit: false,
     slideIndex: WIKI_CONTENT_SLIDE,
     scrollKey: "",
     onChangeTab: () => {}
@@ -93,7 +110,7 @@ class WikiDetailTabs extends React.Component {
     if (!wiki) {
       return <CenterCircularProgress />;
     }
-    const { scrollKey, enableEdit } = this.props;
+    const { scrollKey } = this.props;
     const { slideIndex } = this.state;
     const name = wiki ? wiki.get("name") : "";
     const content = wiki ? wiki.get("content") : emptyContent;
@@ -106,8 +123,7 @@ class WikiDetailTabs extends React.Component {
       rootWikiGroupTree
     };
     const wikiContentProps = {
-      ...wikiProps,
-      enableEdit
+      ...wikiProps
     };
     const wikiFormProps = {
       ...wikiProps,
@@ -122,9 +138,10 @@ class WikiDetailTabs extends React.Component {
           onChange={this.handleTabChange}
         >
           <Tab label="閱讀" value={WIKI_CONTENT_SLIDE} />
+          <Tab label="相關文章" value={WIKI_RELATED_DISCUSSION} />
           <Tab label="編輯" value={WIKI_EDIT_SLIDE} />
           <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE} />
-          <Tab label="相關文章" value={WIKI_RELATED_DISCUSSION} />
+          <Tab label="資料" value={WIKI_DATA_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey={scrollKey}
@@ -135,9 +152,10 @@ class WikiDetailTabs extends React.Component {
           onTransitionEnd={this.handleTransitionEnd}
         >
           <WikiContent {...wikiContentProps} />
+          <div>相關文章(尚未完成)</div>
           <WikiForm {...wikiFormProps} />
           <div>檢視歷史(尚未完成)</div>
-          <div>相關文章(尚未完成)</div>
+          <WikiDataForm />
         </EnhancedSwipeableViews>
       </div>
     );

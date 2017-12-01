@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
-import warning from "warning";
 
 export class EnhancedSwipableViews extends React.Component {
   static propTypes = {
@@ -37,30 +36,31 @@ export class EnhancedSwipableViews extends React.Component {
   componentDidMount() {
     document.body.addEventListener("touchstart", this.onBodyTouchStart);
     document.body.addEventListener("touchend", this.onBodyTouchEnd);
-    this._scrollSpy(this.props.index);
+    this._scrollSpy();
   }
 
   componentWillReceiveProps(nextProps) {
-    warning(
-      nextProps.scrollKey === this.props.scrollKey,
-      "<ScrollContainer> does not support changing scrollKey."
-    );
+    if (nextProps.scrollKey && this.props.scrollKey !== nextProps.scrollKey) {
+      if (this._scrollKeys) {
+        this._scrollKeys.forEach(scrollKey => {
+          this.context.scrollBehavior.unregisterElement(scrollKey);
+        });
+        this._scrollKeys = [];
+        this._scrollSpy();
+      }
+    }
   }
 
   componentWillUnmount() {
     document.body.removeEventListener("touchstart", this.onBodyTouchStart);
     document.body.removeEventListener("touchend", this.onBodyTouchEnd);
-    if (this._registed && this._scrollKey) {
-      this.context.scrollBehavior.unregisterElement(this._scrollKey);
+    if (this._scrollKeys) {
+      this._scrollKeys.forEach(scrollKey => {
+        this.context.scrollBehavior.unregisterElement(scrollKey);
+      });
+      this._scrollKeys = [];
     }
   }
-
-  onChangeIndex = (currentIndex, prevIndex) => {
-    this._scrollSpy(currentIndex, prevIndex);
-    if (this.props.onChangeIndex) {
-      this.props.onChangeIndex(currentIndex, prevIndex);
-    }
-  };
 
   onBodyTouchStart = event => {
     if (this.props.disableOnDrawerStart && document) {
@@ -95,49 +95,31 @@ export class EnhancedSwipableViews extends React.Component {
     this.originalSwipableViews = ori;
   };
 
-  _scrollSpy = (index, prevIndex) => {
-    if (!this.originalSwipableViews || typeof index !== "number") {
+  _scrollSpy = () => {
+    if (!this.originalSwipableViews) {
       return;
     }
     const { containerNode } = this.originalSwipableViews;
-    const activeNode = containerNode.childNodes[index];
-    if (!activeNode) {
-      return;
-    }
     const { scrollKey, animateHeight } = this.props;
-    if (scrollKey && !animateHeight) {
-      if (this._registed && this._scrollKey && typeof prevIndex === "number") {
+    if (scrollKey && !animateHeight && containerNode) {
+      containerNode.childNodes.forEach((activeNode, index) => {
+        const _scrollKey = `${scrollKey}-${index}`;
+        this._scrollKeys = this._scrollKeys || [];
+        this._scrollKeys.push(_scrollKey);
+        const targetScrollElement = activeNode;
+        let { scrollBehaviorShouldUpdateScroll } = this.props;
+        scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior
+          .shouldUpdateScroll;
         try {
-          this.context.scrollBehavior.unregisterElement(
-            `${scrollKey}-${prevIndex}`
+          this.context.scrollBehavior.registerElement(
+            _scrollKey,
+            targetScrollElement,
+            scrollBehaviorShouldUpdateScroll
           );
         } catch (err) {
-          if (
-            /ScrollBehavior: There is already an element registered for /.test(
-              err.message
-            )
-          ) {
-            warning(err);
-          } else {
-            throw err;
-          }
+          console.warn(err);
         }
-      }
-      const _scrollKey = `${scrollKey}-${index}`;
-      if (_scrollKey === this._scrollKey && this._registed) {
-        return;
-      }
-      this._scrollKey = _scrollKey;
-      this._registed = true;
-      const targetScrollElement = activeNode;
-      let { scrollBehaviorShouldUpdateScroll } = this.props;
-      scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior
-        .shouldUpdateScroll;
-      this.context.scrollBehavior.registerElement(
-        _scrollKey,
-        targetScrollElement,
-        scrollBehaviorShouldUpdateScroll
-      );
+      });
     }
   };
 
@@ -160,7 +142,6 @@ export class EnhancedSwipableViews extends React.Component {
         resistance={resistance}
         ref={this.setOriginalSwipableViewsRef}
         disabled={disabled}
-        onChangeIndex={this.onChangeIndex}
         disableLazyLoading={disableLazyLoading}
       >
         {children}

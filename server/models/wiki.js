@@ -18,6 +18,7 @@ const wikiSchema = new Schema({
     required: true,
     index: true
   },
+  data: { type: Object },
   rootWikiGroupTree: { type: Schema.Types.Mixed },
   tags: { type: [String], default: [], index: true },
   popularityCounter: { type: Number, default: 0 },

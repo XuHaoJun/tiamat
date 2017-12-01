@@ -137,14 +137,23 @@ export default (
     />
     <Route
       path="/forumBoards/:forumBoardId/rootDiscussions"
+      targetKind="rootDiscussions"
+      component={MixedMainPage}
+    />
+    <Route
+      path="/rootWikis/:rootWikiId/wikis"
+      targetKind="wikis"
+      component={MixedMainPage}
+    />
+    <Route
+      path="/rootWikis/:rootWikiId"
+      targetKind="rootWiki"
       component={MixedMainPage}
     />
     <Route
       path="/rootWikis/:rootWikiId/wikis/:wikiId"
       component={WikiDetailPage}
     />
-    <Route path="/rootWikis/:rootWikiId/wikis" component={MixedMainPage} />
-    <Route path="/rootWikis/:rootWikiId" component={MixedMainPage} />
     <Route
       path="/edit/rootWikis/:rootWikiId/rootWikiGroupTree"
       component={EditRootWikiGroupTreePage}

@@ -103,9 +103,5 @@
         }
       }
     }
-  },
-
-  "type": "object",
-  "additionalProperties": false,
-  "$ref": "#/definitions/value"
+  }
 }

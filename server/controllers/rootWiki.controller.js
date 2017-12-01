@@ -8,16 +8,16 @@ import ForumBoard from "../models/forumBoard";
  * @returns void
  */
 export function getRootWiki(req, res) {
-  const query = {
-    _id: req.params.id
-  };
-  RootWiki.findOne(query).exec((err, rootWiki) => {
-    if (err) {
-      res.status(403).send(err);
-      return;
-    }
-    res.json({ rootWiki });
-  });
+  const { id } = req.params;
+  RootWiki.findById(id)
+    .populate("wikiDataForms")
+    .exec((err, rootWiki) => {
+      if (err) {
+        res.status(403).send(err);
+        return;
+      }
+      res.json({ rootWiki });
+    });
 }
 
 export function addRootWiki(req, res) {

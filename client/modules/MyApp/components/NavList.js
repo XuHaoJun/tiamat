@@ -4,7 +4,7 @@ import { Scrollbars } from "react-custom-scrollbars";
 import { Link } from "react-router";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
-import Divider from "material-ui/Divider";
+import MaterialDivider from "material-ui/Divider";
 import Subheader from "material-ui/Subheader";
 import { List, ListItem, makeSelectable } from "material-ui/List";
 import RaisedButton from "material-ui/RaisedButton";
@@ -25,6 +25,17 @@ import UserAvatar from "../../User/components/UserAvatar";
 const LogOutListItem = logOutRequestComposeEvent(ListItem, "onClick");
 
 const SelectableList = makeSelectable(List);
+
+const Divider = props => {
+  const { style, ...other } = props;
+  const _style = Object.assign(
+    {
+      backgroundColor: "hsl(0, 0%, 93.3%)"
+    },
+    style
+  );
+  return <MaterialDivider {...other} style={_style} />;
+};
 
 export function getStyles(muiTheme) {
   return {

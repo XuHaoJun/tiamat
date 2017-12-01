@@ -6,7 +6,7 @@ import {
   ADD_DISCUSSION,
   CLEAR_DISCUSSIONS,
   SET_DISCUSSIONS_UI,
-  SET_CREATE_ROOT_DISCUSSION_PAGE_FORM
+  SET_UPSERT_DISCUSSION_PAGE_FORM
 } from "./DiscussionActions";
 
 // Initial State
@@ -42,10 +42,10 @@ const DiscussionReducer = (state = initialState, action) => {
     case CLEAR_DISCUSSIONS:
       return state.set("data", Set());
 
-    case SET_CREATE_ROOT_DISCUSSION_PAGE_FORM:
+    case SET_UPSERT_DISCUSSION_PAGE_FORM:
       const { forumBoardId, form } = action;
       const newState = state.setIn(
-        ["ui", "CreateRootDiscussionPage", "forms", forumBoardId],
+        ["ui", "UpsertDiscussionPage", "forms", forumBoardId],
         fromJS(form)
       );
       const db = connectDB();

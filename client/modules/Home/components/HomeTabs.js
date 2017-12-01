@@ -89,7 +89,7 @@ class HomeTabs extends React.Component {
   };
 
   handleTabMouseOver = slideIndex => {
-    this.setState({ slideIndex });
+    // this.setState({ slideIndex });
   };
 
   handleTabMouseOvers = {

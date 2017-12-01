@@ -1,0 +1,160 @@
+{
+  "dependencies": {
+    "type": {
+      "oneOf": [{
+          "properties": {
+            "atk": {
+              "default": 1,
+              "title": "攻擊力",
+              "type": "integer"
+            },
+            "hp": {
+              "default": 1,
+              "title": "血量",
+              "type": "integer"
+            },
+            "type": {
+              "enum": [
+                "Minion"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": [
+                "Spell"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": [
+                "Hero"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "atk": {
+              "default": 1,
+              "title": "攻擊力",
+              "type": "integer"
+            },
+            "times": {
+              "default": 0,
+              "title": "使用次數",
+              "type": "integer"
+            },
+            "type": {
+              "enum": [
+                "Weapon"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "class": {
+      "default": "Neutral",
+      "enum": [
+        "Neutral",
+        "Druid",
+        "Hunter",
+        "Mage",
+        "Paladin",
+        "Priest",
+        "Rogue",
+        "Shaman",
+        "Warlock",
+        "Warrior"
+      ],
+      "title": "職業",
+      "type": "string"
+    },
+    "cost": {
+      "default": 1,
+      "max": 10,
+      "min": 0,
+      "title": "消耗",
+      "type": "integer"
+    },
+    "description": {
+      "maxLength": 300,
+      "minLength": 4,
+      "title": "敘述",
+      "type": "string"
+    },
+    "effect": {
+      "maxLength": 300,
+      "minLength": 4,
+      "title": "效果",
+      "type": "string"
+    },
+    "name": {
+      "title": "名稱",
+      "type": "string"
+    },
+    "race": {
+      "default": "",
+      "enum": [
+        "龍",
+        "圖騰",
+        "野獸",
+        "惡魔",
+        "魚人",
+        "機械",
+        "元素",
+        "海盜"
+      ],
+      "title": "種族",
+      "type": "string"
+    },
+    "rarity": {
+      "default": "Free",
+      "enum": [
+        "Free",
+        "Common",
+        "Rare",
+        "Epic",
+        "Legendary"
+      ],
+      "title": "稀有度",
+      "type": "string"
+    },
+    "type": {
+      "default": "Minion",
+      "enum": [
+        "Minion",
+        "Spell",
+        "Hero",
+        "Weapon"
+      ],
+      "enumNames": [
+        "手下",
+        "法術",
+        "英雄",
+        "武器"
+      ],
+      "title": "類型",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "rarity",
+    "class",
+    "cost",
+    "description",
+    "effect"
+  ],
+  "title": "爐石戰記-卡片(基於 JSON Schema 產生)",
+  "type": "object"
+}

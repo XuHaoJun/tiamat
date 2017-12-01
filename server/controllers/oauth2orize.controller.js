@@ -77,54 +77,48 @@ server.exchange(
 );
 
 server.exchange(
-  oauth2orize.exchange.password((reqClient, email, password, scope, done) => {
-    // TODO
-    // trust passport validated reqClient?
-    Client.findOne(
-      { _id: reqClient._id, secret: reqClient.secret },
-      (clientErr, client) => {
-        if (clientErr) return done(clientErr);
-        if (!client) return done(null, false);
-        User.findOne(
-          {
-            email
-          },
-          (err, user) => {
-            if (err) {
-              return done(err);
-            }
-            if (!user) {
-              return done(null, false);
-            }
-            return user.comparePassword(password, (err2, isMatch) => {
-              if (isMatch) {
-                const props = {
-                  user,
-                  scope
-                };
-                const token = AccessToken.create(client, props);
-                token.save(err3 => {
-                  if (err3) {
-                    return done(err3);
-                  }
-                  return done(null, token.token, {
-                    refresh_token: token.refreshToken,
-                    expires_in: defaultExpiresDuration.asSeconds(),
-                    refresh_expires_in: defaultRefreshExpiresDuration.asSeconds()
-                  });
-                });
-              } else {
-                return done(null, false, {
-                  message: "Invalid email or password."
-                });
-              }
-              return isMatch;
+  oauth2orize.exchange.password(
+    async (reqClient, email, password, scope, done) => {
+      // TODO
+      // validate by scope
+      try {
+        const [user, client] = await Promise.all([
+          User.findOne({ email }).exec(),
+          Client.findOne({
+            _id: reqClient._id,
+            secret: reqClient.secret
+          }).exec()
+        ]);
+        if (!user || !client) {
+          return done(null, false);
+        } else {
+          const isMatch = await user.comparePassword(password);
+          if (!isMatch) {
+            return done(null, false, {
+              message: "Invalid email or password."
+            });
+          } else {
+            const props = {
+              user,
+              scope
+            };
+            const token = AccessToken.create(client, props);
+            const saved = await token.save();
+            return done(null, saved.token, {
+              refresh_token: saved.refreshToken,
+              expires_in: defaultExpiresDuration.asSeconds(),
+              refresh_expires_in: defaultRefreshExpiresDuration.asSeconds()
             });
           }
-        );
+        }
+      } catch (err) {
+        // TODO
+        // should handle comparePassword err or mongo err
+        // throw other err
+        return done(err);
       }
-    );
-  })
+    }
+  )
 );
 
 server.exchange(

@@ -34,7 +34,7 @@ export function renderHead() {
         <link async href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
         ${
-          process.env.NODE_ENV === "production"
+          process.env.NODE_ENV === "production" && assetsManifest
             ? `<link rel='stylesheet' href='${assetsManifest["/app.css"]}' />`
             : ""
         }
@@ -94,12 +94,12 @@ export function renderScripts(initialState) {
           }
         </script>
         <script src='${
-          process.env.NODE_ENV === "production"
+          process.env.NODE_ENV === "production" && assetsManifest
             ? assetsManifest["/vendor.js"]
             : "/vendor.js"
         }'></script>
         <script src='${
-          process.env.NODE_ENV === "production"
+          process.env.NODE_ENV === "production" && assetsManifest
             ? assetsManifest["/app.js"]
             : "/app.js"
         }'></script>

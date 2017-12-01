@@ -5,7 +5,6 @@ import { Tabs, Tab } from "material-ui/Tabs";
 import Loadable from "react-loadable";
 
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
-// import RootWikiDetail from "../../RootWiki/components/RootWikiDetail";
 import RootDiscussionList from "../../Discussion/components/RootDiscussionList";
 import ForumBoardGroupsList from "../../ForumBoard/components/ForumBoardGroupsList";
 import RootWikiGroupTreeList from "../../RootWiki/components/RootWikiGroupTreeList";
@@ -14,6 +13,8 @@ import AddButton from "./AddButton";
 import Loading from "../../../components/CenterCircularProgress";
 
 // optimize size beacuse RootWikiDetail use Editor module.
+// TODO
+// disable lazy load for bot crawler.
 const RootWikiDetail = Loadable({
   loader: () => {
     const isServer = typeof window === "undefined";
@@ -33,22 +34,29 @@ export const ROOT_WIKI_GROUPS_SLIDE = 2;
 export const ROOT_WIKI_OR_WIKI_SLIDE = 3;
 
 class RootWikiDetailOrWikiList extends React.Component {
+  static propTypes = {
+    targetKind: PropTypes.string.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
   }
 
   render() {
-    const { rootWikiId, rootWikiGroupTree } = this.props;
-    if (rootWikiGroupTree) {
+    const { targetKind, rootWikiId, rootWikiGroupTree } = this.props;
+    if (targetKind === "wikis") {
       return (
         <WikiList
           rootWikiId={rootWikiId}
           rootWikiGroupTree={rootWikiGroupTree}
         />
       );
+    } else if (targetKind === "rootWiki") {
+      return <RootWikiDetail rootWikiId={rootWikiId} />;
+    } else {
+      return <div>{`unknown targetKind ${targetKind}`}</div>;
     }
-    return <RootWikiDetail rootWikiId={rootWikiId} />;
   }
 }
 
@@ -231,6 +239,8 @@ class MixedMainTabs extends React.Component {
 
   render() {
     const {
+      targetKind,
+      forumBoard,
       forumBoardId,
       rootWikiId,
       forumBoardGroup,
@@ -262,19 +272,23 @@ class MixedMainTabs extends React.Component {
           onTransitionEnd={this.handleTransitionEnd}
         >
           <ForumBoardGroupsList
+            forumBoard={forumBoard}
             forumBoardId={forumBoardId}
             forumBoardGroup={forumBoardGroup}
           />
           <RootDiscussionList
+            forumBoard={forumBoard}
             forumBoardId={forumBoardId}
             forumBoardGroup={forumBoardGroup}
           />
           <RootWikiGroupTreeList
+            forumBoard={forumBoard}
             forumBoardId={forumBoardId}
             rootWikiId={rootWikiId}
             queryRootWikiGroupTree={rootWikiGroupTree}
           />
           <RootWikiDetailOrWikiList
+            targetKind={targetKind}
             rootWikiId={rootWikiId}
             rootWikiGroupTree={rootWikiGroupTree}
           />

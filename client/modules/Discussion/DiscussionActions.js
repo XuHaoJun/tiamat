@@ -7,8 +7,8 @@ export const ADD_DISCUSSION = "ADD_DISCUSSION";
 export const ADD_DISCUSSIONS = "ADD_DISCUSSIONS";
 export const SET_DISCUSSIONS_UI = "SET_DISCUSSIONS_UI";
 export const CLEAR_DISCUSSIONS = "CLEAR_DISCUSSIONS";
-export const SET_CREATE_ROOT_DISCUSSION_PAGE_FORM =
-  "SET_CREATE_ROOT_DISCUSSION_PAGE_FORM";
+export const SET_UPSERT_DISCUSSION_PAGE_FORM =
+  "SET_UPSERT_DISCUSSION_PAGE_FORM";
 
 // Export Actions
 export function addDiscussion(discussion) {
@@ -27,8 +27,8 @@ export function clearDiscussions() {
   return { type: CLEAR_DISCUSSIONS };
 }
 
-export function setCreateRootDiscussionPageForm(forumBoardId, form) {
-  return { type: SET_CREATE_ROOT_DISCUSSION_PAGE_FORM, forumBoardId, form };
+export function setUpsertDiscussionPageForm(forumBoardId, form) {
+  return { type: SET_UPSERT_DISCUSSION_PAGE_FORM, forumBoardId, form };
 }
 
 export function fetchRootDiscussions(forumBoardId, _opts, reqConfig = {}) {

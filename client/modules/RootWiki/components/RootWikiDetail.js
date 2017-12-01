@@ -2,12 +2,14 @@ import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
 import { getRootWiki } from "../RootWikiReducer";
+
+import Loading from "../../../components/CenterCircularProgress";
 import Editor from "../../../components/Slate/Editor";
 
 class RootWikiDetail extends React.Component {
   static defaultProps = {
     rootWikiId: "",
-    rootWiki: null
+    rootWiki: undefined
   };
 
   constructor(props) {
@@ -17,16 +19,18 @@ class RootWikiDetail extends React.Component {
 
   render() {
     const { rootWiki } = this.props;
-    const rawContent = rootWiki ? rootWiki.get("content") : null;
-    return (
-      <div>
-        {rootWiki ? (
+    if (rootWiki === undefined) {
+      return <Loading />;
+    } else if (rootWiki === null) {
+      return <div>沒有任何維基</div>;
+    } else {
+      const rawContent = rootWiki ? rootWiki.get("content") : null;
+      return (
+        <div>
           <Editor rawContent={rawContent} readOnly={true} />
-        ) : (
-          <div>沒有任何維基</div>
-        )}
-      </div>
-    );
+        </div>
+      );
+    }
   }
 }
 

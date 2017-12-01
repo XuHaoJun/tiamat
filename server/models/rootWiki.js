@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const Schema = mongoose.Schema;
 
 const rootWikiSchema = new Schema({
@@ -9,6 +10,15 @@ const rootWikiSchema = new Schema({
   // author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   // parent: { type: Schema.Types.ObjectId },
   // rootParent: { type: Schema.Types.ObjectId, default: null },
+  wikiDataForms: {
+    type: [{ type: Schema.Types.ObjectId, ref: "WikiDataForm" }],
+    validate: [
+      function arrayLimit(arr) {
+        return arr.length <= 100;
+      },
+      "{PATH} exceeds the limit of 100"
+    ]
+  },
   groupTree: { type: Schema.Types.Mixed, default: {} },
   forumBoard: {
     type: Schema.Types.ObjectId,
