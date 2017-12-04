@@ -1,40 +1,9 @@
 import React from "react";
+import PropTypes from "prop-types";
 import Form from "react-jsonschema-form";
 import JSONTree from "react-json-tree";
 
-import _cloneDeep from "lodash/cloneDeep";
-import _set from "lodash/set";
-import _unset from "lodash/unset";
-import RecursiveIterator from "recursive-iterator";
-
 import loadBootstrap from "./utils/loadBootstrap";
-
-function normal2Search(schema) {
-  const result = _cloneDeep(schema);
-  for (const { node, path } of new RecursiveIterator(schema)) {
-    const { type } = node;
-    const _enum = node.enum;
-    if (type === "number" || type === "integer") {
-      _set(result, path, {
-        type: "object",
-        title: node.title,
-        properties: {
-          min: {
-            type,
-            title: "min"
-          },
-          max: {
-            type,
-            title: "max"
-          }
-        }
-      });
-    } else if (type === "string" && !_enum) {
-      _unset(result, path);
-    }
-  }
-  return result;
-}
 
 const schema = {
   title: "流亡黯道-裝備(基於 JSON Schema 產生)",
@@ -95,25 +64,8 @@ const schema = {
   }
 };
 
-// normal2Search(schema);
-
 const uiSchema = {
-  // description: {
-  //   "ui:widget": "textarea"
-  // },
-  // effect: {
-  //   "ui:widget": "textarea"
-  // },
-  // "ui:order": [
-  //   "type",
-  //   "name",
-  //   "rarity",
-  //   "class",
-  //   "cost",
-  //   "*",
-  //   "effect",
-  //   "description"
-  // ]
+  "ui:order": ["type", "mods", "*"]
 };
 
 const log = type => console.log.bind(console, type);
@@ -140,25 +92,42 @@ const theme = {
 };
 
 class WikiDataForm extends React.Component {
+  static propTypes = {
+    wikiDataForm: PropTypes.object
+  };
+
+  static defaultProps = {
+    wikiDataForm: {
+      name: "流亡黯道-裝備",
+      jsonSchema: schema,
+      jsonUISchema: uiSchema
+    }
+  };
+
   componentDidMount() {
     loadBootstrap();
   }
 
   render() {
+    const { wikiDataForm } = this.props;
+    // if (wikiDataForm === undefined) {
+    //   return <div>Loading...</div>;
+    // }
+    const { name, jsonSchema, jsonUISchema } = wikiDataForm;
     return (
       <div>
         <h1>尚未完成</h1>
         <Form
-          schema={schema}
-          uiSchema={uiSchema}
+          schema={jsonSchema}
+          uiSchema={jsonUISchema}
           onChange={log("changed")}
           onSubmit={log("submitted")}
           onError={log("errors")}
         />
         <h1>JSON Schema</h1>
-        <JSONTree theme={theme} data={schema} invertTheme={true} />
+        <JSONTree theme={theme} data={jsonSchema} invertTheme={true} />
         <h1>UI Schema</h1>
-        <JSONTree theme={theme} data={uiSchema} invertTheme={true} />
+        <JSONTree theme={theme} data={jsonUISchema} invertTheme={true} />
         <h1>etc</h1>
         <h2>
           <a href="https://mozilla-services.github.io/react-jsonschema-form/">

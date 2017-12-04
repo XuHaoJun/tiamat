@@ -66,12 +66,12 @@ export default class MyAppNavDrawer extends React.Component {
           userSelect: "none"
         })}
         containerStyle={
-          this.props.browser.greaterThan.medium
-            ? {
+          this.props.browser.lessThan.medium
+            ? {}
+            : {
                 top: 64,
                 height: "calc(100vh - 64px)"
               }
-            : {}
         }
         zDepth={this.props.browser.lessThan.medium ? 1 : 0}
         swipeAreaWidth={30}

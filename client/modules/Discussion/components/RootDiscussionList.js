@@ -12,11 +12,12 @@ import moment from "moment";
 
 class RootDiscussionList extends React.Component {
   static propTypes = {
-    forumBoardId: PropTypes.string.isRequired,
+    forumBoardId: PropTypes.string,
     dataSource: PropTypes.object
   };
 
   static defaultProps = {
+    forumBoardId: undefined,
     dataSource: Set()
   };
 
@@ -43,6 +44,9 @@ class RootDiscussionList extends React.Component {
   onRequestLoadMore = () => {
     const { page, limit, sort } = this.state;
     const { forumBoardId, forumBoardGroup } = this.props;
+    if (!forumBoardId) {
+      return null;
+    }
     const nextPage = page + 1;
     const prevDataSource = this.props.dataSource;
     this.props.dispatch(
@@ -95,7 +99,10 @@ class RootDiscussionList extends React.Component {
 
   render() {
     const { enableLoadMore } = this.state;
-    const { forumBoardGroup } = this.props;
+    const { forumBoardId, forumBoardGroup } = this.props;
+    if (forumBoardId === undefined) {
+      return <div>Loading...</div>;
+    }
     let { dataSource } = this.props;
     if (forumBoardGroup) {
       dataSource = dataSource.filter(rootDiscussion => {

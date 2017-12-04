@@ -25,7 +25,7 @@ class CreateRootWikiPage extends React.PureComponent {
   };
 
   componentWillMount() {
-    const title = this.props.title;
+    const { title } = this.props;
     this.props.dispatch(setHeaderTitle(title));
   }
 
@@ -70,7 +70,7 @@ class CreateRootWikiPage extends React.PureComponent {
   // onChangeEditorContent = (editorState) => {}
 
   render() {
-    const title = this.props.title;
+    const { title } = this.props;
     const metaDescription = title;
     const meta = [
       {

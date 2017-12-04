@@ -7,6 +7,7 @@ const wikiDataFormSchema = new Schema({
   jsonSchema: { type: Schema.Types.Mixed, required: true },
   jsonUISchema: { type: Schema.Types.Mixed },
   publisher: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  publisherBasicInfo: { type: Object },
   rootWiki: { type: Schema.Types.ObjectId, ref: "RootWiki", required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

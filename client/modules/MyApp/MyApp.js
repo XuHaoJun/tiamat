@@ -25,7 +25,62 @@ import Header from "./components/Header";
 import spacing from "material-ui/styles/spacing";
 import ErrorSnackbar from "../Error/components/ErrorSnackbar";
 
-const defaultMuiTheme = getMuiTheme();
+// FIXME
+//   getMuiTheme will overide something make responsive theme not work
+// so that use _cloneDeep.
+const defaultMuiTheme = _cloneDeep(
+  getMuiTheme({
+    fontFamily:
+      '"Noto Sans TC", "Helvetica Neue", "Calibri Light", Roboto, sans-serif, sans-serif'
+  })
+);
+
+const desktopMuiTheme = _cloneDeep(
+  getMuiTheme(_cloneDeep(defaultMuiTheme), {
+    appBar: {
+      color: white,
+      textColor: darkBlack
+    },
+    drawer: {
+      color: "#FAFAFA"
+    },
+    tabs: {
+      backgroundColor: white,
+      textColor: fade(darkBlack, 0.45),
+      selectedTextColor: darkBlack
+    },
+    inkBar: {
+      backgroundColor: "#6E6E6E"
+    },
+    palette: {
+      primary1Color: cyan500,
+      primary2Color: cyan700,
+      primary3Color: grey400,
+      accent2Color: grey100,
+      accent3Color: grey500,
+      textColor: darkBlack,
+      alternateTextColor: white,
+      canvasColor: white,
+      borderColor: grey300,
+      disabledColor: fade(darkBlack, 0.3),
+      pickerHeaderColor: cyan500,
+      clockCircleColor: fade(darkBlack, 0.07),
+      shadowColor: fullBlack
+    },
+    zIndex: {
+      menu: 1000,
+      drawerOverlay: 1200,
+      drawer: 1300,
+      appBar: 1301,
+      dialogOverlay: 1400,
+      dialog: 1500,
+      layer: 2000,
+      popover: 2100,
+      snackbar: 2900,
+      tooltip: 3000
+    }
+  })
+);
 
 export function getStyles(browser, drawerOpen) {
   const styles = {
@@ -66,7 +121,10 @@ export function getStyles(browser, drawerOpen) {
 }
 
 class MyApp extends React.Component {
-  state = {};
+  constructor(props) {
+    super(props);
+    this.state = { drawerOpen: !props.browser.lessThan.medium };
+  }
 
   componentDidMount() {
     if (typeof window === "object" && typeof document === "object") {
@@ -119,70 +177,14 @@ class MyApp extends React.Component {
   };
 
   _getMuiTheme = () => {
-    const fontFamily =
-      '"Noto Sans TC", "Helvetica Neue", "Calibri Light", Roboto, sans-serif, sans-serif';
     const { userAgent, browser } = this.props;
+    let muiTheme;
     if (browser.lessThan.medium) {
-      if (this._muiThemeWithMedium) {
-        return this._muiThemeWithMedium;
-      }
-      this._muiThemeWithMedium = getMuiTheme(_cloneDeep(defaultMuiTheme), {
-        fontFamily,
-        userAgent
-      });
-      return this._muiThemeWithMedium;
+      muiTheme = defaultMuiTheme;
     } else {
-      if (this._muiTheme) {
-        return this._muiTheme;
-      }
-      this._muiTheme = getMuiTheme(_cloneDeep(defaultMuiTheme), {
-        fontFamily,
-        userAgent,
-        appBar: {
-          color: white,
-          textColor: darkBlack
-        },
-        drawer: {
-          color: "#FAFAFA"
-        },
-        tabs: {
-          backgroundColor: white,
-          textColor: fade(darkBlack, 0.45),
-          selectedTextColor: darkBlack
-        },
-        inkBar: {
-          backgroundColor: "#6E6E6E"
-        },
-        palette: {
-          primary1Color: cyan500,
-          primary2Color: cyan700,
-          primary3Color: grey400,
-          accent2Color: grey100,
-          accent3Color: grey500,
-          textColor: darkBlack,
-          alternateTextColor: white,
-          canvasColor: white,
-          borderColor: grey300,
-          disabledColor: fade(darkBlack, 0.3),
-          pickerHeaderColor: cyan500,
-          clockCircleColor: fade(darkBlack, 0.07),
-          shadowColor: fullBlack
-        },
-        zIndex: {
-          menu: 1000,
-          drawerOverlay: 1200,
-          drawer: 1300,
-          appBar: 1301,
-          dialogOverlay: 1400,
-          dialog: 1500,
-          layer: 2000,
-          popover: 2100,
-          snackbar: 2900,
-          tooltip: 3000
-        }
-      });
-      return this._muiTheme;
+      muiTheme = desktopMuiTheme;
     }
+    return getMuiTheme(muiTheme, { userAgent });
   };
 
   handleChangeDrawerOpen = drawerOpen => {

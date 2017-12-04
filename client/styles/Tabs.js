@@ -4,6 +4,7 @@ export default function getStyles(context, browser) {
   const styles = {
     slideContainer: {
       height: `calc(100vh - ${tabHeight + appBarHeight}px)`,
+      maxWidth: "100vw",
       WebkitOverflowScrolling: "touch"
     },
     swipeableViews: {},

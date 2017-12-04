@@ -52,6 +52,21 @@ export const SettingDetailPage = Loadable({
     import(/* webpackChunkName: "SettingDetailPage" */ "./modules/Setting/pages/SettingDetailPage"),
   loading: Loading
 });
+export const RootWikiDashboardPage = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "RootWikiDetailPage" */ "./modules/RootWiki/pages/RootWikiDashboardPage"),
+  loading: Loading
+});
+export const UpsertRootWikiGroupTreePage = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "UpsertRootWikiGroupTreePage" */ "./modules/RootWiki/pages/UpsertRootWikiGroupTreePage"),
+  loading: Loading
+});
+export const UpsertWikiDataFormPage = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "UpsertWikiDataFormPage" */ "./modules/RootWiki/pages/UpsertWikiDataFormPage"),
+  loading: Loading
+});
 export const WikiDetailPage = Loadable({
   loader: () =>
     import(/* webpackChunkName: "WikiDetailPage" */ "./modules/Wiki/pages/WikiDetailPage"),
@@ -88,13 +103,6 @@ export const NotFoundPage = Loadable({
   loading: Loading
 });
 
-// require.ensure polyfill for node
-if (typeof require.ensure !== "function") {
-  require.ensure = function requireModule(deps, callback) {
-    callback(require);
-  };
-}
-
 /* Workaround for async react routes to work with react-hot-reloader till
   and it fixed in react-router v4 but react-router-scroll must use v3.
   https://github.com/reactjs/react-router/issues/2182 and
@@ -111,6 +119,9 @@ if (process.env.NODE_ENV !== "production") {
   require("./modules/ForumBoard/pages/CreateForumBoardPage");
   require("./modules/Wiki/pages/CreateWikiPage");
   require("./modules/Wiki/pages/WikiDetailPage");
+  require("./modules/RootWiki/pages/RootWikiDashboardPage");
+  require("./modules/RootWiki/pages/UpsertRootWikiGroupTreePage");
+  require("./modules/RootWiki/pages/UpsertWikiDataFormPage");
   require("./modules/RootWiki/pages/CreateRootWikiPage");
   require("./modules/MixedMain/pages/MixedMainPage");
   require("./modules/Discussion/pages/UpsertDiscussionPage");
@@ -136,6 +147,10 @@ export default (
       component={DiscussionDetailPage}
     />
     <Route
+      path="/rootWikis/:rootWikiId/dashboard"
+      component={RootWikiDashboardPage}
+    />
+    <Route
       path="/forumBoards/:forumBoardId/rootDiscussions"
       targetKind="rootDiscussions"
       component={MixedMainPage}
@@ -159,10 +174,30 @@ export default (
       component={EditRootWikiGroupTreePage}
     />
     <Route
+      path="/create/rootWikis/:rootWikiId/rootWikiGroupTree"
+      actionType="create"
+      component={UpsertRootWikiGroupTreePage}
+    />
+    <Route
+      path="/update/rootWikis/:rootWikiId/rootWikiGroupTree"
+      actionType="update"
+      component={UpsertRootWikiGroupTreePage}
+    />
+    <Route
       path="/create/forumBoards/:forumBoardId/rootDiscussion"
       component={UpsertDiscussionPage}
       actionType="create"
       targetKind="rootDiscussion"
+    />
+    <Route
+      path="/create/rootWikis/:rootWikiId/wikiDataForm"
+      component={UpsertWikiDataFormPage}
+      actionType="create"
+    />
+    <Route
+      path="/update/wikiDataForms/:wikiDataFormId"
+      component={UpsertWikiDataFormPage}
+      actionType="update"
     />
     <Route
       path="/create/rootDiscussions/:parentDiscussionId/childDiscussion"

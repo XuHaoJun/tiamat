@@ -1,15 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Tabs, Tab } from "material-ui/Tabs";
 import Loadable from "react-loadable";
+
+import { Tabs, Tab } from "material-ui/Tabs";
 
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
 import RootDiscussionList from "../../Discussion/components/RootDiscussionList";
 import ForumBoardGroupsList from "../../ForumBoard/components/ForumBoardGroupsList";
 import RootWikiGroupTreeList from "../../RootWiki/components/RootWikiGroupTreeList";
 import WikiList from "../../Wiki/components/WikiList";
-import AddButton from "./AddButton";
+import ActionButton from "./ActionButton";
 import Loading from "../../../components/CenterCircularProgress";
 
 // optimize size beacuse RootWikiDetail use Editor module.
@@ -160,14 +161,14 @@ class MixedMainTabs extends React.Component {
     return styles;
   };
 
-  getAddButtonIsOpened = slideIndex => {
+  getActionButtonIsOpened = slideIndex => {
     if (this.state.lastScrollDirection === "down") {
       return false;
     }
     return true;
   };
 
-  getAddButtonHref = (slideIndex, forumBoardGroup = "") => {
+  getActionButtonHref = (slideIndex, forumBoardGroup = "") => {
     const { forumBoardId, rootWiki } = this.props;
     const rootWikiId = rootWiki ? rootWiki.get("_id") : "";
     let href = "";
@@ -186,13 +187,13 @@ class MixedMainTabs extends React.Component {
       }
     } else if (slideIndex === ROOT_WIKI_GROUPS_SLIDE) {
       if (rootWikiId) {
-        href = `/edit/rootWikis/${rootWikiId}/rootWikiGroupTree`;
+        href = `/create/rootWikis/${rootWikiId}/rootWikiGroupTree`;
       }
     }
     return href;
   };
 
-  getAddButtonIconType = slideIndex => {
+  getActionButtonIconType = slideIndex => {
     if (
       slideIndex === FORUMBOARD_GROUPS_SLIDE ||
       slideIndex === ROOT_WIKI_GROUPS_SLIDE
@@ -202,11 +203,12 @@ class MixedMainTabs extends React.Component {
     return "create";
   };
 
-  getAddButtonProps = (slideIndex, forumBoardGroup) => {
-    const isOpen = this.getAddButtonIsOpened(slideIndex);
-    const iconType = this.getAddButtonIconType(slideIndex);
-    const href = this.getAddButtonHref(slideIndex, forumBoardGroup);
-    return { isOpen, iconType, href };
+  getActionButtonProps = (slideIndex, forumBoardGroup) => {
+    const isOpen = this.getActionButtonIsOpened(slideIndex);
+    const iconType = this.getActionButtonIconType(slideIndex);
+    const href = this.getActionButtonHref(slideIndex, forumBoardGroup);
+    const { targetKind, rootWikiId } = this.props;
+    return { slideIndex, isOpen, iconType, href, targetKind, rootWikiId };
   };
 
   handleTransitionEnd = () => {
@@ -249,7 +251,10 @@ class MixedMainTabs extends React.Component {
     const { scrollKey } = this.props;
     const { slideIndex } = this.state;
     const styles = this.getStyles();
-    const addButtonProps = this.getAddButtonProps(slideIndex, forumBoardGroup);
+    const actionButtonProps = this.getActionButtonProps(
+      slideIndex,
+      forumBoardGroup
+    );
     return (
       <div style={styles.root}>
         <Tabs
@@ -293,7 +298,7 @@ class MixedMainTabs extends React.Component {
             rootWikiGroupTree={rootWikiGroupTree}
           />
         </EnhancedSwipeableViews>
-        <AddButton {...addButtonProps} />
+        <ActionButton {...actionButtonProps} />
       </div>
     );
   }

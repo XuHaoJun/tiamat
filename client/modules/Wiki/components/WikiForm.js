@@ -2,8 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import TextField from "material-ui/TextField";
+
 import Editor from "../../../components/Slate";
 import RootWikiGroupTreePopover from "../../RootWiki/components/RootWikiGroupTreePopover";
+import WikiDataFormDropDownMenu from "./WikiDataFormDropDownMenu";
 
 export function getStyles() {
   const styles = {
@@ -86,6 +88,7 @@ class WikiForm extends React.Component {
           />
         )}
         <RootWikiGroupTreePopover rootWikiGroupTree={rootWikiGroupTree} />
+        <WikiDataFormDropDownMenu />
         <div style={styles.editorStyleContainer}>
           <Editor
             ref={this.setEditorRef}

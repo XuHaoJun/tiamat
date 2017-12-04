@@ -6,7 +6,7 @@ import MobileDetect from "mobile-detect";
 export function calculateResponsiveStateByUserAgent(userAgent) {
   const mobileDetect = new MobileDetect(userAgent);
   const matchMedia = MatchMedia.create();
-  if (mobileDetect.phone()) {
+  if (mobileDetect.mobile()) {
     matchMedia.setConfig({ type: "screen", width: breakPoints.small });
   } else {
     matchMedia.setConfig({ type: "screen", width: breakPoints.large });

@@ -7,7 +7,7 @@ export default function getStyles(browser) {
       margin: "64px 64px 64px 64px"
     }
   };
-  if (browser.greaterThan.medium) {
+  if (!browser.lessThan.medium) {
     styles.container = styles.containerWithMedium;
   }
   return styles;

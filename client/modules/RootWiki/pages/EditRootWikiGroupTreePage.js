@@ -160,8 +160,8 @@ class CreateRootWikiPage extends React.PureComponent {
           }
         ]
       };
-      const SortableTreeWithoutDndContext = require("react-sortable-tree") // eslint-disable-line global-require
-        .SortableTreeWithoutDndContext;
+      const SortableTreeWithoutDndContext = require("react-sortable-tree")
+        .SortableTreeWithoutDndContext; // eslint-disable-line global-require
       this.SortableTree = DragDropContext(MultiBackend(HTML5toTouch))(
         SortableTreeWithoutDndContext
       );

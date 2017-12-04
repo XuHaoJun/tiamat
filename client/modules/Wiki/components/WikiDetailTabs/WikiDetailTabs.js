@@ -32,8 +32,8 @@ const WikiDataForm = Loadable({
 export const WIKI_CONTENT_SLIDE = 0;
 export const WIKI_RELATED_DISCUSSION = 1;
 export const WIKI_EDIT_SLIDE = 2;
-export const WIKI_HITSTORY_SLIDE = 3;
-export const WIKI_DATA_SLIDE = 4;
+export const WIKI_DATA_SLIDE = 3;
+export const WIKI_HITSTORY_SLIDE = 4;
 
 class WikiDetailTabs extends React.Component {
   static defaultProps = {
@@ -140,8 +140,8 @@ class WikiDetailTabs extends React.Component {
           <Tab label="閱讀" value={WIKI_CONTENT_SLIDE} />
           <Tab label="相關文章" value={WIKI_RELATED_DISCUSSION} />
           <Tab label="編輯" value={WIKI_EDIT_SLIDE} />
-          <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE} />
           <Tab label="資料" value={WIKI_DATA_SLIDE} />
+          <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
           scrollKey={scrollKey}
@@ -154,8 +154,8 @@ class WikiDetailTabs extends React.Component {
           <WikiContent {...wikiContentProps} />
           <div>相關文章(尚未完成)</div>
           <WikiForm {...wikiFormProps} />
-          <div>檢視歷史(尚未完成)</div>
           <WikiDataForm />
+          <div>檢視歷史(尚未完成)</div>
         </EnhancedSwipeableViews>
       </div>
     );

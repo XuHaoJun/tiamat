@@ -13,22 +13,24 @@ import UserAvatar from "./UserAvatar";
 import { getCurrentUser } from "../UserReducer";
 
 function makeLinkable(WrappedComponent) {
-  const LinkableComponent = (props, context) => {
-    const { to, children, onClick, ...other } = props;
-    const handleClick = (e, ...args) => {
-      if (to) {
-        context.router.push(to);
-      }
-      if (onClick) {
-        onClick(e, ...args);
-      }
-    };
-    return (
-      <WrappedComponent {...other} onClick={handleClick}>
-        {children}
-      </WrappedComponent>
-    );
-  };
+  class LinkableComponent extends React.Component {
+    render() {
+      const { to, children, onClick, ...other } = this.props;
+      const handleClick = (e, ...args) => {
+        if (to) {
+          this.context.router.push(to);
+        }
+        if (onClick) {
+          onClick(e, ...args);
+        }
+      };
+      return (
+        <WrappedComponent {...other} onClick={handleClick}>
+          {children}
+        </WrappedComponent>
+      );
+    }
+  }
   LinkableComponent.contextTypes = {
     router: PropTypes.object
   };

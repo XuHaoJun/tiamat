@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import memoize from "fast-memoize";
 import { connect } from "react-redux";
 
 import AppBar from "material-ui/AppBar";
@@ -107,7 +106,6 @@ class Header extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldBackspaceButton = memoize(this.shouldBackspaceButton.bind(this));
     let defaultQuery = "";
     if (this._isInSearchPage()) {
       defaultQuery = props.location.query.query;
@@ -249,12 +247,12 @@ class Header extends React.Component {
     if (!this.props.browser.lessThan.medium) {
       return false;
     }
-    const createPage = new RegExp("^/(create)/.+");
+    const upsertPage = new RegExp("^/(create|update|edit)/.+");
     const etcPage = new RegExp("^/(setting|about|search)");
     const discussionDetailPage = new RegExp("^/rootDiscussions/(.+)");
     const wikiDetailPage = new RegExp("^/rootWikis/(.+)/wikis/(.+)");
     const enableBackspaceButtonRules = [
-      createPage,
+      upsertPage,
       etcPage,
       discussionDetailPage,
       wikiDetailPage

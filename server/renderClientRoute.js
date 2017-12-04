@@ -23,6 +23,9 @@ export function renderHead() {
   // Import Manifests
   const assetsManifest =
     process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+  if (process.env.NODE_ENV === "production" && !assetsManifest) {
+    throw new Error("assetsManifest is required.");
+  }
   return `
       <head>
         ${head.base.toString()}
@@ -34,7 +37,7 @@ export function renderHead() {
         <link async href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
         ${
-          process.env.NODE_ENV === "production" && assetsManifest
+          process.env.NODE_ENV === "production"
             ? `<link rel='stylesheet' href='${assetsManifest["/app.css"]}' />`
             : ""
         }
@@ -59,10 +62,14 @@ export function renderHead() {
                     .serviceWorker
                     .register('/precache-service-worker.js');
                 }
-              } else if (location && location.protocol === 'http:' && !(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-                location.href = location
-                  .href
-                  .replace(/^http:/, 'https:');
+              } else if (location && location.protocol === 'http:') {
+                var localHostnameRegexp = new RegExp(${"'(^127.)|(^192.168.)|(^10.)|(^172.1[6-9].)|(^172.2[0-9].)|(^172.3[0-1].)|(^::1$)|(^[fF][cCdD])'"});
+                var isLocal = location.hostname === 'localhost' || localHostnameRegexp.test(location.hostname);
+                if (!isLocal) {
+                  location.href = location
+                    .href
+                    .replace(/^http:/, 'https:');
+                }
               }
             }
           })();
@@ -75,9 +82,15 @@ export function renderScripts(initialState) {
   // Import Manifests
   const assetsManifest =
     process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+  if (process.env.NODE_ENV === "production" && !assetsManifest) {
+    throw new Error("assetsManifest is required.");
+  }
   const chunkManifest =
     process.env.webpackChunkAssets &&
     JSON.parse(process.env.webpackChunkAssets);
+  if (process.env.NODE_ENV === "production" && !chunkManifest) {
+    throw new Error("chunkManifest is required.");
+  }
   // use serializeJavascript for prevent XSS attack, don't remove it.
   const rawInitState = serializeJavascript(initialState, {
     isJSON: true
@@ -94,12 +107,12 @@ export function renderScripts(initialState) {
           }
         </script>
         <script src='${
-          process.env.NODE_ENV === "production" && assetsManifest
+          process.env.NODE_ENV === "production"
             ? assetsManifest["/vendor.js"]
             : "/vendor.js"
         }'></script>
         <script src='${
-          process.env.NODE_ENV === "production" && assetsManifest
+          process.env.NODE_ENV === "production"
             ? assetsManifest["/app.js"]
             : "/app.js"
         }'></script>
@@ -203,6 +216,9 @@ export function renderClientRoute(req, res, next) {
               </IntlWrapper>
             </Provider>
           );
+          stream.on("error", error => {
+            console.warn(error);
+          });
           stream.pipe(res, { end: false });
           stream.on("end", () => {
             res.write("</div>");

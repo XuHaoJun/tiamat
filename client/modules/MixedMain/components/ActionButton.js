@@ -5,7 +5,10 @@ import CreateIcon from "material-ui/svg-icons/content/create";
 import AddIcon from "material-ui/svg-icons/content/add";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 
-class AddButton extends React.PureComponent {
+import { ROOT_WIKI_OR_WIKI_SLIDE } from "./MixedMainTabs";
+import RootWikiMoreButton from "../../RootWiki/components/RootWikiMoreButton";
+
+class ActionButton extends React.PureComponent {
   static propTypes = {
     isOpen: PropTypes.bool,
     iconType: PropTypes.oneOf(["create", "add"]),
@@ -49,6 +52,9 @@ class AddButton extends React.PureComponent {
 
   render() {
     const {
+      slideIndex,
+      targetKind,
+      rootWikiId,
       style,
       isOpen,
       iconType,
@@ -66,18 +72,26 @@ class AddButton extends React.PureComponent {
       right: 20
     };
     const finalStyle = Object.assign(_style, style || {});
-    return (
-      <FloatingActionButton
-        {...other}
-        style={finalStyle}
-        href={href}
-        onTouchTap={this.onTouchTap}
-        onClick={this.onClick}
-      >
-        {iconType === "create" ? <CreateIcon /> : <AddIcon />}
-      </FloatingActionButton>
-    );
+    if (
+      targetKind === "rootWiki" &&
+      rootWikiId &&
+      slideIndex === ROOT_WIKI_OR_WIKI_SLIDE
+    ) {
+      return <RootWikiMoreButton style={finalStyle} rootWikiId={rootWikiId} />;
+    } else {
+      return (
+        <FloatingActionButton
+          {...other}
+          style={finalStyle}
+          href={href}
+          onTouchTap={this.onTouchTap}
+          onClick={this.onClick}
+        >
+          {iconType === "create" ? <CreateIcon /> : <AddIcon />}
+        </FloatingActionButton>
+      );
+    }
   }
 }
 
-export default AddButton;
+export default ActionButton;
