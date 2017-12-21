@@ -147,12 +147,15 @@ class RefreshIndicatorListItem extends ListItem {
   render() {
     const { status } = this.state;
     return (
-      <ListItem disabled={true}>
+      <ListItem
+        disabled={true}
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <RefreshIndicator
           onClick={this.handleClick}
           percentage={100}
           size={60}
-          left={152}
+          left={0}
           top={0}
           status={status}
           zDepth={0}
@@ -348,14 +351,14 @@ class CommonList extends React.Component {
         />
       </LazyLoad>
     ) : null;
-    const refreshIndicator =
-      enableRefreshIndicator && !enableLoadMore ? (
-        <RefreshIndicatorListItem
-          key="refresh-more"
-          onRequestLoadMore={onRequestLoadMore}
-          direction="bottom"
-        />
-      ) : null;
+    // const refreshIndicator =
+    //   enableRefreshIndicator && !enableLoadMore ? (
+    //     <RefreshIndicatorListItem
+    //       key="refresh-more"
+    //       onRequestLoadMore={onRequestLoadMore}
+    //       direction="bottom"
+    //     />
+    //   ) : null;
     const empty =
       !enableLoadMore && dataSource.count() === 0 ? (
         <ListItem key="empty" disabled={true}>
@@ -390,7 +393,7 @@ class CommonList extends React.Component {
       <ListComponent key="foo" {...listProps}>
         {empty}
         {lazyLoadBottom}
-        {refreshIndicator}
+        {/* {refreshIndicator} */}
       </ListComponent>
     );
     return [list, bottom];

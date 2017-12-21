@@ -5,11 +5,10 @@ import IconButton from "material-ui/IconButton";
 import { getUI } from "../MyAppReducer";
 import CircularProgress from "material-ui/CircularProgress";
 
-class SendButton extends React.Component {
-  static muiName = "IconButton";
+class SendButton extends React.PureComponent {
+  static muiName = IconButton.muiName;
 
   static defaultProps = {
-    onTouchTap: () => {},
     loading: false
   };
 
@@ -22,24 +21,30 @@ class SendButton extends React.Component {
   };
 
   renderSendButton() {
-    const { onTouchTap, style, iconStyle } = this.props;
+    const { children, loading, dispatch, ...other } = this.props;
     return (
-      <IconButton onTouchTap={onTouchTap} style={style} iconStyle={iconStyle}>
+      <IconButton {...other}>
         <SendIcon />
       </IconButton>
     );
   }
 
   render() {
-    return this.props.loading ? this.renderLoading() : this.renderSendButton();
+    const { loading } = this.props;
+    return loading ? this.renderLoading() : this.renderSendButton();
   }
 }
+
+export const SendButtonWithoutConnect = SendButton;
 
 function mapStateToProps(store) {
   const ui = getUI(store);
   const onTouchTap = ui.getIn(["sendButton", "onTouchTap"]);
-  const loading = ui.getIn(["sendButton", "loading"]);
-  return { onTouchTap, loading };
+  const onClick = ui.getIn(["sendButton", "onClick"]);
+  const loading = !!ui.getIn(["sendButton", "loading"]);
+  return { onTouchTap, onClick, loading };
 }
 
-export default connect(mapStateToProps)(SendButton);
+export default connect(mapStateToProps, null, null, { withRef: true })(
+  SendButton
+);

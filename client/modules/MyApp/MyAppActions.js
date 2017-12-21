@@ -9,7 +9,7 @@ export function setHeaderTitle(headerTitle) {
   return { type: SET_HEADER_TITLE, headerTitle };
 }
 
-export function setDBisInitialized(error, isInitialized) {
+export function setDBisInitialized(error, isInitialized = false) {
   return { type: SET_DB_IS_INITIALIZED, error, isInitialized };
 }
 

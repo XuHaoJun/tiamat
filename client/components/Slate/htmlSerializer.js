@@ -23,7 +23,8 @@ const BLOCK_TAGS = {
   h3: "heading-three",
   h4: "heading-four",
   h5: "heading-five",
-  h6: "heading-six"
+  h6: "heading-six",
+  img: "image"
 };
 
 /**
@@ -96,6 +97,23 @@ const RULES = [
         nodes: next(el.childNodes),
         data: {
           href: el.getAttribute("href")
+        }
+      };
+    }
+  },
+  {
+    // Special case for images, to grab their src.
+    deserialize(el, next) {
+      if (el.tagName.toLowerCase() !== "img") return;
+      return {
+        kind: "block",
+        type: "image",
+        isVoid: true,
+        nodes: next(el.childNodes),
+        data: {
+          width: el.getAttribute("width"),
+          height: el.getAttribute("height"),
+          src: el.getAttribute("src")
         }
       };
     }

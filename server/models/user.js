@@ -56,6 +56,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     toJSON: {
+      virtuals: true,
       transform(doc, ret, options = {}) {
         const displayName = getDisplayName(ret, options);
         if (!ret.displayName) {
@@ -66,6 +67,20 @@ const userSchema = new mongoose.Schema(
     }
   }
 );
+
+userSchema.virtual("discussions", {
+  ref: "Discussion",
+  localField: "_id",
+  foreignField: "author",
+  justOne: false
+});
+
+userSchema.virtual("messages", {
+  ref: "Message",
+  localField: "_id",
+  foreignField: "author",
+  justOne: false
+});
 
 userSchema.index({ email: 1, isActive: 1 });
 

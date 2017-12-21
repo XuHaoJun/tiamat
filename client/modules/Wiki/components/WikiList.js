@@ -1,22 +1,29 @@
 import React from "react";
 import PropTypes from "prop-types";
-import CommonList from "../../../components/List/CommonList";
-import { Set, List, Map, is } from "immutable";
-import car from "lodash/first";
-import cdr from "lodash/tail";
-import { fetchWikis } from "../WikiActions";
-import { getWikisByRootWikiId } from "../WikiReducer";
 import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import car from "lodash/first";
+import cdr from "lodash/tail";
+import { Set, List } from "immutable";
+import memoize from "fast-memoize";
+import moment from "moment";
+
 import Avatar from "material-ui/Avatar";
 import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
-import memoize from "fast-memoize";
+
+import CommonList from "../../../components/List/CommonList";
+import { fetchWikis } from "../WikiActions";
+import { getWikisByRootWikiId } from "../WikiReducer";
 import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
-import moment from "moment";
 
 class WikiList extends React.Component {
   static propTypes = {
-    rootWikiId: PropTypes.string.isRequired
+    rootWikiId: PropTypes.string,
+    rootWikiGroupTree: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.object
+    ]),
+    dataSource: PropTypes.object
   };
 
   static defaultProps = {
@@ -78,7 +85,7 @@ class WikiList extends React.Component {
   };
 
   listItemHref = payload => {
-    return `/rootWikis/${payload.get("rootWiki")}/wikis/${payload.get("_id")}`;
+    return `/wikis/${payload.get("_id")}`;
   };
 
   listItemSecondaryText = payload => {

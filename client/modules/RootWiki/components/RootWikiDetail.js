@@ -3,7 +3,6 @@ import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
 import { getRootWiki } from "../RootWikiReducer";
 
-import Loading from "../../../components/CenterCircularProgress";
 import Editor from "../../../components/Slate/Editor";
 
 class RootWikiDetail extends React.Component {
@@ -20,7 +19,7 @@ class RootWikiDetail extends React.Component {
   render() {
     const { rootWiki } = this.props;
     if (rootWiki === undefined) {
-      return <Loading />;
+      return <div>Loading...</div>;
     } else if (rootWiki === null) {
       return <div>沒有任何維基</div>;
     } else {

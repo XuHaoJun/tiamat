@@ -5,7 +5,7 @@ import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
 import NavList from "./NavList";
 
-export default class MyAppNavDrawer extends React.Component {
+export default class AppNavDrawer extends React.Component {
   static propTypes = {
     docked: PropTypes.bool.isRequired,
     onRequestChangeNavDrawer: PropTypes.func,
@@ -29,10 +29,6 @@ export default class MyAppNavDrawer extends React.Component {
   componentDidMount() {
     if (this.drawer) {
       this.drawer._oldOnBodyTouchStart = this.drawer.onBodyTouchStart;
-      // this.drawer.onBodyTouchStart = (e) => {
-      //   this.drawer._oldOnBodyTouchStart.bind(this.drawer)(e);
-      //   console.log('drawer event', e);
-      // }
     }
   }
 

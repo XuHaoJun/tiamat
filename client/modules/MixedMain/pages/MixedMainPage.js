@@ -276,7 +276,7 @@ MixedMainPage.need = []
     const rootWiki = rootWikiId ? getRootWiki(store, rootWikiId) : null;
     const fName = forumBoard ? forumBoard.get("name") : "";
     const rName = rootWiki ? rootWiki.get("name") : "";
-    const title = fName || rName;
+    const title = rootWikiId ? rName : fName;
     return title ? setHeaderTitleThunk(title) : emptyThunkAction;
   });
 

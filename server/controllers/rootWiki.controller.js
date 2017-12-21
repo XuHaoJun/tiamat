@@ -9,15 +9,13 @@ import ForumBoard from "../models/forumBoard";
  */
 export function getRootWiki(req, res) {
   const { id } = req.params;
-  RootWiki.findById(id)
-    .populate("wikiDataForms")
-    .exec((err, rootWiki) => {
-      if (err) {
-        res.status(403).send(err);
-        return;
-      }
-      res.json({ rootWiki });
-    });
+  RootWiki.findById(id).exec((err, rootWiki) => {
+    if (err) {
+      res.status(403).send(err);
+      return;
+    }
+    res.json({ rootWiki });
+  });
 }
 
 export function addRootWiki(req, res) {

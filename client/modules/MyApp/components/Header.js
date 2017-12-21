@@ -1,4 +1,5 @@
 import React from "react";
+import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
@@ -106,9 +107,10 @@ class Header extends React.Component {
 
   constructor(props) {
     super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     let defaultQuery = "";
     if (this._isInSearchPage()) {
-      defaultQuery = props.location.query.query;
+      defaultQuery = props.searchQuery;
     }
     const open = !props.browser.lessThan.medium;
     this.state = {
@@ -140,7 +142,7 @@ class Header extends React.Component {
       this.setState({ textValue: "" });
     }
     if (this._isInSearchPage() && this.state.textFieldFocused === false) {
-      const { query } = this.props.location.query;
+      const query = this.props.searchQuery;
       if (this.state.textValue === "" && query) {
         this.setState({ textValue: query });
       }
@@ -221,7 +223,7 @@ class Header extends React.Component {
   };
 
   _isInSearchPage = () => {
-    return /^\/search/.test(this.props.location.pathname);
+    return /^\/search/.test(this.props.pathname);
   };
 
   handleRequestChangeNavDrawer = open => {
@@ -265,7 +267,7 @@ class Header extends React.Component {
 
   renderIconLeftElement = () => {
     const enableBackspaceButton = this.shouldBackspaceButton(
-      this.props.location.pathname
+      this.props.pathname
     );
     if (enableBackspaceButton) {
       return <BackspaceButton onTouchTap={this.handleBack} />;
@@ -274,7 +276,7 @@ class Header extends React.Component {
   };
 
   renderIconRightElement = () => {
-    const { pathname } = this.props.location;
+    const { pathname } = this.props;
     const enableSendButtonRules = [/\/create/, /\update/];
     const enableSendButton = enableSendButtonRules.some(regexp =>
       regexp.test(pathname)
@@ -297,15 +299,16 @@ class Header extends React.Component {
 
   render() {
     const { open } = this.state;
-    const selectedIndex = this.props.location.pathname;
+    const selectedIndex = this.props.pathname;
     let { title } = this.props;
     if (this._isInSearchPage()) {
       title = <SearchAutoComplete />;
     }
+    const appBarZDepth = this.props.appBarZDepth || 0;
     return (
       <div>
         <AppBar
-          zDepth={this.props.browser.lessThan.medium ? 0 : 1}
+          zDepth={appBarZDepth}
           style={this.props.appBarStyle}
           title={title}
           iconElementLeft={this.renderIconLeftElement()}

@@ -75,12 +75,17 @@ class LogInForm extends React.Component {
     return form;
   };
 
-  login = (form, valid) => {
+  login = () => {
     const { login } = this.props;
     if (login) {
-      login(form, valid);
+      const form = this.getForm();
+      const valid = validate(form);
+      return login(form, valid);
     }
+    return Promise.resolve(null);
   };
+
+  validate = validate;
 
   submit = () => {
     this.validateAndUpdateAll();
@@ -259,5 +264,8 @@ export default connect(
         return dispatch(logInRequest({ oauth2Client, email, password }));
       }
     };
+  },
+  {
+    withRef: true
   }
 )(LogInForm);

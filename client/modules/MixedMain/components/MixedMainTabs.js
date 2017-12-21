@@ -11,7 +11,6 @@ import ForumBoardGroupsList from "../../ForumBoard/components/ForumBoardGroupsLi
 import RootWikiGroupTreeList from "../../RootWiki/components/RootWikiGroupTreeList";
 import WikiList from "../../Wiki/components/WikiList";
 import ActionButton from "./ActionButton";
-import Loading from "../../../components/CenterCircularProgress";
 
 // optimize size beacuse RootWikiDetail use Editor module.
 // TODO
@@ -21,12 +20,12 @@ const RootWikiDetail = Loadable({
     const isServer = typeof window === "undefined";
     // use same Component with client-side and server-side for hydrate.
     if (isServer) {
-      return Promise.resolve(Loading);
+      return Promise.resolve(() => null);
     } else {
       return import(/* webpackChunkName: "RootWikiDetail" */ "../../RootWiki/components/RootWikiDetail");
     }
   },
-  loading: Loading
+  loading: () => null
 });
 
 export const FORUMBOARD_GROUPS_SLIDE = 0;
@@ -36,7 +35,11 @@ export const ROOT_WIKI_OR_WIKI_SLIDE = 3;
 
 class RootWikiDetailOrWikiList extends React.Component {
   static propTypes = {
-    targetKind: PropTypes.string.isRequired
+    targetKind: PropTypes.string
+  };
+
+  static defaultProps = {
+    targetKind: undefined
   };
 
   constructor(props) {
@@ -56,7 +59,7 @@ class RootWikiDetailOrWikiList extends React.Component {
     } else if (targetKind === "rootWiki") {
       return <RootWikiDetail rootWikiId={rootWikiId} />;
     } else {
-      return <div>{`unknown targetKind ${targetKind}`}</div>;
+      return <div>Loading...</div>;
     }
   }
 }

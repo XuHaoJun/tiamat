@@ -81,16 +81,41 @@ WikiDetailPage.need = []
       return Promise.all([wikiThunk(dispatch), rootWikiThunk(dispatch)]);
     };
   })
-  .concat((params, store) => {
-    const { rootWikiId } = params;
-    const rootWiki = getRootWiki(store, rootWikiId);
+  .concat((params, state) => {
+    const { wikiId } = params;
+    const wiki = getWiki(state, wikiId);
+    if (wiki) {
+      const rootWikiId = wiki.get("rootWiki");
+      const rootWiki = getRootWiki(state, rootWikiId);
+      if (!rootWiki) {
+        return fetchRootWikiById(rootWikiId);
+      }
+    }
+    return emptyThunkAction;
+  })
+  .concat((params, state) => {
+    const { wikiId } = params;
+    let { rootWikiId } = params;
+    if (!rootWikiId) {
+      const wiki = getWiki(state, wikiId);
+      if (wiki) {
+        rootWikiId = wiki.get("rootWiki");
+      }
+    }
+    const rootWiki = getRootWiki(state, rootWikiId);
     const title = rootWiki ? rootWiki.get("name") : undefined;
     return title ? setHeaderTitleThunk(title) : emptyThunkAction;
   });
 
 function mapStateToProps(store, routerProps) {
-  const { wikiId, rootWikiId } = routerProps.params;
+  const { wikiId } = routerProps.params;
+  let { rootWikiId } = routerProps.params;
   const wiki = getWiki(store, wikiId);
+  if (!rootWikiId) {
+    if (wiki) {
+      rootWikiId = wiki.get("rootWiki");
+    }
+  }
   const rootWiki = getRootWiki(store, rootWikiId);
   const title = rootWiki ? rootWiki.get("name") : "";
   const { browser } = store;

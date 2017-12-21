@@ -6,7 +6,7 @@ import FlatButton from "material-ui/FlatButton";
 
 import LogInForm from "../LogInForm";
 
-class LoginDialog extends React.PureComponent {
+class LoginDialog extends React.Component {
   static propTypes = {
     open: PropTypes.bool,
     onRequestClose: PropTypes.func,
@@ -19,6 +19,18 @@ class LoginDialog extends React.PureComponent {
     loginFormProps: undefined
   };
 
+  setFormRef = form => {
+    if (form) {
+      if (form.getWrappedInstance) {
+        this.form = form.getWrappedInstance();
+      } else {
+        this.form = form;
+      }
+    } else {
+      this.form = form;
+    }
+  };
+
   handleClose = () => {
     if (this.props.onRequestClose) {
       this.props.onRequestClose();
@@ -28,12 +40,7 @@ class LoginDialog extends React.PureComponent {
   handleLogin = () => {
     if (this.form) {
       if (this.form.login) {
-        const p = this.form.login();
-        if (p.then) {
-          p.then(() => {
-            this.handleClose();
-          });
-        }
+        this.form.login();
       }
     }
   };
@@ -48,19 +55,15 @@ class LoginDialog extends React.PureComponent {
         onClick={this.handleLogin}
       />
     ];
+    const { open } = this.props;
     let { loginFormProps } = this.props;
     loginFormProps = loginFormProps || {};
     return (
-      <Dialog modal={true} actions={actions} open={this.props.open}>
+      <Dialog modal={true} actions={actions} open={open}>
         <div
           style={{ height: "100%", display: "flex", justifyContent: "center" }}
         >
-          <LogInForm
-            ref={form => {
-              this.form = form;
-            }}
-            {...loginFormProps}
-          />
+          <LogInForm ref={this.setFormRef} {...loginFormProps} />
         </div>
       </Dialog>
     );

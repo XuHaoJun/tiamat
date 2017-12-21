@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import _cloneDeep from "lodash/cloneDeep";
+import _debounce from "lodash/debounce";
 
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import {
@@ -120,10 +121,16 @@ export function getStyles(browser, drawerOpen) {
   return styles;
 }
 
+// TODO
+// implement pull to refresh feature
+// https://github.com/bryaneaton13/react-pull-to-refresh
 class MyApp extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { drawerOpen: !props.browser.lessThan.medium };
+    this.state = {
+      drawerOpen: !props.browser.lessThan.medium,
+      appBarZDepth: 0
+    };
   }
 
   componentDidMount() {
@@ -140,6 +147,9 @@ class MyApp extends React.Component {
   componentWillUnmount() {
     if (typeof window === "object" && typeof document === "object") {
       document.body.style.backgroundColor = null;
+    }
+    if (this._debouncedChildrenContainerScroll) {
+      this._debouncedChildrenContainerScroll.cancel();
     }
   }
 
@@ -191,6 +201,32 @@ class MyApp extends React.Component {
     this.setState({ drawerOpen });
   };
 
+  _handleChildrenContainerScroll = event => {
+    if (!this.props.browser.lessThan.medium) {
+      if (event.target.scrollTop === 0) {
+        if (this.state.appBarZDepth > 0) {
+          this.setState({ appBarZDepth: 0 });
+        }
+      } else {
+        if (this.state.appBarZDepth < 1) {
+          this.setState({ appBarZDepth: 1 });
+        }
+      }
+    }
+  };
+
+  handleChildrenContainerScroll = _event => {
+    _event.persist();
+    // init debounce
+    if (!this._debouncedChildrenContainerScroll) {
+      this._debouncedChildrenContainerScroll = _debounce(
+        this._handleChildrenContainerScroll,
+        250
+      );
+    }
+    this._debouncedChildrenContainerScroll(_event);
+  };
+
   render() {
     const styles = getStyles(this.props.browser, this.state.drawerOpen);
     const muiTheme = this._getMuiTheme();
@@ -204,7 +240,9 @@ class MyApp extends React.Component {
             <Header
               title={headerTitle}
               appBarStyle={styles.appBar}
-              location={this.props.location}
+              appBarZDepth={this.state.appBarZDepth}
+              pathname={this.props.location.pathname}
+              searchQuery={this.props.location.query.query}
               onChangeDrawerOpen={this.handleChangeDrawerOpen}
             />
             <div
@@ -216,7 +254,12 @@ class MyApp extends React.Component {
             >
               never see me if Header is fixed
             </div>
-            <div style={styles.root}>{this.props.children}</div>
+            <div
+              style={styles.root}
+              onScroll={this.handleChildrenContainerScroll}
+            >
+              {this.props.children}
+            </div>
             <ErrorSnackbar />
           </div>
         </MuiThemeProvider>

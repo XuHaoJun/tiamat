@@ -228,6 +228,8 @@ class NavList extends React.Component {
   }
 }
 
+export const NavListWithoutConnect = NavList;
+
 function mapStateToProps(state) {
   const user = getCurrentUser(state);
   const { browser } = state;

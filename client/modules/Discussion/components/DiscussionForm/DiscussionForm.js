@@ -90,10 +90,7 @@ class DiscussionForm extends React.Component {
     let nextState = {};
     if (form) {
       const { title, content, forumBoardGroup } = form;
-      nextState = Object.assign(
-        this.state,
-        _.omitBy({ title, content, forumBoardGroup }, _.isEmpty)
-      );
+      nextState = _.omitBy({ title, content, forumBoardGroup }, _.isEmpty);
     }
     return nextState;
   };

@@ -60,7 +60,8 @@ function deserializeJSONState(jsonState) {
     "discussions",
     "semanticRules",
     "sockets",
-    "search"
+    "search",
+    "template"
   ];
   for (const field of needImmutableObjectNames) {
     initState[field] = fromJS(jsonState[field]);
@@ -110,33 +111,37 @@ moment.locale(store.getState().intl.locale);
 // sync with server-side responsive state.
 const userAgent = defaultBrowserUserAgent(store.getState());
 store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
-// for dynamic preload Component.
+// should wait loadable ready before component start request another component.
 Loadable.preloadReady().then(() => {
   debug("first hydrate start");
   hydrate(
     <AppContainer>
       <App store={store} />
     </AppContainer>,
-    mountApp
+    mountApp,
+    () => {
+      debug("first hydrate end");
+      // client-slide update responsive state by window.
+      store.dispatch(calculateResponsiveState(window));
+      // db init
+      // must after hydrate because have user(access Token) for logIn, some ui data for restore
+      // will hydrate fail if init db before hydrate.
+      const db = connectDB();
+      if (db) {
+        const initsP = initWithStore(db, store);
+        Promise.all(initsP)
+          .then(() => {
+            store.dispatch(setDBisInitialized(null, true));
+          })
+          .catch(err => {
+            store.dispatch(setDBisInitialized(err));
+          });
+      }
+    }
   );
-  debug("first hydrate end");
-  // client-slide update responsive state by window.
-  store.dispatch(calculateResponsiveState(window));
-  // db init
-  // must after hydrate because have user(access Token) for logIn, some ui data for restore
-  // will hydrate fail if init db before hydrate.
-  const db = connectDB();
-  if (db) {
-    Promise.all(initWithStore(db, store))
-      .then(() => {
-        store.dispatch(setDBisInitialized(null, true));
-      })
-      .catch(err => {
-        store.dispatch(setDBisInitialized(err, true));
-      });
-  }
-  debug("Application started");
 });
+
+debug("Application ready!");
 
 // For hot reloading of react components
 if (module.hot) {

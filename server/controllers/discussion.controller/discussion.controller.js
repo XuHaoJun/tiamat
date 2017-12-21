@@ -196,7 +196,7 @@ export function getDiscussion(req, res) {
   const rawQuery = req._parsedOriginalUrl.query;
   const reqQuery = qs.parse(rawQuery);
   const select = parseSelect(reqQuery.select) || {};
-  Discussion.findOne({ _id: req.params.id })
+  Discussion.findById(req.params.id)
     .select(select)
     .exec((err, discussion) => {
       if (err) {

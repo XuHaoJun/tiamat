@@ -13,6 +13,7 @@ import normalizeHref from "./utils/normailzeHref";
 import { Block } from "slate";
 import Img from "../Img";
 import isUrl from "is-url";
+import Template from "./components/Template";
 
 const DEFAULT_NODE = "paragraph";
 
@@ -79,11 +80,13 @@ export function createSchema() {
         const { node, value } = props;
         const active = value.isFocused && value.selection.hasEdgeIn(node);
         const src = node.data.get("src");
+        const height = node.data.get("height");
+        const width = node.data.get("width");
         const className = active ? "active" : null;
         const style = {
           maxWidth: "100%",
-          height: "auto",
-          width: "auto"
+          height: height || "auto",
+          width: width || "auto"
         };
         return (
           <Img
@@ -119,12 +122,27 @@ export function createSchema() {
       paragraph: Paragraph,
       link: Link,
       heading: props => <h1 {...props.attributes}>{props.children}</h1>,
+      template: Template,
+      code_line: props => <div {...props.attributes}>{props.children}</div>,
+      code_block: props => {
+        // const code = props.node.text;
+        // try {
+        //   console.log("code eval:", eval(code));
+        // } catch (err) {
+        //   console.log("err", err);
+        // }
+        return (
+          <pre className="language-jsx">
+            <code {...props.attributes}>{props.children}</code>
+          </pre>
+        );
+      },
       code: props => (
         <pre>
           <code {...props.attributes}>{props.children}</code>
         </pre>
       ),
-      quote: props => (
+      "block-quote": props => (
         <blockquote {...props.attributes}>{props.children}</blockquote>
       ),
       "bulleted-list": props => <ul {...props.attributes}>{props.children}</ul>,

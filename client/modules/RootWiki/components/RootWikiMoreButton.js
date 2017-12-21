@@ -56,6 +56,10 @@ class RootWikiMoreButton extends React.Component {
           to={`/create/rootWikis/${rootWikiId}/wikiDataForm`}
         />
         <MenuItem
+          primaryText="Add Template"
+          to={`/create/rootWikis/${rootWikiId}/template`}
+        />
+        <MenuItem
           primaryText="RootWiki Dashboard"
           to={`/rootWikis/${rootWikiId}/dashboard`}
         />

@@ -4,19 +4,19 @@ import {
   SlateToolbar,
   SlateContent,
   BoldPlugin,
-  BoldButton,
-  GridPlugin
+  BoldButton
 } from "slate-editor";
 
 const plugins = [BoldPlugin()];
 
-const SlateRichTextEditor = () =>
+const SlateRichTextEditor = () => (
   <SlateEditor plugins={plugins}>
     <SlateToolbar>
       <BoldButton />
     </SlateToolbar>
 
     <SlateContent />
-  </SlateEditor>;
+  </SlateEditor>
+);
 
 export default SlateRichTextEditor;

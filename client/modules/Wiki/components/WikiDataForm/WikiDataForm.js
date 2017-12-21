@@ -10,7 +10,7 @@ const schema = {
   definitions: {
     mod: {
       type: "object",
-      required: ["name"],
+      required: ["name", "value"],
       properties: {
         name: {
           title: "屬性",
@@ -22,23 +22,52 @@ const schema = {
             "+n 智慧",
             "鋼鐵反射",
             "閃電傷害造成中毒"
-          ],
-          default: "+n 全能力"
+          ]
+          // default: "+n 全能力"
+        },
+        valueType: {
+          title: "數值-類型",
+          type: "string",
+          enum: ["fixed", "range"],
+          enumNames: ["固定", "範圍"]
+          // default: "fixed"
         }
       },
       dependencies: {
-        name: {
+        valueType: {
           oneOf: [
             {
               required: ["value"],
               properties: {
-                name: {
-                  enum: ["+n 全能力", "+n 力量", "+n 敏捷", "+n 智慧"]
+                valueType: {
+                  enum: ["fixed"]
                 },
                 value: {
                   type: "integer",
                   title: "數值",
                   default: 0
+                }
+              }
+            },
+            {
+              required: ["value"],
+              properties: {
+                valueType: {
+                  enum: ["range"]
+                },
+                value: {
+                  type: "object",
+                  title: "數值",
+                  properties: {
+                    min: {
+                      type: "integer",
+                      default: 0
+                    },
+                    max: {
+                      type: "integer",
+                      default: 0
+                    }
+                  }
                 }
               }
             }
@@ -64,7 +93,7 @@ const schema = {
   }
 };
 
-const uiSchema = {
+const _uiSchema = {
   "ui:order": ["type", "mods", "*"]
 };
 
@@ -100,7 +129,7 @@ class WikiDataForm extends React.Component {
     wikiDataForm: {
       name: "流亡黯道-裝備",
       jsonSchema: schema,
-      jsonUISchema: uiSchema
+      uiSchema: _uiSchema
     }
   };
 
@@ -113,13 +142,16 @@ class WikiDataForm extends React.Component {
     // if (wikiDataForm === undefined) {
     //   return <div>Loading...</div>;
     // }
-    const { name, jsonSchema, jsonUISchema } = wikiDataForm;
+    const { name } = wikiDataForm;
+    let { jsonSchema, uiSchema } = wikiDataForm;
+    jsonSchema = jsonSchema.toJS ? jsonSchema.toJS() : jsonSchema;
+    uiSchema = uiSchema && uiSchema.toJS ? uiSchema.toJS() : uiSchema;
     return (
       <div>
         <h1>尚未完成</h1>
         <Form
           schema={jsonSchema}
-          uiSchema={jsonUISchema}
+          uiSchema={uiSchema}
           onChange={log("changed")}
           onSubmit={log("submitted")}
           onError={log("errors")}
@@ -127,7 +159,7 @@ class WikiDataForm extends React.Component {
         <h1>JSON Schema</h1>
         <JSONTree theme={theme} data={jsonSchema} invertTheme={true} />
         <h1>UI Schema</h1>
-        <JSONTree theme={theme} data={jsonUISchema} invertTheme={true} />
+        <JSONTree theme={theme} data={uiSchema} invertTheme={true} />
         <h1>etc</h1>
         <h2>
           <a href="https://mozilla-services.github.io/react-jsonschema-form/">

@@ -2,10 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import FacebookProvider, { Comments } from "react-facebook";
+
 import { getOauth2Client } from "../../Oauth2Client/Oauth2ClientReducer";
 import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
 
-export class AboutPage extends React.PureComponent {
+class AboutPage extends React.Component {
   static defaultProps = {
     title: "說明",
     facebookOauth2Client: null

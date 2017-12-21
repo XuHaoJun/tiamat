@@ -97,6 +97,11 @@ export const AboutPage = Loadable({
     import(/* webpackChunkName: "AboutPage" */ "./modules/About/pages/AboutPage"),
   loading: Loading
 });
+export const UpsertTemplatePage = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "UpsertTemplatePage" */ "./modules/Template/pages/UpsertTemplatePage"),
+  loading: Loading
+});
 export const NotFoundPage = Loadable({
   loader: () =>
     import(/* webpackChunkName: "NotFoundPage" */ "./modules/Error/pages/NotFoundPage"),
@@ -129,6 +134,7 @@ if (process.env.NODE_ENV !== "production") {
   require("./modules/Setting/pages/SettingDetailPage");
   require("./modules/Error/pages/NotFoundPage");
   require("./modules/RootWiki/pages/EditRootWikiGroupTreePage");
+  require("./modules/Template/pages/UpsertTemplatePage");
 }
 
 // react-router setup with code-splitting More info:
@@ -138,10 +144,6 @@ export default (
     <IndexRoute component={HomePage} />
     <Route path="/setting" component={SettingDetailPage} />
     <Route path="/settings" component={SettingDetailPage} />
-    <Route
-      path="/forumBoards/:forumBoardId/rootDiscussions/:parentDiscussionId"
-      component={DiscussionDetailPage}
-    />
     <Route
       path="/rootDiscussions/:parentDiscussionId"
       component={DiscussionDetailPage}
@@ -165,6 +167,7 @@ export default (
       targetKind="rootWiki"
       component={MixedMainPage}
     />
+    <Route path="/wikis/:wikiId" component={WikiDetailPage} />
     <Route
       path="/rootWikis/:rootWikiId/wikis/:wikiId"
       component={WikiDetailPage}
@@ -193,6 +196,12 @@ export default (
       path="/create/rootWikis/:rootWikiId/wikiDataForm"
       component={UpsertWikiDataFormPage}
       actionType="create"
+    />
+    <Route
+      path="/create/rootWikis/:rootWikiId/template"
+      component={UpsertTemplatePage}
+      actionType="create"
+      sourceKind="rootWiki"
     />
     <Route
       path="/update/wikiDataForms/:wikiDataFormId"

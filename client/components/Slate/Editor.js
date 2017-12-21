@@ -1,9 +1,12 @@
 import React from "react";
-import { connect } from "react-redux";
+import _ from "lodash";
+import { connect, createProvider } from "react-redux";
+import editorConnectHelper from "./connect";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { fromJS, is, Map, List } from "immutable";
+import { is, Map, List } from "immutable";
 import isUrl from "is-url";
-import { Value, Block } from "slate";
+import { Block } from "slate";
+import Debug from "debug";
 // FIXME
 // Input is wonky on Android devices
 // https://github.com/ianstormtaylor/slate/issues/725
@@ -14,25 +17,27 @@ import {
 } from "slate-react";
 import { Portal } from "react-portal";
 
+import { addImageRequest } from "../../modules/Image/ImageActions";
+import { addError } from "../../modules/Error/ErrorActions";
+
 import schema from "./schema";
 import htmlSerializer from "./htmlSerializer";
-import { defaultPlugins } from "./plugins";
-import emptyContnetJSON from "./emptyContent.json";
+import { loadPrismPlugin, defaultPlugins } from "./plugins";
 import semanticReplace from "./utils/semanticReplace";
 import normalizeHref from "./utils/normailzeHref";
 import AddImageDialog from "./components/AddImageDialog";
 import AddWikiPartDialog from "./components/AddWikiPartDialog";
-import { addImageRequest } from "../../modules/Image/ImageActions";
-import { addError } from "../../modules/Error/ErrorActions";
 import Div from "./components/Div";
-import Debug from "debug";
+import configureStore, { getStoreKey } from "./store";
+import { CHANGE_LOCAL_EDITOR } from "./EditorActions";
+import emptyContent from "./emptyContent";
+import serialize from "./serialize";
+import { connectEditorHelper as templateConnectEditorHelper } from "./components/Template";
 import "./plugin.css";
 
 const debug = Debug("app:editor");
 
 const DEFAULT_NODE = "paragraph";
-
-const emptyContent = fromJS(emptyContnetJSON);
 
 export const getStyles = () => {
   const styles = {
@@ -73,12 +78,6 @@ export const getStyles = () => {
   return styles;
 };
 
-const serialize = content => {
-  const rawContent = Map.isMap(content) ? content.toJS() : emptyContent.toJS();
-  const state = Value.fromJS(rawContent);
-  return state;
-};
-
 function semanticRulesToSuggestions(semanticRules) {
   return semanticRules.map(rule => {
     const key = rule.get("name");
@@ -90,6 +89,7 @@ function semanticRulesToSuggestions(semanticRules) {
 
 class Editor extends React.Component {
   static defaultProps = {
+    enableCodeHighlight: false,
     onChangeContent: () => {},
     onError: null,
     enableAutoFullScreen: true,
@@ -97,6 +97,7 @@ class Editor extends React.Component {
     semanticReplaceMode: false,
     readOnly: false,
     rawContent: emptyContent,
+    defaultValue: undefined,
     schemaType: "",
     sendAddImage: null,
     sourceType: "discussion",
@@ -106,18 +107,36 @@ class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    const { suggestionsPlugin, softBreakPlugin } = defaultPlugins;
-    const plugins = [suggestionsPlugin, softBreakPlugin];
-    let state = serialize(props.rawContent);
+    const { suggestionsPlugin } = defaultPlugins;
+    const { defaultValue } = props;
+    let state;
+    if (defaultValue) {
+      state = serialize(defaultValue);
+    } else {
+      state = serialize(props.rawContent);
+    }
     const { readOnly, semanticRules, semanticReplaceMode } = props;
     if (semanticReplaceMode) {
       state = semanticReplace(state, props.semanticRules).value;
     }
     const suggestions = semanticRulesToSuggestions(semanticRules);
+    const { id, key } = this.props;
+    const storeKey = getStoreKey({ id, key });
+    this.storeKey = storeKey;
+    this.store = configureStore({
+      initialState: {
+        enableTemplatePreview: false,
+        compiled: false,
+        storeKey
+      },
+      reducer: this.reduxReducer
+    });
+    this.connect = editorConnectHelper(storeKey);
+    this.Provider = createProvider(storeKey);
     this.state = {
       state,
       suggestions,
-      plugins,
+      plugins: _.values(defaultPlugins),
       suggestionsPlugin,
       semanticRules,
       semanticReplaceMode,
@@ -134,6 +153,9 @@ class Editor extends React.Component {
       this.lastWidth = window.innerWidth;
       this.lastHeight = window.innerHeight;
       window.addEventListener("resize", this.onWindowResize);
+      if (this.props.enableCodeHighlight) {
+        this.loadCodeHighlightPlugin();
+      }
     }
   }
 
@@ -356,14 +378,20 @@ class Editor extends React.Component {
       }
     } else {
       if (event.key === "Enter") {
-        const breakoutRules = ["heading-one", "heading-two"];
-        const shouldBreakout = breakoutRules.some(
-          rule => change.value.startBlock.type === rule
+        const breakoutTypes = ["heading-one", "heading-two"];
+        const isBreakoutType = breakoutTypes.some(
+          type => change.value.startBlock.type === type
         );
-        if (shouldBreakout) {
-          event.preventDefault();
-          change.splitBlock().setBlock(DEFAULT_NODE);
-          return true;
+        if (isBreakoutType) {
+          const { selection } = change.value;
+          const isEnd =
+            selection.isCollapsed &&
+            selection.anchorOffset === change.value.startBlock.text.length;
+          if (isEnd) {
+            event.preventDefault();
+            change.splitBlock().setBlock(DEFAULT_NODE);
+            return true;
+          }
         }
       }
     }
@@ -416,6 +444,23 @@ class Editor extends React.Component {
       } else if (type === "image") {
         this.setState({ addImageDialogOpen: true });
         return undefined;
+      } else if (type === "template") {
+        const numTemplates = document.filterDescendants(node => {
+          return node.type === "template";
+        }).size;
+        // TODO
+        // add custom name.
+        const name = `Anonymous${numTemplates}`;
+        transform.insertInline({
+          isVoid: true,
+          type: "template",
+          data: {
+            template: {
+              name,
+              code: ""
+            }
+          }
+        });
       } else {
         transform.setBlock(isActive ? DEFAULT_NODE : type);
       }
@@ -563,6 +608,22 @@ class Editor extends React.Component {
 
   getJSONContent = () => {
     return this.state.state.toJS();
+  };
+
+  reduxReducer = (state, action) => {
+    switch (action.type) {
+      case CHANGE_LOCAL_EDITOR:
+        this.onChange(action.change);
+        return state;
+      default:
+        return state;
+    }
+  };
+
+  loadCodeHighlightPlugin = () => {
+    loadPrismPlugin().then(prismPlugin => {
+      this.setState({ plugins: [...this.state.plugins, prismPlugin] });
+    });
   };
 
   toggleReadOnly = () => {
@@ -743,10 +804,11 @@ class Editor extends React.Component {
           {this.renderBlockButton("link", "link")}
           {this.renderBlockButton("numbered-list", "format_list_numbered")}
           {this.renderBlockButton("bulleted-list", "format_list_bulleted")}
-          {this.renderBlockButton("block-quote", "format_quote")}
+          {/* {this.renderBlockButton("block-quote", "format_quote")} */}
           {this.renderMarkButton("italic", "format_italic")}
           {this.renderMarkButton("underlined", "format_underlined")}
-          {this.renderMarkButton("code", "code")}
+          {/* {this.renderBlockButton("code_block", "code")} */}
+          {this.renderBlockButton("template", "extension")}
         </div>
         <AddImageDialog
           open={this.state.addImageDialogOpen}
@@ -791,12 +853,23 @@ class Editor extends React.Component {
   renderNode = props => {
     const { node } = props;
     const Element = schema.nodes[node.type];
-    return <Element {...props} />;
+    if (!Element) {
+      return undefined;
+    } else {
+      if (node.type === "template") {
+        const Template = templateConnectEditorHelper(this.connect, Element);
+        return <Template {...props} />;
+      }
+      return <Element {...props} />;
+    }
   };
 
   renderMark = props => {
     const { mark, children } = props;
     const Element = schema.marks[mark.type];
+    if (!Element) {
+      return undefined;
+    }
     return <Element>{children}</Element>;
   };
 
@@ -847,11 +920,14 @@ class Editor extends React.Component {
   render() {
     const ContainerComponent = this.shouldFullScreen() ? Portal : Div;
     const { readOnly } = this.state;
+    const { Provider, store } = this;
     return (
-      <ContainerComponent>
-        {readOnly ? null : this.renderToolbar()}
-        {this.renderEditor()}
-      </ContainerComponent>
+      <Provider store={store}>
+        <ContainerComponent>
+          {readOnly ? null : this.renderToolbar()}
+          {this.renderEditor()}
+        </ContainerComponent>
+      </Provider>
     );
   }
 }

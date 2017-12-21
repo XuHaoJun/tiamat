@@ -18,6 +18,7 @@ import forumBoards from "./modules/ForumBoard/ForumBoardReducer";
 import discussions from "./modules/Discussion/DiscussionReducer";
 import semanticRules from "./modules/SemanticRule/SemanticRuleReducer";
 import sockets from "./modules/Socket/SocketReducer";
+import template from "./modules/Template/TemplateReducer";
 import { routerReducer as routing } from "react-router-redux";
 
 export function getReducersMapping() {
@@ -36,6 +37,7 @@ export function getReducersMapping() {
     forumBoards,
     discussions,
     semanticRules,
+    template,
     sockets
   };
 }

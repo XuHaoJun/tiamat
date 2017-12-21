@@ -8,6 +8,11 @@ import { fetchRootWikiById } from "../RootWikiActions";
 import { getRootWiki } from "../RootWikiReducer";
 
 class RootWikiDashboardPage extends React.Component {
+  componentDidMount() {
+    const { dispatch, rootWikiId } = this.props;
+    dispatch(fetchRootWikiById(rootWikiId));
+  }
+
   render() {
     const { rootWiki } = this.props;
     const title = rootWiki.get("name");
@@ -34,7 +39,7 @@ RootWikiDashboardPage.need = [].concat(params => {
 function mapStateToProps(state, routeProps) {
   const { rootWikiId } = routeProps.params;
   const rootWiki = getRootWiki(state, rootWikiId);
-  return { rootWiki };
+  return { rootWikiId, rootWiki };
 }
 
 export default connect(mapStateToProps)(RootWikiDashboardPage);

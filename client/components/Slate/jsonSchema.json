@@ -2,7 +2,6 @@
   "$schema": "http://json-schema.org/draft-06/schema#",
   "title": "Slate editor",
   "description": "Slate editor from Tiamat",
-
   "definitions": {
     "value": {
       "type": "object",

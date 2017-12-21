@@ -6,7 +6,7 @@ const Loading = () => {
   return <div style={{ display: "none" }}>Loading LogInDialog</div>;
 };
 
-const LoginDialog = Loadable({
+const LoginDialogLoadable = Loadable({
   loader: () => {
     const isServer = typeof window === "undefined";
     // use same Component with client-side and server-side for hydrate.
@@ -21,20 +21,34 @@ const LoginDialog = Loadable({
 
 function makeLogInDialogable(WrappedComponent, _options) {
   const options = _.defaults(_options, {
+    enableLazyLoad: true,
+    lazyLoadEvents: ["onMouseOver"],
     openEventNames: ["onClick"],
     loginDialogPropsName: "loginDialogProps"
   });
   const { openEventNames, loginDialogPropsName } = options;
   class LoginDialogable extends React.Component {
-    state = {
-      open: false
-    };
+    constructor(props) {
+      super(props);
+      this.state = {
+        open: false,
+        LogInDialog: () => null
+      };
+    }
 
     handleRequestClose = () => {
       this.setState({ open: false });
       const loginDialogProps = this.props[loginDialogPropsName] || {};
       if (loginDialogProps.onRequestClose) {
         loginDialogProps.onRequestClose();
+      }
+    };
+
+    handlePreload = () => {
+      if (this.state.LogInDialog !== LoginDialogLoadable) {
+        this.setState({
+          LogInDialog: LoginDialogLoadable
+        });
       }
     };
 
@@ -48,16 +62,28 @@ function makeLogInDialogable(WrappedComponent, _options) {
           }
         };
       }
+      const preloadEventName = "onMouseOver";
+      const mouseOverOpen = eventHandlers[preloadEventName];
+      eventHandlers[preloadEventName] = (...args) => {
+        this.handlePreload();
+        if (mouseOverOpen) {
+          mouseOverOpen(...args);
+        }
+        if (this.props[preloadEventName]) {
+          this.props[preloadEventName](...args);
+        }
+      };
       const loginDialogProps = this.props[loginDialogPropsName] || {};
       const loginFormProps = {
         onClickSignUpButton: this.handleRequestClose
       };
+      const { open, LogInDialog } = this.state;
       return (
         <div>
           <WrappedComponent {...this.props} {...eventHandlers} />
-          <LoginDialog
+          <LogInDialog
             {...loginDialogProps}
-            open={this.state.open}
+            open={open}
             onRequestClose={this.handleRequestClose}
             loginFormProps={loginFormProps}
           />
@@ -65,7 +91,8 @@ function makeLogInDialogable(WrappedComponent, _options) {
       );
     }
   }
-  LoginDialogable.preload = LoginDialog.preload;
+  LoginDialogable.defaultProps = WrappedComponent.defaultProps;
+  LoginDialogable.preload = LoginDialogLoadable.preload;
   return LoginDialogable;
 }
 

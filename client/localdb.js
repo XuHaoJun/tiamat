@@ -33,7 +33,9 @@ export function initWithStore(db, store) {
   ps = ps.concat(
     initAccessToken(db, store).then(token => {
       if (token) {
-        store.dispatch(fetchCurrentUser(token));
+        return store.dispatch(fetchCurrentUser(token));
+      } else {
+        return null;
       }
     })
   );

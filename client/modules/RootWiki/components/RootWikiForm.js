@@ -1,14 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 import Editor from "../../../components/Slate";
 
-class RootWikiForm extends React.PureComponent {
+// TODO
+// validate form
+class RootWikiForm extends React.Component {
   static propTypes = {
+    actionType: PropTypes.oneOf(["create", "update"]),
+    defaultRootWiki: PropTypes.object,
     forumBoardId: PropTypes.string
   };
 
   static defaultProps = {
-    forumBoardId: ""
+    forumBoardId: "",
+    actionType: "create",
+    defaultRootWiki: undefined
   };
 
   getForm = () => {
@@ -21,15 +28,31 @@ class RootWikiForm extends React.PureComponent {
   };
 
   setEditorRef = ele => {
-    this.editor = ele ? ele.getWrappedInstance() : ele;
+    if (ele && ele.getWrappedInstance) {
+      this.editor = ele.getWrappedInstance();
+    } else {
+      this.editor = ele;
+    }
   };
 
   render() {
+    const { actionType } = this.props;
+    let defaultValue;
+    if (actionType === "update") {
+      const { defaultRootWiki } = this.props;
+      if (defaultRootWiki) {
+        const { content } = defaultRootWiki;
+        if (content) {
+          defaultValue = content;
+        }
+      }
+    }
     return (
       <div>
         <Editor
           ref={this.setEditorRef}
           onChangeContent={this.props.onChangeContent}
+          defaultValue={defaultValue}
         />
       </div>
     );
