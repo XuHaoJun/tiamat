@@ -1,0 +1,23 @@
+{
+  "name": "Tiamat",
+  "description": "Tiamat - a modern gaming forum",
+  "repository": "https://github.com/XuHaoJun/tiamat",
+  "keywords": ["node", "express", "react", "forum", "game"],
+  "addons": [{
+      "plan": "mongolab:sandbox"
+    },
+    {
+      "plan": "bonsai:sandbox-6"
+    }
+  ],
+  "env": {
+    "NODE_MODULES_CACHE": {
+      "description": "For install dev deps",
+      "value": "true"
+    },
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "For install dev deps",
+      "value": "false"
+    }
+  }
+}

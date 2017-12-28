@@ -2,12 +2,16 @@
 Tiamat - a modern gaming forum.
 [Online Demo](https://tiamat.herokuapp.com)
 
+
 ## Requirements
 * A version of Node.js at least 6 or greater
 * [MongoDB](https://www.mongodb.com/), version 3.x.x
 * [elasticsearch](https://www.elastic.co), version 5.x.x (optional for search feature)
 
 ## Quickstart
+### Heroku
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/XuHaoJun/tiamat)
+### Local
 ```sh
   git clone https://github.com/XuHaoJun/tiamat.git
   cd tiamat
