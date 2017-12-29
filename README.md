@@ -16,7 +16,9 @@ Tiamat - a modern gaming forum.
   git clone https://github.com/XuHaoJun/tiamat.git
   cd tiamat
   npm install -g yarn
+  # install dependencies
   yarn
+  # development run
   yarn run start
   # production run
   yarn run build

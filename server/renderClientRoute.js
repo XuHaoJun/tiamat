@@ -111,7 +111,7 @@ export function renderScripts(initialState) {
             ? assetsManifest["/vendor.js"]
             : "/vendor.js"
         }'></script>
-        <script src='${
+        <script defer src='${
           process.env.NODE_ENV === "production"
             ? assetsManifest["/app.js"]
             : "/app.js"
