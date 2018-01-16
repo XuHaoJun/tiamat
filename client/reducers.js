@@ -19,6 +19,7 @@ import discussions from "./modules/Discussion/DiscussionReducer";
 import semanticRules from "./modules/SemanticRule/SemanticRuleReducer";
 import sockets from "./modules/Socket/SocketReducer";
 import template from "./modules/Template/TemplateReducer";
+import history from "./modules/History/HistoryReducer";
 import { routerReducer as routing } from "react-router-redux";
 
 export function getReducersMapping() {
@@ -38,7 +39,8 @@ export function getReducersMapping() {
     discussions,
     semanticRules,
     template,
-    sockets
+    sockets,
+    history
   };
 }
 
