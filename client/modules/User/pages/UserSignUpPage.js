@@ -34,6 +34,10 @@ class UserSignUpPage extends Component {
     isLoggedIn: PropTypes.bool.isRequired
   };
 
+  static getInitialAction() {
+    return setHeaderTitle("註冊");
+  }
+
   componentWillMount() {
     this.props.dispatch(setHeaderTitle("註冊"));
   }
@@ -83,10 +87,6 @@ class UserSignUpPage extends Component {
     );
   }
 }
-
-UserSignUpPage.need = [].concat(() => {
-  return setHeaderTitleThunk("註冊");
-});
 
 function mapStateToProps(state) {
   const { browser } = state;

@@ -2,6 +2,7 @@ import { LOCATION_CHANGE } from "react-router-redux";
 
 export const SET_HISTORY_STATE = "SET_HISTORY_STATE";
 export const SET_HISTORY_CURSOR = "SET_HISTORY_CURSOR";
+export const CLEAR_HISTORY_BY_CURSOR = "CLEAR_HISTORY_BY_CURSOR";
 
 // FIXME
 // don't use window.history.
@@ -18,6 +19,10 @@ export function dirtyPush(location) {
 
 export function setHistoryCursor(cursor) {
   return { type: SET_HISTORY_CURSOR, cursor };
+}
+
+export function clearHistoryByCursor(cursor) {
+  return { type: CLEAR_HISTORY_BY_CURSOR, cursor };
 }
 
 export function setHistory(state) {

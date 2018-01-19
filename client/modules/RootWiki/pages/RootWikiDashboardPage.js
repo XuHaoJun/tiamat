@@ -1,6 +1,7 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
+import { is } from "immutable";
 
 import RootWikiTabs from "../components/RootWikiTabs";
 
@@ -8,10 +9,28 @@ import { fetchRootWikiById } from "../RootWikiActions";
 import { getRootWiki } from "../RootWikiReducer";
 
 class RootWikiDashboardPage extends React.Component {
-  componentDidMount() {
-    const { dispatch, rootWikiId } = this.props;
-    dispatch(fetchRootWikiById(rootWikiId));
+  static getInitialAction({ routerProps }) {
+    const { rootWikiId } = routerProps.params;
+    return fetchRootWikiById(rootWikiId);
   }
+
+  componentDidMount() {
+    this.fetchComponentData();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!is(this.props, nextProps)) {
+      this.fetchComponentData(nextProps);
+    }
+  }
+
+  fetchComponentData = (props = this.props) => {
+    if (props.fetchComponentData) {
+      return props.fetchComponentData();
+    } else {
+      return null;
+    }
+  };
 
   render() {
     const { rootWiki } = this.props;
@@ -31,15 +50,21 @@ class RootWikiDashboardPage extends React.Component {
   }
 }
 
-RootWikiDashboardPage.need = [].concat(params => {
-  const { rootWikiId } = params;
-  return fetchRootWikiById(rootWikiId);
-});
-
 function mapStateToProps(state, routeProps) {
   const { rootWikiId } = routeProps.params;
   const rootWiki = getRootWiki(state, rootWikiId);
   return { rootWikiId, rootWiki };
 }
 
-export default connect(mapStateToProps)(RootWikiDashboardPage);
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchComponentData() {
+      const action = RootWikiDashboardPage.getInitialAction();
+      return dispatch(action);
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  RootWikiDashboardPage
+);

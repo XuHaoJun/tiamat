@@ -7,10 +7,13 @@ import MaterialDivider from "material-ui/Divider";
 import CircularProgress from "material-ui/CircularProgress";
 import LazyLoad from "react-lazyload";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import memoize from "fast-memoize";
-import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
 import FlipMove from "react-flip-move";
-import RefreshIndicator from "material-ui/RefreshIndicator";
+import PullRefresh from "react-pullrefresh";
+import Portal from "../Portal";
+import NextList, {
+  ListItem as NextListItem,
+  ListItemText as NextListItemText
+} from "material-ui-next/List";
 
 import Debug from "debug";
 
@@ -110,61 +113,6 @@ export class LoadingListItem extends ListItem {
   }
 }
 
-class RefreshIndicatorListItem extends ListItem {
-  state = {
-    status: "ready"
-  };
-
-  timeouts = [];
-
-  componentWillUnmount() {
-    for (const t of this.timeouts) {
-      clearTimeout(t);
-    }
-  }
-
-  handleClick = e => {
-    if (this.props.onRequestLoadMore) {
-      e.preventDefault();
-      this.setState({ status: "loading" });
-      const p = this.props.onRequestLoadMore("bottom");
-      if (p && p.then) {
-        p.then(() => {
-          const t = setTimeout(() => {
-            this.setState({ status: "ready" });
-          }, 500);
-          this.timeouts.push(t);
-        });
-      } else {
-        const t = setTimeout(() => {
-          this.setState({ status: "ready" });
-        }, 3000);
-        this.timeouts.push(t);
-      }
-    }
-  };
-
-  render() {
-    const { status } = this.state;
-    return (
-      <ListItem
-        disabled={true}
-        style={{ display: "flex", justifyContent: "center" }}
-      >
-        <RefreshIndicator
-          onClick={this.handleClick}
-          percentage={100}
-          size={60}
-          left={0}
-          top={0}
-          status={status}
-          zDepth={0}
-        />
-      </ListItem>
-    );
-  }
-}
-
 export class CommonListItem extends ListItem {
   static defaultProps = {
     href: "",
@@ -210,12 +158,7 @@ export class CommonListItem extends ListItem {
   render() {
     const { href, routerMethod, ...other } = this.props;
     return (
-      <ListItem
-        {...other}
-        href={href}
-        // onTouchTap={this.onTouchTap}
-        onClick={this.onTouchTap}
-      >
+      <ListItem {...other} href={href} onClick={this.onTouchTap}>
         {this.props.children}
       </ListItem>
     );
@@ -229,7 +172,6 @@ class CommonList extends React.Component {
     onRequestLoadMore: PropTypes.func,
     enableLoadMore: PropTypes.bool,
     enableSelectable: PropTypes.bool,
-    enableRefreshIndicator: PropTypes.bool,
     defaultValue: PropTypes.any,
     listItemHref: PropTypes.func,
     listItemRouterMethod: PropTypes.string,
@@ -244,7 +186,6 @@ class CommonList extends React.Component {
     onRequestLoadMore: () => {},
     enableLoadMore: true,
     enableSelectable: false,
-    enableRefreshIndicator: false,
     defaultValue: 0,
     listItemHref: () => "",
     listStyle: {
@@ -273,10 +214,6 @@ class CommonList extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    this.getListItems = memoize(
-      this.getListItems.bind(this),
-      createFastMemoizeDefaultOptions(2)
-    );
   }
 
   getListItemKeyByPayload = payload => {
@@ -331,7 +268,6 @@ class CommonList extends React.Component {
       dataSource,
       enableLoadMore,
       enableSelectable,
-      enableRefreshIndicator,
       onRequestLoadMore,
       defaultValue,
       listStyle
@@ -351,44 +287,63 @@ class CommonList extends React.Component {
         />
       </LazyLoad>
     ) : null;
-    // const refreshIndicator =
-    //   enableRefreshIndicator && !enableLoadMore ? (
-    //     <RefreshIndicatorListItem
-    //       key="refresh-more"
-    //       onRequestLoadMore={onRequestLoadMore}
-    //       direction="bottom"
-    //     />
-    //   ) : null;
     const empty =
       !enableLoadMore && dataSource.count() === 0 ? (
         <ListItem key="empty" disabled={true}>
           沒有任何內容
         </ListItem>
       ) : null;
-    const listItems = this.getListItems(dataSource);
+    const listItems = (
+      <FlipMove
+        typeName={null}
+        getPosition={node => {
+          const rect = (() => {
+            if (node.getBoundingClientRect) {
+              return node.getBoundingClientRect();
+            } else {
+              return ReactDOM.findDOMNode(node).getBoundingClientRect();
+            }
+          })();
+          return rect;
+        }}
+      >
+        {this.getListItems(dataSource)}
+      </FlipMove>
+    );
     const ListComponent = enableSelectable ? SelectableList : List;
     const listProps = {
       style: listStyle,
       defaultValue
     };
-    const flipMoveProps = {
-      typeName: ListComponent,
-      getPosition: node => {
-        const rect = (() => {
-          if (node.getBoundingClientRect) {
-            return node.getBoundingClientRect();
-          } else {
-            return ReactDOM.findDOMNode(node).getBoundingClientRect();
-          }
-        })();
-        return rect;
-      }
-    };
-    const list = (
-      <FlipMove key="list" {...flipMoveProps} {...listProps}>
+    let list = (
+      <ListComponent key="list" {...listProps}>
         {listItems}
-      </FlipMove>
+      </ListComponent>
     );
+    list = (
+      <PullRefresh
+        key="list"
+        zIndex={9999}
+        as={React.Fragment}
+        onRefresh={() => {
+          alert("hello");
+        }}
+        render={(...args) => {
+          return <Portal>{PullRefresh.defaultProps.render(...args)}</Portal>;
+        }}
+      >
+        {list}
+      </PullRefresh>
+    );
+    //     <NextList>
+    //       {[...Array(3).keys()].map(i => {
+    //         return (
+    //           <NextListItem key={i} button>
+    //             <NextListItemText primary="Drafts" />
+    //           </NextListItem>
+    //         );
+    //       })}
+    //     </NextList>
     const bottom = (
       <ListComponent key="foo" {...listProps}>
         {empty}
@@ -396,7 +351,12 @@ class CommonList extends React.Component {
         {/* {refreshIndicator} */}
       </ListComponent>
     );
-    return [list, bottom];
+    return (
+      <React.Fragment>
+        {list}
+        {bottom}
+      </React.Fragment>
+    );
   }
 }
 

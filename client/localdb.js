@@ -1,13 +1,19 @@
-import localForage from "localforage";
+// TODO
+// move init db action to per module.
+
 import {
   setCurrentAccessToken,
   addUsers,
   fetchCurrentUser
 } from "./modules/User/UserActions";
 import { getCurrentAccessToken, getUsers } from "./modules/User/UserReducer";
+
 import { setOauth2Client } from "./modules/Oauth2Client/Oauth2ClientActions";
 import { getOauth2Client } from "./modules/Oauth2Client/Oauth2ClientReducer";
+
 import { setDiscussionUI } from "./modules/Discussion/DiscussionActions";
+
+import { setHistory } from "./modules/History/HistoryActions";
 
 export function initAccessToken(db, store) {
   let p;
@@ -59,13 +65,29 @@ export function initWithStore(db, store) {
     });
     ps.push(p);
   }
-  const p = db.getItem("discussion:ui").then(ui => {
+
+  const historyP = db.getItem("history").then(history => {
+    if (history) {
+      store.dispatch(setHistory(history));
+    }
+  });
+  ps.push(historyP);
+
+  const uiP = db.getItem("discussion:ui").then(ui => {
     if (ui) {
       store.dispatch(setDiscussionUI(ui));
     }
   });
-  ps.push(p);
+  ps.push(uiP);
   return ps;
+}
+
+let localForage = null;
+
+export async function loadDBLib() {
+  const module = await import(/* webpackChunkName: "localForage" */ "localForage");
+  localForage = module;
+  return module;
 }
 
 // TODO

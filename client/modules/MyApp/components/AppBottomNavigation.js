@@ -93,7 +93,11 @@ class AppBottomNavigation extends Component {
 
 export const AppBottomNavigationWithoutConnect = AppBottomNavigation;
 
-import { setHistoryCursor, dirtyPushState } from "../../History/HistoryActions";
+import {
+  setHistoryCursor,
+  dirtyPushState,
+  clearHistoryByCursor
+} from "../../History/HistoryActions";
 import { getCursor, getStackByCursor } from "../../History/HistoryReducer";
 import { push } from "react-router-redux";
 
@@ -120,6 +124,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       const cursor = getCursorByindex(currentIndex);
       const pathname = cursor;
       dispatch(push(pathname));
+      dispatch(clearHistoryByCursor(cursor));
     } else {
       const cursor = getCursorByindex(nextIndex);
       const stack = _getStackByCursor(cursor);

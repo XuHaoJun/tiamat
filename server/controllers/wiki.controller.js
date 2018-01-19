@@ -13,16 +13,26 @@ import cdr from "lodash/tail";
  * @returns void
  */
 export function getWiki(req, res) {
-  const query = {
-    _id: req.params.id
-  };
-  Wiki.findOne(query).exec((err, wiki) => {
-    if (err) {
-      res.status(403).send(err);
-      return;
-    }
-    res.json({ wiki });
-  });
+  const { id, name, rootWikiId } = req.params;
+  if (!id && (!name && !rootWikiId)) {
+    res.status(403).send(new Error(`unknown params.${req.params}`));
+    return;
+  }
+  let query;
+  if (id) {
+    query = { _id: id };
+  } else {
+    query = { name, rootWiki: rootWikiId };
+  }
+  Wiki.findOne(query)
+    .populate("wikiDataForm")
+    .exec((err, wiki) => {
+      if (err) {
+        res.status(403).send(err);
+      } else {
+        res.json({ wiki });
+      }
+    });
 }
 
 function pathToMongoQuery(path = []) {
@@ -129,12 +139,16 @@ export function getWikis(req, res) {
     const q = rootWikiGroupTreeToMongoQuery(rootWikiGroupTree);
     query = Object.assign(query, q);
   }
+  const populate = {
+    path: "wikiDataForm"
+  };
   Wiki.paginate(
     query,
     {
       page,
       limit,
-      sort
+      sort,
+      populate
     },
     (err, result) => {
       if (err) {

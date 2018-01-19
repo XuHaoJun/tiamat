@@ -248,21 +248,15 @@ class Header extends React.Component {
   shouldBackspaceButton = pathname => {
     if (!this.props.browser.lessThan.medium) {
       return false;
+    } else {
+      const upsertPage = new RegExp("^/(create|update|edit)/.+");
+      const etcPage = new RegExp("^/(setting|about|search)");
+      const discussionDetailPage = new RegExp("^/rootDiscussions/(.+)");
+      const wikiDetailPage = new RegExp("^/rootWikis/(.+)/wikis/(.+)");
+      const rules = [upsertPage, etcPage, discussionDetailPage, wikiDetailPage];
+      const enableBackspaceButton = rules.some(regexp => regexp.test(pathname));
+      return enableBackspaceButton;
     }
-    const upsertPage = new RegExp("^/(create|update|edit)/.+");
-    const etcPage = new RegExp("^/(setting|about|search)");
-    const discussionDetailPage = new RegExp("^/rootDiscussions/(.+)");
-    const wikiDetailPage = new RegExp("^/rootWikis/(.+)/wikis/(.+)");
-    const enableBackspaceButtonRules = [
-      upsertPage,
-      etcPage,
-      discussionDetailPage,
-      wikiDetailPage
-    ];
-    const enableBackspaceButton = enableBackspaceButtonRules.some(regexp =>
-      regexp.test(pathname)
-    );
-    return enableBackspaceButton;
   };
 
   renderIconLeftElement = () => {
@@ -270,9 +264,12 @@ class Header extends React.Component {
       this.props.pathname
     );
     if (enableBackspaceButton) {
-      return <BackspaceButton onTouchTap={this.handleBack} />;
+      return <BackspaceButton onClick={this.handleBack} />;
+    } else {
+      // TODO
+      // disable menubutton on browser.lessThan.medium?
+      return <MenuButton onClick={this.handleToggle} />;
     }
-    return <MenuButton onTouchTap={this.handleToggle} />;
   };
 
   renderIconRightElement = () => {

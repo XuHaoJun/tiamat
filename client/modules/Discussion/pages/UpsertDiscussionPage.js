@@ -2,13 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import { Set } from "immutable";
+import { Set, is } from "immutable";
 import { push, replace } from "react-router-redux";
 import debounce from "lodash/debounce";
 
 import {
   setHeaderTitle,
-  setHeaderTitleThunk,
   updateSendButtonProps
 } from "../../MyApp/MyAppActions";
 import { getDBisInitialized } from "../../MyApp/MyAppReducer";
@@ -35,6 +34,46 @@ const CREATE_ACTION = "create";
 const UPDATE_ACTION = "update";
 const ACTIONS = [CREATE_ACTION, UPDATE_ACTION];
 
+function getHeaderTitle(routerProps = { params: {} }, state = {}) {
+  const { forumBoardId, parentDiscussionId, discussionId } = routerProps.params;
+  if (forumBoardId) {
+    const forumBoard = getForumBoardById(state, forumBoardId);
+    if (forumBoard) {
+      return `建立文章 - ${forumBoard.get("name")}`;
+    } else {
+      return "建立文章";
+    }
+  } else if (parentDiscussionId) {
+    const parentDiscussion = getDiscussion(state, parentDiscussionId);
+    if (parentDiscussion) {
+      return `RE:${parentDiscussion.get("title")}`;
+    } else {
+      return "回覆文章";
+    }
+  } else if (discussionId) {
+    return "編輯文章";
+  } else {
+    return "建立文章";
+  }
+}
+
+function getForumBoardId(routerProps, state) {
+  const { parentDiscussionId, discussionId, forumBoardId } = routerProps.params;
+  if (forumBoardId) {
+    return forumBoardId;
+  } else if (parentDiscussionId || discussionId) {
+    const id = parentDiscussionId || discussionId;
+    const discussion = getDiscussion(state, id);
+    if (discussion) {
+      return discussion.get("forumBoard");
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
+
 // TODO
 // check actionType update with discussion's author id and currentUser id
 class UpsertRootDiscussionPage extends React.Component {
@@ -51,22 +90,56 @@ class UpsertRootDiscussionPage extends React.Component {
     router: PropTypes.object.isRequired
   };
 
-  static defaultProps = {
-    headerTitle: "建立文章"
-  };
-
-  componentWillMount() {
-    const { headerTitle } = this.props;
-    this.props.dispatch(setHeaderTitle(headerTitle));
+  static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
+    return async (dispatch, getState) => {
+      dispatch(setHeaderTitle(getHeaderTitle(routerProps, getState())));
+      const fetchByRouterProps = () => {
+        const {
+          parentDiscussionId,
+          discussionId,
+          forumBoardId
+        } = routerProps.params;
+        return Promise.all([
+          parentDiscussionId
+            ? dispatch(fetchDiscussion(parentDiscussionId))
+            : null,
+          discussionId ? dispatch(fetchDiscussion(discussionId)) : null,
+          forumBoardId ? dispatch(fetchForumBoardById(forumBoardId)) : null
+        ]);
+      };
+      await fetchByRouterProps();
+      const forumBoardId = getForumBoardId(routerProps, getState());
+      if (!getForumBoardById(getState(), forumBoardId)) {
+        await dispatch(fetchForumBoardById(forumBoardId));
+      }
+      dispatch(setHeaderTitle(getHeaderTitle(routerProps, getState())));
+      if (tryMore) {
+        const forumBoard = getForumBoardById(getState(), forumBoardId);
+        const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+        if (rootWikiId) {
+          const scope = [
+            {
+              type: "wiki",
+              rootWikiId
+            }
+          ];
+          return dispatch(fetchSemanticRules(scope));
+        }
+      }
+      return Promise.resolve(null);
+    };
   }
 
   componentDidMount() {
-    this.fetchData(this.props);
-    this.ensureLoggedIn(this.props);
+    this.fetchComponentData();
+    this.ensureLoggedIn();
   }
 
   componentWillReceiveProps(nextProps) {
-    this.fetchData(nextProps);
+    const { dbIsInitialized } = nextProps;
+    if (!is(this.props, nextProps) && dbIsInitialized) {
+      this.fetchComponentData(nextProps);
+    }
     this.ensureLoggedIn(nextProps);
   }
 
@@ -95,11 +168,19 @@ class UpsertRootDiscussionPage extends React.Component {
     }
   };
 
+  fetchComponentData = (props = this.props) => {
+    if (props.fetchComponentData) {
+      return props.fetchComponentData();
+    } else {
+      return Promise.resolve(null);
+    }
+  };
+
   _toLoginPage = () => {
     this.context.router.replace("/login");
   };
 
-  ensureLoggedIn = props => {
+  ensureLoggedIn = (props = this.props) => {
     const { dbIsInitialized } = props;
     if (dbIsInitialized) {
       const { isLoggedIn } = props;
@@ -353,105 +434,27 @@ class UpsertRootDiscussionPage extends React.Component {
   }
 }
 
-const emptyThunk = () => {
-  return Promise.resolve(null);
-};
-
-function getHeaderTitle(params = {}, store = {}) {
-  const { forumBoardId, parentDiscussionId, discussionId } = params;
-  if (forumBoardId) {
-    const forumBoard = getForumBoardById(store, forumBoardId);
-    if (forumBoard) {
-      return `建立文章 - ${forumBoard.get("name")}`;
-    } else {
-      return "建立文章";
-    }
-  } else if (parentDiscussionId) {
-    const parentDiscussion = getDiscussion(store, parentDiscussionId);
-    if (parentDiscussion) {
-      return `RE:${parentDiscussion.get("title")}`;
-    } else {
-      return "回覆文章";
-    }
-  } else if (discussionId) {
-    return "編輯文章";
-  } else {
-    return "建立文章";
-  }
-}
-
-UpsertRootDiscussionPage.need = []
-  .concat(params => {
-    const { parentDiscussionId } = params;
-    if (parentDiscussionId) {
-      return fetchDiscussion(parentDiscussionId);
-    } else {
-      return emptyThunk;
-    }
-  })
-  .concat(params => {
-    const { discussionId } = params;
-    if (discussionId) {
-      return fetchDiscussion(discussionId);
-    } else {
-      return emptyThunk;
-    }
-  })
-  .concat((params, store) => {
-    const { forumBoardId, parentDiscussionId } = params;
-    if (forumBoardId) {
-      return fetchForumBoardById(forumBoardId);
-    } else {
-      const parentDiscussion = getDiscussion(store, parentDiscussionId);
-      if (parentDiscussion) {
-        return fetchForumBoardById(parentDiscussion.get("forumBoard"));
-      } else {
-        return emptyThunk;
-      }
-    }
-  })
-  .concat((params, store) => {
-    const { forumBoardId } = params;
-    const forumBoard = getForumBoardById(store, forumBoardId);
-    const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
-    if (rootWikiId) {
-      const scope = [
-        {
-          type: "wiki",
-          rootWikiId
-        }
-      ];
-      return fetchSemanticRules(scope);
-    } else {
-      return emptyThunk;
-    }
-  })
-  .concat((params, store, query, routes) => {
-    const headerTitle = getHeaderTitle(params, store);
-    return setHeaderTitleThunk(headerTitle);
-  });
-
-function mapStateToProps(store, routerProps) {
+function mapStateToProps(state, routerProps) {
   const leafRoute = routerProps.routes[routerProps.routes.length - 1];
   const { actionType, targetKind } = leafRoute;
-  const dbIsInitialized = getDBisInitialized(store);
-  const isLoggedIn = getIsLoggedIn(store);
+  const dbIsInitialized = getDBisInitialized(state);
+  const isLoggedIn = getIsLoggedIn(state);
   const { forumBoardId, parentDiscussionId, discussionId } = routerProps.params;
   const { forumBoardGroup } = routerProps.location.query;
-  const forumBoard = getForumBoardById(store, forumBoardId);
-  const discussion = getDiscussion(store, discussionId);
-  const parentDiscussion = getDiscussion(store, parentDiscussionId);
-  const ui = getUI(store);
+  const forumBoard = getForumBoardById(state, forumBoardId);
+  const discussion = getDiscussion(state, discussionId);
+  const parentDiscussion = getDiscussion(state, parentDiscussionId);
+  const ui = getUI(state);
   let initForm;
   if (parentDiscussionId) {
     initForm = null;
   } else {
     initForm = ui.getIn(["UpsertDiscussionPage", "forms", forumBoardId]);
   }
-  const semanticRules = getSemanticRules(store);
-  const headerTitle = getHeaderTitle(routerProps.params, store);
-  const accessToken = getCurrentAccessToken(store);
-  const currentUser = getCurrentUser(store);
+  const semanticRules = getSemanticRules(state);
+  const headerTitle = getHeaderTitle(routerProps, state);
+  const accessToken = getCurrentAccessToken(state);
+  const currentUser = getCurrentUser(state);
   return {
     actionType,
     targetKind,
@@ -472,4 +475,19 @@ function mapStateToProps(store, routerProps) {
   };
 }
 
-export default connect(mapStateToProps)(UpsertRootDiscussionPage);
+function mapDispatchToProps(dispatch, routerProps) {
+  return {
+    dispatch,
+    fetchComponentData() {
+      const action = UpsertRootDiscussionPage.getInitialAction(
+        { routerProps },
+        { tryMore: true }
+      );
+      return dispatch(action);
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  UpsertRootDiscussionPage
+);

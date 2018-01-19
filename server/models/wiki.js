@@ -16,10 +16,12 @@ const wikiSchema = new Schema(
     rootWiki: {
       type: Schema.Types.ObjectId,
       ref: "RootWiki",
-      required: true,
-      index: true
+      required: true
     },
+
+    wikiDataForm: { type: Schema.Types.ObjectId, ref: "WikiDataForm", index: true },
     data: { type: Object },
+
     rootWikiGroupTree: { type: Schema.Types.Mixed },
     tags: { type: [String], default: [], index: true },
     popularityCounter: { type: Number, default: 0 },

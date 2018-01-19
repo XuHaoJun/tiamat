@@ -100,6 +100,15 @@ class HomeTabs extends React.Component {
 
   render() {
     const { slideIndex } = this.state;
+    const MyTab = (icon, slide) => (
+      <Tab
+        icon={icon}
+        value={slide}
+        onFocus={() => undefined}
+        onMouseOver={this.handleTabMouseOvers[slide]}
+      />
+    );
+    // {MyTab(<ActionHome />, HOME_SLIDE)}
     return (
       <div style={this.props.style}>
         <Tabs

@@ -1,7 +1,7 @@
 import React from "react";
 import memoize from "fast-memoize";
 import qs from "qs";
-import { fromJS } from "immutable";
+import { is, fromJS } from "immutable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
@@ -13,17 +13,62 @@ import MixedMainTabs, {
   ROOT_WIKI_GROUPS_SLIDE,
   ROOT_WIKI_OR_WIKI_SLIDE
 } from "../components/MixedMainTabs";
-import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchWikis } from "../../Wiki/WikiActions";
 import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
 import { getRootWiki } from "../../RootWiki/RootWikiReducer";
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
 import { fetchRootDiscussions } from "../../Discussion/DiscussionActions";
-import { createSocket, removeSocket } from "../../Socket/SocketActions";
 import { getCurrentAccessToken } from "../../User/UserReducer";
+import { getDBisInitialized } from "../../MyApp/MyAppReducer";
 
 const debug = Debug("app:MixedMainPage");
+
+const parseRootWikiGroupTree = memoize(queryString => {
+  if (!queryString) {
+    return queryString;
+  }
+  // TODO
+  // let depth limit to 3 or 4?
+  const parsed = qs.parse(queryString, { depth: Infinity });
+  const { rootWikiGroupTree } = parsed;
+  return fromJS(rootWikiGroupTree);
+});
+
+function parseRouterProps(routerProps) {
+  const { forumBoardGroup } = routerProps.location.query;
+  //
+  const rootWikiGroupTree = parseRootWikiGroupTree(
+    routerProps.location.search.length > 0
+      ? routerProps.location.search.slice(1)
+      : ""
+  );
+  //
+  const leafRoute = routerProps.routes[routerProps.routes.length - 1];
+  const { targetKind } = leafRoute;
+  //
+  const { forumBoardId, rootWikiId } = routerProps.params;
+  //
+  let slideIndex = 1;
+  const slideIndexMapping = {
+    forumBoardId: 1,
+    rootWikiId: 3
+  };
+  for (const key in routerProps.params) {
+    if ({}.hasOwnProperty.call(routerProps.params, key)) {
+      slideIndex = slideIndexMapping[key];
+    }
+  }
+  return {
+    forumBoardId,
+    rootWikiId,
+    forumBoardGroup,
+    rootWikiGroupTree,
+    targetKind,
+    slideIndex
+  };
+}
 
 class MixedMainPage extends React.Component {
   static propTypes = {
@@ -40,100 +85,108 @@ class MixedMainPage extends React.Component {
     router: PropTypes.object.isRequired
   };
 
+  static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
+    const parsed = parseRouterProps(routerProps);
+    return async (dispatch, getState) => {
+      const _setHeaderTitle = () => {
+        const { forumBoardId, rootWikiId } = parsed;
+        const state = getState();
+        const forumBoard = forumBoardId
+          ? getForumBoardById(state, forumBoardId)
+          : null;
+        const rootWiki = rootWikiId ? getRootWiki(state, rootWikiId) : null;
+        const fName = forumBoard ? forumBoard.get("name") : "";
+        const rName = rootWiki ? rootWiki.get("name") : "";
+        const title = (rootWikiId ? rName : fName) || "Loading...";
+        return setHeaderTitle(title);
+      };
+      // set default title before fetch.
+      dispatch(_setHeaderTitle());
+      // fetch
+      const { targetKind } = parsed;
+      await (() => {
+        if (targetKind === "rootDiscussions") {
+          const { forumBoardId, forumBoardGroup } = parsed;
+          return Promise.all(
+            [
+              fetchForumBoardById(forumBoardId),
+              fetchRootDiscussions(forumBoardId, { forumBoardGroup })
+            ].map(dispatch)
+          );
+        } else if (targetKind === "wikis") {
+          const { rootWikiId, rootWikiGroupTree } = parsed;
+          return Promise.all(
+            [
+              fetchRootWikiById(rootWikiId),
+              fetchWikis(rootWikiId, { rootWikiGroupTree })
+            ].map(dispatch)
+          );
+        } else if (targetKind === "rootWiki") {
+          const { rootWikiId } = parsed;
+          return dispatch(fetchRootWikiById(rootWikiId));
+        } else {
+          return Promise.resolve(null);
+        }
+      })();
+      // update title after fetch.
+      dispatch(_setHeaderTitle());
+      // tryMore
+      if (tryMore) {
+        const { forumBoardId, rootWikiId } = parsed;
+        const state = getState();
+        const forumBoard = forumBoardId
+          ? getForumBoardById(state, forumBoardId)
+          : null;
+        const rootWiki = rootWikiId ? getRootWiki(state, rootWikiId) : null;
+        if (forumBoard && forumBoard.get("rootWiki") && !rootWiki) {
+          return dispatch(fetchRootWikiById(forumBoard.get("rootWiki")));
+        } else if (rootWiki && rootWiki.get("forumBoard") && !forumBoard) {
+          return dispatch(fetchForumBoardById(rootWiki.get("forumBoard")));
+        } else {
+          return Promise.resolve(null);
+        }
+      } else {
+        return Promise.resolve(null);
+      }
+    };
+  }
+
   constructor(props) {
     super(props);
     this.timeouts = [];
   }
 
-  componentWillMount() {
-    const { title } = this.props;
-    this.props.dispatch(setHeaderTitle(title));
-  }
-
   componentDidMount() {
-    const {
-      dispatch,
-      forumBoardGroup,
-      forumBoard,
-      rootWiki,
-      rootWikiGroupTree
-    } = this.props;
-    const rootWikiId =
-      this.props.rootWikiId || (forumBoard && forumBoard.get("rootWiki"));
-    const forumBoardId =
-      this.props.forumBoardId || (rootWiki && rootWiki.get("forumBoard"));
-    if (forumBoardId) {
-      dispatch(fetchForumBoardById(forumBoardId));
-      dispatch(fetchRootDiscussions(forumBoardId, { forumBoardGroup }));
-      if (forumBoardGroup) {
-        this.lastForumBoardGroup = forumBoardGroup;
-      }
-    }
-    if (rootWikiId) {
-      dispatch(fetchRootWikiById(rootWikiId));
-      if (rootWikiGroupTree) {
-        dispatch(fetchWikis(rootWikiId, { rootWikiGroupTree }));
-        this.lastRootWikiGroupTree = rootWikiGroupTree;
-      }
-    }
-    if (forumBoardId) {
-      const { accessToken } = this.props;
-      dispatch(
-        createSocket(`/forumBoards/${forumBoardId}/discussions`, {
-          accessToken
-        })
-      );
-    }
+    this.fetchComponentData();
+    this.setLast();
   }
 
   componentWillReceiveProps(nextProps) {
-    const { title } = nextProps;
-    if (this.props.title !== title) {
-      this.props.dispatch(setHeaderTitle(title));
+    if (!is(this.props, nextProps) && nextProps.dbIsInitialized) {
+      this.fetchComponentData(nextProps);
     }
-    const {
-      dispatch,
-      forumBoard,
-      rootWiki,
-      forumBoardGroup,
-      rootWikiGroupTree
-    } = nextProps;
-    const rootWikiId =
-      nextProps.rootWikiId || (forumBoard && forumBoard.get("rootWiki"));
-    const forumBoardId =
-      nextProps.forumBoardId || (rootWiki && rootWiki.get("forumBoard"));
-    if (forumBoardId) {
-      dispatch(fetchForumBoardById(forumBoardId));
-      dispatch(fetchRootDiscussions(forumBoardId, { forumBoardGroup }));
-      if (nextProps.isRootDiscussions) {
-        this.lastForumBoardGroup = forumBoardGroup;
-      }
-    }
-    if (rootWikiId) {
-      dispatch(fetchRootWikiById(rootWikiId));
-      if (rootWikiGroupTree) {
-        dispatch(fetchWikis(rootWikiId, { rootWikiGroupTree }));
-      }
-      if (!nextProps.isRootDiscussions) {
-        this.lastRootWikiGroupTree = rootWikiGroupTree;
-      }
-    }
-    if (this.props.forumBoardId !== nextProps.forumBoardId) {
-      dispatch(
-        removeSocket(`/forumBoards/${this.props.forumBoardId}/discussions`)
-      );
-    }
+    this.setLast(nextProps);
   }
 
   componentWillUnmount() {
     this.timeouts.forEach(timeout => clearTimeout(timeout));
     this.timeouts = [];
-    this.props.dispatch(
-      removeSocket(`/forumBoards/${this.props.forumBoardId}/discussions`)
-    );
   }
 
-  handleTransitionEnd = slideIndex => {
+  setLast = (props = this.props) => {
+    this.lastForumBoardGroup = props.forumBoardGroup;
+    this.lastRootWikiGroupTree = props.rootWikiGroupTree;
+  };
+
+  fetchComponentData = (props = this.props) => {
+    if (props.fetchComponentData) {
+      return props.fetchComponentData();
+    } else {
+      return null;
+    }
+  };
+
+  replaceURLBySlideIndex = slideIndex => {
     const { rootWiki, forumBoard } = this.props;
     const forumBoardId =
       this.props.forumBoardId || (rootWiki && rootWiki.get("forumBoard"));
@@ -161,8 +214,8 @@ class MixedMainPage extends React.Component {
         : rootWikiGroupTree;
       if (rootWikiId && rootWikiGroupTree) {
         const query = qs.stringify({
-          rootWikiGroupTree: rootWikiGroupTree.toJSON
-            ? rootWikiGroupTree.toJSON()
+          rootWikiGroupTree: rootWikiGroupTree.toJS
+            ? rootWikiGroupTree.toJS()
             : rootWikiGroupTree
         });
         const url = `/rootWikis/${rootWikiId}/wikis?${query}`;
@@ -176,6 +229,10 @@ class MixedMainPage extends React.Component {
         }
       }
     }
+  };
+
+  handleTransitionEnd = slideIndex => {
+    this.replaceURLBySlideIndex(slideIndex);
   };
 
   render() {
@@ -228,109 +285,32 @@ class MixedMainPage extends React.Component {
   }
 }
 
-const emptyThunkAction = () => {
-  return Promise.resolve(null);
-};
-
-// TODO
-// optimize need by Promise.all by default need behavior is sequence
-MixedMainPage.need = []
-  .concat(params => {
-    const { forumBoardId } = params;
-    return forumBoardId ? fetchForumBoardById(forumBoardId) : emptyThunkAction;
-  })
-  .concat((params, store, query) => {
-    const { forumBoardId } = params;
-    const { forumBoardGroup } = query;
-    return forumBoardId
-      ? fetchRootDiscussions(forumBoardId, { forumBoardGroup })
-      : emptyThunkAction;
-  })
-  .concat(params => {
-    const { rootWikiId } = params;
-    return rootWikiId ? fetchRootWikiById(rootWikiId) : emptyThunkAction;
-  })
-  .concat((params, store) => {
-    const { rootWikiId } = params;
-    const rootWiki = rootWikiId ? getRootWiki(store, rootWikiId) : null;
-    let forumBoardId;
-    if (rootWiki) {
-      forumBoardId = rootWiki.get("forumBoard");
-    }
-    return forumBoardId ? fetchForumBoardById(forumBoardId) : emptyThunkAction;
-  })
-  .concat((params, store) => {
-    let { rootWikiId } = params;
-    const { forumBoardId } = params;
-    const forumBoard = forumBoardId
-      ? getForumBoardById(store, forumBoardId)
-      : null;
-    rootWikiId = rootWikiId || (forumBoard && forumBoard.get("rootWiki"));
-    return rootWikiId ? fetchWikis(rootWikiId) : emptyThunkAction;
-  })
-  .concat((params, store) => {
-    const { forumBoardId, rootWikiId } = params;
-    const forumBoard = forumBoardId
-      ? getForumBoardById(store, forumBoardId)
-      : null;
-    const rootWiki = rootWikiId ? getRootWiki(store, rootWikiId) : null;
-    const fName = forumBoard ? forumBoard.get("name") : "";
-    const rName = rootWiki ? rootWiki.get("name") : "";
-    const title = rootWikiId ? rName : fName;
-    return title ? setHeaderTitleThunk(title) : emptyThunkAction;
-  });
-
-const parseRootWikiGroupTree = memoize(queryString => {
-  if (!queryString) {
-    return queryString;
-  }
-  // TODO
-  // let depth limit to 3 or 4?
-  const parsed = qs.parse(queryString, { depth: Infinity });
-  const { rootWikiGroupTree } = parsed;
-  return fromJS(rootWikiGroupTree);
-});
-
-function mapStateToProps(store, routerProps) {
-  const leafRoute = routerProps.routes[routerProps.routes.length - 1];
-  const { targetKind } = leafRoute;
-  const accessToken = getCurrentAccessToken(store);
-  const { forumBoardGroup } = routerProps.location.query;
-  const rootWikiGroupTree = parseRootWikiGroupTree(
-    routerProps.location.search.length > 0
-      ? routerProps.location.search.slice(1)
-      : ""
-  );
+function mapStateToProps(state, routerProps) {
+  const parsed = parseRouterProps(routerProps);
+  const { forumBoardGroup, rootWikiGroupTree, targetKind, slideIndex } = parsed;
+  const accessToken = getCurrentAccessToken(state);
   const isWikis = routerProps.location.pathname.split("/").pop() === "wikis";
   const isRootDiscussions =
     routerProps.location.pathname.split("/").pop() === "rootDiscussions";
-  let { forumBoardId, rootWikiId } = routerProps.params;
-  let forumBoard = getForumBoardById(store, forumBoardId);
+  let { forumBoardId, rootWikiId } = parsed;
+  let forumBoard = getForumBoardById(state, forumBoardId);
   if (!rootWikiId && forumBoard) {
     rootWikiId = forumBoard.get("rootWiki");
   }
-  const rootWiki = getRootWiki(store, rootWikiId);
+  const rootWiki = getRootWiki(state, rootWikiId);
   if (!forumBoardId && rootWiki) {
     forumBoardId = rootWiki.get("forumBoard");
   }
   if (!forumBoard) {
-    forumBoard = getForumBoardById(store, forumBoardId);
+    forumBoard = getForumBoardById(state, forumBoardId);
   }
   const forumBoardName = forumBoard ? forumBoard.get("name") : "";
   const rootWikiName = rootWiki ? rootWiki.get("name") : "";
-  const { browser } = store;
-  let slideIndex = 1;
-  const slideIndexMapping = {
-    forumBoardId: 1,
-    rootWikiId: 3
-  };
-  for (const key in routerProps.params) {
-    if ({}.hasOwnProperty.call(routerProps.params, key)) {
-      slideIndex = slideIndexMapping[key];
-    }
-  }
-  const title = forumBoardName || rootWikiName;
+  const { browser } = state;
+  const title = rootWikiName || forumBoardName;
+  const dbIsInitialized = getDBisInitialized(state);
   return {
+    dbIsInitialized,
     targetKind,
     accessToken,
     browser,
@@ -347,4 +327,16 @@ function mapStateToProps(store, routerProps) {
   };
 }
 
-export default connect(mapStateToProps)(MixedMainPage);
+function mapDispatchToProps(dispatch, routerProps) {
+  return {
+    fetchComponentData() {
+      const action = MixedMainPage.getInitialAction(
+        { routerProps },
+        { tryMore: true }
+      );
+      return dispatch(action);
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MixedMainPage);

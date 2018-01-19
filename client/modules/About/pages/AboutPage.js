@@ -12,9 +12,25 @@ class AboutPage extends React.Component {
     facebookOauth2Client: null
   };
 
-  componentWillMount() {
-    this.props.dispatch(setHeaderTitle(this.props.title));
+  static getInitialAction() {
+    return setHeaderTitle(AboutPage.defaultProps.title);
   }
+
+  componentDidMount() {
+    this.fetchComponentData();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.fetchComponentData(nextProps);
+  }
+
+  fetchComponentData = (props = this.props) => {
+    if (props.fetchComponentData) {
+      return props.fetchComponentData();
+    } else {
+      return null;
+    }
+  };
 
   render() {
     const { title, facebookOauth2Client } = this.props;
@@ -36,14 +52,18 @@ class AboutPage extends React.Component {
   }
 }
 
-AboutPage.need = [].concat(() => {
-  const title = "說明";
-  return setHeaderTitleThunk(title);
-});
-
 function mapStateToProps(state) {
   const facebookOauth2Client = getOauth2Client(state, "facebook");
   return { facebookOauth2Client };
 }
 
-export default connect(mapStateToProps)(AboutPage);
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchComponentData() {
+      const action = AboutPage.getInitialAction();
+      return dispatch(action);
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AboutPage);

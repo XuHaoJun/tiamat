@@ -65,7 +65,11 @@ class DiscussionNode extends React.Component {
   onSemanticToggle = (event, isInputChecked, time) => {
     const afterUpdate = () => {
       if (this.props.onSemanticToggle) {
-        this.props.onSemanticToggle(this.state.semanticReplaceToggled);
+        this.props.onSemanticToggle(
+          event,
+          this.state.semanticReplaceToggled,
+          this
+        );
       }
       this.semanticToggle(time);
     };

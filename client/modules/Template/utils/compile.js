@@ -1,6 +1,6 @@
 import getModuleId from "./getModuleId";
 import { fetchTemplate } from "../TemplateActions";
-import { fromJS, Map } from "immutable";
+import { fromJS, Map, Set, List } from "immutable";
 
 function __require(__rootWiki, __caches, preModuleId) {
   if (preModuleId.substring(0, 2) === "~/") {
@@ -31,8 +31,14 @@ function evalWithContext(__code, __context, __rootWiki, __caches) {
   return __module;
 }
 
+export const SKIP = "@@template:SKIP";
+
+export const globalCaches = Map().asMutable();
+
+// compile template to module.
 // TODO
-// use load instead of dispatch.
+// 1. use load instead of dispatch.
+// 2. add visted for prevent circle reference.
 async function compile(
   template,
   {
@@ -41,16 +47,21 @@ async function compile(
     maxDepth,
     enableEvalModule,
     forceBabel,
-    enableValidate
+    enableValidate,
+    enableSaveChildren
   } = {
-    caches: Map(),
+    caches: globalCaches,
     dispatch: null,
     maxDepth: 20,
     enableEvalModule: true,
     forceBabel: true,
-    enableValidate: true
+    enableValidate: true,
+    enableSaveChildren: true
   },
-  { depth } = { depth: 0 }
+  { depth, visted } = {
+    depth: 0,
+    visted: Set()
+  }
 ) {
   if (!dispatch) {
     throw new Error("compile require dispatch");
@@ -58,14 +69,24 @@ async function compile(
   if (depth > maxDepth) {
     throw new Error(`compile reached maxDepth: ${maxDepth}`);
   }
-  const mutCaches = caches.asMutable();
   const { name, code } = template;
   if (!name) {
     throw new Error("template require name.");
   } else if (!code) {
     throw new Error("template require code.");
   }
+  const updatedAt = new Date(template.get("updatedAt")) || Date.now();
   const moduleId = getModuleId(template);
+  const cachedModule = caches.get(moduleId);
+  if (cachedModule) {
+    if (updatedAt <= cachedModule.updatedAt) {
+      return cachedModule;
+    }
+  }
+  if (visted.includes(moduleId)) {
+    return SKIP;
+  }
+  const mutCaches = caches.asMutable();
   const esprimaP = import(/* webpackChunkName: "esprima" */ "esprima");
   const estraverseP = import(/* webpackChunkName: "estraverse-fb" */ "estraverse-fb");
   const [esprima, estraverse] = await Promise.all([esprimaP, estraverseP]);
@@ -93,26 +114,24 @@ async function compile(
       }
     }
   });
+  // TODO
+  // change data structure to
+  // { targetKind: "rootWiki", rootWiki: rootWikiId, name: templateName }
   const childrenIds = importModuelNames.map(mname => {
     if (mname.substring(0, 2) === "~/") {
       const { rootWiki } = template;
-      const matches = /^~\/(.+)/.exec(name);
-      const localName = matches[1] || "";
-      return `/rootWikis/${rootWiki}/${localName}`;
+      const matches = /^~\/(.+)/.exec(mname);
+      const templateName = matches[1] || "";
+      return `/rootWikis/${rootWiki}/${templateName}`;
     } else {
       throw new Error("Unknown import path");
     }
   });
   // load
   const templateRequests = childrenIds.map(id => {
-    const cachedModule = mutCaches.get(id);
-    if (cachedModule) {
-      return cachedModule;
-    } else {
-      return dispatch(fetchTemplate(id)).then(_jsonTemplate => {
-        return fromJS(_jsonTemplate);
-      });
-    }
+    return dispatch(fetchTemplate(id)).then(_jsonTemplate => {
+      return fromJS(_jsonTemplate);
+    });
   });
   // TODO
   // try catch request error.
@@ -121,30 +140,24 @@ async function compile(
     importTemplates.map(importTemplate => {
       return compile(
         importTemplate,
-        { caches: mutCaches, dispatch, maxDepth },
-        { depth: depth + 1 }
+        {
+          caches: mutCaches,
+          dispatch,
+          maxDepth,
+          enableEvalModule,
+          forceBabel,
+          enableValidate,
+          enableSaveChildren
+        },
+        { depth: depth + 1, visted: visted.add(moduleId) }
       );
     })
   )
-    .then(results => {
-      // update cache.
-      results.forEach(r => {
-        const resultId = r.get("id");
-        if (resultId) {
-          const oldModule = mutCaches.get(r.id);
-          if (oldModule) {
-            const oldCreatedAt = oldModule.get("createdAt");
-            const currentCreatedAt = r.get("createdAt");
-            if (currentCreatedAt > oldCreatedAt) {
-              mutCaches.set(resultId, r);
-            }
-          }
-        }
-      });
-      return results;
+    .then(modules => {
+      return modules.filter(m => m !== SKIP);
     })
-    .then(results => {
-      return results.reduce((localChildren, r) => {
+    .then(modules => {
+      return modules.reduce((localChildren, r) => {
         const id = r.get("id");
         if (id) {
           return localChildren.set(id, r);
@@ -162,25 +175,43 @@ async function compile(
     output = Babel.transform(code, { presets: ["es2015", "react"] }).code;
   }
   const React = await import("react");
-  let module;
+  let instance;
   if (enableEvalModule) {
-    module = evalWithContext.call(
+    instance = evalWithContext.call(
       null,
       output,
       { React },
       template.get("rootWiki"),
       mutCaches
     );
+  } else {
+    instance = null;
   }
-  return fromJS({
-    module,
-    caches: mutCaches.asImmutable(),
-    createdAt: Date.now(),
+  const nextModule = Map({
+    instance,
+    caches: mutCaches,
+    updatedAt,
     id: moduleId,
     children,
     code,
-    es5Code: output
+    es5Code: output,
+    metaData: Map({
+      template
+    })
   });
+  // TODO
+  // move before eval
+  const oldModule = mutCaches.get(moduleId);
+  if (oldModule) {
+    const oldUpdatedAt = oldModule.get("updatedAt");
+    const nextUpdatedAt = nextModule.get("updatedAt");
+    if (nextUpdatedAt > oldUpdatedAt) {
+      mutCaches.set(moduleId, nextModule);
+    } else {
+      return oldModule;
+    }
+  }
+  return nextModule;
 }
 
 export default compile;

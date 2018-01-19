@@ -1,57 +1,86 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { is } from "immutable";
 import Helmet from "react-helmet";
-import _ from "lodash";
 
 import { fetchDiscussion, fetchDiscussions } from "../DiscussionActions";
 import { getDiscussion } from "../DiscussionReducer";
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
-import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
 import DiscussionDetail from "../components/DiscussionDetail";
 
 class DiscussionDetailPage extends React.Component {
-  static defaultProps = {
-    title: "文章"
-  };
-
   static contextTypes = {
     router: PropTypes.object
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      title: props.title
+  static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
+    const { parentDiscussionId } = routerProps.params;
+    return async (dispatch, getState) => {
+      const _setHeaderTitle = () => {
+        const parentDiscussion = getDiscussion(getState(), parentDiscussionId);
+        const title = parentDiscussion
+          ? parentDiscussion.get("title")
+          : "Loading...";
+        return setHeaderTitle(title);
+      };
+      dispatch(_setHeaderTitle());
+      await Promise.all(
+        [
+          fetchDiscussion(parentDiscussionId),
+          fetchDiscussions({ parentDiscussionId })
+        ].map(dispatch)
+      );
+      dispatch(_setHeaderTitle());
+      if (tryMore) {
+        const parentDiscussion = getDiscussion(getState(), parentDiscussionId);
+        if (parentDiscussion && parentDiscussion.get("forumBoard")) {
+          const forumBoardId = parentDiscussion.get("forumBoard");
+          await dispatch(fetchForumBoardById(forumBoardId));
+          const forumBoard = getForumBoardById(getState(), forumBoardId);
+          if (forumBoard) {
+            const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+            if (rootWikiId) {
+              const scope = [
+                {
+                  type: "wiki",
+                  rootWikiId
+                }
+              ];
+              return dispatch(fetchSemanticRules(scope));
+            } else {
+              return Promise.resolve(null);
+            }
+          } else {
+            return Promise.resolve(null);
+          }
+        } else {
+          return Promise.resolve(null);
+        }
+      } else {
+        return Promise.resolve(null);
+      }
     };
   }
 
-  componentWillMount() {
-    const { title } = this.state;
-    this.props.dispatch(setHeaderTitle(title));
-  }
-
   componentDidMount() {
-    this.fetchData(this.props);
+    this.fetchComponentData();
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.state.title !== nextProps.title) {
-      this.setState({ title: nextProps.title });
-      nextProps.dispatch(setHeaderTitle(nextProps.title));
-    }
-    if (this.props.parentDiscussionId !== nextProps.parentDiscussionId) {
-      this.fetchData(nextProps);
+    if (!is(this.props, nextProps)) {
+      this.fetchComponentData(nextProps);
     }
   }
 
-  onSemanticToggle = newSemanticReplaceMode => {
+  onSemanticToggle = (event, nextSemanticReplaceMode) => {
     const { parentDiscussionId, semanticReplaceMode } = this.props;
     const { router } = this.context;
-    if (semanticReplaceMode !== newSemanticReplaceMode) {
-      if (newSemanticReplaceMode) {
+    if (semanticReplaceMode !== nextSemanticReplaceMode) {
+      if (nextSemanticReplaceMode) {
         router.replace(
           `/rootDiscussions/${parentDiscussionId}?semanticReplaceMode=true`
         );
@@ -61,41 +90,36 @@ class DiscussionDetailPage extends React.Component {
     }
   };
 
-  fetchData = currentProps => {
-    const { parentDiscussion, parentDiscussionId, dispatch } = currentProps;
-    dispatch(fetchDiscussion(parentDiscussionId));
-    dispatch(fetchDiscussions({ parentDiscussionId }));
-    let { forumBoardId } = currentProps;
-    if (!forumBoardId) {
-      forumBoardId = parentDiscussion
-        ? parentDiscussion.get("forumBoard")
-        : forumBoardId;
+  getHelmetTitle = (props = this.props) => {
+    const { parentDiscussion, forumBoard } = props;
+    if (parentDiscussion) {
+      const title = parentDiscussion.get("title");
+      if (forumBoard) {
+        const name = forumBoard.get("name");
+        return `${title} - ${name}`;
+      } else {
+        return title;
+      }
+    } else {
+      return "Loading...";
     }
-    if (forumBoardId) {
-      dispatch(fetchForumBoardById(forumBoardId));
-    }
-    const { forumBoard } = currentProps;
-    const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
-    if (rootWikiId) {
-      const scope = [
-        {
-          type: "wiki",
-          rootWikiId
-        }
-      ];
-      dispatch(fetchSemanticRules(scope));
+  };
+
+  fetchComponentData = (props = this.props) => {
+    if (props.fetchComponentData) {
+      return props.fetchComponentData();
+    } else {
+      return null;
     }
   };
 
   render() {
     const {
       forumBoardId,
-      forumBoard,
       parentDiscussionId,
       semanticReplaceMode
     } = this.props;
-    const forumBoardName = forumBoard ? forumBoard.get("name") : "";
-    const helmetTitle = `${this.state.title} - ${forumBoardName}`;
+    const helmetTitle = this.getHelmetTitle();
     return (
       <div>
         <Helmet title={helmetTitle} />
@@ -110,50 +134,6 @@ class DiscussionDetailPage extends React.Component {
   }
 }
 
-const emptyThunkAction = () => {
-  return Promise.resolve(null);
-};
-
-DiscussionDetailPage.need = []
-  .concat(params => {
-    const { parentDiscussionId, forumBoardId } = params;
-    return dispatch => {
-      const parentPromise = fetchDiscussion(parentDiscussionId)(dispatch);
-      const childrenPromise = fetchDiscussions({ parentDiscussionId })(
-        dispatch
-      );
-      let forumBoardPromise;
-      if (forumBoardId) {
-        forumBoardPromise = fetchForumBoardById(forumBoardId)(dispatch);
-      }
-      const ps = _.reject(
-        [parentPromise, childrenPromise, forumBoardPromise],
-        v => v === undefined
-      );
-      return Promise.all(ps);
-    };
-  })
-  .concat((params, store) => {
-    const { parentDiscussionId } = params;
-    const parentDiscussion = getDiscussion(store, parentDiscussionId);
-    if (parentDiscussion) {
-      const forumBoardId = parentDiscussion.get("forumBoard");
-      const forumBoard = getForumBoardById(store, forumBoardId);
-      if (!forumBoard) {
-        return fetchForumBoardById(forumBoardId);
-      }
-    }
-    return emptyThunkAction;
-  })
-  .concat((params, store) => {
-    const { parentDiscussionId } = params;
-    const parentDiscussion = getDiscussion(store, parentDiscussionId);
-    const title = parentDiscussion ? parentDiscussion.get("title") : undefined;
-    return title ? setHeaderTitleThunk(title) : emptyThunkAction;
-  });
-// TODO
-// optimize semanticReplace and then add to need for server-side.
-
 function mapStateToProps(store, routerProps) {
   const { parentDiscussionId } = routerProps.params;
   let { semanticReplaceMode } = routerProps.location.query;
@@ -166,14 +146,27 @@ function mapStateToProps(store, routerProps) {
       : forumBoardId;
   }
   const forumBoard = getForumBoardById(store, forumBoardId);
-  const title = parentDiscussion ? parentDiscussion.get("title") : undefined;
   return {
-    title,
+    parentDiscussionId,
+    parentDiscussion,
     forumBoardId,
     forumBoard,
-    parentDiscussionId,
     semanticReplaceMode
   };
 }
 
-export default connect(mapStateToProps)(DiscussionDetailPage);
+function mapDispatchToProps(dispatch, routerProps) {
+  return {
+    fetchComponentData() {
+      const action = DiscussionDetailPage.getInitialAction(
+        { routerProps },
+        { tryMore: true }
+      );
+      return dispatch(action);
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  DiscussionDetailPage
+);

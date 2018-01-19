@@ -5,7 +5,14 @@ import editorConnectHelper from "./connect";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { is, Map, List } from "immutable";
 import isUrl from "is-url";
-import { Block } from "slate";
+import { Block, setKeyGenerator } from "slate";
+
+let n = 0;
+setKeyGenerator(() => {
+  n += 1;
+  return `${n}`;
+});
+
 import Debug from "debug";
 // FIXME
 // Input is wonky on Android devices
@@ -100,8 +107,8 @@ class Editor extends React.Component {
     defaultValue: undefined,
     schemaType: "",
     sendAddImage: null,
-    sourceType: "discussion",
-    sourceId: ""
+    targetKind: "rootWiki",
+    rootWiki: ""
   };
 
   constructor(props) {
@@ -449,13 +456,16 @@ class Editor extends React.Component {
           return node.type === "template";
         }).size;
         // TODO
-        // add custom name.
-        const name = `Anonymous${numTemplates}`;
+        // generate random string for name like uuid?.
+        const name = `Template${numTemplates}`;
         transform.insertInline({
           isVoid: true,
           type: "template",
           data: {
             template: {
+              rootWiki: this.props.rootWiki,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
               name,
               code: ""
             }
@@ -918,15 +928,15 @@ class Editor extends React.Component {
   };
 
   render() {
-    const ContainerComponent = this.shouldFullScreen() ? Portal : Div;
+    const Container = this.shouldFullScreen() ? Portal : Div;
     const { readOnly } = this.state;
     const { Provider, store } = this;
     return (
       <Provider store={store}>
-        <ContainerComponent>
+        <Container>
           {readOnly ? null : this.renderToolbar()}
           {this.renderEditor()}
-        </ContainerComponent>
+        </Container>
       </Provider>
     );
   }

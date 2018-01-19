@@ -2,86 +2,18 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import _cloneDeep from "lodash/cloneDeep";
-import _debounce from "lodash/debounce";
 
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import {
-  cyan500,
-  cyan700,
-  grey100,
-  grey300,
-  grey400,
-  grey500,
-  white,
-  darkBlack,
-  fullBlack
-} from "material-ui/styles/colors";
-import { fade } from "material-ui/utils/colorManipulator";
-import getMuiTheme from "material-ui/styles/getMuiTheme";
+import { memorizedGetMuiTheme } from "./styles/getMuiTheme";
+
+import _debounce from "lodash/debounce";
 
 import { getUserAgent } from "../UserAgent/UserAgentReducer";
 import { getUI } from "./MyAppReducer";
 import Header from "./components/Header";
+import AppBottomNavigation from "./components/AppBottomNavigation";
 import spacing from "material-ui/styles/spacing";
 import ErrorSnackbar from "../Error/components/ErrorSnackbar";
-
-// FIXME
-//   getMuiTheme will overide something make responsive theme not work
-// so that use _cloneDeep.
-const defaultMuiTheme = _cloneDeep(
-  getMuiTheme({
-    fontFamily:
-      '"Noto Sans TC", "Helvetica Neue", "Calibri Light", Roboto, sans-serif, sans-serif'
-  })
-);
-
-const desktopMuiTheme = _cloneDeep(
-  getMuiTheme(_cloneDeep(defaultMuiTheme), {
-    appBar: {
-      color: white,
-      textColor: darkBlack
-    },
-    drawer: {
-      color: "#FAFAFA"
-    },
-    tabs: {
-      backgroundColor: white,
-      textColor: fade(darkBlack, 0.45),
-      selectedTextColor: darkBlack
-    },
-    inkBar: {
-      backgroundColor: "#6E6E6E"
-    },
-    palette: {
-      primary1Color: cyan500,
-      primary2Color: cyan700,
-      primary3Color: grey400,
-      accent2Color: grey100,
-      accent3Color: grey500,
-      textColor: darkBlack,
-      alternateTextColor: white,
-      canvasColor: white,
-      borderColor: grey300,
-      disabledColor: fade(darkBlack, 0.3),
-      pickerHeaderColor: cyan500,
-      clockCircleColor: fade(darkBlack, 0.07),
-      shadowColor: fullBlack
-    },
-    zIndex: {
-      menu: 1000,
-      drawerOverlay: 1200,
-      drawer: 1300,
-      appBar: 1301,
-      dialogOverlay: 1400,
-      dialog: 1500,
-      layer: 2000,
-      popover: 2100,
-      snackbar: 2900,
-      tooltip: 3000
-    }
-  })
-);
 
 export function getStyles(browser, drawerOpen) {
   const styles = {
@@ -120,7 +52,6 @@ export function getStyles(browser, drawerOpen) {
   styles.disableRoot.paddingTop = -1 * styles.root.paddingTop;
   return styles;
 }
-
 // TODO
 // implement pull to refresh feature
 // https://github.com/bryaneaton13/react-pull-to-refresh
@@ -129,7 +60,8 @@ class MyApp extends React.Component {
     super(props);
     this.state = {
       drawerOpen: !props.browser.lessThan.medium,
-      appBarZDepth: 0
+      appBarZDepth: 0,
+      isOffline: false
     };
   }
 
@@ -142,6 +74,10 @@ class MyApp extends React.Component {
       ]);
       document.body.style.backgroundColor = backgroundColor;
     }
+    if (typeof window === "object") {
+      window.addEventListener("online", this.handleOnline);
+      window.addEventListener("offline", this.handleOffline);
+    }
   }
 
   componentWillUnmount() {
@@ -150,6 +86,10 @@ class MyApp extends React.Component {
     }
     if (this._debouncedChildrenContainerScroll) {
       this._debouncedChildrenContainerScroll.cancel();
+    }
+    if (typeof window === "object") {
+      window.removeEventListener("online", this.handleOnline);
+      window.removeEventListener("offline", this.handleOffline);
     }
   }
 
@@ -186,15 +126,23 @@ class MyApp extends React.Component {
     ];
   };
 
-  _getMuiTheme = () => {
+  getMuiTheme = () => {
     const { userAgent, browser } = this.props;
-    let muiTheme;
-    if (browser.lessThan.medium) {
-      muiTheme = defaultMuiTheme;
-    } else {
-      muiTheme = desktopMuiTheme;
+    const { isOffline } = this.state;
+    const isMobileSize = browser.lessThan.medium;
+    return memorizedGetMuiTheme(userAgent, { isMobileSize, isOffline });
+  };
+
+  handleOnline = () => {
+    if (this.state.isOffline) {
+      this.setState({ isOffline: false });
     }
-    return getMuiTheme(muiTheme, { userAgent });
+  };
+
+  handleOffline = () => {
+    if (!this.state.isOffline) {
+      this.setState({ isOffline: true });
+    }
   };
 
   handleChangeDrawerOpen = drawerOpen => {
@@ -229,7 +177,7 @@ class MyApp extends React.Component {
 
   render() {
     const styles = getStyles(this.props.browser, this.state.drawerOpen);
-    const muiTheme = this._getMuiTheme();
+    const muiTheme = this.getMuiTheme();
     const meta = this.getHeadMeta();
     const headerTitle = this.props.ui.get("headerTitle");
     return (
@@ -237,6 +185,7 @@ class MyApp extends React.Component {
         <Helmet titleTemplate="%s - Tiamat 電玩論壇" meta={meta} />
         <MuiThemeProvider muiTheme={muiTheme}>
           <div>
+            <AppBottomNavigation />
             <Header
               title={headerTitle}
               appBarStyle={styles.appBar}

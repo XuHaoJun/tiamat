@@ -23,7 +23,7 @@ export function getSemanticRules(req, res) {
             rootWikiId: wiki.rootWiki,
             wikiId: wiki._id,
             name: wiki.name,
-            href: `/rootWikis/${wiki.rootWiki}/wikis/${wiki._id}`,
+            href: `/wikis/${wiki._id}`,
             updatedAt: wiki.updatedAt
           };
           return semanticRule;

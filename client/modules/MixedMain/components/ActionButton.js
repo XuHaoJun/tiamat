@@ -68,8 +68,8 @@ class ActionButton extends React.PureComponent {
     }
     const _style = {
       position: "fixed",
-      bottom: 20,
-      right: 20
+      bottom: 60,
+      right: 10
     };
     const finalStyle = Object.assign(_style, style || {});
     if (

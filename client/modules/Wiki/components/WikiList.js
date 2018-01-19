@@ -84,13 +84,18 @@ class WikiList extends React.Component {
     return -1 * new Date(payload.get("updatedAt")).getTime();
   };
 
-  listItemHref = payload => {
-    return `/wikis/${payload.get("_id")}`;
+  listItemHref = wiki => {
+    const { _id, rootWiki, name } = wiki;
+    if (rootWiki && name) {
+      return `/rootWikis/${rootWiki}/wikis/${encodeURIComponent(name)}`;
+    } else {
+      return `/wikis/${_id}`;
+    }
   };
 
   listItemSecondaryText = payload => {
     const fromNowTime = moment(payload.get("updatedAt")).fromNow();
-    return `${fromNowTime}(應該還要顯示分類訊息)`;
+    return `${fromNowTime}(顯示分類訊息...)`;
   };
 
   listItemLeftAvatar = payload => {

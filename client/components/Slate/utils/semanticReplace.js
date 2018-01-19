@@ -16,17 +16,16 @@ export const exampleSemanticRules = fromJS([
     },
     getHref: (rule, node) => {
       const data = rule.get("data");
-      const rootWikiId = data.get("rootWikiId");
       const wikiId = data.get("wikiId");
-      return `/rootWikis/${rootWikiId}/wikis/${wikiId}`;
+      return `/wikis/${wikiId}`;
     }
   }
 ]);
 
-function semanticReplace(state, semanticRules) {
-  debug("start", state, semanticRules);
-  const change = state.change();
-  const { document } = state;
+function semanticReplace(value, semanticRules) {
+  debug("start", value, semanticRules);
+  const change = value.change();
+  const { document } = value;
   const startNode = document;
   if (!semanticRules || semanticRules.count() === 0) {
     return change;
@@ -92,5 +91,7 @@ function semanticReplace(state, semanticRules) {
   debug("end", change);
   return change;
 }
+
+export const semanticReplaceWithoutMemorize = semanticReplace;
 
 export default memoize(semanticReplace, createFastMemoizeDefaultOptions(2));

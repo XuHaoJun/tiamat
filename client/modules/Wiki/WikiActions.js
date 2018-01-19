@@ -20,15 +20,27 @@ export function setUIWikiForm(form) {
   return { type: SET_UI_WIKI_FORM, form };
 }
 
-export function fetchWiki(id) {
+export function fetchWiki(id, rootWikiId = null) {
   return dispatch => {
-    return callApi(`wikis/${id}`)
+    const uri = rootWikiId
+      ? `rootWikis/${rootWikiId}/wikis/${encodeURIComponent(id)}`
+      : `wikis/${id}`;
+    return callApi(uri)
       .then(res => {
         dispatch(addWiki(res.wiki));
         return res.wiki;
       })
       .catch(err => defaultRequestCatchHandler(dispatch, err));
   };
+}
+
+export function fetchWikiByRouterProps(routerProps) {
+  const { wikiId, wikiName, rootWikiId } = routerProps.params;
+  if (rootWikiId) {
+    return fetchWiki(wikiName, rootWikiId);
+  } else {
+    return fetchWiki(wikiId);
+  }
 }
 
 export function fetchWikis(

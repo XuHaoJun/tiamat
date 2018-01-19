@@ -17,7 +17,12 @@ import App from "./App";
 import { configureStore } from "./store";
 import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
 import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
-import { connectDB, initWithStore, initAccessToken } from "./localdb";
+import {
+  loadDBLib,
+  connectDB,
+  initWithStore,
+  initAccessToken
+} from "./localdb";
 import { setSocket } from "./modules/Socket/SocketActions";
 import googleAnalyticsConfig from "../server/configs/googleAnalytics";
 import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
@@ -102,6 +107,8 @@ function injectTapEventPluginHelper() {
 }
 injectTapEventPluginHelper();
 
+const loadingDBLib = loadDBLib();
+
 const mountElementId = "root";
 const mountApp = document.getElementById(mountElementId);
 debug(`mount application element id: ${mountElementId}`);
@@ -126,17 +133,19 @@ Loadable.preloadReady().then(() => {
       // db init
       // must after hydrate because have user(access Token) for logIn, some ui data for restore
       // will hydrate fail if init db before hydrate.
-      const db = connectDB();
-      if (db) {
-        const initsP = initWithStore(db, store);
-        Promise.all(initsP)
-          .then(() => {
-            store.dispatch(setDBisInitialized(null, true));
-          })
-          .catch(err => {
-            store.dispatch(setDBisInitialized(err));
-          });
-      }
+      loadingDBLib.then(() => {
+        const db = connectDB();
+        if (db) {
+          const initPs = initWithStore(db, store);
+          Promise.all(initPs)
+            .then(() => {
+              store.dispatch(setDBisInitialized(null, true));
+            })
+            .catch(err => {
+              store.dispatch(setDBisInitialized(err, false));
+            });
+        }
+      });
     }
   );
 });

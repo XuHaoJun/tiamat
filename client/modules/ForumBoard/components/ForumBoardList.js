@@ -43,7 +43,9 @@ class ForumBoardList extends React.Component {
         debug("onRequestLoadMore end1");
         const currentDataSource = this.props.dataSource;
         const nextState = {};
-        const changed = !is(prevDataSource, currentDataSource);
+        const changed =
+          currentDataSource.count() > 0 &&
+          !is(prevDataSource, currentDataSource);
         if (changed) {
           nextState.enableLoadMore = true;
           nextState.page = nextPage;
@@ -81,7 +83,6 @@ class ForumBoardList extends React.Component {
       <CommonList
         dataSource={dataSource}
         enableLoadMore={enableLoadMore}
-        enableRefreshIndicator={true}
         listItemHref={this.listItemHref}
         listItemLeftAvatar={this.listItemLeftAvatar}
         listItemSecondaryText={this.listItemSecondaryText}
@@ -91,8 +92,8 @@ class ForumBoardList extends React.Component {
   }
 }
 
-function mapStateToProps(store) {
-  const forumBoards = getForumBoards(store);
+function mapStateToProps(state) {
+  const forumBoards = getForumBoards(state);
   return { dataSource: forumBoards };
 }
 

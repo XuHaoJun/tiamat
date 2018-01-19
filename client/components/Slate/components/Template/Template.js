@@ -1,13 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
-import { fromJS } from "immutable";
+import { Map } from "immutable";
 
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 
+import { getModule } from "../../../../modules/Template/TemplateReducer";
 import AceEditor from "../../../AceEditor";
-import { compile } from "../../../../modules/Template/TemplateActions";
-import { getCaches } from "../../../../modules/Template/TemplateReducer";
 import UpsertTemplateTabs from "./components/UpsertTemplateTabs";
 
 class Template extends React.Component {
@@ -20,30 +19,29 @@ class Template extends React.Component {
     this.setState({ code: nextCode });
   };
 
-  compile = template => {
-    const { caches } = this.props;
-    return this.props.appDispatch(compile(template, { caches }));
-  };
-
   handleSave = () => {
     this.setState({ open: false });
     const { editor, node } = this.props;
-    const { key } = node;
-    const oldData = node.data;
+    const { key, data } = node;
+    const oldData = data;
     const oldTemplateData = oldData.get("template");
-    const templateData = fromJS({
-      code: this.state.code
-    });
-    const nextTemplateData = oldTemplateData
-      ? oldTemplateData.merge(templateData)
-      : fromJS({ template: templateData });
-    const nextData = oldData.merge(nextTemplateData);
-    editor.change(change => {
-      return change.setNodeByKey(key, {
-        data: nextData
+    if (oldTemplateData) {
+      const updateTemplateData = Map({
+        code: this.state.code,
+        updatedAt: Date.now()
       });
-    });
-    // this.compile(nextData);
+      const nextTemplateData = oldTemplateData.merge(updateTemplateData);
+      const nextData = oldData.merge(Map({ template: nextTemplateData }));
+      editor.change(change => {
+        return change.setNodeByKey(key, {
+          data: nextData
+        });
+      });
+    } else {
+      // TODO
+      // template node must have template data.
+      // console.warn(`template ${key} no data!`);
+    }
     if (this.props.onSave) {
       this.props.onSave(this.state.code, this);
     }
@@ -61,12 +59,11 @@ class Template extends React.Component {
     // TODO
     // get enableTemplatePlaceholder from redux state.
     const editorReadOnly = this.props.editor.props.readOnly;
-    const { node } = this.props;
-    const Component = node.get("Component");
+    const { module } = this.props;
+    const Component = module ? module.get("instance").default : null;
     if (editorReadOnly && !Component) {
-      return <span {...this.props.attributes}>Loading...</span>;
-    }
-    if (Component) {
+      return <span {...this.props.attributes}>Template Loading...</span>;
+    } else if (Component) {
       return <Component {...this.props.attributes} />;
     } else {
       // this.compile().then(({ module }) => {
@@ -149,9 +146,11 @@ export const connectEditorHelper = (editorConnect, NextTemplate) => {
 };
 
 const ConnectedWithApp = connect(
-  state => {
-    const caches = getCaches(state);
-    return { caches };
+  (state, props) => {
+    const { node } = props;
+    const template = node.data.get("template");
+    const module = getModule(state, template);
+    return { module };
   },
   null,
   (stateProps, dispatchProps, ownProps) => {

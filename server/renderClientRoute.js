@@ -3,12 +3,14 @@ import React from "react";
 import Helmet from "react-helmet";
 import { setKeyGenerator } from "slate";
 import serializeJavascript from "serialize-javascript";
-import { renderToNodeStream } from "react-dom/server";
+import { renderToNodeStream, renderToString } from "react-dom/server";
 import { match, RouterContext } from "react-router";
 import moment from "moment";
 import { Provider } from "react-redux";
+
 import IntlWrapper from "../client/modules/Intl/IntlWrapper";
 import clientRoutes from "../client/routes";
+import { clearTemplateCaches } from "../client/modules/Template/TemplateActions";
 import { setUserAgent } from "../client/modules/UserAgent/UserAgentActions";
 import { setOauth2Client } from "../client/modules/Oauth2Client/Oauth2ClientActions";
 import googleAnalyticsConfig from "./configs/googleAnalytics";
@@ -18,7 +20,7 @@ import { fetchComponentData } from "./util/fetchData";
 import appConfig from "./configs";
 import Oauth2Client from "./models/oauth2Client";
 
-export function renderHead() {
+export function renderHead(...other) {
   const head = Helmet.rewind();
   // Import Manifests
   const assetsManifest =
@@ -74,8 +76,17 @@ export function renderHead() {
             }
           })();
         </script>
+        ${other.join()}
       </head>
   `;
+}
+
+function safeStringify(state) {
+  // use serializeJavascript for prevent XSS attack, don't remove it.
+  const safeInitState = serializeJavascript(state, {
+    isJSON: true
+  });
+  return safeInitState;
 }
 
 export function renderScripts(initialState) {
@@ -91,17 +102,17 @@ export function renderScripts(initialState) {
   if (process.env.NODE_ENV === "production" && !chunkManifest) {
     throw new Error("chunkManifest is required.");
   }
-  // use serializeJavascript for prevent XSS attack, don't remove it.
-  const rawInitState = serializeJavascript(initialState, {
-    isJSON: true
-  });
+  const initialStateString =
+    typeof initialState === "string"
+      ? initialState
+      : safeStringify(initialState);
   return `
         <script>
-          window.__INITIAL_STATE__ = ${rawInitState};
+          window.__INITIAL_STATE__ = ${initialStateString};
           ${
             process.env.NODE_ENV === "production"
               ? `//<![CDATA[
-          window.webpackManifest = ${JSON.stringify(chunkManifest)};
+          window.webpackManifest = ${safeStringify(chunkManifest)};
           //]]>`
               : ""
           }
@@ -111,7 +122,7 @@ export function renderScripts(initialState) {
             ? assetsManifest["/vendor.js"]
             : "/vendor.js"
         }'></script>
-        <script defer src='${
+        <script src='${
           process.env.NODE_ENV === "production"
             ? assetsManifest["/app.js"]
             : "/app.js"
@@ -187,28 +198,50 @@ export function renderClientRoute(req, res, next) {
         const { clientID } = appConfig.oauth2.facebook;
         store.dispatch(setOauth2Client({ clientID }, "facebook"));
       }
-      return fetchComponentData(
+
+      await fetchComponentData({
         store,
-        renderProps.components,
-        renderProps.params,
-        renderProps.location.query,
-        renderProps.routes,
-        renderProps
-      )
-        .then(() => {
-          res.set("Content-Type", "text/html").status(200);
-          res.write("<!doctype html><html>");
-          res.write(renderHead());
-          res.write("<body>");
-          res.write('<div id="root">');
-          let n = 0;
-          setKeyGenerator(() => {
-            n += 1;
-            return `${n}`;
-          });
-          // TODO
-          // locale by request langa.
-          moment.locale(store.getState().intl.locale);
+        components: renderProps.components,
+        params: renderProps.params,
+        query: renderProps.location.query,
+        location: renderProps.location,
+        routes: renderProps.routes,
+        routerProps: renderProps,
+        serverRequest: req
+      });
+
+      try {
+        res.set("Content-Type", "text/html").status(200);
+        res.write("<!doctype html><html>");
+        res.write(renderHead());
+        res.write("<body>");
+        res.write('<div id="root">');
+        let n = 0;
+        setKeyGenerator(() => {
+          n += 1;
+          return `${n}`;
+        });
+        // TODO
+        // locale by request lang.
+        moment.locale(store.getState().intl.locale);
+        if (appConfig.react.domOutput === "string") {
+          const body = renderToString(
+            <Provider store={store}>
+              <IntlWrapper>
+                <RouterContext {...renderProps} />
+              </IntlWrapper>
+            </Provider>
+          );
+          res.write(body);
+          res.write("</div>");
+          // don't send template caches.
+          store.dispatch(clearTemplateCaches());
+          // send state
+          const stateString = safeStringify(store.getState());
+          res.write(renderScripts(stateString));
+          res.write("</body></html>");
+          res.end();
+        } else {
           const stream = renderToNodeStream(
             <Provider store={store}>
               <IntlWrapper>
@@ -222,15 +255,20 @@ export function renderClientRoute(req, res, next) {
           stream.pipe(res, { end: false });
           stream.on("end", () => {
             res.write("</div>");
-            const finalState = store.getState();
-            res.write(renderScripts(finalState));
+            // don't send template caches.
+            store.dispatch(clearTemplateCaches());
+            // send state
+            const stateString = safeStringify(store.getState());
+            res.write(renderScripts(stateString));
             res.write("</body></html>");
             res.end();
           });
-        })
-        .catch(error => {
-          next(error);
-        });
+        }
+        return Promise.resolve(null);
+      } catch (_err) {
+        next(_err);
+        return Promise.resolve(null);
+      }
     }
   );
 }

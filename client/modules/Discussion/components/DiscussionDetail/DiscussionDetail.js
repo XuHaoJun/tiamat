@@ -99,6 +99,7 @@ class DiscussionDetail extends React.Component {
                 const dividerKey = `divider-${i}`;
                 return [
                   <DiscussionNode
+                    onSemanticToggle={this.props.onSemanticToggle}
                     semanticReplaceMode={semanticReplaceMode}
                     discussion={d}
                     semanticRules={semanticRules}

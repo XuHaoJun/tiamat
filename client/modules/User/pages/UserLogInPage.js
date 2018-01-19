@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
@@ -35,12 +35,17 @@ class UserLoginPage extends Component {
     router: PropTypes.object.isRequired
   };
 
-  componentWillMount() {
-    this.props.dispatch(setHeaderTitle("登入"));
+  static getInitialAction() {
+    return setHeaderTitle("登入");
   }
 
   componentDidMount() {
     this.goBackIfLoggedIn();
+    this.props.dispatch(UserLoginPage.getInitialAction());
+  }
+
+  componentWillReceiveProps() {
+    this.props.dispatch(UserLoginPage.getInitialAction());
   }
 
   componentDidUpdate() {
@@ -79,10 +84,6 @@ class UserLoginPage extends Component {
     );
   }
 }
-
-UserLoginPage.need = [].concat(() => {
-  return setHeaderTitleThunk("登入");
-});
 
 function mapStateToProps(state, routerProps) {
   const { browser } = state;

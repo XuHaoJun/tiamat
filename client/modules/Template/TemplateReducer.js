@@ -1,20 +1,27 @@
 import {
   ADD_TEMPLATE,
   ADD_TEMPLATES,
-  ADD_TEMPLATE_CACHES
+  ADD_TEMPLATE_CACHES,
+  CLEAR_TEMPLATE_CACHES
 } from "./TemplateActions";
-import { Map, is, List, Set, fromJS } from "immutable";
+import { is, List, Set, Map, fromJS } from "immutable";
 import getModuleId from "./utils/getModuleId";
+import { globalCaches } from "./utils/compile";
 
 // Initial State
 const initialState = fromJS({
   data: Set(),
-  caches: Map()
+  caches: globalCaches
 });
 
 const TemplateReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CLEAR_TEMPLATE_CACHES:
+      globalCaches.clear();
+      return state.set("caches", globalCaches);
     case ADD_TEMPLATE_CACHES:
+      // TODO
+      // limit caches size
       const { caches } = action;
       const currentCaches = state.get("caches");
       if (is(caches, currentCaches)) {
@@ -55,8 +62,8 @@ export const getCaches = state => {
   return state.template.get("caches");
 };
 
-export const getModule = (state, rootWiki, name) => {
-  return state.template.get("caches").get(getModuleId(rootWiki, name));
+export const getModule = (state, template) => {
+  return state.template.get("caches").get(getModuleId(template));
 };
 
 export default TemplateReducer;

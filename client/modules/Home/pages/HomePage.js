@@ -1,7 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { is } from "immutable";
 import Helmet from "react-helmet";
+
 import HomeTabs, {
   HOME_SLIDE,
   SLIDE_COUNT,
@@ -11,21 +13,20 @@ import HomeTabs, {
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchForumBoards } from "../../ForumBoard/ForumBoardActions";
 
-export function getStyles(browser) {
+export function getStyles(context, browser) {
+  const tabHeight = 48;
+  const appBarHeight = context.muiTheme.appBar.height;
   const styles = {
     slideContainer: {
-      height: "calc(100vh - 112px)",
+      height: `calc(100vh - ${tabHeight + appBarHeight}px)`,
       WebkitOverflowScrolling: "touch"
     },
     swipeableViews: {},
-    swipeableViewsWithMedium: {
-      paddingTop: 48
-    },
+    swipeableViewsWithMedium: {},
     tabs: {},
     tabsWithMedium: {
-      zIndex: 1,
-      position: "fixed",
-      width: "100%"
+      // position: "fixed",
+      // width: "100%"
     }
   };
   if (browser.lessThan.medium) {
@@ -37,11 +38,12 @@ export function getStyles(browser) {
 
 class HomePage extends React.Component {
   static propTypes = {
-    browser: PropTypes.object.isRequired
+    browser: PropTypes.object.isRequired,
+    title: PropTypes.string
   };
 
   static defaultProps = {
-    title: "Tiamat"
+    title: "首頁"
   };
 
   static contextTypes = {
@@ -49,10 +51,30 @@ class HomePage extends React.Component {
     router: PropTypes.object.isRequired
   };
 
-  componentWillMount() {
-    const { title } = this.props;
-    this.props.dispatch(setHeaderTitle(title));
+  static getInitialAction() {
+    return dispatch => {
+      dispatch(setHeaderTitle(HomePage.defaultProps.title));
+      return dispatch(fetchForumBoards());
+    };
   }
+
+  componentDidMount() {
+    this.fetchComponentData();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!is(this.props, nextProps)) {
+      this.fetchComponentData(nextProps);
+    }
+  }
+
+  fetchComponentData = (props = this.props) => {
+    if (props.fetchComponentData) {
+      return props.fetchComponentData();
+    } else {
+      return null;
+    }
+  };
 
   handleTransitionEnd = slideIndex => {
     if (slideIndex === HOME_SLIDE) {
@@ -65,7 +87,7 @@ class HomePage extends React.Component {
 
   render() {
     const { title } = this.props;
-    const styles = getStyles(this.props.browser);
+    const styles = getStyles(this.context, this.props.browser);
     const metaDescription = "Tiamat | Game forum and wiki.";
     const meta = [
       {
@@ -91,10 +113,6 @@ class HomePage extends React.Component {
   }
 }
 
-HomePage.need = [].concat(() => {
-  return fetchForumBoards();
-});
-
 function mapStateToProps(state, routerProps) {
   const { location } = routerProps;
   const { browser } = state;
@@ -112,4 +130,13 @@ function mapStateToProps(state, routerProps) {
   return { browser, location, slideIndex };
 }
 
-export default connect(mapStateToProps)(HomePage);
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchComponentData() {
+      const action = HomePage.getInitialAction();
+      return dispatch(action);
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

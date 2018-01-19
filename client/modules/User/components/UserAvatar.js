@@ -1,6 +1,7 @@
 import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import randomColor from "randomcolor";
+import LazyLoad from "react-lazyload";
 
 import Avatar from "material-ui/Avatar";
 import GuestPersonIcon from "material-ui/svg-icons/social/person";
@@ -32,27 +33,51 @@ function getTextOrSrcOrIcon(user) {
 }
 
 class UserAvatar extends React.Component {
+  static defaultProps = {
+    user: null,
+    enableLazyLoad: true
+  };
+
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate;
   }
 
+  getAvatarProps = () => {
+    const { user, enableLazyLoad, ...other } = this.props;
+    return other;
+  };
+
+  renderByText = (text, user = this.props.user) => {
+    const other = this.getAvatarProps();
+    const { _id } = user;
+    const backgroundColor = randomColor({
+      luminosity: "dark",
+      seed: _id || text
+    });
+    return (
+      <Avatar backgroundColor={backgroundColor} {...other}>
+        {text}
+      </Avatar>
+    );
+  };
+
   render() {
-    const { user, ...other } = this.props;
+    const { user, enableLazyLoad, ...other } = this.props;
     const { text, src, icon } = getTextOrSrcOrIcon(user);
     if (src) {
-      return <Avatar src={src} {...other} />;
+      if (enableLazyLoad) {
+        const placeholder = <Avatar icon={<GuestPersonIcon />} {...other} />;
+        return (
+          <LazyLoad height={32} once={true} placeholder={placeholder}>
+            <Avatar src={src} {...other} />
+          </LazyLoad>
+        );
+      } else {
+        return <Avatar src={src} {...other} />;
+      }
     } else if (text) {
-      const { _id } = user;
-      const backgroundColor = randomColor({
-        luminosity: "dark",
-        seed: _id || text
-      });
-      return (
-        <Avatar backgroundColor={backgroundColor} {...other}>
-          {text}
-        </Avatar>
-      );
+      return this.renderByText(text, user);
     } else if (icon) {
       return <Avatar icon={icon} {...other} />;
     } else {

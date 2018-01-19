@@ -22,6 +22,11 @@ export const DiscussionDetailPage = Loadable({
     import(/* webpackChunkName: "DiscussionDetailPage" */ "./modules/Discussion/pages/DiscussionDetailPage"),
   loading: Loading
 });
+export const WhatsHotDiscussionsPage = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "WhatsHotDiscussionsPage" */ "./modules/Discussion/pages/WhatsHotDiscussionsPage"),
+  loading: Loading
+});
 export const EditRootWikiGroupTreePage = Loadable({
   loader: () =>
     import(/* webpackChunkName: "EditRootWikiGroupTreePage" */ "./modules/RootWiki/pages/EditRootWikiGroupTreePage"),
@@ -131,6 +136,7 @@ if (process.env.NODE_ENV !== "production") {
   require("./modules/MixedMain/pages/MixedMainPage");
   require("./modules/Discussion/pages/UpsertDiscussionPage");
   require("./modules/Discussion/pages/DiscussionDetailPage");
+  require("./modules/Discussion/pages/WhatsHotDiscussionsPage");
   require("./modules/Setting/pages/SettingDetailPage");
   require("./modules/Error/pages/NotFoundPage");
   require("./modules/RootWiki/pages/EditRootWikiGroupTreePage");
@@ -148,6 +154,7 @@ export default (
       path="/rootDiscussions/:parentDiscussionId"
       component={DiscussionDetailPage}
     />
+    <Route path="/whatsHotDiscussions" component={WhatsHotDiscussionsPage} />
     <Route
       path="/rootWikis/:rootWikiId/dashboard"
       component={RootWikiDashboardPage}
@@ -169,6 +176,10 @@ export default (
     />
     <Route path="/wikis/:wikiId" component={WikiDetailPage} />
     <Route
+      path="/rootWikis/:rootWikiId/wikis/:wikiName"
+      component={WikiDetailPage}
+    />
+    <Route
       path="/rootWikis/:rootWikiId/wikis/:wikiId"
       component={WikiDetailPage}
     />
@@ -187,12 +198,6 @@ export default (
       component={UpsertRootWikiGroupTreePage}
     />
     <Route
-      path="/create/forumBoards/:forumBoardId/rootDiscussion"
-      component={UpsertDiscussionPage}
-      actionType="create"
-      targetKind="rootDiscussion"
-    />
-    <Route
       path="/create/rootWikis/:rootWikiId/wikiDataForm"
       component={UpsertWikiDataFormPage}
       actionType="create"
@@ -207,6 +212,12 @@ export default (
       path="/update/wikiDataForms/:wikiDataFormId"
       component={UpsertWikiDataFormPage}
       actionType="update"
+    />
+    <Route
+      path="/create/forumBoards/:forumBoardId/rootDiscussion"
+      component={UpsertDiscussionPage}
+      actionType="create"
+      targetKind="rootDiscussion"
     />
     <Route
       path="/create/rootDiscussions/:parentDiscussionId/childDiscussion"

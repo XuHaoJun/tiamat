@@ -2,7 +2,11 @@ import _findIndex from "lodash/findIndex";
 import { LOCATION_CHANGE } from "react-router-redux";
 
 import { connectDB } from "../../localdb";
-import { SET_HISTORY_STATE, SET_HISTORY_CURSOR } from "./HistoryActions";
+import {
+  SET_HISTORY_STATE,
+  SET_HISTORY_CURSOR,
+  CLEAR_HISTORY_BY_CURSOR
+} from "./HistoryActions";
 
 const initialState = {
   prevCursor: "/",
@@ -46,14 +50,25 @@ function equal(l1, l2) {
 }
 
 function limitStack(stack) {
-  if (stack.length > 100) {
-    stack.slice(-20, -1);
+  if (stack.length > 30) {
+    stack.slice(-5, -1);
   }
   return stack;
 }
 
 const _HistoryReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CLEAR_HISTORY_BY_CURSOR: {
+      const { stacks } = state;
+      const { cursor } = action;
+      const stack = stacks[cursor];
+      if (stack && stack.length > 0) {
+        stacks[cursor] = [];
+        return { ...state };
+      } else {
+        return state;
+      }
+    }
     case SET_HISTORY_STATE: {
       return action.state || state;
     }
@@ -182,7 +197,9 @@ const _HistoryReducer = (state = initialState, action) => {
 const HistoryReducer = (state = initialState, action) => {
   const nextState = _HistoryReducer(state, action);
   const db = connectDB();
-  save(db, nextState);
+  if (state !== nextState) {
+    save(db, nextState);
+  }
   return nextState;
 };
 

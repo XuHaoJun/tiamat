@@ -130,8 +130,11 @@ class NavList extends React.Component {
             onClick={this.preventDefault}
             onTouchTap={this.handleTouchTap.bind(this, "/")}
           />
+          <ListItem primaryText="熱門討論" />
+          <ListItem primaryText="聊天室" />
+          <Divider />
           <ListItem
-            primaryText="我的文章(尚未完成)"
+            primaryText="我的文章"
             leftIcon={<GuestPersonIcon />}
             value="/users/guest/discussions"
             href="/users/guest/discussions"
@@ -142,7 +145,7 @@ class NavList extends React.Component {
             )}
           />
           <ListItem
-            primaryText="我的訂閱(尚未完成)"
+            primaryText="訂閱內容"
             leftIcon={<WatchIcon />}
             value="/users/guest/discussions"
             href="/users/guest/discussions"
@@ -155,7 +158,7 @@ class NavList extends React.Component {
           <Divider />
           <Subheader>瀏覽</Subheader>
           <ListItem
-            primaryText="看板(尚未完成)"
+            primaryText="看板"
             leftIcon={<ForumBoardIcon />}
             value="/forumBoards"
             href="/forumBoards"
@@ -163,7 +166,7 @@ class NavList extends React.Component {
             onTouchTap={this.handleTouchTap.bind(this, "/forumBoards")}
           />
           <ListItem
-            primaryText="維基(尚未完成)"
+            primaryText="維基"
             leftIcon={<WikiIcon />}
             value="/wikis"
             href="/wikis"

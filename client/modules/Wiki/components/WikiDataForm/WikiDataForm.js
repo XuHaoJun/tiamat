@@ -94,7 +94,11 @@ const schema = {
 };
 
 const _uiSchema = {
-  "ui:order": ["type", "mods", "*"]
+  mods: {
+    items: {
+      "ui:order": ["name", "valueType", "value", "*"]
+    }
+  }
 };
 
 const log = type => console.log.bind(console, type);
