@@ -1,10 +1,12 @@
 import React from "react";
 import _ from "lodash";
-import { connect, createProvider } from "react-redux";
-import editorConnectHelper from "./connect";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { is, Map, List } from "immutable";
 import isUrl from "is-url";
+
+import editorConnectHelper from "./connect";
+import { connect, createProvider } from "react-redux";
+
 import { Block, setKeyGenerator } from "slate";
 
 let n = 0;
@@ -22,7 +24,7 @@ import {
   getEventTransfer,
   getEventRange
 } from "slate-react";
-import { Portal } from "react-portal";
+import Portal from "material-ui-next/Portal";
 
 import { addImageRequest } from "../../modules/Image/ImageActions";
 import { addError } from "../../modules/Error/ErrorActions";

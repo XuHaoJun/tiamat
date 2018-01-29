@@ -4,41 +4,55 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Set, OrderedSet } from "immutable";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import Divider from "material-ui/Divider";
 import memoize from "fast-memoize";
-import { ScrollContainer } from "react-router-scroll";
+import createFastMemoizeDefaultOptions from "../../../../util/createFastMemoizeDefaultOptions";
+
+import ScrollContainer from "../../../../components/ScrollContainer";
+
+import { withStyles } from "material-ui-next/styles";
+import MuiDivider from "material-ui-next/Divider";
+import CenterCircularProgress from "../../../../components/CenterCircularProgress";
+import DiscussionNode from "./DiscussionNode";
+import ReplyButton from "./ReplyButton";
+import slideHeightStyles from "../../../MyApp/styles/slideHeight";
 
 import { getDiscussion, getDiscussions } from "../../DiscussionReducer";
 import { getForumBoardById } from "../../../ForumBoard/ForumBoardReducer";
 import { getSemanticRules } from "../../../SemanticRule/SemanticRuleReducer";
-import CenterCircularProgress from "../../../../components/CenterCircularProgress";
-import createFastMemoizeDefaultOptions from "../../../../util/createFastMemoizeDefaultOptions";
-import DiscussionNode from "./DiscussionNode";
-import ReplyButton from "./ReplyButton";
 
-export function getStyles(propStyles, context) {
-  const appBarHeight = context.muiTheme.appBar.height;
-  const styles = {
-    listContainer: {
-      overflow: "auto",
-      height: `calc(100vh - ${appBarHeight}px)`,
-      WebkitOverflowScrolling: "touch"
+const dividerStyles = theme => {
+  return {
+    default: {
+      backgroundColor: theme.palette.primary.light
     }
   };
-  return Object.assign(styles, propStyles);
+};
+
+const Divider = withStyles(dividerStyles)(MuiDivider);
+
+export function styles(theme) {
+  const heightStyle = slideHeightStyles(theme);
+  return {
+    root: Object.assign(
+      {
+        overflow: "auto"
+      },
+      heightStyle.slideHeight
+    ),
+    list: {
+      height: "100%",
+      overflow: "auto"
+    }
+  };
 }
 
 class DiscussionDetail extends React.Component {
-  static contextTypes = {
-    muiTheme: PropTypes.object.isRequired
-  };
-
   static defaultProps = {
     forumBoardId: "",
-    forumBoard: undefined,
+    forumBoard: null,
     parentDiscussionId: "",
-    parentDiscussion: undefined,
-    childDiscussions: undefined,
+    parentDiscussion: null,
+    childDiscussions: null,
     semanticReplaceMode: false
   };
 
@@ -73,22 +87,18 @@ class DiscussionDetail extends React.Component {
     if (!parentDiscussion) {
       return <CenterCircularProgress />;
     }
-    const { listContainerStyle } = this.props;
-    const propStyles = {
-      listContainerStyle
-    };
-    const styles = getStyles(propStyles, this.context);
     const discussions = OrderedSet()
       .add(parentDiscussion)
       .union(childDiscussions)
       .sortBy(d => {
         return new Date(d.get("updatedAt")).getTime();
       });
+    const { classes } = this.props;
     return (
-      <div>
+      <div className={classes.root}>
         <ScrollContainer scrollKey={parentDiscussionId}>
           <div
-            style={styles.listContainer}
+            className={classes.list}
             onScroll={this.handleScroll}
             ref={ele => {
               this.list = ele;
@@ -118,6 +128,8 @@ class DiscussionDetail extends React.Component {
     );
   }
 }
+
+const Styled = withStyles(styles)(DiscussionDetail);
 
 const getSemanticRulesHelper = (() => {
   let f = (rootWikiId, semanticRules) => {
@@ -151,7 +163,7 @@ function mapStateToProps(store, props) {
     parentDiscussionId,
     getDiscussions(store)
   );
-  const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : undefined;
+  const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : null;
   const semanticRules = rootWikiId
     ? getSemanticRulesHelper(rootWikiId, getSemanticRules(store))
     : Set();
@@ -165,4 +177,4 @@ function mapStateToProps(store, props) {
   };
 }
 
-export default connect(mapStateToProps)(DiscussionDetail);
+export default connect(mapStateToProps)(Styled);

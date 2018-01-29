@@ -1,23 +1,40 @@
 import React from "react";
 import PropTypes from "prop-types";
-import CommonList from "../../../components/List/CommonList";
 import { Set, is, fromJS } from "immutable";
-import { fetchRootDiscussions } from "../DiscussionActions";
-import { getRootDiscussions } from "../DiscussionReducer";
 import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import UserAvatar from "../../User/components/UserAvatar";
 import moment from "moment";
+import { Link } from "react-router";
+
+import { withStyles } from "material-ui-next/styles";
+import List from "../../../components/List/EnhancedList";
+import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
+import UserAvatar from "../../User/components/UserAvatar";
+
+import { fetchRootDiscussions } from "../DiscussionActions";
+import { getRootDiscussions } from "../DiscussionReducer";
+import { getIsFirstRender } from "../../MyApp/MyAppReducer";
+
+const styles = theme => ({
+  root: {
+    backgroundColor: theme.palette.background.paper,
+    width: "100%",
+    height: "100%",
+    overflow: "auto"
+  }
+});
 
 class RootDiscussionList extends React.Component {
   static propTypes = {
     forumBoardId: PropTypes.string,
-    dataSource: PropTypes.object
+    dataSource: PropTypes.object,
+    isFirstRender: PropTypes.bool
   };
 
   static defaultProps = {
     forumBoardId: undefined,
-    dataSource: Set()
+    dataSource: Set(),
+    isFirstRender: false
   };
 
   constructor(props) {
@@ -27,36 +44,34 @@ class RootDiscussionList extends React.Component {
     const pageTable = fromJS({}).merge(pageInfo);
     this.state = {
       pageTable,
-      sort: "-updatedAt",
-      enableLoadMore: true,
-      isFirstRender: true
+      sort: "-updatedAt"
     };
-  }
-
-  componentDidMount() {
-    this.setIsFirstRender(false);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.forumBoardGroup !== nextProps.forumBoardGroup) {
       const nextPageTable = this.state.pageTable.merge(
-        this.makePageInfo(nextProps)
+        this.makePageInfo(nextProps, { page: 1 })
       );
-      this.setState({ enableLoadMore: true, pageTable: nextPageTable }, () => {
-        this.onRequestLoadMore();
+      this.setState({ pageTable: nextPageTable }, () => {
+        this.handleRequestMore("top");
       });
     }
   }
 
-  onRequestLoadMore = () => {
+  getForumBoardGroup = (props = this.props) => {
+    return props.getForumBoardGroup || "_all";
+  };
+
+  handleRequestMore = ({ direction }) => {
     const { pageTable, sort } = this.state;
     const { forumBoardId, forumBoardGroup } = this.props;
     const pageInfo = pageTable.get(this.getForumBoardGroup());
     const { page, limit } = pageInfo;
     if (!forumBoardId) {
-      return null;
+      return Promise.resolve(null);
     }
-    const nextPage = page + 1;
+    const nextPage = direction === "bottom" ? page + 1 : 1;
     const prevDataSource = this.props.dataSource;
     // TODO
     // cancel fetch when componemntWillUnmount
@@ -73,10 +88,10 @@ class RootDiscussionList extends React.Component {
         const currentDataSource = this.props.dataSource;
         if (
           discussionsJSON.length < limit ||
-          currentDataSource.count() === 0 ||
+          prevDataSource.count() === currentDataSource.count() ||
           is(prevDataSource, currentDataSource)
         ) {
-          this.setState({ enableLoadMore: false });
+          return null;
         } else {
           const currentPageTable = this.state.pageTable;
           const nextPageInfo = currentPageTable.get(
@@ -87,21 +102,9 @@ class RootDiscussionList extends React.Component {
             nextPageInfo.set("page", nextPageInfo.get("page") + 1)
           );
           this.setState({ pageTable: nextPageTable });
+          return null;
         }
-      })
-      .catch(() => {
-        this.setState({ enableLoadMore: false });
       });
-  };
-
-  setIsFirstRender = bool => {
-    if (bool !== this.state.isFirstRender) {
-      this.setState({ isFirstRender: bool });
-    }
-  };
-
-  getForumBoardGroup = (props = this.props) => {
-    return props.getForumBoardGroup || "_all";
   };
 
   makePageInfo = (props = this.props) => {
@@ -127,7 +130,7 @@ class RootDiscussionList extends React.Component {
   };
 
   listItemSecondaryText = discussion => {
-    const { isFirstRender } = this.state;
+    const { isFirstRender } = this.props;
     const fromNowTime = isFirstRender
       ? moment(discussion.get("updatedAt")).format("ll")
       : moment(discussion.get("updatedAt")).fromNow();
@@ -141,31 +144,42 @@ class RootDiscussionList extends React.Component {
   };
 
   render() {
-    const { enableLoadMore } = this.state;
-    const { forumBoardId, forumBoardGroup } = this.props;
-    if (forumBoardId === undefined) {
+    const { id, forumBoardId, forumBoardGroup } = this.props;
+    if (!forumBoardId) {
       return <div>Loading...</div>;
     }
     let { dataSource } = this.props;
     if (forumBoardGroup) {
-      dataSource = dataSource.filter(rootDiscussion => {
-        return rootDiscussion.get("forumBoardGroup") === forumBoardGroup;
+      dataSource = dataSource.filter(discussion => {
+        return discussion.get("forumBoardGroup") === forumBoardGroup;
       });
     }
     dataSource = dataSource.sortBy(this.sortBy);
-    const { isFirstRender } = this.state;
-    const listItemSecondaryText = isFirstRender
-      ? this.listItemSecondaryText.bind(this)
-      : this.listItemSecondaryText;
+    const listId = this.props.id || "default";
+    const { classes, isFirstRender } = this.props;
     return (
-      <CommonList
-        dataSource={dataSource}
-        enableLoadMore={enableLoadMore}
-        listItemHref={this.listItemHref}
-        listItemSecondaryText={listItemSecondaryText}
-        listItemLeftAvatar={this.listItemLeftAvatar}
-        onRequestLoadMore={this.onRequestLoadMore}
-      />
+      <List
+        id={id ? `${id}/List` : undefined}
+        onRequestMore={this.handleRequestMore}
+        style={this.props.style}
+        className={classes.root}
+      >
+        {dataSource.map(discussion => {
+          const key = `RootDiscussionList/${listId}/${discussion.get(
+            "_id"
+          )}/isFirstRender/${isFirstRender}`;
+          const to = this.listItemHref(discussion);
+          const avatar = this.listItemLeftAvatar(discussion);
+          const primary = discussion.get("title");
+          const secondary = this.listItemSecondaryText(discussion);
+          return (
+            <ListItem key={key} button component={Link} to={to} divider>
+              <ListItemAvatar>{avatar}</ListItemAvatar>
+              <ListItemText primary={primary} secondary={secondary} />
+            </ListItem>
+          );
+        })}
+      </List>
     );
   }
 }
@@ -179,7 +193,10 @@ function mapStateToProps(store, props) {
   const dataSource = forumBoardId
     ? getRootDiscussions(store, forumBoardId)
     : Set();
-  return { forumBoardId, forumBoardGroup, dataSource };
+  const isFirstRender = getIsFirstRender(store);
+  return { forumBoardId, forumBoardGroup, dataSource, isFirstRender };
 }
 
-export default connect(mapStateToProps)(RootDiscussionList);
+const Styled = withStyles(styles)(RootDiscussionList);
+
+export default connect(mapStateToProps)(Styled);

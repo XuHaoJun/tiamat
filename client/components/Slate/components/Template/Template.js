@@ -2,8 +2,8 @@ import React from "react";
 import { connect } from "react-redux";
 import { Map } from "immutable";
 
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
+import Dialog, { DialogActions, DialogContent } from "material-ui-next/Dialog";
+import Button from "material-ui-next/Button";
 
 import { getModule } from "../../../../modules/Template/TemplateReducer";
 import AceEditor from "../../../AceEditor";
@@ -70,15 +70,6 @@ class Template extends React.Component {
       //   this.setState({ Component: module });
       //   console.log("module", module);
       // });
-      const actions = [
-        <FlatButton label="取消" primary={true} onClick={this.handleClose} />,
-        <FlatButton
-          label="儲存"
-          primary={true}
-          keyboardFocused={true}
-          onClick={this.handleSave}
-        />
-      ];
       return (
         <span // eslint-disable-line
           style={{ cursor: "pointer" }}
@@ -89,25 +80,15 @@ class Template extends React.Component {
         >
           📝
           {this.state.open ? (
-            <Dialog
-              modal={true}
-              actions={actions}
-              open={this.state.open}
-              autoDetectWindowHeight={false}
-              autoScrollBodyContent={false}
-              contentStyle={{
-                height: "70vh",
-                width: "100%",
-                maxWidth: "none"
-              }}
-            >
-              <div
+            <Dialog open={this.state.open} onClose={this.handleClose}>
+              <DialogContent
                 style={{
+                  height: "70vh",
                   display: "flex",
                   justifyContent: "center"
                 }}
               >
-                {/* <SetTemplateTabs/> */}
+                {/* <UpsertTemplateTabs/> */}
                 <AceEditor
                   onChange={this.handleChangeCode}
                   value={this.state.code}
@@ -117,7 +98,13 @@ class Template extends React.Component {
                   height="70vh"
                   width="70vw"
                 />
-              </div>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={this.handleClose}>取消</Button>
+                <Button color="primary" onClick={this.handleSave}>
+                  儲存
+                </Button>
+              </DialogActions>
             </Dialog>
           ) : null}
         </span>

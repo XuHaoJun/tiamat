@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
+import Dialog, { DialogActions, DialogContent } from "material-ui-next/Dialog";
+import Button from "material-ui-next/Button";
 
 import TemplateForm from "./TemplateForm";
 
@@ -46,25 +46,32 @@ class TemplateFormDialog extends React.Component {
   };
 
   render() {
-    const actions = [
-      <FlatButton label="取消" primary={true} onClick={this.handleClose} />,
-      <FlatButton
-        label="儲存"
-        primary={true}
-        keyboardFocused={true}
-        onClick={this.handleLogin}
-      />
-    ];
+    const actions = [];
     const { open } = this.props;
     let { templateProps } = this.props;
     templateProps = templateProps || {};
     return (
-      <Dialog modal={true} actions={actions} open={open}>
-        <div
-          style={{ height: "100%", display: "flex", justifyContent: "center" }}
-        >
-          <TemplateForm ref={this.setFormRef} {...templateProps} />
-        </div>
+      <Dialog disableBackdropClick open={open}>
+        <DialogContent>
+          <div
+            style={{
+              height: "100%",
+              display: "flex",
+              justifyContent: "center"
+            }}
+          >
+            <TemplateForm ref={this.setFormRef} {...templateProps} />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button label="取消" onClick={this.handleClose} />,
+          <Button
+            label="儲存"
+            color="primary"
+            focusRipple={true}
+            onClick={this.handleLogin}
+          />
+        </DialogActions>
       </Dialog>
     );
   }

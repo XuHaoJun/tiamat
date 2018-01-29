@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { Container, Col, Row } from "react-grid-system";
-import { Tabs, Tab } from "material-ui/Tabs";
 
 import exampleData from "../../../Wiki/components/WikiDataForm/HearthStoneSchema.json";
 import WikiDataForm from "../../../Wiki/components/WikiDataForm";

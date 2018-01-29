@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
+import Dialog, { DialogContent, DialogActions } from "material-ui-next/Dialog";
+import Button from "material-ui-next/Button";
 
 import LogInForm from "../LogInForm";
 
@@ -46,25 +46,34 @@ class LoginDialog extends React.Component {
   };
 
   render() {
-    const actions = [
-      <FlatButton label="取消" primary={true} onClick={this.handleClose} />,
-      <FlatButton
-        label="登入"
-        primary={true}
-        keyboardFocused={true}
-        onClick={this.handleLogin}
-      />
-    ];
     const { open } = this.props;
     let { loginFormProps } = this.props;
     loginFormProps = loginFormProps || {};
     return (
-      <Dialog modal={true} actions={actions} open={open}>
-        <div
-          style={{ height: "100%", display: "flex", justifyContent: "center" }}
-        >
-          <LogInForm ref={this.setFormRef} {...loginFormProps} />
-        </div>
+      <Dialog disableBackdropClick open={open} onClose={this.handleClose}>
+        <DialogContent>
+          <div
+            style={{
+              height: "100%",
+              display: "flex",
+              justifyContent: "center"
+            }}
+          >
+            <LogInForm ref={this.setFormRef} {...loginFormProps} />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={this.handleClose}>
+            取消
+          </Button>
+          <Button
+            color="primary"
+            keyboardFocused={true}
+            onClick={this.handleLogin}
+          >
+            登入
+          </Button>
+        </DialogActions>
       </Dialog>
     );
   }

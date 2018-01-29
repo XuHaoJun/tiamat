@@ -1,12 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 import isUrl from "is-url";
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
-import PhotoIcon from "material-ui/svg-icons/image/photo-camera";
-import TextField from "material-ui/TextField";
-import LinearProgress from "material-ui/LinearProgress";
+
+import Button from "material-ui-next/Button";
+import Dialog, {
+  DialogActions,
+  DialogContent,
+  DialogTitle
+} from "material-ui-next/Dialog";
+import PhotoIcon from "material-ui-icons-next/PhotoCamera";
+import TextField from "material-ui-next/TextField";
+import LinearProgress from "material-ui-next/Progress/LinearProgress";
 
 const styles = {
   imgContainer: {
@@ -41,15 +45,13 @@ const styles = {
 class AddImageDialog extends React.PureComponent {
   static propTypes = {
     open: PropTypes.bool.isRequired,
-    title: PropTypes.string.isRequired,
+    title: PropTypes.string,
     sendAddImage: PropTypes.func.isRequired,
     onRequestClose: PropTypes.func
   };
 
   static defaultProps = {
-    open: false,
-    title: "新增圖片",
-    sendAddImage: null,
+    title: "插入圖片",
     onRequestClose: null
   };
 
@@ -213,59 +215,60 @@ class AddImageDialog extends React.PureComponent {
     const { title, open } = this.props;
     const { imageUrl, previewImageUrl, uploading, progressValue } = this.state;
     const confirmDisabled = imageUrl === "";
-    const actions = [
-      <FlatButton label="取消" onTouchTap={this.handleCancel} />,
-      <RaisedButton
-        label="確定"
-        disabled={confirmDisabled}
-        primary={true}
-        onTouchTap={this.handleSubmit}
-      />
-    ];
     return (
-      <Dialog
-        title={title}
-        actions={actions}
-        modal={true}
-        open={open}
-        autoScrollBodyContent={true}
-      >
-        <FlatButton
-          disabled={uploading}
-          label="選擇檔案"
-          labelPosition="before"
-          style={styles.uploadButton}
-          containerElement="label"
-          icon={<PhotoIcon />}
-        >
-          <input
+      <Dialog disableBackdropClick open={open} onClose={this.onRequestClose}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <Button
+            disabled={uploading}
+            style={styles.uploadButton}
+            component="input"
             type="file"
-            style={styles.uploadInput}
             accept="image/*"
             onChange={this.handleFileInputChange}
+          >
+            選擇檔案
+            <PhotoIcon />
+          </Button>
+          <br />
+          <TextField
+            id="image-url-textfield"
+            style={styles.urlTextField}
+            label="圖片網址..."
+            value={this.state.urlTextFieldValue}
+            disabled={uploading}
+            onChange={this.handleUrlTextFieldChange}
+            margin="normal"
           />
-        </FlatButton>
-        <br />
-        <TextField
-          style={styles.urlTextField}
-          floatingLabelText="圖片網址..."
-          value={this.state.urlTextFieldValue}
-          disabled={uploading}
-          onChange={this.handleUrlTextFieldChange}
-        />
-        <div style={styles.imgContainer}>
-          {uploading ? (
-            <LinearProgress
-              mode="determinate"
-              min={0}
-              max={200}
-              value={progressValue}
-            />
-          ) : null}
-          {previewImageUrl ? (
-            <img style={styles.img} src={previewImageUrl} alt="previewImage" />
-          ) : null}
-        </div>
+          <div style={styles.imgContainer}>
+            {uploading ? (
+              <LinearProgress
+                mode="determinate"
+                min={0}
+                max={200}
+                value={progressValue}
+              />
+            ) : null}
+            {previewImageUrl ? (
+              <img
+                style={styles.img}
+                src={previewImageUrl}
+                alt="previewImage"
+              />
+            ) : null}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={this.handleCancel}>取消</Button>
+          <Button
+            raised
+            disabled={confirmDisabled}
+            color="primary"
+            onClick={this.handleSubmit}
+          >
+            確定
+          </Button>
+        </DialogActions>
       </Dialog>
     );
   }

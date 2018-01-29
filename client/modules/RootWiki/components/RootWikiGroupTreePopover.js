@@ -1,12 +1,14 @@
 import React from "react";
-import Paper from "material-ui/Paper";
-import RaisedButton from "material-ui/RaisedButton";
-import Menu from "material-ui/Menu";
-import MenuItem from "material-ui/MenuItem";
-import Popover from "material-ui/Popover";
-import ArrowDropRight from "material-ui/svg-icons/navigation-arrow-drop-right";
-import ArrowDropDown from "material-ui/svg-icons/navigation/arrow-drop-down";
 import { Map, List as ImmutableList, fromJS } from "immutable";
+
+import Button from "material-ui-next/Button";
+import { MenuList } from "material-ui-next/Menu";
+import MenuItem from "../../../components/NestingMenuItem";
+import { ListItemText } from "material-ui-next/List";
+import Popover from "material-ui-next/Popover";
+import ClickAwayListener from "material-ui-next/utils/ClickAwayListener";
+
+import ArrowDropDown from "material-ui-icons-next/KeyboardArrowDown";
 
 const style = {
   display: "inline-block",
@@ -30,20 +32,20 @@ export function getRootWikiGroupTreeMenuItemsHelper(
           .toJS();
       }
       return (
-        <MenuItem
-          value={value}
-          rightIcon={<ArrowDropRight />}
-          key={value}
-          primaryText={k}
-          menuItems={menuItems}
-        />
+        <MenuItem value={value} key={value} menuItems={menuItems}>
+          <ListItemText primary={k} />
+        </MenuItem>
       );
     });
   } else if (ImmutableList.isList(rootWikiGroupTree)) {
     return rootWikiGroupTree
       .map(leaf => {
         const value = `${prefix}${delimiter}${leaf}`;
-        return <MenuItem value={value} key={value} primaryText={leaf} />;
+        return (
+          <MenuItem key={value}>
+            <ListItemText primary={leaf} />
+          </MenuItem>
+        );
       })
       .toJS();
   }
@@ -58,7 +60,7 @@ class RootWikiGroupTreePopover extends React.PureComponent {
     };
   }
 
-  onItemTouchTap = (event, menuItem, index) => {
+  onItemClick = (event, menuItem, index) => {
     event.preventDefault();
   };
 
@@ -68,7 +70,8 @@ class RootWikiGroupTreePopover extends React.PureComponent {
     this.setState({ open: true, anchorEl: event.currentTarget });
   };
 
-  handleRequestClose = reason => {
+  handleClose = reason => {
+    console.log("root close");
     this.setState({ open: false });
   };
 
@@ -97,37 +100,101 @@ class RootWikiGroupTreePopover extends React.PureComponent {
         }
       }
     });
+    // const rootWikiGroupTree = fromJS([
+    //   {
+    //     name: "裝備",
+    //     children: [
+    //       {
+    //         name: "武器",
+    //         children: [
+    //           {
+    //             name: "長劍"
+    //           },
+    //           {
+    //             name: "斧"
+    //           },
+    //           {
+    //             name: "槍"
+    //           }
+    //         ]
+    //       },
+    //       {
+    //         name: "防具",
+    //         children: [
+    //           {
+    //             name: "皮甲"
+    //           },
+    //           {
+    //             name: "重甲"
+    //           }
+    //         ]
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     name: "卡片",
+    //     children: [
+    //       {
+    //         name: "法師"
+    //       },
+    //       {
+    //         name: "盜賊"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     name: "深度測試(一)",
+    //     children: [
+    //       {
+    //         name: "深度測試(二)",
+    //         children: [
+    //           {
+    //             name: "深度測試(三)",
+    //             children: [
+    //               {
+    //                 name: "深度測試(四)",
+    //                 children: [
+    //                   {
+    //                     name: "深度測試(五)",
+    //                     children: [
+    //                       {
+    //                         name: "你看見我了!"
+    //                       }
+    //                     ]
+    //                   }
+    //                 ]
+    //               }
+    //             ]
+    //           }
+    //         ]
+    //       }
+    //     ]
+    //   }
+    // ]);
     const menuItems = getRootWikiGroupTreeMenuItemsHelper(rootWikiGroupTree)
       .toList()
       .toJS();
     return (
       <div>
-        <Paper style={style}>
-          <RaisedButton
-            label="未分類(尚未完成)可以選好幾組"
-            onClick={this.handleClick}
-            icon={<ArrowDropDown />}
-            labelPosition="before"
-          />
-          <Popover
-            animated={false}
-            open={this.state.open}
-            anchorEl={this.state.anchorEl}
-            anchorOrigin={{
-              horizontal: "left",
-              vertical: "bottom"
-            }}
-            targetOrigin={{
-              horizontal: "left",
-              vertical: "top"
-            }}
-            onRequestClose={this.handleRequestClose}
-          >
-            <Menu onItemTouchTap={this.onItemTouchTap} desktop={true}>
-              {menuItems}
-            </Menu>
-          </Popover>
-        </Paper>
+        <Button onClick={this.handleClick}>
+          <ArrowDropDown />
+          未分類(尚未完成)可以選好幾組
+        </Button>
+        <Popover
+          open={this.state.open}
+          anchorEl={this.state.anchorEl}
+          anchorOrigin={{
+            horizontal: "left",
+            vertical: "bottom"
+          }}
+          transformOrigin={{
+            horizontal: "left",
+            vertical: "top"
+          }}
+          onClose={this.handleClose}
+        >
+          <MenuList>{menuItems}</MenuList>
+        </Popover>
       </div>
     );
   }

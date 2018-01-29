@@ -2,7 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
-import { Tabs, Tab } from "material-ui/Tabs";
+import Tabs from "../../../../components/Tabs";
+import { Tab } from "material-ui-next/Tabs";
 
 import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
 import WikiDataFormList from "./WikiDataFormList";
@@ -20,7 +21,7 @@ class RootWikiTabs extends React.Component {
   };
 
   static defaultProps = {
-    rootWiki: undefined
+    rootWiki: null
   };
 
   constructor(props) {
@@ -39,14 +40,17 @@ class RootWikiTabs extends React.Component {
     }
   }
 
-  handleChange = value => {
+  handleChange = (event, value) => {
     this.setState({ slideIndex: value });
-    this.props.onChangeTab(value);
+  };
+
+  handleChangeIndex = value => {
+    this.setState({ slideIndex: value });
   };
 
   render() {
     const { rootWiki } = this.props;
-    if (rootWiki === undefined) {
+    if (!rootWiki) {
       return <div>Loading...</div>;
     }
     const { slideIndex } = this.state;
@@ -61,7 +65,7 @@ class RootWikiTabs extends React.Component {
         </Tabs>
         <EnhancedSwipeableViews
           index={slideIndex}
-          onChangeIndex={this.handleChange}
+          onChangeIndex={this.handleChangeIndex}
         >
           <RootWikiDetail rootWiki={rootWiki} />
           <RootWikiForm actionType="update" defaultRootWiki={rootWiki} />

@@ -1,9 +1,11 @@
-export default function createFastMemoizeDefaultOptions(size = 100) {
+export default function createFastMemoizeDefaultOptions(...args) {
+  const options = args[0] || {};
+  const size = (typeof args[0] === "number" ? args[0] : options.size) || 10;
   return {
-    serializer(...args) {
+    serializer(...callerArgs) {
       return JSON.stringify(
-        args.map(arg => {
-          if (typeof arg === "object" && typeof arg.hashCode === "function") {
+        callerArgs.map(arg => {
+          if (arg && arg.hashCode && typeof arg.hashCode === "function") {
             return arg.hashCode();
           } else if (typeof arg === "function") {
             return String(arg);

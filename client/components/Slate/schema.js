@@ -1,14 +1,11 @@
 import React from "react";
 import { Link as ReactRouterLink } from "react-router";
-import {
-  Table,
+import Table, {
   TableBody,
-  TableFooter,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
+  TableCell,
+  TableHead,
+  TableRow
+} from "material-ui-next/Table";
 import normalizeHref from "./utils/normailzeHref";
 import { Block } from "slate";
 import Img from "../Img";

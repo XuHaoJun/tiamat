@@ -1,11 +1,13 @@
 import React, { Component } from "react";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import Paper from "material-ui/Paper";
+
+import Paper from "material-ui-next/Paper";
 
 import LogInForm from "../components/LogInForm";
+
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { getIsLoggedIn } from "../UserReducer";
 
 const styles = {
@@ -31,7 +33,6 @@ class UserLoginPage extends Component {
   };
 
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
 

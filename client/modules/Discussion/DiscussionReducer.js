@@ -1,4 +1,5 @@
 import { fromJS, Set, List } from "immutable";
+
 import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
 import { connectDB } from "../../localdb";
 import {
@@ -71,7 +72,6 @@ const DiscussionReducer = (state = initialState, action) => {
 
 /* Selectors */
 
-// Get all posts
 export const getRootDiscussions = (state, forumBoardId) => {
   return state.discussions
     .get("data")

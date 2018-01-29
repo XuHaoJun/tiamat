@@ -1,38 +1,22 @@
-import React from "react";
+import * as React from "react";
 import PropTypes from "prop-types";
-import CreateIcon from "material-ui/svg-icons/content/create";
-import FloatingActionButton from "material-ui/FloatingActionButton";
-import Portal from "react-portal-minimal";
 
-class EditButton extends React.PureComponent {
+import Portal from "material-ui-next/Portal";
+import CreateIcon from "material-ui-icons-next/Create";
+import Button from "material-ui-next/Button";
+
+class EditButton extends React.Component {
   static propTypes = {
     isOpened: PropTypes.bool,
     href: PropTypes.string,
-    onTouchTap: PropTypes.func,
     onClick: PropTypes.func
-  };
-
-  static contextTypes = {
-    router: PropTypes.object
   };
 
   static defaultProps = {
     isOpened: true,
     iconType: "create",
     href: "",
-    onTouchTap: () => {},
     onClick: () => {}
-  };
-
-  onTouchTap = e => {
-    if (e.nativeEvent.which === 3 || !this.props.href) {
-      return;
-    }
-    this.context.router.push(this.props.href);
-    e.preventDefault();
-    if (this.props.onTouchTap) {
-      this.props.onTouchTap(e);
-    }
   };
 
   onClick = e => {
@@ -40,10 +24,6 @@ class EditButton extends React.PureComponent {
     if (this.props.onClick) {
       this.props.onClick(e);
     }
-  };
-
-  setPortalRef = v => {
-    this.portal = v;
   };
 
   render() {
@@ -63,16 +43,16 @@ class EditButton extends React.PureComponent {
     };
     const finalStyle = Object.assign(_style, style || {});
     return (
-      <Portal isOpened={isOpened} ref={this.setPortalRef}>
-        <FloatingActionButton
+      <Portal>
+        <Button
           {...other}
+          fab
           style={finalStyle}
           href={href}
-          onTouchTap={this.onTouchTap}
           onClick={this.onClick}
         >
           <CreateIcon />
-        </FloatingActionButton>
+        </Button>
       </Portal>
     );
   }

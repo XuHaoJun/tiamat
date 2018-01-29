@@ -1,36 +1,72 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Drawer from "material-ui/Drawer";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+
+import classNames from "classnames";
+import { withStyles } from "material-ui-next/styles";
+import Drawer from "material-ui-next/Drawer";
 
 import NavList from "./NavList";
 
-export default class AppNavDrawer extends React.Component {
+export const drawerWidth = 256;
+
+export const miniDrawerWidth = 56;
+
+const styles = theme => {
+  const { breakpoints } = theme;
+  return {
+    drawerInner: {
+      height: "100%",
+      width: drawerWidth,
+      maxWidth: drawerWidth,
+      overflowX: "hidden"
+    },
+    drawerPaperBase: {
+      userSelect: "none",
+      maxWidth: drawerWidth,
+      overflowX: "hidden",
+      [`${breakpoints.up("sm")}`]: {
+        backgroundColor: theme.palette.background.default,
+        height: "calc(100vh - 64px)",
+        top: 64
+      }
+    },
+    drawerPaperClose: {
+      [`${breakpoints.up("sm")}`]: {
+        width: miniDrawerWidth,
+        overflowX: "hidden",
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen
+        })
+      }
+    },
+    drawerPaperOpen: {
+      [`${breakpoints.up("sm")}`]: {
+        width: drawerWidth,
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen
+        })
+      }
+    }
+  };
+};
+
+class AppNavDrawer extends React.Component {
   static propTypes = {
-    docked: PropTypes.bool.isRequired,
     onRequestChangeNavDrawer: PropTypes.func,
     open: PropTypes.bool.isRequired,
-    onChangeList: PropTypes.func,
-    selectedIndex: PropTypes.string.isRequired,
-    style: PropTypes.object
+    selectedIndex: PropTypes.string.isRequired
   };
 
   static defaultProps = {
-    onRequestChangeNavDrawer: () => {},
-    onChangeList: () => {},
-    style: {}
+    onRequestChangeNavDrawer: () => {}
   };
 
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
-
-  componentDidMount() {
-    if (this.drawer) {
-      this.drawer._oldOnBodyTouchStart = this.drawer.onBodyTouchStart;
-    }
-  }
 
   shouldComponentUpdate(nextProps, nextState) {
     // skip update if not open
@@ -40,47 +76,42 @@ export default class AppNavDrawer extends React.Component {
     return shouldComponentUpdate.bind(this)(nextProps, nextState);
   }
 
-  setRefDrawer = elem => {
-    this.drawer = elem;
+  handleClose = () => {
+    if (this.props.onRequestChangeNavDrawer) {
+      this.props.onRequestChangeNavDrawer(false);
+    }
   };
 
   render() {
     const {
       open,
-      docked,
       onRequestChangeNavDrawer,
-      style,
       selectedIndex,
-      onChangeList
+      classes
     } = this.props;
     return (
       <Drawer
-        ref={this.setRefDrawer}
-        style={Object.assign({}, style, {
-          MozUserSelect: "none",
-          WebkitUserSelect: "none",
-          userSelect: "none"
-        })}
-        containerStyle={
-          this.props.browser.lessThan.medium
-            ? {}
-            : {
-                top: 64,
-                height: "calc(100vh - 64px)"
-              }
-        }
-        zDepth={this.props.browser.lessThan.medium ? 1 : 0}
-        swipeAreaWidth={30}
+        elevation={this.props.browser.lessThan.medium ? 16 : 0}
         open={open}
-        docked={docked}
-        onRequestChange={onRequestChangeNavDrawer}
+        onClose={this.handleClose}
+        type={this.props.browser.lessThan.medium ? "temporary" : "permanent"}
+        classes={{
+          paper: classNames(
+            classes.drawerPaperBase,
+            open ? classes.drawerPaperOpen : classes.drawerPaperClose
+          )
+        }}
+        // swipeAreaWidth={30}
       >
-        <NavList
-          onChangeList={onChangeList}
-          selectedIndex={selectedIndex}
-          requestChangeNavDrawer={onRequestChangeNavDrawer}
-        />
+        <div className={classes.drawerInner}>
+          <NavList
+            selectedIndex={selectedIndex}
+            requestChangeNavDrawer={onRequestChangeNavDrawer}
+          />
+        </div>
       </Drawer>
     );
   }
 }
+
+export default withStyles(styles)(AppNavDrawer);

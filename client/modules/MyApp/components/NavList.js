@@ -4,101 +4,57 @@ import { Scrollbars } from "react-custom-scrollbars";
 import { Link } from "react-router";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
-import MaterialDivider from "material-ui/Divider";
-import Subheader from "material-ui/Subheader";
-import { List, ListItem, makeSelectable } from "material-ui/List";
-import RaisedButton from "material-ui/RaisedButton";
-import ActionSettings from "material-ui/svg-icons/action/settings";
-import ActionHome from "material-ui/svg-icons/action/home";
-import ActionHelp from "material-ui/svg-icons/action/help";
-import GuestPersonIcon from "material-ui/svg-icons/social/person";
-import WatchIcon from "material-ui/svg-icons/image/remove-red-eye";
-import DiscussionIcon from "material-ui/svg-icons/communication/comment";
-import ForumBoardIcon from "material-ui/svg-icons/av/library-books";
-import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
-import AddIcon from "material-ui/svg-icons/content/add";
+
+import { withStyles } from "material-ui-next/styles";
+
+import Button from "material-ui-next/Button";
+
+import Divider from "material-ui-next/Divider";
+
+import ListSubheader from "material-ui-next/List/ListSubheader";
+import List, {
+  ListItem as MuiListItem,
+  ListItemIcon,
+  ListItemText
+} from "material-ui-next/List";
+
+import WhatsHotIcon from "material-ui-icons-next/Whatshot";
+import ActionHomeIcon from "material-ui-icons-next/Home";
+import ChatIcon from "material-ui-icons-next/Chat";
+import SubscriptionIcon from "material-ui-icons-next/RssFeed";
+import HelpIcon from "material-ui-icons-next/Help";
+import SettingsIcon from "material-ui-icons-next/Settings";
+import AddIcon from "material-ui-icons-next/Add";
 
 import { getCurrentUser } from "../../User/UserReducer";
 import logOutRequestComposeEvent from "../../User/composes/logOutRequestComposeEvent";
 import UserAvatar from "../../User/components/UserAvatar";
+import { getIsFirstRender } from "../MyAppReducer";
 
-const LogOutListItem = logOutRequestComposeEvent(ListItem, "onClick");
+const LogOutListItem = logOutRequestComposeEvent(MuiListItem, "onClick");
 
-const SelectableList = makeSelectable(List);
-
-const Divider = props => {
-  const { style, ...other } = props;
-  const _style = Object.assign(
-    {
-      backgroundColor: "hsl(0, 0%, 93.3%)"
-    },
-    style
-  );
-  return <MaterialDivider {...other} style={_style} />;
-};
-
-export function getStyles(muiTheme) {
+const userPanelStyles = muiTheme => {
   return {
-    whiteText: {
-      color: "white"
-    },
-    userPanel: {
-      background: muiTheme.palette.primary2Color,
+    root: {
+      background: muiTheme.palette.primary.light,
       width: "100%",
       maxWidth: "100%",
       height: 150,
       padding: 20,
       boxSizing: "border-box"
+    },
+    whiteText: {
+      color: muiTheme.palette.primary.contrastText
     }
   };
-}
+};
 
-class NavList extends React.Component {
-  static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
-    router: PropTypes.object.isRequired
-  };
-
-  static propTypes = {
-    requestChangeNavDrawer: PropTypes.func,
-    user: PropTypes.object
-  };
-
-  static defaultProps = {
-    requestChangeNavDrawer: () => {},
-    user: null
-  };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-  }
-
-  preventDefault = e => {
-    e.preventDefault();
-  };
-
-  requestChangeNavDrawer = open => {
-    if (this.props.requestChangeNavDrawer) {
-      this.props.requestChangeNavDrawer(open);
-    }
-  };
-
-  handleTouchTap = (path, e) => {
-    if (e.nativeEvent.which === 3) {
-      return;
-    }
-    this.requestChangeNavDrawer(false);
-    this.context.router.push(path);
-  };
-
-  render() {
-    const styles = getStyles(this.context.muiTheme);
-    const { user, browser } = this.props;
-    const userPanel = (
-      <div style={styles.userPanel}>
+const UserPanel = withStyles(userPanelStyles)(
+  ({ user, classes, onClickLogin }) => {
+    return (
+      <div className={classes.root}>
         <UserAvatar user={user} />
-        <div style={styles.whiteText}>
+        <div className={classes.whiteText}>
           {user ? user.get("displayName") : "Guest"}
         </div>
         <div
@@ -107,125 +63,213 @@ class NavList extends React.Component {
           }}
         >
           {!user ? (
-            <Link
+            <Button
+              raised
+              color="primary"
+              component={Link}
               to="/login"
-              href="/login"
-              onClick={this.requestChangeNavDrawer.bind(this, false)}
+              onClick={onClickLogin}
             >
-              <RaisedButton label="登入" primary={true} />
-            </Link>
+              登入
+            </Button>
           ) : null}
         </div>
       </div>
     );
+  }
+);
+
+const selectedListItemStyles = theme => {
+  return {
+    root: {
+      backgroundColor: theme.palette.divider,
+      "&:hover": {
+        backgroundColor: theme.palette.divider
+      }
+    }
+  };
+};
+
+const SelectedListItem = withStyles(selectedListItemStyles)(MuiListItem);
+
+class NavList extends React.Component {
+  static propTypes = {
+    requestChangeNavDrawer: PropTypes.func,
+    user: PropTypes.object,
+    value: PropTypes.string
+  };
+
+  static defaultProps = {
+    requestChangeNavDrawer: () => {},
+    user: null,
+    value: null
+  };
+
+  constructor(props) {
+    super(props);
+    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+  }
+
+  requestChangeNavDrawer = open => {
+    if (this.props.requestChangeNavDrawer) {
+      this.props.requestChangeNavDrawer(open);
+    }
+  };
+
+  closeNavDrawer = () => {
+    if (this.props.requestChangeNavDrawer) {
+      this.props.requestChangeNavDrawer(false);
+    }
+  };
+
+  ListItem = props => {
+    const { value } = this.props;
+    const { to } = props;
+    if (typeof to === "string" && to === value) {
+      return <SelectedListItem {...props} disableRipple />;
+    } else {
+      return <MuiListItem {...props} />;
+    }
+  };
+
+  render() {
+    const { user, browser } = this.props;
+    const { ListItem } = this;
     return (
       <Scrollbars universal={true} autoHide={true}>
-        {browser.lessThan.medium ? userPanel : null}
-        <SelectableList value={this.props.selectedIndex}>
-          <ListItem
-            primaryText="首頁"
-            leftIcon={<ActionHome />}
-            value="/"
-            href="/"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/")}
-          />
-          <ListItem primaryText="熱門討論" />
-          <ListItem primaryText="聊天室" />
-          <Divider />
-          <ListItem
-            primaryText="我的文章"
-            leftIcon={<GuestPersonIcon />}
-            value="/users/guest/discussions"
-            href="/users/guest/discussions"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(
-              this,
-              "/users/guest/discussions"
-            )}
-          />
-          <ListItem
-            primaryText="訂閱內容"
-            leftIcon={<WatchIcon />}
-            value="/users/guest/discussions"
-            href="/users/guest/discussions"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(
-              this,
-              "/users/guest/discussions"
-            )}
-          />
-          <Divider />
-          <Subheader>瀏覽</Subheader>
-          <ListItem
-            primaryText="看板"
-            leftIcon={<ForumBoardIcon />}
-            value="/forumBoards"
-            href="/forumBoards"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/forumBoards")}
-          />
-          <ListItem
-            primaryText="維基"
-            leftIcon={<WikiIcon />}
-            value="/wikis"
-            href="/wikis"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/wikis")}
-          />
-          <Divider />
-          <Subheader>近期瀏覽(4個)尚未完成</Subheader>
-          <ListItem
-            primaryText="某個文章(尚未完成)"
-            leftIcon={<DiscussionIcon />}
-            value="/???"
-            href="/???"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/???")}
-          />
-          <ListItem
-            primaryText="某個維基(尚未完成)"
-            leftIcon={<WikiIcon />}
-            value="/???"
-            href="/???"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/???")}
-          />
-          <Divider />
-          <Subheader>App 相關</Subheader>
-          <ListItem
-            primaryText="建立看板"
-            leftIcon={<AddIcon />}
-            value="/create/forumBoard"
-            href="/create/forumBoard"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/create/forumBoard")}
-          />
-          <ListItem
-            primaryText="說明"
-            leftIcon={<ActionHelp />}
-            value="/about"
-            href="/about"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/about")}
-          />
-          <ListItem
-            primaryText="設定"
-            leftIcon={<ActionSettings />}
-            value="/setting"
-            href="/setting"
-            onClick={this.preventDefault}
-            onTouchTap={this.handleTouchTap.bind(this, "/setting")}
-          />
-          {user ? (
-            <LogOutListItem
-              primaryText="登出"
-              onClick={() => {
-                this.requestChangeNavDrawer(false);
-              }}
-            />
+        <div style={{ overflow: "auto", height: "100%", width: "100%" }}>
+          {browser.lessThan.medium ? (
+            <React.Fragment>
+              <UserPanel user={user} onClickLogin={this.closeNavDrawer} />
+              <Divider />
+            </React.Fragment>
           ) : null}
-        </SelectableList>
+          <List style={{ paddingTop: 0 }}>
+            <ListItem
+              button
+              component={Link}
+              to="/"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <ActionHomeIcon />
+              </ListItemIcon>
+              <ListItemText inset primary="首頁" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/whatsHotDiscussions"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <WhatsHotIcon />
+              </ListItemIcon>
+              <ListItemText primary="熱門話題" />
+            </ListItem>
+            <Divider />
+            <ListItem
+              button
+              component={Link}
+              to="/subscriptions"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <SubscriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="訂閱內容" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/subscriptions/1"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemText inset primary="訂閱內容近期更新01" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/subscriptions/2"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemText inset primary="訂閱內容近期更新02" />
+            </ListItem>
+            <Divider />
+            <ListItem
+              button
+              component={Link}
+              to="/chatRooms"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <ChatIcon />
+              </ListItemIcon>
+              <ListItemText primary="聊天室" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/chatRooms/1"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemText inset primary="聊天室近期更新01" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/chatRooms/2"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemText inset primary="聊天室近期更新02" />
+            </ListItem>
+            <Divider />
+            <ListSubheader>App 相關</ListSubheader>
+            <ListItem
+              button
+              component={Link}
+              to="/create/forumBoard"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <AddIcon />
+              </ListItemIcon>
+              <ListItemText primary="建立看板" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/about"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <HelpIcon />
+              </ListItemIcon>
+              <ListItemText primary="說明" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/settings"
+              onClick={this.closeNavDrawer}
+            >
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary="設定" />
+            </ListItem>
+            {user ? (
+              <LogOutListItem
+                button
+                component={Link}
+                to="/logout"
+                onClick={this.closeNavDrawer}
+              >
+                <ListItemText inset primary="登出" />
+              </LogOutListItem>
+            ) : null}
+          </List>
+        </div>
       </Scrollbars>
     );
   }
@@ -234,9 +278,15 @@ class NavList extends React.Component {
 export const NavListWithoutConnect = NavList;
 
 function mapStateToProps(state) {
+  const location = state.routing.locationBeforeTransitions;
+  const isFirstRender = getIsFirstRender(state);
+  let value;
+  if (location && !isFirstRender) {
+    value = location.pathname;
+  }
   const user = getCurrentUser(state);
   const { browser } = state;
-  return { user, browser };
+  return { user, value, browser };
 }
 
 export default connect(mapStateToProps)(NavList);

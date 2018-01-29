@@ -7,8 +7,8 @@ import MaterialDivider from "material-ui/Divider";
 import CircularProgress from "material-ui/CircularProgress";
 import LazyLoad from "react-lazyload";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import FlipMove from "react-flip-move";
-import PullRefresh from "react-pullrefresh";
+import FlipMove from "@xuhaojun/react-flip-move";
+import PullRefresh from "@xuhaojun/react-pullrefresh";
 import Portal from "../Portal";
 import NextList, {
   ListItem as NextListItem,
@@ -316,25 +316,28 @@ class CommonList extends React.Component {
       defaultValue
     };
     let list = (
-      <ListComponent key="list" {...listProps}>
+      <ListComponent {...listProps}>
         {listItems}
+        {empty}
+        {lazyLoadBottom}
       </ListComponent>
     );
-    list = (
-      <PullRefresh
-        key="list"
-        zIndex={9999}
-        as={React.Fragment}
-        onRefresh={() => {
-          alert("hello");
-        }}
-        render={(...args) => {
-          return <Portal>{PullRefresh.defaultProps.render(...args)}</Portal>;
-        }}
-      >
-        {list}
-      </PullRefresh>
-    );
+    // list = (
+    //   <PullRefresh
+    //     key="list"
+    //     zIndex={9999}
+    //     typeName={React.Fragment}
+    //     as={React.Fragment}
+    //     onRefresh={() => {
+    //       alert("hello");
+    //     }}
+    //     render={(...args) => {
+    //       return <Portal>{PullRefresh.defaultProps.render(...args)}</Portal>;
+    //     }}
+    //   >
+    //     {list}
+    //   </PullRefresh>
+    // );
     //     <NextList>
     //       {[...Array(3).keys()].map(i => {
     //         return (
@@ -351,12 +354,7 @@ class CommonList extends React.Component {
         {/* {refreshIndicator} */}
       </ListComponent>
     );
-    return (
-      <React.Fragment>
-        {list}
-        {bottom}
-      </React.Fragment>
-    );
+    return list;
   }
 }
 

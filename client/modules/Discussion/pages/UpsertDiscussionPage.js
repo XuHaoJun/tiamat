@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import { Set, is } from "immutable";
+import { Set } from "immutable";
 import { push, replace } from "react-router-redux";
 import debounce from "lodash/debounce";
 
@@ -137,7 +137,10 @@ class UpsertRootDiscussionPage extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { dbIsInitialized } = nextProps;
-    if (!is(this.props, nextProps) && dbIsInitialized) {
+    if (
+      this.props.location.pathname !== nextProps.location.pathname &&
+      dbIsInitialized
+    ) {
       this.fetchComponentData(nextProps);
     }
     this.ensureLoggedIn(nextProps);
@@ -149,7 +152,7 @@ class UpsertRootDiscussionPage extends React.Component {
     this.saveToLocalDB();
     this.props.dispatch(
       updateSendButtonProps({
-        onTouchTap: undefined
+        onClick: undefined
       })
     );
   }
@@ -157,12 +160,12 @@ class UpsertRootDiscussionPage extends React.Component {
   setFormRef = form => {
     if (form) {
       this.form = form;
-      const onTouchTap = this.sendForm;
-      this.props.dispatch(updateSendButtonProps({ onTouchTap }));
+      const onClick = this.sendForm;
+      this.props.dispatch(updateSendButtonProps({ onClick }));
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onTouchTap: undefined
+          onClick: undefined
         })
       );
     }

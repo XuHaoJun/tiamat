@@ -1,8 +1,12 @@
 import React from "react";
 import { Set } from "immutable";
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
+
+import Button from "material-ui-next/Button";
+import Dialog, {
+  DialogActions,
+  DialogContent,
+  DialogTitle
+} from "material-ui-next/Dialog";
 
 class AddWikiPartDialog extends React.Component {
   static defaultProps = {
@@ -17,23 +21,16 @@ class AddWikiPartDialog extends React.Component {
   render() {
     const { open } = this.props;
     const { title } = this.state;
-    const actions = [
-      <FlatButton label="取消" onTouchTap={this.handleCancel} />,
-      <RaisedButton
-        label="確定"
-        primary={true}
-        onTouchTap={this.handleSubmit}
-      />
-    ];
     return (
-      <Dialog
-        title={title}
-        actions={actions}
-        modal={true}
-        open={open}
-        autoScrollBodyContent={true}
-      >
-        wiki list
+      <Dialog disableBackdropClick open={open} onClose={this.onRequestClose}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>wiki part</DialogContent>
+        <DialogActions>
+          <Button onClick={this.handleCancel}>取消</Button>
+          <Button raised color="primary" onClick={this.handleSubmit}>
+            確定
+          </Button>
+        </DialogActions>
       </Dialog>
     );
   }

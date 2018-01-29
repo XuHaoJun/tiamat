@@ -1,10 +1,14 @@
 import React from "react";
-import { List } from "immutable";
-import CommonList from "../../../components/List/CommonList";
 import { connect } from "react-redux";
-import { getForumBoardById } from "../ForumBoardReducer";
+import { List } from "immutable";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import RightArrowIcon from "material-ui/svg-icons/hardware/keyboard-arrow-right";
+
+import { replace } from "react-router-redux";
+import { MenuItem, MenuList } from "material-ui-next/Menu";
+import { ListItemText, ListItemIcon } from "material-ui-next/List";
+import RightArrowIcon from "material-ui-icons-next/KeyboardArrowRight";
+
+import { getForumBoardById } from "../ForumBoardReducer";
 
 class ForumBoardGroupsList extends React.Component {
   static defaultProps = {
@@ -17,13 +21,22 @@ class ForumBoardGroupsList extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+    this.state = {
+      selectedGroup: props.forumBoardGroup
+    };
   }
 
-  listItemHref = payload => {
+  componentWillReceiveProps(nextProps) {
+    if (this.props.forumBoardGroup !== nextProps.forumBoardGroup) {
+      this.setState({ selectedGroup: nextProps.forumBoardGroup });
+    }
+  }
+
+  listItemHref = group => {
     const { forumBoardId, defaultAllGroup } = this.props;
     const query =
-      payload !== defaultAllGroup
-        ? `?forumBoardGroup=${encodeURIComponent(payload)}`
+      group !== defaultAllGroup
+        ? `?forumBoardGroup=${encodeURIComponent(group)}`
         : "";
     return `/forumBoards/${forumBoardId}/rootDiscussions${query}`;
   };
@@ -34,31 +47,42 @@ class ForumBoardGroupsList extends React.Component {
     } else if (payload === "綜合討論") {
       return -1;
     }
-    return payload.length;
+    return 0;
   };
 
-  listItemValue = payload => {
-    return payload;
-  };
-
-  listItemRightIcon = () => {
-    return <RightArrowIcon />;
+  handleMenuItemClick = (event, group) => {
+    if (group !== this.state.selectedGroup) {
+      this.setState({ selectedGroup: group });
+    }
+    if (this.props.onMenuItemClick) {
+      this.props.onMenuItemClick(event, group, this.listItemHref(group));
+    }
   };
 
   render() {
-    const { groups, defaultAllGroup, forumBoardGroup } = this.props;
+    const { groups, defaultAllGroup } = this.props;
     const dataSource = groups.insert(0, defaultAllGroup).sortBy(this.sortBy);
+    const { selectedGroup } = this.state;
     return (
-      <CommonList
-        dataSource={dataSource}
-        enableLoadMore={false}
-        enableSelectable={true}
-        defaultValue={!forumBoardGroup ? defaultAllGroup : forumBoardGroup}
-        listItemValue={this.listItemValue}
-        listItemRouterMethod="replace"
-        listItemRightIcon={this.listItemRightIcon}
-        listItemHref={this.listItemHref}
-      />
+      <MenuList role="menu">
+        {dataSource.map(group => {
+          const selected = selectedGroup
+            ? selectedGroup === group
+            : group === defaultAllGroup;
+          return (
+            <MenuItem
+              key={group}
+              selected={selected}
+              onClick={event => this.handleMenuItemClick(event, group)}
+            >
+              <ListItemText primary={group} />
+              <ListItemIcon>
+                <RightArrowIcon />
+              </ListItemIcon>
+            </MenuItem>
+          );
+        })}
+      </MenuList>
     );
   }
 }
@@ -74,4 +98,17 @@ function mapStateToProps(store, props) {
   };
 }
 
-export default connect(mapStateToProps)(ForumBoardGroupsList);
+function mapDispatchToProps(dispatch, ownProps) {
+  return {
+    onMenuItemClick(event, group, href) {
+      if (ownProps.onMenuItemClick) {
+        ownProps.onMenuItemClick(event, group, href);
+      }
+      dispatch(replace(href));
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  ForumBoardGroupsList
+);

@@ -1,7 +1,5 @@
 import React from "react";
 
-import CommonList from "../../../../components/List/CommonList";
-
 class WikiDataFormList extends React.Component {
   listItemHref = payload => {
     const { _id } = payload;
@@ -10,14 +8,7 @@ class WikiDataFormList extends React.Component {
 
   render() {
     const dataSource = this.props.wikiDataForms;
-    return (
-      <CommonList
-        dataSource={dataSource}
-        enableLoadMore={false}
-        enableRefreshIndicator={false}
-        listItemHref={this.listItemHref}
-      />
-    );
+    return <div>尚未完成</div>;
   }
 }
 

@@ -3,9 +3,11 @@ import Helmet from "react-helmet";
 import { connect } from "react-redux";
 import Loadable from "react-loadable";
 
-import Toggle from "material-ui/Toggle";
-import RaisedButton from "material-ui/RaisedButton";
+import { FormControlLabel, FormGroup } from "material-ui-next/Form";
+import Switch from "material-ui-next/Switch";
+import Button from "material-ui-next/Button";
 import { SketchPicker } from "react-color";
+import screenfull from "screenfull";
 
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 
@@ -16,6 +18,11 @@ class SettingDetailPage extends React.PureComponent {
 
   preloadAll = () => {
     Loadable.preloadAll();
+  };
+
+  state = {
+    check: false,
+    isFullStreen: false
   };
 
   render() {
@@ -35,13 +42,41 @@ class SettingDetailPage extends React.PureComponent {
     return (
       <div>
         <Helmet title="設定" />
-        <div style={styles.container}>
-          <div style={styles.alignerItem}>
-            <Toggle label="即時更新文章列表(尚未完成)" style={styles.toggle} />
-            <div>主題顏色挑選:</div>
-            <SketchPicker />
-            <RaisedButton label="預加載其他頁面" onClick={this.preloadAll} />
-          </div>
+        <div>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={this.state.check}
+                  onChange={(event, checked) =>
+                    this.setState({ check: checked })
+                  }
+                />
+              }
+              label="即時更新文章列表(尚未完成)"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={this.state.isFullScreen}
+                  onChange={(event, checked) => {
+                    this.setState({ isFullScreen: checked });
+                    if (screenfull.enabled) {
+                      screenfull.toggle();
+                    }
+                  }}
+                />
+              }
+              label="全螢幕(FullScreen)"
+            />
+            <Button raised onClick={this.preloadAll}>
+              預加載其他頁面
+            </Button>
+            <div>
+              <div>主題顏色挑選:#ff0f0f(改為Dialog)</div>
+              <SketchPicker />
+            </div>
+          </FormGroup>
         </div>
       </div>
     );

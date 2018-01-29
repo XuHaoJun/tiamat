@@ -1,52 +1,40 @@
-import React, { Component } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import {
-  BottomNavigation,
-  BottomNavigationItem
-} from "material-ui/BottomNavigation";
+import { withStyles } from "material-ui-next/styles";
+import BottomNavigation, {
+  BottomNavigationAction
+} from "material-ui-next/BottomNavigation";
 
-import WhatsHotIcon from "material-ui/svg-icons/social/whatshot";
-import ActionHomeIcon from "material-ui/svg-icons/action/home";
-import ChatIcon from "material-ui/svg-icons/communication/chat";
-import SubscriptionIcon from "material-ui/svg-icons/communication/rss-feed";
+import WhatsHotIcon from "material-ui-icons-next/Whatshot";
+import ActionHomeIcon from "material-ui-icons-next/Home";
+import ChatIcon from "material-ui-icons-next/Chat";
+import SubscriptionIcon from "material-ui-icons-next/RssFeed";
 
-const whatsHotIcon = <WhatsHotIcon />;
-const actionHomeIcon = <ActionHomeIcon />;
-const chatIcon = <ChatIcon />;
-const subscriptionIcon = <SubscriptionIcon />;
+const styles = {
+  root: {
+    width: "100%",
+    position: "fixed",
+    bottom: 0,
+    left: 0,
+    zIndex: 100
+  }
+};
 
-const indexToCursorMapping = [
-  "/",
-  "/whatsHotDiscussions",
-  "/subscriptions",
-  "chatRooms"
-];
-
-function getCursorByindex(i) {
-  return indexToCursorMapping[i];
-}
-
-const cursorToIndexMapping = indexToCursorMapping.reduce(
-  (result, cursor, index) => {
-    return { ...result, [cursor]: index };
-  },
-  {}
-);
-
-function getIndexByCursor(cursor) {
-  return cursorToIndexMapping[cursor];
-}
-
-class AppBottomNavigation extends Component {
-  static defaultProps = {
-    style: { position: "fixed", bottom: 0, left: 0, zIndex: 100 },
-    selectedIndex: 0
+class AppBottomNavigation extends React.Component {
+  static propTypes = {
+    classes: PropTypes.object.isRequired,
+    selectedIndex: PropTypes.string
   };
 
-  select = nextIndex => {
+  static defaultProps = {
+    selectedIndex: "/"
+  };
+
+  handleChange = (event, nextIndex) => {
     if (this.props.onSelect) {
-      this.props.onSelect(nextIndex, this.props.selectedIndex);
+      this.props.onSelect(event, nextIndex, this.props.selectedIndex);
     }
   };
 
@@ -55,47 +43,46 @@ class AppBottomNavigation extends Component {
     if (browser && !browser.lessThan.medium) {
       return null;
     } else {
+      const { classes, selectedIndex } = this.props;
       return (
-        <div style={this.props.style}>
-          <BottomNavigation
-            selectedIndex={this.props.selectedIndex}
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            <BottomNavigationItem
-              label="首頁"
-              icon={actionHomeIcon}
-              onClick={() => this.select(0)}
-            />
-            <BottomNavigationItem
-              label="熱門討論"
-              icon={whatsHotIcon}
-              onClick={() => this.select(1)}
-            />
-            <BottomNavigationItem
-              label="訂閱內容"
-              icon={subscriptionIcon}
-              onClick={() => this.select(2)}
-            />
-            <BottomNavigationItem
-              label="聊天室"
-              icon={chatIcon}
-              onClick={() => this.select(3)}
-            />
-          </BottomNavigation>
-        </div>
+        <BottomNavigation
+          className={classes.root}
+          value={selectedIndex}
+          onChange={this.handleChange}
+          showLabels
+        >
+          <BottomNavigationAction
+            value="/"
+            label="首頁"
+            icon={<ActionHomeIcon />}
+          />
+          <BottomNavigationAction
+            value="/whatsHotDiscussions"
+            label="熱門話題"
+            icon={<WhatsHotIcon />}
+          />
+          <BottomNavigationAction
+            value="/subscriptions"
+            label="訂閱內容"
+            icon={<SubscriptionIcon />}
+          />
+          <BottomNavigationAction
+            value="/chatRooms"
+            label="聊天室"
+            icon={<ChatIcon />}
+          />
+        </BottomNavigation>
       );
     }
   }
 }
 
-export const AppBottomNavigationWithoutConnect = AppBottomNavigation;
+const Styled = withStyles(styles)(AppBottomNavigation);
+
+export const AppBottomNavigationWithoutConnect = Styled;
 
 import {
   setHistoryCursor,
-  dirtyPushState,
   clearHistoryByCursor
 } from "../../History/HistoryActions";
 import { getCursor, getStackByCursor } from "../../History/HistoryReducer";
@@ -103,8 +90,9 @@ import { push } from "react-router-redux";
 
 function mapStateToProps(state) {
   const { browser } = state;
-  const selectedIndex = getIndexByCursor(getCursor(state)) || 0;
-  const _history = state.history; // never pass to props ignore by mergeProps function.
+  const selectedIndex = getCursor(state);
+  // never pass to props ignore by mergeProps function.
+  const _history = state.history;
   return { browser, selectedIndex, _history };
 }
 
@@ -119,23 +107,25 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const _getStackByCursor = cursor =>
     getStackByCursor({ history: _history }, cursor);
   const { dispatch } = dispatchProps;
-  const onSelect = (nextIndex, currentIndex) => {
+  const onSelect = (event, nextIndex, currentIndex) => {
     if (nextIndex === currentIndex) {
-      const cursor = getCursorByindex(currentIndex);
+      const cursor = currentIndex;
       const pathname = cursor;
-      dispatch(push(pathname));
       dispatch(clearHistoryByCursor(cursor));
+      dispatch(push(pathname));
     } else {
-      const cursor = getCursorByindex(nextIndex);
+      const cursor = nextIndex;
       const stack = _getStackByCursor(cursor);
       dispatch(setHistoryCursor(cursor));
+      dispatch(clearHistoryByCursor(cursor));
+      // append stack to global history stack
       if (stack && stack.length > 0) {
         for (const l of stack) {
           l.state = l.state || {};
           l.state = { ...l.state, oriKey: l.key };
         }
         // FIXME
-        // push to global history stack
+        // dirty push to global history stack
         const reversedStackNoHead = stack.slice(1, stack.length).reverse();
         for (const location of reversedStackNoHead) {
           dispatch(push(location));
@@ -154,6 +144,4 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   });
 }
 
-export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(
-  AppBottomNavigation
-);
+export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(Styled);

@@ -94,11 +94,11 @@ const schema = {
 };
 
 const _uiSchema = {
-  mods: {
-    items: {
-      "ui:order": ["name", "valueType", "value", "*"]
-    }
-  }
+  // mods: {
+  //   items: {
+  //     "ui:order": ["name", "valueType", "value", "*"]
+  //   }
+  // }
 };
 
 const log = type => console.log.bind(console, type);
@@ -137,9 +137,12 @@ class WikiDataForm extends React.Component {
     }
   };
 
-  componentDidMount() {
-    loadBootstrap();
+  async componentDidMount() {
+    // loadBootstrap()
+    await import(/* webpackChunkName: "glyphicons.css" */ "./utils/plugin.css");
   }
+
+  componentWillUnmount() {}
 
   render() {
     const { wikiDataForm } = this.props;

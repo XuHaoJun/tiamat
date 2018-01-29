@@ -26,7 +26,6 @@ const styles = {
 
 class UserSignUpPage extends Component {
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
 

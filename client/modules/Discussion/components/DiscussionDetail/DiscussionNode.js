@@ -1,18 +1,26 @@
 import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { Set } from "immutable";
-import Toggle from "material-ui/Toggle";
 import moment from "moment";
-import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
 
-import Editor from "../../../../components/Slate/Editor";
+import { withStyles } from "material-ui-next/styles";
+import Switch from "material-ui-next/Switch";
+import WikiIcon from "material-ui-icons-next/ImportContacts";
+import { FormGroup, FormControlLabel } from "material-ui-next/Form";
+
 import UserAvatar from "../../../User/components/UserAvatar";
+import Editor from "../../../../components/Slate/Editor";
 
 const styles = {
+  root: {
+    boxSizing: "border-box"
+  },
   title: {
+    boxSizing: "border-box",
     padding: "5px 5px 0px 5px"
   },
   content: {
+    boxSizing: "border-box",
     padding: "15px"
   },
   simpleInfo: {
@@ -65,11 +73,7 @@ class DiscussionNode extends React.Component {
   onSemanticToggle = (event, isInputChecked, time) => {
     const afterUpdate = () => {
       if (this.props.onSemanticToggle) {
-        this.props.onSemanticToggle(
-          event,
-          this.state.semanticReplaceToggled,
-          this
-        );
+        this.props.onSemanticToggle(event, this.state.semanticReplaceToggled);
       }
       this.semanticToggle(time);
     };
@@ -102,26 +106,33 @@ class DiscussionNode extends React.Component {
       ? authorBasicInfo.get("displayName")
       : "";
     const createdAtFromNow = moment(createdAt).fromNow();
+    const { classes } = this.props;
     return (
-      <div>
-        <h1 style={styles.title}>{title}</h1>
-        <div style={styles.simpleInfo}>
+      <div className={classes.root}>
+        <h1 className={classes.title}>{title}</h1>
+        <div className={classes.simpleInfo}>
           <div>
-            <div style={styles.avatarContainer}>
+            <div className={classes.avatarContainer}>
               <UserAvatar user={authorBasicInfo} />
               <span style={{ marginLeft: 5 }}>{displayName || "Guset"} </span>
             </div>
           </div>
           <div>
-            <Toggle
-              label={<WikiIcon />}
-              onToggle={this.onSemanticToggle}
-              toggled={semanticReplaceToggled}
-            />
-            <div style={styles.smallFont}>{createdAtFromNow}</div>
+            <FormGroup row>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={this.onSemanticToggle}
+                    checked={semanticReplaceToggled}
+                  />
+                }
+                label={<WikiIcon />}
+              />
+            </FormGroup>
+            <div className={classes.smallFont}>{createdAtFromNow}</div>
           </div>
         </div>
-        <div style={styles.content}>
+        <div className={classes.content}>
           <Editor
             rawContent={content}
             readOnly={true}
@@ -134,4 +145,6 @@ class DiscussionNode extends React.Component {
   }
 }
 
-export default DiscussionNode;
+const Styled = withStyles(styles)(DiscussionNode);
+
+export default Styled;

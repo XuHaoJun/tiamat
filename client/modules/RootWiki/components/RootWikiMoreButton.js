@@ -1,69 +1,68 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { Link } from "react-router";
 
-import IconMenu from "material-ui/IconMenu";
-import MaterialMenuItem from "material-ui/MenuItem";
-import FloatingActionButton from "material-ui/FloatingActionButton";
-import MoreVertIcon from "material-ui/svg-icons/editor/format-list-bulleted";
-
-function makeLinkable(WrappedComponent) {
-  class LinkableComponent extends React.Component {
-    render() {
-      const { to, children, onClick, ...other } = this.props;
-      const handleClick = (e, ...args) => {
-        if (to) {
-          this.context.router.push(to);
-        }
-        if (onClick) {
-          onClick(e, ...args);
-        }
-      };
-      return (
-        <WrappedComponent {...other} onClick={handleClick}>
-          {children}
-        </WrappedComponent>
-      );
-    }
-  }
-  LinkableComponent.contextTypes = {
-    router: PropTypes.object
-  };
-  return LinkableComponent;
-}
-
-const MenuItem = makeLinkable(MaterialMenuItem);
-MenuItem.muiName = MaterialMenuItem.muiName;
+import Menu, { MenuItem } from "material-ui-next/Menu";
+import Button from "material-ui-next/Button";
+import MoreVertIcon from "material-ui-icons-next/FormatListBulleted";
 
 class RootWikiMoreButton extends React.Component {
+  state = {
+    anchorEl: null
+  };
+
+  handleClick = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleClose = () => {
+    this.setState({ anchorEl: null });
+  };
+
   render() {
-    const { rootWikiId, style } = this.props;
+    const { rootWikiId, ButtonProps, MenuProps } = this.props;
+    const { anchorEl } = this.state;
     return (
-      <IconMenu
-        iconButtonElement={
-          <FloatingActionButton style={style}>
-            <MoreVertIcon />
-          </FloatingActionButton>
-        }
-        anchorOrigin={{ horizontal: "left", vertical: "top" }}
-        targetOrigin={{ horizontal: "left", vertical: "top" }}
-      >
-        <MenuItem
-          primaryText="Edit"
-          to={`/rootWikis/${rootWikiId}/dashboard?slideIndex=edit`}
-        />
-        <MenuItem
-          primaryText="Add WikiDataForm"
-          to={`/create/rootWikis/${rootWikiId}/wikiDataForm`}
-        />
-        <MenuItem
-          primaryText="Add Template"
-          to={`/create/rootWikis/${rootWikiId}/template`}
-        />
-        <MenuItem
-          primaryText="RootWiki Dashboard"
-          to={`/rootWikis/${rootWikiId}/dashboard`}
-        />
-      </IconMenu>
+      <div>
+        <Button
+          fab
+          aria-label="More"
+          {...ButtonProps}
+          aria-owns={anchorEl ? "long-menu" : null}
+          aria-haspopup="true"
+          onClick={this.handleClick}
+        >
+          <MoreVertIcon />
+        </Button>
+        <Menu
+          id="rootWikiMoreMenu"
+          anchorEl={this.state.anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={this.handleClose}
+          {...MenuProps}
+        >
+          <MenuItem
+            component={Link}
+            to={`/rootWikis/${rootWikiId}/dashboard?slideIndex=edit`}
+          >
+            Edit
+          </MenuItem>
+          <MenuItem
+            component={Link}
+            to={`/create/rootWikis/${rootWikiId}/wikiDataForm`}
+          >
+            Add WikiDataForm
+          </MenuItem>
+          <MenuItem
+            component={Link}
+            to={`/create/rootWikis/${rootWikiId}/template`}
+          >
+            Add Template
+          </MenuItem>
+          <MenuItem component={Link} to={`/rootWikis/${rootWikiId}/dashboard`}>
+            RootWiki Dashboard
+          </MenuItem>
+        </Menu>
+      </div>
     );
   }
 }

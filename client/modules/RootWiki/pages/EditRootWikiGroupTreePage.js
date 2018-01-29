@@ -130,12 +130,12 @@ class CreateRootWikiPage extends React.PureComponent {
   setFormRef = formComponent => {
     if (formComponent) {
       this.formComponent = formComponent;
-      const onTouchTap = this.sendForm;
-      this.props.dispatch(updateSendButtonProps({ onTouchTap }));
+      const onClick = this.sendForm;
+      this.props.dispatch(updateSendButtonProps({ onClick }));
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onTouchTap: () => {}
+          onClick: null
         })
       );
     }

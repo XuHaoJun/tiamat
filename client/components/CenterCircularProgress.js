@@ -1,5 +1,7 @@
 import React from "react";
-import CircularProgress from "material-ui/CircularProgress";
+
+import CircularProgress from "material-ui-next/Progress/CircularProgress";
+import pure from "recompose/pure";
 
 const CenterCircularProgress = () => {
   const styles = {
@@ -22,4 +24,4 @@ const CenterCircularProgress = () => {
   );
 };
 
-export default CenterCircularProgress;
+export default pure(CenterCircularProgress);

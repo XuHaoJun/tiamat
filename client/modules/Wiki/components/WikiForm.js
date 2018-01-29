@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import TextField from "material-ui/TextField";
+
+import TextField from "material-ui-next/TextField";
 
 import Editor from "../../../components/Slate";
 import RootWikiGroupTreePopover from "../../RootWiki/components/RootWikiGroupTreePopover";
@@ -82,7 +83,7 @@ class WikiForm extends React.Component {
           <h1 style={styles.name}>{name}</h1>
         ) : (
           <TextField
-            floatingLabelText="您的維基名稱"
+            label="您的維基名稱"
             value={this.state.name}
             onChange={this.onNameChange}
           />

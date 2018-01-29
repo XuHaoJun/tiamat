@@ -1,9 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
-import SendIcon from "material-ui/svg-icons/content/send";
-import IconButton from "material-ui/IconButton";
+
+import SendIcon from "material-ui-icons-next/Send";
+import IconButton from "material-ui-next/IconButton";
+import { CircularProgress } from "material-ui-next/Progress";
+
 import { getUI } from "../MyAppReducer";
-import CircularProgress from "material-ui/CircularProgress";
 
 class SendButton extends React.PureComponent {
   static muiName = IconButton.muiName;
@@ -39,10 +41,9 @@ export const SendButtonWithoutConnect = SendButton;
 
 function mapStateToProps(store) {
   const ui = getUI(store);
-  const onTouchTap = ui.getIn(["sendButton", "onTouchTap"]);
   const onClick = ui.getIn(["sendButton", "onClick"]);
   const loading = !!ui.getIn(["sendButton", "loading"]);
-  return { onTouchTap, onClick, loading };
+  return { onClick, loading };
 }
 
 export default connect(mapStateToProps, null, null, { withRef: true })(

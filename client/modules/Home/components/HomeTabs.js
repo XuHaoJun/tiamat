@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import _reduce from "lodash/reduce";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
-import { Tabs, Tab } from "material-ui/Tabs";
-import WhatHotIcon from "material-ui/svg-icons/social/whatshot";
-import ActionHome from "material-ui/svg-icons/action/home";
-import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
+import Tabs from "../../../components/Tabs";
+import { Tab } from "material-ui-next/Tabs";
+import WhatsHotIcon from "material-ui-icons-next/Whatshot";
+import ActionHomeIcon from "material-ui-icons-next/Home";
+import WikiIcon from "material-ui-icons-next/ImportContacts";
 
 import ForumBoardList from "../../ForumBoard/components/ForumBoardList";
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
@@ -42,25 +43,16 @@ export const getSlideIndexFromEnAlias = enAlias => {
 
 class HomeTabs extends React.Component {
   static propTypes = {
-    style: PropTypes.object,
     slideContainerStyle: PropTypes.object,
-    scrollBehaviorShouldUpdateScroll: PropTypes.func
+    forumBoardListProps: PropTypes.object
   };
 
   static defaultProps = {
-    onChangeTab: () => {},
-    scrollBehaviorShouldUpdateScroll: undefined,
-    slideIndex: 0,
-    style: {},
+    slideIndex: 0, // eslint-disable-line
     slideContainerStyle: {
       height: "100%"
     },
-    swipeableViewsStyle: {},
-    tabsStyle: {}
-  };
-
-  static contextTypes = {
-    muiTheme: PropTypes.object.isRequired
+    forumBoardListProps: {}
   };
 
   constructor(props) {
@@ -77,9 +69,12 @@ class HomeTabs extends React.Component {
     }
   }
 
-  handleChange = value => {
+  handleChange = (event, value) => {
     this.setState({ slideIndex: value });
-    this.props.onChangeTab(value);
+  };
+
+  handleChangeIndex = value => {
+    this.setState({ slideIndex: value });
   };
 
   handleTransitionEnd = () => {
@@ -99,55 +94,29 @@ class HomeTabs extends React.Component {
   };
 
   render() {
+    const { id, forumBoardListProps } = this.props;
     const { slideIndex } = this.state;
-    const MyTab = (icon, slide) => (
-      <Tab
-        icon={icon}
-        value={slide}
-        onFocus={() => undefined}
-        onMouseOver={this.handleTabMouseOvers[slide]}
-      />
-    );
-    // {MyTab(<ActionHome />, HOME_SLIDE)}
     return (
-      <div style={this.props.style}>
-        <Tabs
-          style={this.props.tabsStyle}
-          onChange={this.handleChange}
-          value={slideIndex}
-        >
-          <Tab
-            icon={<ActionHome />}
-            value={HOME_SLIDE}
-            onFocus={() => undefined}
-            onMouseOver={this.handleTabMouseOvers[HOME_SLIDE]}
-          />
-          <Tab
-            icon={<WhatHotIcon />}
-            value={WHAT_HOT_SLIDE}
-            onFocus={() => undefined}
-            onMouseOver={this.handleTabMouseOvers[WHAT_HOT_SLIDE]}
-          />
-          <Tab
-            icon={<WikiIcon />}
-            value={WIKI_SLIDE}
-            onFocus={() => undefined}
-            onMouseOver={this.handleTabMouseOvers[WIKI_SLIDE]}
-          />
+      <div>
+        <Tabs onChange={this.handleChange} value={slideIndex}>
+          <Tab label="首頁" value={HOME_SLIDE} />
+          <Tab label="熱門看板" value={WHAT_HOT_SLIDE} />
+          <Tab label="今日維基" value={WIKI_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
-          scrollKey="hometabs"
+          id={id ? `${id}/EnhancedSwipeableViews` : null}
           index={slideIndex}
-          scrollBehaviorShouldUpdateScroll={
-            this.props.scrollBehaviorShouldUpdateScroll
-          }
           style={this.props.swipeableViewsStyle}
           containerStyle={this.props.slideContainerStyle}
-          onChangeIndex={this.handleChange}
+          slideClassName={this.props.slideClassName}
+          onChangeIndex={this.handleChangeIndex}
           onTransitionEnd={this.handleTransitionEnd}
         >
-          <div>主頁，放訂閱的文章或看板等最新或熱門資訊(尚未完成)</div>
-          <ForumBoardList />
+          <div>首頁，放推薦內容(尚未完成)</div>
+          <ForumBoardList
+            id={id ? `${id}/ForumBoardList` : null}
+            {...forumBoardListProps}
+          />
           <div>維基特色條目(尚未完成)</div>
         </EnhancedSwipeableViews>
       </div>

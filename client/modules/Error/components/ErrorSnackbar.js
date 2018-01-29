@@ -1,22 +1,91 @@
-import { Map, List } from "immutable";
 import React from "react";
-import Snackbar from "material-ui/Snackbar";
+import PropTypes from "prop-types";
+import { Map, List } from "immutable";
 import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+
+import classNames from "classnames";
+import { withStyles } from "material-ui-next/styles";
+import Snackbar from "material-ui-next/Snackbar";
+import IconButton from "material-ui-next/IconButton";
+import CloseIcon from "material-ui-icons-next/Close";
+
 import { getLastError } from "../ErrorReducer";
 
-export function getStyles() {
-  const styles = {
-    snackbarBody: {
-      backgroundColor: "rgba(100, 0, 0, 0.87)"
+const snackbarContentStyles = {
+  root: {
+    backgroundColor: "rgba(100, 0, 0, 0.87)"
+  }
+};
+
+const RedSnackbarBase = props => {
+  const { SnackbarContentProps, ...other } = props;
+  const _SnackbarContentProps = {
+    className: props.classes.root,
+    ...SnackbarContentProps
+  };
+  return <Snackbar {...other} SnackbarContentProps={_SnackbarContentProps} />;
+};
+
+RedSnackbarBase.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+const RedSnackbar = withStyles(snackbarContentStyles)(RedSnackbarBase);
+
+function getMessage(error) {
+  let message;
+  if (typeof error === "string") {
+    message = error;
+  } else if (Map.isMap(error)) {
+    message =
+      error.get("message") ||
+      error.get("errmsg") ||
+      error.get("msg") ||
+      error.get("name") ||
+      error.get("error_description") ||
+      error.get("error") ||
+      "";
+    if (message && error.get("dataPath")) {
+      message = `${error.get("dataPath")} ${message}`;
+    }
+  } else {
+    message = "";
+  }
+  return message;
+}
+
+const closeButtonStyles = theme => {
+  return {
+    root: {
+      width: theme.spacing.unit * 4,
+      height: theme.spacing.unit * 4
     }
   };
-  return styles;
-}
+};
+
+const CloseButtonBase = props => {
+  const { className, classes, ...other } = props;
+  return (
+    <IconButton className={classNames(classes.root, className)} {...other}>
+      <CloseIcon />
+    </IconButton>
+  );
+};
+
+CloseButtonBase.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+const CloseButton = withStyles(closeButtonStyles)(CloseButtonBase);
 
 class ErrorSnackbar extends React.Component {
   static defaultProps = {
     error: null
+  };
+
+  static propTypes = {
+    error: PropTypes.object
   };
 
   constructor(props) {
@@ -33,39 +102,34 @@ class ErrorSnackbar extends React.Component {
     }
   }
 
-  handleRequestClose = () => {
+  handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
     this.setState({ open: false });
   };
 
   render() {
-    const styles = getStyles();
     let { error } = this.props;
     if (List.isList(error)) {
       error = error.get(0);
     }
     const { open } = this.state;
-    let message;
-    if (typeof error === "string") {
-      message = error;
-    } else if (Map.isMap(error)) {
-      message =
-        error.get("message") ||
-        error.get("errmsg") ||
-        error.get("msg") ||
-        error.get("name") ||
-        error.get("error_description") ||
-        error.get("error") ||
-        "";
-    } else {
-      message = "";
-    }
+    const message = getMessage(error);
     return (
-      <Snackbar
-        bodyStyle={styles.snackbarBody}
+      <RedSnackbar
         open={message ? open : false}
         message={message}
-        autoHideDuration={6666}
-        onRequestClose={this.handleRequestClose}
+        autoHideDuration={6000}
+        onClose={this.handleClose}
+        action={[
+          <CloseButton
+            key="close"
+            aria-label="Close"
+            color="inherit"
+            onClick={this.handleClose}
+          />
+        ]}
       />
     );
   }
@@ -76,4 +140,8 @@ function mapStateToProps(store) {
   return { error };
 }
 
-export default connect(mapStateToProps)(ErrorSnackbar);
+function mapDispatchToProps() {
+  return {};
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ErrorSnackbar);

@@ -1,10 +1,10 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
 import Loadable from "react-loadable";
 
-import { Tabs, Tab } from "material-ui/Tabs";
+import Tabs from "../../../../components/Tabs";
+import { Tab } from "material-ui-next/Tabs";
 
 import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
 import { getWiki } from "../../WikiReducer";
@@ -12,7 +12,6 @@ import { getRootWiki } from "../../../RootWiki/RootWikiReducer";
 import CenterCircularProgress from "../../../../components/CenterCircularProgress";
 import { emptyContent } from "../../../../components/Slate/Editor";
 import WikiContent from "../../components/WikiContent";
-import getStyles from "../../../../styles/Tabs";
 import WikiForm from "../WikiForm";
 
 const Loading = () => <div>Loading...</div>;
@@ -37,16 +36,10 @@ export const WIKI_HITSTORY_SLIDE = 4;
 
 class WikiDetailTabs extends React.Component {
   static defaultProps = {
-    title: "維基",
     wikiId: "",
     wiki: null,
     slideIndex: WIKI_CONTENT_SLIDE,
-    scrollKey: "",
-    onChangeTab: () => {}
-  };
-
-  static contextTypes = {
-    muiTheme: PropTypes.object.isRequired
+    scrollKey: ""
   };
 
   constructor(props) {
@@ -64,45 +57,22 @@ class WikiDetailTabs extends React.Component {
     }
   }
 
-  getStyles = () => {
-    const {
-      rootStyle,
-      tabsStyle,
-      swipeableViewsStyle,
-      slideContainerStyle
-    } = this.props;
-    const defaultStyles = getStyles(this.context, this.props.browser);
-    const propStyles = {
-      rootStyle,
-      tabsStyle,
-      swipeableViewsStyle,
-      slideContainerStyle
-    };
-    const styles = defaultStyles;
-    for (const k in styles) {
-      if (Object.prototype.hasOwnProperty.call(styles, k)) {
-        styles[k] = {
-          ...styles[k],
-          ...propStyles[k]
-        };
-      }
-    }
-    return styles;
-  };
-
   handleTransitionEnd = () => {
     if (this.props.onTransitionEnd) {
       this.props.onTransitionEnd(this.state.slideIndex);
     }
   };
 
-  handleTabChange = value => {
-    this.setState(
-      {
-        slideIndex: value
-      },
-      () => this.props.onChangeTab(value)
-    );
+  handleChange = (event, value) => {
+    this.setState({
+      slideIndex: value
+    });
+  };
+
+  handleChangeIndex = value => {
+    this.setState({
+      slideIndex: value
+    });
   };
 
   render() {
@@ -110,7 +80,7 @@ class WikiDetailTabs extends React.Component {
     if (!wiki) {
       return <CenterCircularProgress />;
     }
-    const { scrollKey } = this.props;
+    const { id } = this.props;
     const { slideIndex } = this.state;
     const name = wiki ? wiki.get("name") : "";
     const content = wiki ? wiki.get("content") : emptyContent;
@@ -129,14 +99,9 @@ class WikiDetailTabs extends React.Component {
       ...wikiProps,
       nameReadOnly: true
     };
-    const styles = this.getStyles();
     return (
-      <div style={styles.root}>
-        <Tabs
-          style={styles.tabs}
-          value={slideIndex}
-          onChange={this.handleTabChange}
-        >
+      <div>
+        <Tabs value={slideIndex} onChange={this.handleChange}>
           <Tab label="閱讀" value={WIKI_CONTENT_SLIDE} />
           <Tab label="相關文章" value={WIKI_RELATED_DISCUSSION} />
           <Tab label="編輯" value={WIKI_EDIT_SLIDE} />
@@ -144,11 +109,10 @@ class WikiDetailTabs extends React.Component {
           <Tab label="檢視歷史" value={WIKI_HITSTORY_SLIDE} />
         </Tabs>
         <EnhancedSwipeableViews
-          scrollKey={scrollKey}
-          style={styles.swipeableViews}
-          containerStyle={styles.slideContainer}
+          id={id ? `${id}/EnhancedSwipeableViews` : null}
           index={slideIndex}
-          onChangeIndex={this.handleTabChange}
+          slideClassName={this.props.slideClassName}
+          onChangeIndex={this.handleChangeIndex}
           onTransitionEnd={this.handleTransitionEnd}
         >
           <WikiContent {...wikiContentProps} />

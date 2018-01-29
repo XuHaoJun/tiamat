@@ -4,14 +4,16 @@ import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import car from "lodash/first";
 import cdr from "lodash/tail";
-import { Set, List } from "immutable";
+import { Set, List as ImmutableList } from "immutable";
 import memoize from "fast-memoize";
 import moment from "moment";
+import { Link } from "react-router";
 
-import Avatar from "material-ui/Avatar";
-import WikiIcon from "material-ui/svg-icons/communication/import-contacts";
+import List from "../../../components/List/EnhancedList";
+import { ListItem, ListItemText } from "material-ui-next/List";
+import Avatar from "material-ui-next/Avatar";
+import WikiIcon from "material-ui-icons-next/ImportContacts";
 
-import CommonList from "../../../components/List/CommonList";
 import { fetchWikis } from "../WikiActions";
 import { getWikisByRootWikiId } from "../WikiReducer";
 import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
@@ -40,22 +42,39 @@ class WikiList extends React.Component {
     this.state = {
       page,
       limit,
-      sort: "-updatedAt",
-      enableLoadMore: true
+      sort: "-updatedAt"
     };
   }
 
   componentWillReceiveProps(nextProps) {
+    if (nextProps.rootWikiGroupTree !== this.props.rootWikiGroupTree) {
+      this.setState({
+        page: 1
+      });
+    }
     if (nextProps.dataSource.count() === 0) {
-      this.onRequestLoadMore();
+      this.handleRequestMore({ reason: "sync" });
     }
   }
 
-  onRequestLoadMore = () => {
-    const { page, limit, sort } = this.state;
+  handleRequestMore = ({ direction, reason }) => {
     const { rootWikiId, rootWikiGroupTree } = this.props;
     if (rootWikiId) {
-      const nextPage = page + 1;
+      const { page, limit, sort } = this.state;
+      let nextPage;
+      if (reason === "pullRefresh") {
+        nextPage = 1;
+      } else if (reason === "sync") {
+        nextPage = page;
+      } else {
+        if (direction === "bottom") {
+          nextPage = page + 1;
+        } else if (direction === "top") {
+          nextPage = page - 1 > 0 ? page - 1 : 1;
+        } else {
+          nextPage = page;
+        }
+      }
       return this.props
         .dispatch(
           fetchWikis(rootWikiId, {
@@ -66,17 +85,12 @@ class WikiList extends React.Component {
           })
         )
         .then(wikisJSON => {
-          if (wikisJSON.length < limit) {
-            this.setState({ enableLoadMore: false });
-          } else {
+          if (wikisJSON.length >= limit) {
             this.setState({ page: nextPage });
           }
-        })
-        .catch(() => {
-          this.setState({ enableLoadMore: false });
         });
     } else {
-      return undefined;
+      return Promise.resolve(null);
     }
   };
 
@@ -99,23 +113,31 @@ class WikiList extends React.Component {
   };
 
   listItemLeftAvatar = payload => {
-    return <Avatar icon={<WikiIcon />} />;
+    return (
+      <Avatar>
+        <WikiIcon />
+      </Avatar>
+    );
   };
 
   render() {
-    const { enableLoadMore } = this.state;
     let { dataSource } = this.props;
     dataSource = dataSource.sortBy(this.sortBy);
     return (
-      <CommonList
-        dataSource={dataSource}
-        enableLoadMore={enableLoadMore}
-        enableRefreshIndicator={true}
-        listItemHref={this.listItemHref}
-        listItemSecondaryText={this.listItemSecondaryText}
-        listItemLeftAvatar={this.listItemLeftAvatar}
-        onRequestLoadMore={this.onRequestLoadMore}
-      />
+      <List onRequestMore={this.handleRequestMore}>
+        {dataSource.map(wiki => {
+          const name = wiki.get("name");
+          const avatar = this.listItemLeftAvatar(wiki);
+          const to = this.listItemHref(wiki);
+          const key = wiki.get("_id");
+          return (
+            <ListItem key={key} button component={Link} to={to}>
+              {avatar}
+              <ListItemText primary={name} />
+            </ListItem>
+          );
+        })}
+      </List>
     );
   }
 }
@@ -169,8 +191,8 @@ const filterByRootWikiGroupTree = memoize((wikis, queryRootWikiGroupTree) => {
         rootWikiGroupTree === "null"
       );
     } else if (
-      List.isList(rootWikiGroupTree) &&
-      List.isList(queryRootWikiGroupTree)
+      ImmutableList.isList(rootWikiGroupTree) &&
+      ImmutableList.isList(queryRootWikiGroupTree)
     ) {
       return weakEqual(rootWikiGroupTree, queryRootWikiGroupTree);
     } else {

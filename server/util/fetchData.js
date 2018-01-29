@@ -5,24 +5,28 @@ This was inspired from https://github.com/caljrimmer/isomorphic-redux-app/blob/7
 import { sequence as pipe } from "./promiseUtils";
 
 function defaultGetNeed(component) {
-  const names = ["getInitialAction", "getInitialActions", "need"];
-  for (const name of names) {
-    const need = component[name];
-    if (need) {
-      if (Array.isArray(need)) {
-        return need.map(_need => {
-          return { name, callback: _need, component };
-        });
-      } else if (typeof need === "function") {
-        return [{ name, callback: need, component }];
-      } else if (typeof need === "object") {
-        return Object.values(need).map(_need => {
-          return { name, callback: _need, component };
-        });
+  if (!component) {
+    return [];
+  } else {
+    const names = ["getInitialAction", "getInitialActions", "need"];
+    for (const name of names) {
+      const need = component[name];
+      if (need) {
+        if (Array.isArray(need)) {
+          return need.map(_need => {
+            return { name, callback: _need, component };
+          });
+        } else if (typeof need === "function") {
+          return [{ name, callback: need, component }];
+        } else if (typeof need === "object") {
+          return Object.values(need).map(_need => {
+            return { name, callback: _need, component };
+          });
+        }
       }
     }
+    return [];
   }
-  return [];
 }
 
 export function fetchComponentData(

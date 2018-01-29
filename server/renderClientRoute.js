@@ -8,6 +8,10 @@ import { match, RouterContext } from "react-router";
 import moment from "moment";
 import { Provider } from "react-redux";
 
+import { SheetsRegistry } from "react-jss/lib/jss";
+import JssProvider from "react-jss/lib/JssProvider";
+import { createGenerateClassName } from "material-ui-next/styles";
+
 import IntlWrapper from "../client/modules/Intl/IntlWrapper";
 import clientRoutes from "../client/routes";
 import { clearTemplateCaches } from "../client/modules/Template/TemplateActions";
@@ -36,7 +40,8 @@ export function renderHead(...other) {
         ${head.link.toString()}
         ${head.script.toString()}
         <link href="/appManifest.json" rel="manifest">
-        <link async href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
         ${
           process.env.NODE_ENV === "production"
@@ -211,11 +216,6 @@ export function renderClientRoute(req, res, next) {
       });
 
       try {
-        res.set("Content-Type", "text/html").status(200);
-        res.write("<!doctype html><html>");
-        res.write(renderHead());
-        res.write("<body>");
-        res.write('<div id="root">');
         let n = 0;
         setKeyGenerator(() => {
           n += 1;
@@ -224,14 +224,64 @@ export function renderClientRoute(req, res, next) {
         // TODO
         // locale by request lang.
         moment.locale(store.getState().intl.locale);
-        if (appConfig.react.domOutput === "string") {
-          const body = renderToString(
-            <Provider store={store}>
-              <IntlWrapper>
-                <RouterContext {...renderProps} />
-              </IntlWrapper>
-            </Provider>
+        if (appConfig.react.domOutput === "stream") {
+          res.set("Content-Type", "text/html").status(200);
+          res.write("<!doctype html><html>");
+          res.write(renderHead());
+          res.write("<body>");
+          res.write('<div id="root">');
+          const generateClassName = createGenerateClassName();
+          const sheetsRegistry = new SheetsRegistry();
+          const stream = renderToNodeStream(
+            <JssProvider
+              registry={sheetsRegistry}
+              generateClassName={generateClassName}
+            >
+              <Provider store={store}>
+                <IntlWrapper>
+                  <RouterContext {...renderProps} />
+                </IntlWrapper>
+              </Provider>
+            </JssProvider>
           );
+          stream.on("error", error => {
+            console.warn(error);
+          });
+          stream.pipe(res, { end: false });
+          stream.on("end", () => {
+            res.write("</div>");
+            const css = sheetsRegistry.toString();
+            res.write(`<style id="jss-server-side">${css}</style>`);
+            // don't send template caches.
+            store.dispatch(clearTemplateCaches());
+            // send state
+            const stateString = safeStringify(store.getState());
+            res.write(renderScripts(stateString));
+            res.write("</body></html>");
+            res.end();
+          });
+        } else {
+          res.set("Content-Type", "text/html").status(200);
+          res.write("<!doctype html><html>");
+          res.write(renderHead());
+          res.write("<body>");
+          const generateClassName = createGenerateClassName();
+          const sheetsRegistry = new SheetsRegistry();
+          const body = renderToString(
+            <JssProvider
+              registry={sheetsRegistry}
+              generateClassName={generateClassName}
+            >
+              <Provider store={store}>
+                <IntlWrapper>
+                  <RouterContext {...renderProps} />
+                </IntlWrapper>
+              </Provider>
+            </JssProvider>
+          );
+          const css = sheetsRegistry.toString();
+          res.write(`<style id="jss-server-side">${css}</style>`);
+          res.write('<div id="root">');
           res.write(body);
           res.write("</div>");
           // don't send template caches.
@@ -241,28 +291,6 @@ export function renderClientRoute(req, res, next) {
           res.write(renderScripts(stateString));
           res.write("</body></html>");
           res.end();
-        } else {
-          const stream = renderToNodeStream(
-            <Provider store={store}>
-              <IntlWrapper>
-                <RouterContext {...renderProps} />
-              </IntlWrapper>
-            </Provider>
-          );
-          stream.on("error", error => {
-            console.warn(error);
-          });
-          stream.pipe(res, { end: false });
-          stream.on("end", () => {
-            res.write("</div>");
-            // don't send template caches.
-            store.dispatch(clearTemplateCaches());
-            // send state
-            const stateString = safeStringify(store.getState());
-            res.write(renderScripts(stateString));
-            res.write("</body></html>");
-            res.end();
-          });
         }
         return Promise.resolve(null);
       } catch (_err) {

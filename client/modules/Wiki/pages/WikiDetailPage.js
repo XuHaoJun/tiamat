@@ -1,18 +1,21 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
-import { is } from "immutable";
+
+import { withStyles } from "material-ui-next/styles";
+import slideHeightStyle from "../../MyApp/styles/slideHeight";
+
+import CenterCircularProgress from "../../../components/CenterCircularProgress";
+import WikiDetailTabs, {
+  WIKI_CONTENT_SLIDE,
+  WIKI_HITSTORY_SLIDE
+} from "../components/WikiDetailTabs/WikiDetailTabs";
 
 import { fetchWikiByRouterProps } from "../WikiActions";
 import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
 import { getWikiByRouterProps } from "../WikiReducer";
 import { getRootWiki } from "../../RootWiki/RootWikiReducer";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
-import CenterCircularProgress from "../../../components/CenterCircularProgress";
-import WikiDetailTabs, {
-  WIKI_CONTENT_SLIDE,
-  WIKI_HITSTORY_SLIDE
-} from "../components/WikiDetailTabs/WikiDetailTabs";
 
 function getTitle({ rootWiki }) {
   if (rootWiki) {
@@ -22,9 +25,21 @@ function getTitle({ rootWiki }) {
   }
 }
 
+export const styles = theme => {
+  return {
+    slideHeight: slideHeightStyle(theme, {
+      withTab: true,
+      withAppBar: true
+    }).slideHeight,
+    slideHeightWithoutAppBar: slideHeightStyle(theme, {
+      withTab: true,
+      withAppBar: false
+    }).slideHeight
+  };
+};
+
 class WikiDetailPage extends React.Component {
   static defaultProps = {
-    title: "Loading...",
     wikiId: "",
     wiki: null
   };
@@ -60,7 +75,7 @@ class WikiDetailPage extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!is(this.props, nextProps)) {
+    if (this.props.location !== nextProps.location) {
       this.fetchComponentData(nextProps);
     }
   }
@@ -69,7 +84,7 @@ class WikiDetailPage extends React.Component {
     if (props.fetchComponentData) {
       return props.fetchComponentData();
     } else {
-      return null;
+      return Promise.resolve(null);
     }
   };
 
@@ -81,15 +96,16 @@ class WikiDetailPage extends React.Component {
     const name = wiki ? wiki.get("name") : "Loading...";
     const title = getTitle(this.props);
     const helmetTitle = `${name} - ${title}`;
-    const { browser } = this.props;
     return (
       <div>
         <Helmet title={helmetTitle} />
         <WikiDetailTabs
-          scrollKey="WikiDetailPage/WikiDetailTabs"
+          // ui
+          id="WikiDetailPage/WikiDetailTabs"
+          slideClassName={this.props.classes.slideHeight}
+          // data
           wikiId={wikiId}
           rootWikiId={rootWikiId}
-          browser={browser}
         />
       </div>
     );
@@ -105,11 +121,9 @@ function mapStateToProps(state, routerProps) {
     }
   }
   const rootWiki = getRootWiki(state, rootWikiId);
-  const { browser } = state;
   const wikiId = wiki ? wiki.get("_id") : routerProps.params.wikiId;
   const wikiName = wiki ? wiki.get("name") : routerProps.params.wikiName;
   return {
-    browser,
     wikiId,
     wikiName,
     wiki,
@@ -127,4 +141,6 @@ function mapDispatchToProps(dispatch, routerProps) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(WikiDetailPage);
+const Styled = withStyles(styles)(WikiDetailPage);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Styled);

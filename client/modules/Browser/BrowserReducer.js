@@ -1,7 +1,7 @@
 import { createResponsiveStateReducer } from "redux-responsive";
 
 const breakPoints = {
-  extraSmall: 1,
+  extraSmall: 0,
   small: 600,
   medium: 960,
   large: 1280,

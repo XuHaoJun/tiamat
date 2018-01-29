@@ -4,9 +4,10 @@ import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { Set } from "immutable";
 import _ from "lodash";
 
-import TextField from "material-ui/TextField";
-import DropDownMenu from "material-ui/DropDownMenu";
-import MenuItem from "material-ui/MenuItem";
+import TextField from "material-ui-next/TextField";
+import Button from "material-ui-next/Button";
+import Menu, { MenuItem } from "material-ui-next/Menu";
+import ArrowDropDown from "material-ui-icons-next/ArrowDropDown";
 
 import Editor, { emptyContent } from "../../../../components/Slate/Editor";
 
@@ -134,23 +135,48 @@ class DiscussionForm extends React.Component {
             style={{
               marginLeft: 24
             }}
-            floatingLabelText="標題"
+            label="標題"
             value={title}
             onChange={this.handleTitleOnChange}
           />
         ) : null}
         <div>
           {forumBoard && isRoot ? (
-            <DropDownMenu
-              value={forumBoardGroup}
-              onChange={this.handleGroupChange}
-            >
-              {this.props.forumBoard.get("groups").map(group => {
-                return (
-                  <MenuItem key={group} value={group} primaryText={group} />
-                );
-              })}
-            </DropDownMenu>
+            <React.Fragment>
+              <Button
+                onClick={event => {
+                  this.setState({ anchorEl: event.currentTarget });
+                }}
+              >
+                {forumBoardGroup}
+                <ArrowDropDown />
+              </Button>
+              <Menu
+                anchorEl={this.state.anchorEl}
+                open={Boolean(this.state.anchorEl)}
+                onClose={() => {
+                  this.setState({ anchorEl: null });
+                }}
+              >
+                {forumBoard.get("groups").map(group => {
+                  const selected = group === forumBoardGroup;
+                  return (
+                    <MenuItem
+                      onClick={() => {
+                        this.setState({
+                          anchorEl: null,
+                          forumBoardGroup: group
+                        });
+                      }}
+                      key={group}
+                      selected={selected}
+                    >
+                      {group}
+                    </MenuItem>
+                  );
+                })}
+              </Menu>
+            </React.Fragment>
           ) : null}
         </div>
         <div style={styles.editorContainer}>

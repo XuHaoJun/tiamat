@@ -5,7 +5,9 @@ import { is, fromJS } from "immutable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import Debug from "debug";
+
+import { withStyles } from "material-ui-next/styles";
+import slideHeightStyle from "../../MyApp/styles/slideHeight";
 
 import MixedMainTabs, {
   FORUMBOARD_GROUPS_SLIDE,
@@ -23,7 +25,18 @@ import { fetchRootDiscussions } from "../../Discussion/DiscussionActions";
 import { getCurrentAccessToken } from "../../User/UserReducer";
 import { getDBisInitialized } from "../../MyApp/MyAppReducer";
 
-const debug = Debug("app:MixedMainPage");
+export const styles = theme => {
+  return {
+    slideHeight: slideHeightStyle(theme, {
+      withTab: true,
+      withAppBar: true
+    }).slideHeight,
+    slideHeightWithoutAppBar: slideHeightStyle(theme, {
+      withTab: true,
+      withAppBar: false
+    }).slideHeight
+  };
+};
 
 const parseRootWikiGroupTree = memoize(queryString => {
   if (!queryString) {
@@ -72,16 +85,14 @@ function parseRouterProps(routerProps) {
 
 class MixedMainPage extends React.Component {
   static propTypes = {
-    title: PropTypes.string,
-    browser: PropTypes.object.isRequired
+    title: PropTypes.string
   };
 
   static defaultProps = {
-    title: "Redirecting..."
+    title: "Loading..."
   };
 
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
 
@@ -97,7 +108,7 @@ class MixedMainPage extends React.Component {
         const rootWiki = rootWikiId ? getRootWiki(state, rootWikiId) : null;
         const fName = forumBoard ? forumBoard.get("name") : "";
         const rName = rootWiki ? rootWiki.get("name") : "";
-        const title = (rootWikiId ? rName : fName) || "Loading...";
+        const title = fName || rName || "Loading...";
         return setHeaderTitle(title);
       };
       // set default title before fetch.
@@ -162,8 +173,11 @@ class MixedMainPage extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!is(this.props, nextProps) && nextProps.dbIsInitialized) {
-      this.fetchComponentData(nextProps);
+    if (
+      this.props.location.pathname !== nextProps.location.pathname &&
+      nextProps.dbIsInitialized
+    ) {
+      this.fetchComponentData({ tryMore: false }, nextProps);
     }
     this.setLast(nextProps);
   }
@@ -178,11 +192,11 @@ class MixedMainPage extends React.Component {
     this.lastRootWikiGroupTree = props.rootWikiGroupTree;
   };
 
-  fetchComponentData = (props = this.props) => {
+  fetchComponentData = (options = {}, props = this.props) => {
     if (props.fetchComponentData) {
-      return props.fetchComponentData();
+      return props.fetchComponentData(options);
     } else {
-      return null;
+      return Promise.resolve(null);
     }
   };
 
@@ -253,7 +267,6 @@ class MixedMainPage extends React.Component {
       wiki,
       isWikis
     } = this.props;
-    const { browser } = this.props;
     let { rootWikiGroupTree, forumBoardGroup } = this.props;
     rootWikiGroupTree = !rootWikiGroupTree
       ? this.lastRootWikiGroupTree
@@ -265,7 +278,12 @@ class MixedMainPage extends React.Component {
       <div>
         <Helmet title={title} meta={meta} />
         <MixedMainTabs
-          scrollKey="MixedMainPage/MixedMainTabs"
+          // ui
+          id="MixedMainPage/MixedMainTabs"
+          slideClassName={this.props.classes.slideHeight}
+          onTransitionEnd={this.handleTransitionEnd}
+          slideIndex={this.props.slideIndex}
+          // data
           targetKind={targetKind}
           forumBoardId={forumBoardId}
           forumBoard={forumBoard}
@@ -275,10 +293,6 @@ class MixedMainPage extends React.Component {
           rootWikiGroupTree={rootWikiGroupTree}
           wiki={wiki}
           isWikis={isWikis}
-          onTransitionEnd={this.handleTransitionEnd}
-          slideIndex={this.props.slideIndex}
-          disableOnDrawerStart={true}
-          browser={browser}
         />
       </div>
     );
@@ -306,14 +320,12 @@ function mapStateToProps(state, routerProps) {
   }
   const forumBoardName = forumBoard ? forumBoard.get("name") : "";
   const rootWikiName = rootWiki ? rootWiki.get("name") : "";
-  const { browser } = state;
   const title = rootWikiName || forumBoardName;
   const dbIsInitialized = getDBisInitialized(state);
   return {
     dbIsInitialized,
     targetKind,
     accessToken,
-    browser,
     isWikis,
     isRootDiscussions,
     slideIndex,
@@ -329,14 +341,16 @@ function mapStateToProps(state, routerProps) {
 
 function mapDispatchToProps(dispatch, routerProps) {
   return {
-    fetchComponentData() {
+    fetchComponentData(options = {}) {
       const action = MixedMainPage.getInitialAction(
         { routerProps },
-        { tryMore: true }
+        { tryMore: true, ...options }
       );
       return dispatch(action);
     }
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MixedMainPage);
+const Styled = withStyles(styles)(MixedMainPage);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Styled);

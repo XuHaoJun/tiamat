@@ -2,52 +2,45 @@ import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-
-import AppBar from "material-ui/AppBar";
-import { getStyles as appBarGetStyles } from "material-ui/AppBar/AppBar";
-import IconButton from "material-ui/IconButton";
-import SearchVerIcon from "material-ui/svg-icons/action/search";
-import BackspaceIcon from "material-ui/svg-icons/hardware/keyboard-backspace";
-import MenuIcon from "material-ui/svg-icons/navigation/menu";
-import FlatButton from "material-ui/FlatButton";
-import { Motion, spring } from "react-motion";
 import { Link } from "react-router";
 
-import { getIsLoggedIn } from "../../User/UserReducer";
+import { Motion, spring } from "react-motion";
+
+import compose from "recompose/compose";
+import { withStyles } from "material-ui-next/styles";
+import AppBar from "material-ui-next/AppBar";
+import Toolbar from "material-ui-next/Toolbar";
+import Typography from "material-ui-next/Typography";
+import Button from "material-ui-next/Button";
+import IconButton from "material-ui-next/IconButton";
+import { CircularProgress } from "material-ui-next/Progress";
+import SearchVerIcon from "material-ui-icons-next/Search";
+import BackspaceIcon from "material-ui-icons-next/KeyboardBackspace";
+import MenuIcon from "material-ui-icons-next/Menu";
+
 import CurrentUserIconMenu from "../../User/components/CurrentUserIconMenu";
 import AppNavDrawer from "./AppNavDrawer";
 import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
 
-function makeLinkable(WrappedComponent) {
-  const LinkableComponent = props => {
-    const { to, children, ...other } = props;
-    return (
-      <Link to={to} href={to}>
-        <WrappedComponent {...other}>{children}</WrappedComponent>
-      </Link>
-    );
-  };
-  return LinkableComponent;
-}
+import { getIsFirstRender } from "../MyAppReducer";
+import { getIsLoggedIn } from "../../User/UserReducer";
 
-const LogInButton = makeLogInDialogable(FlatButton);
-LogInButton.muiName = FlatButton.muiName;
+const LogInButton = makeLogInDialogable(Button);
 
-const LinkIconButton = makeLinkable(IconButton);
 const SearchButton = props => {
   return (
-    <LinkIconButton {...props} to="/search">
+    <IconButton {...props} component={Link} to="/search">
       <SearchVerIcon />
-    </LinkIconButton>
+    </IconButton>
   );
 };
-SearchButton.muiName = IconButton.muiName;
 
-const LeftElementMotionWrap = props => {
+const LeftElementMotionHoc = Component => props => {
+  const { initDeg, ...other } = props;
   const defaultStyle = {
-    deg: props.initDeg || 45
+    deg: initDeg || 45
   };
   const style = {
     deg: spring(0, {
@@ -61,40 +54,53 @@ const LeftElementMotionWrap = props => {
         const divStyle = {
           transform: `rotate(${deg}deg)`
         };
-        return <div style={divStyle}>{props.children}</div>;
+        return <Component style={divStyle} {...other} />;
       }}
     </Motion>
   );
 };
 
+const AnimateBackspaceIcon = LeftElementMotionHoc(BackspaceIcon);
+
 const BackspaceButton = props => {
+  const { initDeg, ...other } = props;
   return (
-    <LeftElementMotionWrap>
-      <IconButton {...props}>
-        <BackspaceIcon />
-      </IconButton>
-    </LeftElementMotionWrap>
+    <IconButton {...other}>
+      <AnimateBackspaceIcon initDeg={initDeg} />
+    </IconButton>
   );
 };
 
-BackspaceButton.muiName = IconButton.muiName;
+const AnimateMenuIcon = LeftElementMotionHoc(MenuIcon);
 
 const MenuButton = props => {
+  const { initDeg, ...other } = props;
   return (
-    <LeftElementMotionWrap initDeg={-45}>
-      <IconButton {...props}>
-        <MenuIcon />
-      </IconButton>
-    </LeftElementMotionWrap>
+    <IconButton {...other}>
+      <AnimateMenuIcon initDeg={initDeg || -45} />
+    </IconButton>
   );
 };
 
-MenuButton.muiName = IconButton.muiName;
+const styles = theme => {
+  return {
+    flex: {
+      flex: 1
+    },
+    menuButton: {
+      marginLeft: -12,
+      marginRight: 20
+    }
+  };
+};
 
 class Header extends React.Component {
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
+  };
+
+  static propTypes = {
+    classes: PropTypes.object.isRequired
   };
 
   static defaultProps = {
@@ -165,12 +171,6 @@ class Header extends React.Component {
 
   getDrawerIsOpen = () => {
     return this.state.open;
-  };
-
-  getIconStyles = () => {
-    const { prepareStyles } = this.context.muiTheme;
-    const iconStyle = appBarGetStyles(this.props, this.context);
-    return prepareStyles(iconStyle);
   };
 
   handleOnSubmit = e => {
@@ -259,37 +259,40 @@ class Header extends React.Component {
     }
   };
 
-  renderIconLeftElement = () => {
+  LeftIconButton = props => {
     const enableBackspaceButton = this.shouldBackspaceButton(
       this.props.pathname
     );
     if (enableBackspaceButton) {
-      return <BackspaceButton onClick={this.handleBack} />;
+      return <BackspaceButton onClick={this.handleBack} {...props} />;
     } else {
-      // TODO
-      // disable menubutton on browser.lessThan.medium?
-      return <MenuButton onClick={this.handleToggle} />;
+      if (this.props.isFirstRender) {
+        return <CircularProgress size={24} {...props} />;
+      } else {
+        return <MenuButton onClick={this.handleToggle} {...props} />;
+      }
     }
   };
 
-  renderIconRightElement = () => {
+  RightIconButton = props => {
     const { pathname } = this.props;
     const enableSendButtonRules = [/\/create/, /\update/];
     const enableSendButton = enableSendButtonRules.some(regexp =>
       regexp.test(pathname)
     );
     if (enableSendButton) {
-      return <SendButton />;
-    }
-    const { browser } = this.props;
-    if (browser.lessThan.medium) {
-      return <SearchButton />;
+      return <SendButton {...props} />;
     } else {
-      const { isLoggedIn } = this.props;
-      if (isLoggedIn) {
-        return <CurrentUserIconMenu />;
+      const { browser } = this.props;
+      if (browser.lessThan.medium) {
+        return <SearchButton {...props} />;
       } else {
-        return <LogInButton label="登入" />;
+        const { isLoggedIn } = this.props;
+        if (isLoggedIn) {
+          return <CurrentUserIconMenu {...props} />;
+        } else {
+          return <LogInButton {...props}>登入</LogInButton>;
+        }
       }
     }
   };
@@ -302,31 +305,45 @@ class Header extends React.Component {
       title = <SearchAutoComplete />;
     }
     const appBarZDepth = this.props.appBarZDepth || 0;
+    const { classes } = this.props;
+    const { LeftIconButton, RightIconButton } = this;
     return (
-      <div>
-        <AppBar
-          zDepth={appBarZDepth}
-          style={this.props.appBarStyle}
-          title={title}
-          iconElementLeft={this.renderIconLeftElement()}
-          iconElementRight={this.renderIconRightElement()}
-        />
+      <React.Fragment>
+        <AppBar elevation={appBarZDepth} position="static">
+          <Toolbar>
+            <LeftIconButton
+              className={classes.menuButton}
+              color="inherit"
+              aria-label="Menu"
+            />
+            <Typography type="title" color="inherit" className={classes.flex}>
+              {title}
+            </Typography>
+            <RightIconButton color="inherit" />
+          </Toolbar>
+        </AppBar>
         <AppNavDrawer
           browser={this.props.browser}
           selectedIndex={selectedIndex}
           open={open}
-          docked={!this.props.browser.lessThan.medium}
           onRequestChangeNavDrawer={this.handleRequestChangeNavDrawer}
         />
-      </div>
+      </React.Fragment>
     );
   }
 }
 
-export const HeaderWithoutConnect = Header;
-
-export default connect(store => {
-  const { browser } = store;
-  const isLoggedIn = getIsLoggedIn(store);
-  return { browser, isLoggedIn };
-})(Header);
+export default compose(
+  withStyles(styles),
+  connect(
+    state => {
+      const isFirstRender = getIsFirstRender(state);
+      const isLoggedIn = getIsLoggedIn(state);
+      const { browser } = state;
+      return { browser, isFirstRender, isLoggedIn };
+    },
+    () => {
+      return {};
+    }
+  )
+)(Header);

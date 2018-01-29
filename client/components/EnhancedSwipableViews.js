@@ -2,8 +2,19 @@ import React from "react";
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
 
+class PureSwipableChild extends React.Component {
+  shouldComponentUpdate() {
+    return this.props.index === this.props.currentIndex;
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
+
 export class EnhancedSwipableViews extends React.Component {
   static propTypes = {
+    pure: PropTypes.bool,
     disableOnDrawerStart: PropTypes.bool,
     resistance: PropTypes.bool,
     scrollKey: PropTypes.string,
@@ -13,6 +24,7 @@ export class EnhancedSwipableViews extends React.Component {
   };
 
   static defaultProps = {
+    pure: false,
     disableOnDrawerStart: true,
     disableLazyLoading: true,
     resistance: true,
@@ -27,7 +39,7 @@ export class EnhancedSwipableViews extends React.Component {
 
   constructor(props) {
     super(props);
-    this.scrollKey = props.scrollKey;
+    this.scrollKey = props.id;
     this.state = {
       disabled: false
     };
@@ -40,7 +52,7 @@ export class EnhancedSwipableViews extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.scrollKey && this.props.scrollKey !== nextProps.scrollKey) {
+    if (nextProps.id && this.props.id !== nextProps.id) {
       if (this._scrollKeys) {
         this._scrollKeys.forEach(scrollKey => {
           this.context.scrollBehavior.unregisterElement(scrollKey);
@@ -100,7 +112,8 @@ export class EnhancedSwipableViews extends React.Component {
       return;
     }
     const { containerNode } = this.originalSwipableViews;
-    const { scrollKey, animateHeight } = this.props;
+    const { id, animateHeight } = this.props;
+    const scrollKey = id;
     if (scrollKey && !animateHeight && containerNode) {
       containerNode.childNodes.forEach((activeNode, index) => {
         const _scrollKey = `${scrollKey}-${index}`;
@@ -125,6 +138,8 @@ export class EnhancedSwipableViews extends React.Component {
 
   render() {
     const {
+      pure,
+      index,
       disableOnDrawerStart,
       scrollKey,
       resistance,
@@ -136,15 +151,25 @@ export class EnhancedSwipableViews extends React.Component {
       ...other
     } = this.props;
     const { disabled } = this.state;
+    const _children = pure
+      ? React.Children.map(children, (child, i) => {
+          return (
+            <PureSwipableChild key={child.key} index={i} currentIndex={index}>
+              {child}
+            </PureSwipableChild>
+          );
+        })
+      : children;
     return (
       <SwipeableViews
         {...other}
+        index={index}
         resistance={resistance}
         ref={this.setOriginalSwipableViewsRef}
         disabled={disabled}
         disableLazyLoading={disableLazyLoading}
       >
-        {children}
+        {_children}
       </SwipeableViews>
     );
   }

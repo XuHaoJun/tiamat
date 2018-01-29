@@ -1,19 +1,35 @@
 import React from "react";
 import { Set, is } from "immutable";
 import { connect } from "react-redux";
-import CommonList from "../../../components/List/CommonList";
+import { Link } from "react-router";
+
+import { ListItem, ListItemText } from "material-ui-next/List";
+import List from "../../../components/List/EnhancedList";
 import { getForumBoards } from "../ForumBoardReducer";
 import { fetchForumBoards } from "../ForumBoardActions";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import Avatar from "material-ui/Avatar";
+
+import Avatar from "material-ui-next/Avatar";
 import Debug from "debug";
 
 const debug = Debug("app:ForumBoardList");
 
+const defaultSortBy = d => {
+  return -1 * d.get("popularityCounter");
+};
+
 class ForumBoardList extends React.Component {
   static defaultProps = {
-    dataSource: Set()
+    dataSource: Set(),
+    sortBy: defaultSortBy,
+    style: { width: "100%", height: "100%", overflow: "auto" }
   };
+
+  static getInitialAction() {
+    return dispatch => {
+      return dispatch(fetchForumBoards());
+    };
+  }
 
   constructor(props) {
     super(props);
@@ -23,71 +39,64 @@ class ForumBoardList extends React.Component {
     const page = props.page || Math.floor(dataSource.count() / limit) || 1;
     this.state = {
       page,
-      limit,
-      enableLoadMore: true
+      limit
     };
   }
 
-  componentDidMount() {
-    this.props.dispatch(fetchForumBoards());
-  }
-
-  onRequestLoadMore = () => {
-    const { page, limit, sort } = this.state;
-    const nextPage = page + 1;
-    const prevDataSource = this.props.dataSource;
-    debug("onRequestLoadMore start");
-    return this.props
-      .dispatch(fetchForumBoards(nextPage, limit, sort))
-      .then(() => {
-        debug("onRequestLoadMore end1");
-        const currentDataSource = this.props.dataSource;
-        const nextState = {};
-        const changed =
-          currentDataSource.count() > 0 &&
-          !is(prevDataSource, currentDataSource);
-        if (changed) {
-          nextState.enableLoadMore = true;
-          nextState.page = nextPage;
-        } else {
-          nextState.enableLoadMore = false;
-        }
-        this.setState(nextState);
-        debug("onRequestLoadMore end2");
-      })
-      .catch(() => {
-        this.setState({ enableLoadMore: false });
-      });
-  };
-
-  listItemHref = payload => {
-    return `/forumBoards/${payload.get("_id")}/rootDiscussions`;
-  };
-
-  listItemLeftAvatar = payload => {
-    return <Avatar>{payload.get("name")[0]}</Avatar>;
-  };
-
-  listItemSecondaryText = payload => {
-    return `${payload.get("popularityCounter")} 人氣`;
-  };
-
-  sortBy = payload => {
-    return -1 * payload.get("popularityCounter");
+  handleRequestMore = ({ direction }) => {
+    if (direction === "top") {
+      return this.props.dispatch(ForumBoardList.getInitialAction());
+    } else {
+      const { page, limit, sort } = this.state;
+      const nextPage = page + 1;
+      const prevDataSource = this.props.dataSource;
+      debug("onRequestLoadMore start");
+      return this.props
+        .dispatch(fetchForumBoards(nextPage, limit, sort))
+        .then(() => {
+          debug("onRequestLoadMore end1");
+          const currentDataSource = this.props.dataSource;
+          const nextState = {};
+          const changed =
+            currentDataSource.count() > 0 &&
+            !is(prevDataSource, currentDataSource);
+          if (changed) {
+            nextState.page = nextPage;
+          }
+          this.setState(nextState);
+          debug("onRequestLoadMore end2");
+        });
+    }
   };
 
   render() {
-    const { enableLoadMore } = this.state;
-    const dataSource = this.props.dataSource.sortBy(this.sortBy);
+    const dataSource = this.props.sortBy
+      ? this.props.dataSource.sortBy(this.props.sortBy)
+      : this.props.dataSorce;
+    const { id } = this.props;
     return (
-      <CommonList
-        dataSource={dataSource}
-        enableLoadMore={enableLoadMore}
-        listItemHref={this.listItemHref}
-        listItemLeftAvatar={this.listItemLeftAvatar}
-        listItemSecondaryText={this.listItemSecondaryText}
-        onRequestLoadMore={this.onRequestLoadMore}
-      />
+      <List
+        id={id ? `${id}/List` : undefined}
+        onRequestMore={this.handleRequestMore}
+        style={this.props.style}
+      >
+        {dataSource.map(forumBoard => {
+          const _id = forumBoard.get("_id");
+          const name = forumBoard.get("name");
+          const popularityCounter = forumBoard.get("popularityCounter");
+          const key = `ForumBoardList/${_id}`;
+          const defaultAvatar = name[0];
+          const primary = name;
+          const secondary = `${popularityCounter} 人氣`;
+          const to = `/forumBoards/${_id}/rootDiscussions`;
+          return (
+            <ListItem key={key} button divider component={Link} to={to}>
+              <Avatar>{defaultAvatar}</Avatar>
+              <ListItemText primary={primary} secondary={secondary} />
+            </ListItem>
+          );
+        })}
+      </List>
     );
   }
 }

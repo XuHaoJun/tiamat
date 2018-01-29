@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Tabs, Tab } from "material-ui/Tabs";
+import { Tab } from "material-ui-next/Tabs";
+import Tabs from "../../../../Tabs";
 
 import AceEditor from "../../../../AceEditor";
 

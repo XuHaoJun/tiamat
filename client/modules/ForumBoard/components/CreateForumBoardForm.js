@@ -1,9 +1,10 @@
 import React from "react";
-import TextField from "material-ui/TextField";
-import DropDownMenu from "material-ui/DropDownMenu";
-import MenuItem from "material-ui/MenuItem";
-import FlatButton from "material-ui/FlatButton";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+
+import TextField from "material-ui-next/TextField";
+import Menu, { MenuItem } from "material-ui-next/Menu";
+import Button from "material-ui-next/Button";
+import ArrowDropDown from "material-ui-icons-next/ArrowDropDown";
 
 export function getStyles() {
   return {
@@ -18,7 +19,8 @@ class CreateForumBoardForm extends React.Component {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
-      type: 1,
+      type: "",
+      typePlaceholder: "遊戲類型",
       name: ""
     };
   }
@@ -41,19 +43,64 @@ class CreateForumBoardForm extends React.Component {
       <div>
         <TextField
           style={{ marginLeft: 24 }}
-          floatingLabelText="看板名字"
+          label="看板名字"
           value={name}
           onChange={this.handleChangeName}
         />
         <br />
-        <DropDownMenu value={type} onChange={this.handleChangeType}>
-          <MenuItem value={1} primaryText="遊戲類型" />
-          <MenuItem value={2} primaryText="角色扮演" />
-          <MenuItem value={3} primaryText="動作" />
-          <MenuItem value={4} primaryText="射擊" />
-        </DropDownMenu>
+        <React.Fragment>
+          <Button
+            onClick={event => {
+              this.setState({ anchorEl: event.currentTarget });
+            }}
+          >
+            {type || this.state.typePlaceholder}
+            <ArrowDropDown />
+          </Button>
+          <Menu
+            anchorEl={this.state.anchorEl}
+            open={Boolean(this.state.anchorEl)}
+            onClose={() => {
+              this.setState({ anchorEl: null });
+            }}
+          >
+            <MenuItem
+              selected={type === "角色扮演"}
+              onClick={() => {
+                this.setState({
+                  anchorEl: null,
+                  type: "角色扮演"
+                });
+              }}
+            >
+              角色扮演
+            </MenuItem>
+            <MenuItem
+              selected={type === "動作"}
+              onClick={() => {
+                this.setState({
+                  anchorEl: null,
+                  type: "動作"
+                });
+              }}
+            >
+              動作
+            </MenuItem>
+            <MenuItem
+              selected={type === "射擊"}
+              onClick={() => {
+                this.setState({
+                  anchorEl: null,
+                  type: "射擊"
+                });
+              }}
+            >
+              射擊
+            </MenuItem>
+          </Menu>
+        </React.Fragment>
         <br />
-        <FlatButton label="上傳看板 Icon (36x36) (尚未完成)" primary={true} />
+        <Button color="primary">上傳看板 Icon (36x36) (尚未完成)</Button>
       </div>
     );
   }

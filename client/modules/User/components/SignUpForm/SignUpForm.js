@@ -1,12 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import isEmail from "validator/lib/isEmail";
-import TextField from "material-ui/TextField";
-import RaisedButton from "material-ui/RaisedButton";
-import isBoolean from "lodash/isBoolean";
-import isPromise from "is-promise";
 import _ from "lodash";
 import { connect } from "react-redux";
+import isEmail from "validator/lib/isEmail";
+import isBoolean from "lodash/isBoolean";
+import isPromise from "is-promise";
+
+import TextField from "material-ui-next/TextField";
+import Button from "material-ui-next/Button";
+
 import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";
 import {
   addUserRequest,
@@ -15,10 +17,6 @@ import {
 } from "../../UserActions";
 
 class SignUpForm extends React.PureComponent {
-  static contextTypes = {
-    muiTheme: PropTypes.object.isRequired
-  };
-
   static propTypes = {
     onSubmit: PropTypes.func,
     validateEmail: PropTypes.func
@@ -243,7 +241,7 @@ class SignUpForm extends React.PureComponent {
             autoFocus={true}
             type="email"
             id="sign-up-form-email"
-            floatingLabelText="電子郵件"
+            label="電子郵件"
             value={this.state.email}
             onBlur={this.handleBlur.bind(this, "email")}
             onChange={this.handleChange.bind(this, "email")}
@@ -254,7 +252,7 @@ class SignUpForm extends React.PureComponent {
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"
-            floatingLabelText="建立密碼"
+            label="建立密碼"
             id="sign-up-form-password"
             type="password"
             value={this.state.password}
@@ -263,7 +261,7 @@ class SignUpForm extends React.PureComponent {
           />
           <br />
           <TextField
-            floatingLabelText="確認密碼"
+            label="確認密碼"
             id="sign-up-form-confirm-password"
             type="password"
             value={this.state.confirmPassword}
@@ -271,17 +269,19 @@ class SignUpForm extends React.PureComponent {
             errorText={this.state.errors.confirmPassword}
           />
           <br />
-          <RaisedButton
-            label="註冊"
+          <Button
+            raised
             type="submit"
             disabled={this.state.progressing}
-            primary={true}
+            color="primary"
             style={{
               width: 256,
               marginTop: 50,
               marginBottom: 20
             }}
-          />
+          >
+            註冊
+          </Button>
         </form>
       </div>
     );

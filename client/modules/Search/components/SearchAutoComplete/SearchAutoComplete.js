@@ -1,152 +1,77 @@
-import { List } from "immutable";
 import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import AutoComplete from "material-ui/AutoComplete";
-import MenuItem from "material-ui/MenuItem";
-import { connect } from "react-redux";
-import muiThemeable from "material-ui/styles/muiThemeable";
-import { fetchSearchResult } from "../../SearchActions";
-import { getLastSearchResult } from "../../SearchReducer";
-import cssStyles from "./SearchAutoComplete.css";
+
+import compose from "recompose/compose";
+import pure from "recompose/pure";
+import withWidth, { isWidthUp } from "material-ui-next/utils/withWidth";
+import { withStyles } from "material-ui-next/styles";
+import { fade } from "material-ui-next/styles/colorManipulator";
+
+import SearchIcon from "material-ui-icons-next/Search";
+
+const styles = theme => {
+  return {
+    wrapper: {
+      fontFamily: theme.typography.fontFamily,
+      position: "relative",
+      marginRight: theme.spacing.unit * 2,
+      marginLeft: theme.spacing.unit,
+      borderRadius: 2,
+      background: fade(theme.palette.common.white, 0.15),
+      "&:hover": {
+        background: fade(theme.palette.common.white, 0.25)
+      },
+      "& $input": {
+        transition: theme.transitions.create("width"),
+        width: 200,
+        "&:focus": {
+          width: 250
+        }
+      }
+    },
+    search: {
+      width: theme.spacing.unit * 9,
+      height: "100%",
+      position: "absolute",
+      pointerEvents: "none",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    input: {
+      font: "inherit",
+      padding: `${theme.spacing.unit}px ${theme.spacing.unit}px ${
+        theme.spacing.unit
+      }px ${theme.spacing.unit}px`,
+      border: 0,
+      display: "block",
+      verticalAlign: "middle",
+      whiteSpace: "normal",
+      background: "none",
+      margin: 0, // Reset for Safari
+      color: "inherit",
+      width: "100%",
+      "&:focus": {
+        outline: 0
+      }
+    }
+  };
+};
 
 class SearchAutoComplete extends React.Component {
-  static defaultProps = {
-    hits: List(),
-    target: "discussions",
-    queryField: "title",
-    queryOptions: {},
-    onUpdateInput: () => {},
-    onSubmit: () => {}
-  };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    this.state = {
-      searchText: ""
-    };
-  }
-
-  getQueryOptions = searchText => {
-    const { queryField, queryOptions } = this.props;
-    const _queryOptions = {
-      [queryField]: searchText,
-      highlight: true
-    };
-    const { target } = this.props;
-    if (target === "discussions") {
-      _queryOptions.parentDiscussionId = null;
-    }
-    return Object.assign({}, _queryOptions, queryOptions);
-  };
-
-  handleUpdateInput = searchText => {
-    const { target } = this.props;
-    const queryOptions = this.getQueryOptions(searchText);
-    this.setState(
-      {
-        searchText
-      },
-      () => {
-        this.props.onUpdateInput(searchText, target, queryOptions);
-      }
-    );
-  };
-
-  handleNewRequest = ({ text, hit }) => {
-    if (text !== "") {
-      // TODO goto search home
-    }
-    this.setState({ searchText: "" });
-  };
-
-  handleKeyPress = e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      // Goto search home page
-      this.props.onSubmit(e);
-    }
-  };
-
   render() {
-    const { queryField, hits } = this.props;
-    const { searchText } = this.state;
-    const dataSource = (() => {
-      if (searchText === "") {
-        return [];
-      } else {
-        return hits
-          .map(hit => {
-            const text = hit.getIn(["_source", queryField]);
-            const highlightedText = hit.getIn(["highlight", queryField, 0]);
-            const primaryText = (() => {
-              if (highlightedText) {
-                const dangerouslySetInnerHTML = {
-                  __html: highlightedText
-                };
-                return <span className={cssStyles.highlight} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />; // eslint-disable-line
-              } else {
-                return <span>{text}</span>;
-              }
-            })();
-            const value = <MenuItem primaryText={primaryText} />;
-            return { text, value };
-          })
-          .toJS();
-      }
-    })();
-    const styles = {
-      input: {
-        color: this.props.muiTheme.appBar.textColor
-      }
-    };
+    const { classes } = this.props;
     return (
-      <AutoComplete
-        fullWidth={true}
-        name="searchAutoComplete"
-        inputStyle={styles.input}
-        hintText="找標題"
-        searchText={searchText}
-        onUpdateInput={this.handleUpdateInput}
-        onNewRequest={this.handleNewRequest}
-        onKeyPress={this.handleKeyPress}
-        dataSource={dataSource}
-        filter={() => true}
-        maxSearchResults={5}
-        openOnFocus={true}
-      />
+      <div className={classes.wrapper}>
+        <input id="docsearch-input" className={classes.input} />
+      </div>
     );
   }
 }
 
-function mapStateToProps(store) {
-  const lastSearchResult = getLastSearchResult(store);
-  const hits = (() => {
-    if (lastSearchResult) {
-      // merge {discussions: searchResult1, wiki: searchResult2, author: ....}
-      return lastSearchResult
-        .valueSeq()
-        .map(searchResult => {
-          return searchResult.getIn(["hits", "hits"]);
-        })
-        .flatten(1);
-    } else {
-      return List();
-    }
-  })();
-  return { hits };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    onUpdateInput: (searchText, target, queryOptions) => {
-      if (searchText !== "") {
-        dispatch(fetchSearchResult(target, queryOptions));
-      }
-    }
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(
-  muiThemeable()(SearchAutoComplete)
-);
+export default compose(
+  withStyles(styles, {
+    name: "SearchAutoComplete"
+  }),
+  withWidth(),
+  pure
+)(SearchAutoComplete);

@@ -1,10 +1,10 @@
 import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import randomColor from "randomcolor";
 import LazyLoad from "react-lazyload";
+import pure from "recompose/pure";
 
-import Avatar from "material-ui/Avatar";
-import GuestPersonIcon from "material-ui/svg-icons/social/person";
+import Avatar from "material-ui-next/Avatar";
+import GuestPersonIcon from "material-ui-icons-next/Person";
 
 function getTextOrSrcOrIcon(user) {
   if (user) {
@@ -32,60 +32,61 @@ function getTextOrSrcOrIcon(user) {
   }
 }
 
-class UserAvatar extends React.Component {
-  static defaultProps = {
-    user: null,
-    enableLazyLoad: true
-  };
+const getAvatarProps = props => {
+  const { user, enableLazyLoad, ...other } = props;
+  return other;
+};
 
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = shouldComponentUpdate;
-  }
+const renderByText = (text, props) => {
+  const { user } = props;
+  const other = getAvatarProps(props);
+  const { _id } = user;
+  const backgroundColor = randomColor({
+    luminosity: "dark",
+    seed: _id || text
+  });
+  return (
+    <Avatar style={{ backgroundColor }} {...other}>
+      {text}
+    </Avatar>
+  );
+};
 
-  getAvatarProps = () => {
-    const { user, enableLazyLoad, ...other } = this.props;
-    return other;
-  };
-
-  renderByText = (text, user = this.props.user) => {
-    const other = this.getAvatarProps();
-    const { _id } = user;
-    const backgroundColor = randomColor({
-      luminosity: "dark",
-      seed: _id || text
-    });
+const UserAvatar = props => {
+  const { user, enableLazyLoad, ...other } = props;
+  const { text, src, icon } = getTextOrSrcOrIcon(user);
+  if (src) {
+    if (enableLazyLoad) {
+      const placeholder = (
+        <Avatar {...other}>
+          <GuestPersonIcon />
+        </Avatar>
+      );
+      const displayName = user.get("displayName");
+      return (
+        <LazyLoad height={32} once={true} placeholder={placeholder}>
+          <Avatar alt={displayName} src={src} {...other} />
+        </LazyLoad>
+      );
+    } else {
+      return <Avatar src={src} {...other} />;
+    }
+  } else if (text) {
+    return renderByText(text, props);
+  } else if (icon) {
     return (
-      <Avatar backgroundColor={backgroundColor} {...other}>
-        {text}
+      <Avatar {...other}>
+        <GuestPersonIcon />
       </Avatar>
     );
-  };
-
-  render() {
-    const { user, enableLazyLoad, ...other } = this.props;
-    const { text, src, icon } = getTextOrSrcOrIcon(user);
-    if (src) {
-      if (enableLazyLoad) {
-        const placeholder = <Avatar icon={<GuestPersonIcon />} {...other} />;
-        return (
-          <LazyLoad height={32} once={true} placeholder={placeholder}>
-            <Avatar src={src} {...other} />
-          </LazyLoad>
-        );
-      } else {
-        return <Avatar src={src} {...other} />;
-      }
-    } else if (text) {
-      return this.renderByText(text, user);
-    } else if (icon) {
-      return <Avatar icon={icon} {...other} />;
-    } else {
-      return <Avatar {...other} />;
-    }
+  } else {
+    return <Avatar {...other} />;
   }
-}
+};
 
-UserAvatar.muiName = Avatar.muiName;
+UserAvatar.defaultProps = {
+  user: null,
+  enableLazyLoad: true
+};
 
-export default UserAvatar;
+export default pure(UserAvatar);

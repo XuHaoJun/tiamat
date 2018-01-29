@@ -1,7 +1,6 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
-import { is } from "immutable";
 
 import RootWikiTabs from "../components/RootWikiTabs";
 
@@ -19,7 +18,7 @@ class RootWikiDashboardPage extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!is(this.props, nextProps)) {
+    if (this.props.location.pathname !== nextProps.location.pathname) {
       this.fetchComponentData(nextProps);
     }
   }

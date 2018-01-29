@@ -26,7 +26,10 @@ import {
 import { setSocket } from "./modules/Socket/SocketActions";
 import googleAnalyticsConfig from "../server/configs/googleAnalytics";
 import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
-import { setDBisInitialized } from "./modules/MyApp/MyAppActions";
+import {
+  setIsFirstRender,
+  setDBisInitialized
+} from "./modules/MyApp/MyAppActions";
 
 const debug = Debug("app:main");
 
@@ -89,23 +92,23 @@ function defaultBrowserUserAgent(state) {
   }
 }
 
-function injectTapEventPluginHelper() {
-  const userAgent = defaultBrowserUserAgent(store.getState());
-  const md = new MobileDetect(userAgent);
-  injectTapEventPlugin({
-    shouldRejectClick: (lastTouchEventTimestamp, clickEventTimestamp) => {
-      if (md.mobile()) {
-        return true;
-      } else if (
-        lastTouchEventTimestamp &&
-        clickEventTimestamp - lastTouchEventTimestamp < 750
-      ) {
-        return true;
-      }
-    }
-  });
-}
-injectTapEventPluginHelper();
+// function injectTapEventPluginHelper() {
+//   const userAgent = defaultBrowserUserAgent(store.getState());
+//   const md = new MobileDetect(userAgent);
+//   injectTapEventPlugin({
+//     shouldRejectClick: (lastTouchEventTimestamp, clickEventTimestamp) => {
+//       if (md.mobile()) {
+//         return true;
+//       } else if (
+//         lastTouchEventTimestamp &&
+//         clickEventTimestamp - lastTouchEventTimestamp < 750
+//       ) {
+//         return true;
+//       }
+//     }
+//   });
+// }
+// injectTapEventPluginHelper();
 
 const loadingDBLib = loadDBLib();
 
@@ -130,6 +133,7 @@ Loadable.preloadReady().then(() => {
       debug("first hydrate end");
       // client-slide update responsive state by window.
       store.dispatch(calculateResponsiveState(window));
+      store.dispatch(setIsFirstRender(false));
       // db init
       // must after hydrate because have user(access Token) for logIn, some ui data for restore
       // will hydrate fail if init db before hydrate.

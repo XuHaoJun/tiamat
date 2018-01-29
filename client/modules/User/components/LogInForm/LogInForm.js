@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import TextField from "material-ui/TextField";
-import RaisedButton from "material-ui/RaisedButton";
-import Divider from "material-ui/Divider";
-import FlatButton from "material-ui/FlatButton";
 import _ from "lodash";
 import Ajv from "ajv";
+
+import TextField from "material-ui-next/TextField";
+import Button from "material-ui-next/Button";
+import Divider from "material-ui-next/Divider";
 
 import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";
 import { logInRequest } from "../../UserActions";
@@ -20,7 +20,6 @@ const validate = ajv.compile(logInFormschema);
 
 class LogInForm extends React.Component {
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
 
@@ -179,7 +178,7 @@ class LogInForm extends React.Component {
             autoFocus={true}
             id="loginForm-email-text-field"
             type="email"
-            floatingLabelText="電子郵件"
+            label="電子郵件"
             onChange={e => this.handleChange("email", e)}
             onBlur={e => this.handleBlur("email", e)}
             value={this.state.email}
@@ -187,12 +186,14 @@ class LogInForm extends React.Component {
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"
+            marigin="auto"
           />
           <br />
           <TextField
+            marigin="auto"
             id="loginForm-password-text-field"
             type="password"
-            floatingLabelText="密碼"
+            label="密碼"
             onChange={e => this.handleChange("password", e)}
             value={this.state.password}
             errorText={this.state.passwordError}
@@ -201,45 +202,50 @@ class LogInForm extends React.Component {
             spellCheck="false"
           />
           <br />
-          <RaisedButton
+          <Button
+            raised
             style={{
               width: 256,
               marginTop: 20,
               marginBottom: 20
             }}
             type="submit"
-            primary={true}
-            label="登入"
-          />
+            color="primary"
+          >
+            登入
+          </Button>
           <br />
-          <FlatButton
+          <Button
             onClick={(...args) => {
               this.context.router.push("/signup");
               if (this.props.onClickSignUpButton) {
                 this.props.onClickSignUpButton(...args);
               }
             }}
-            label="註冊新帳號"
-          />
-          <FlatButton label="忘記密碼?(尚未完成)" />
+          >
+            註冊新帳號
+          </Button>
+          <Button>忘記密碼?(尚未完成)</Button>
           <br />
           <Divider style={{ marginTop: 10, marginBottom: 10 }} />
           <br />
-          <RaisedButton
+          <Button
             style={{
               width: 256,
               marginTop: 20
             }}
-            label="使用 Facebook 登入(尚未完成)"
-          />
+          >
+            使用 Facebook 登入(尚未完成)
+          </Button>
           <br />
-          <RaisedButton
+          <Button
             style={{
               width: 256,
               marginTop: 20
             }}
-            label="使用 Google 登入(尚未完成)"
-          />
+          >
+            使用 Google 登入(尚未完成)
+          </Button>
         </form>
       </div>
     );

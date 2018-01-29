@@ -1,53 +1,46 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { is } from "immutable";
 import Helmet from "react-helmet";
 
+import compose from "recompose/compose";
+import { withStyles } from "material-ui-next/styles";
+import slideHeightStyle from "../../MyApp/styles/slideHeight";
 import HomeTabs, {
   HOME_SLIDE,
   SLIDE_COUNT,
   getSlideIndexEnAlias,
   getSlideIndexFromEnAlias
 } from "../components/HomeTabs";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
+
+import { setHeaderTitle, setCurrentPage } from "../../MyApp/MyAppActions";
 import { fetchForumBoards } from "../../ForumBoard/ForumBoardActions";
 
-export function getStyles(context, browser) {
-  const tabHeight = 48;
-  const appBarHeight = context.muiTheme.appBar.height;
-  const styles = {
-    slideContainer: {
-      height: `calc(100vh - ${tabHeight + appBarHeight}px)`,
-      WebkitOverflowScrolling: "touch"
-    },
-    swipeableViews: {},
-    swipeableViewsWithMedium: {},
-    tabs: {},
-    tabsWithMedium: {
-      // position: "fixed",
-      // width: "100%"
-    }
+export const styles = theme => {
+  return {
+    slideHeight: slideHeightStyle(theme, {
+      withTab: true,
+      withAppBar: true
+    }).slideHeight,
+    slideHeightWithoutAppBar: slideHeightStyle(theme, {
+      withTab: true,
+      withAppBar: false
+    }).slideHeight
   };
-  if (browser.lessThan.medium) {
-    styles.tabs = styles.tabsWithMedium;
-    styles.swipeableViews = styles.swipeableViewsWithMedium;
-  }
-  return styles;
-}
+};
 
 class HomePage extends React.Component {
   static propTypes = {
-    browser: PropTypes.object.isRequired,
     title: PropTypes.string
   };
 
   static defaultProps = {
-    title: "首頁"
+    title: "Tiamat"
   };
 
+  static PAGE_NAME = "HomePage";
+
   static contextTypes = {
-    muiTheme: PropTypes.object.isRequired,
     router: PropTypes.object.isRequired
   };
 
@@ -59,13 +52,18 @@ class HomePage extends React.Component {
   }
 
   componentDidMount() {
+    this.props.setCurrentPage();
     this.fetchComponentData();
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!is(this.props, nextProps)) {
+    if (this.props.location.pathname !== nextProps.location.pathname) {
       this.fetchComponentData(nextProps);
     }
+  }
+
+  componentWillUnmount() {
+    if (this.timeout) clearTimeout(this.timeout);
   }
 
   fetchComponentData = (props = this.props) => {
@@ -77,17 +75,22 @@ class HomePage extends React.Component {
   };
 
   handleTransitionEnd = slideIndex => {
+    if (this.timeout) clearTimeout(this.timeout);
     if (slideIndex === HOME_SLIDE) {
-      this.context.router.replace("/");
+      this.timeout = setTimeout(() => {
+        this.context.router.replace("/");
+      }, 100);
     } else {
-      const slideIndexEN = getSlideIndexEnAlias(slideIndex);
-      this.context.router.replace(`/?slideIndex=${slideIndexEN}`);
+      this.timeout = setTimeout(() => {
+        const slideIndexEN = getSlideIndexEnAlias(slideIndex);
+        this.context.router.replace(`/?slideIndex=${slideIndexEN}`);
+      }, 100);
     }
   };
 
   render() {
     const { title } = this.props;
-    const styles = getStyles(this.context, this.props.browser);
+    // const styles = getStyles(this.context, this.props.browser);
     const metaDescription = "Tiamat | Game forum and wiki.";
     const meta = [
       {
@@ -95,18 +98,15 @@ class HomePage extends React.Component {
         content: metaDescription
       }
     ];
-    const { slideIndex, browser } = this.props;
+    const { slideIndex, classes } = this.props;
     return (
       <div>
         <Helmet title={title} meta={meta} />
         <HomeTabs
+          id="HomePage/Tabs"
+          slideClassName={classes.slideHeight}
           onTransitionEnd={this.handleTransitionEnd}
           slideIndex={slideIndex}
-          disableOnDrawerStart={true}
-          browser={browser}
-          tabsStyle={styles.tabs}
-          swipeableViewsStyle={styles.swipeableViews}
-          slideContainerStyle={styles.slideContainer}
         />
       </div>
     );
@@ -115,7 +115,6 @@ class HomePage extends React.Component {
 
 function mapStateToProps(state, routerProps) {
   const { location } = routerProps;
-  const { browser } = state;
   const slideIndex = (() => {
     const qsi = location.query.slideIndex;
     let si = Number.parseInt(qsi, 10);
@@ -127,11 +126,14 @@ function mapStateToProps(state, routerProps) {
     }
     return si;
   })();
-  return { browser, location, slideIndex };
+  return { slideIndex };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    setCurrentPage() {
+      return dispatch(setCurrentPage(HomePage.PAGE_NAME));
+    },
     fetchComponentData() {
       const action = HomePage.getInitialAction();
       return dispatch(action);
@@ -139,4 +141,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+export default compose(
+  withStyles(styles, { name: "HomePage" }),
+  connect(mapStateToProps, mapDispatchToProps)
+)(HomePage);
