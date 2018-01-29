@@ -138,13 +138,24 @@ function FlipMoveHoc(Component) {
 }
 
 class LoadingListItem extends React.Component {
+  static defaultProps = {
+    enableMountRequestMore: true
+  };
+
   state = {
-    showButton: false,
     loading: false
   };
 
   componentDidMount() {
-    this.handleRequestMore();
+    if (this.props.enableMountRequestMore) {
+      this.handleRequestMore();
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.type !== nextProps.type && !this.state.loading) {
+      this.handleRequestMore();
+    }
   }
 
   handleRequestMore = () => {
@@ -155,46 +166,37 @@ class LoadingListItem extends React.Component {
         const p = this.props.onRequestMore(event, reason);
         if (p.then) {
           p.then(() => {
-            this.setState({ showButton: true, loading: false });
+            this.setState({ loading: false });
           });
         } else {
-          this.setState({ showButton: true, loading: false });
+          this.setState({ loading: false });
         }
       });
     } else {
-      this.setState({ showButton: true, loading: false });
+      this.setState({ loading: false });
     }
   };
 
   render() {
-    const { showButton, loading } = this.state;
+    const { loading } = this.state;
     const progressSize = 32;
-    if (showButton) {
-      return (
-        <ListItem button onClick={this.handleRequestMore} disabled={loading}>
-          {loading ? (
-            <CircularProgress size={progressSize} />
-          ) : (
-            <CircularProgress
-              color="primary"
-              size={progressSize}
-              mode="determinate"
-              value={20}
-              min={0}
-              max={100}
-            />
-          )}
-          <ListItemText primary="Load More..." />
-        </ListItem>
-      );
-    } else {
-      return (
-        <ListItem button disabled={true}>
+    return (
+      <ListItem button onClick={this.handleRequestMore} disabled={loading}>
+        {loading ? (
           <CircularProgress size={progressSize} />
-          <ListItemText primary="Load More..." />
-        </ListItem>
-      );
-    }
+        ) : (
+          <CircularProgress
+            color="primary"
+            size={progressSize}
+            mode="determinate"
+            value={20}
+            min={0}
+            max={100}
+          />
+        )}
+        <ListItemText primary="Load More..." />
+      </ListItem>
+    );
   }
 }
 
@@ -230,13 +232,14 @@ function BottomLazyLoadHoc(Component) {
             unmountIfInvisible={true}
             placeholder={
               <LoadingListItem
-                key="placeholder"
+                type="placeholder"
+                enableMountRequestMore={false}
                 onRequestMore={onRequestMore}
               />
             }
             {...bottomLazyLoadProps}
           >
-            <LoadingListItem key="loaded" onRequestMore={onRequestMore} />
+            <LoadingListItem type="instance" onRequestMore={onRequestMore} />
           </LazyLoad>
         </Component>
       );

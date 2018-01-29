@@ -1,6 +1,7 @@
 const cssnext = require("postcss-cssnext");
 const postcssFocus = require("postcss-focus");
 const postcssReporter = require("postcss-reporter");
+const nodeExternals = require("webpack-node-externals");
 
 let cssModulesIdentName = "[name]__[local]__[hash:base64:5]";
 if (process.env.NODE_ENV === "production") {
@@ -12,16 +13,20 @@ module.exports = {
     publicPath: "/",
     libraryTarget: "commonjs2"
   },
+
+  externals: [nodeExternals({ whitelist: [/^webpack\/hot\/poll/] })],
+  
+  node: {
+    __filename: true,
+    __dirname: true
+  },
+
   resolve: {
     extensions: [".js", ".jsx"],
     modules: ["client", "node_modules"]
   },
   module: {
     rules: [
-      {
-        test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
-        loader: "file-loader?name=fonts/[name].[ext]"
-      },
       {
         test: /\.css$/,
         include: [/node_modules/, /plugin\.css/],
@@ -74,7 +79,7 @@ module.exports = {
         ]
       },
       {
-        test: /\.jpe?g$|\.gif$|\.png$|\.svg$/i,
+        test: /\.jpe?g$|\.gif$|\.png$/i,
         loader: "url-loader",
         options: {
           limit: 10000

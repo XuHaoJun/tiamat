@@ -2,12 +2,13 @@
  * Main store function
  */
 import { createStore, applyMiddleware, compose } from "redux";
+
+// middlewares
 import { browserHistory } from "react-router";
 import { routerMiddleware } from "react-router-redux";
-// TODO
-// migrate redux-thunk to redux-saga
 import thunk from "redux-thunk";
 import { createResponsiveStoreEnhancer } from "redux-responsive";
+
 import rootReducer from "./reducers";
 
 export function configureStore(initialState = {}) {
@@ -19,11 +20,14 @@ export function configureStore(initialState = {}) {
     if (window.devToolsExtension) {
       enhancers.push(window.devToolsExtension());
     }
-    enhancers.push(applyMiddleware(routerMiddleware(browserHistory)));
   }
+
+  enhancers.push(applyMiddleware(routerMiddleware(browserHistory)));
+
   const responsiveStoreEnhancer = createResponsiveStoreEnhancer({
     calculateInitialState: false
   });
+
   const store = createStore(
     rootReducer,
     initialState,

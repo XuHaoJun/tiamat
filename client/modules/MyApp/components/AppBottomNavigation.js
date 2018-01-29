@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
+import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import BottomNavigation, {
   BottomNavigationAction
@@ -12,14 +13,21 @@ import ActionHomeIcon from "material-ui-icons-next/Home";
 import ChatIcon from "material-ui-icons-next/Chat";
 import SubscriptionIcon from "material-ui-icons-next/RssFeed";
 
-const styles = {
-  root: {
-    width: "100%",
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    zIndex: 100
-  }
+const styles = theme => {
+  const { breakpoints } = theme;
+  return {
+    root: {
+      width: "100%",
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      zIndex: 100,
+      display: "block",
+      [`${breakpoints.up("sm")}`]: {
+        display: "none"
+      }
+    }
+  };
 };
 
 class AppBottomNavigation extends React.Component {
@@ -39,14 +47,10 @@ class AppBottomNavigation extends React.Component {
   };
 
   render() {
-    const { browser } = this.props;
-    if (browser && !browser.lessThan.medium) {
-      return null;
-    } else {
-      const { classes, selectedIndex } = this.props;
-      return (
+    const { classes, selectedIndex } = this.props;
+    return (
+      <div className={classes.root}>
         <BottomNavigation
-          className={classes.root}
           value={selectedIndex}
           onChange={this.handleChange}
           showLabels
@@ -72,14 +76,10 @@ class AppBottomNavigation extends React.Component {
             icon={<ChatIcon />}
           />
         </BottomNavigation>
-      );
-    }
+      </div>
+    );
   }
 }
-
-const Styled = withStyles(styles)(AppBottomNavigation);
-
-export const AppBottomNavigationWithoutConnect = Styled;
 
 import {
   setHistoryCursor,
@@ -89,11 +89,10 @@ import { getCursor, getStackByCursor } from "../../History/HistoryReducer";
 import { push } from "react-router-redux";
 
 function mapStateToProps(state) {
-  const { browser } = state;
   const selectedIndex = getCursor(state);
   // never pass to props ignore by mergeProps function.
   const _history = state.history;
-  return { browser, selectedIndex, _history };
+  return { selectedIndex, _history };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -144,4 +143,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   });
 }
 
-export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(Styled);
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
+)(AppBottomNavigation);

@@ -1,8 +1,9 @@
 /* eslint-disable global-require */
 import React from "react";
 import { Route, IndexRoute } from "react-router";
-import MyApp from "./modules/MyApp/MyApp";
 import Loadable from "react-loadable";
+
+import MyApp from "./modules/MyApp/MyApp";
 import Loading from "./components/CenterCircularProgress";
 
 // FIXME

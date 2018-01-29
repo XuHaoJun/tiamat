@@ -13,7 +13,6 @@ import Toolbar from "material-ui-next/Toolbar";
 import Typography from "material-ui-next/Typography";
 import Button from "material-ui-next/Button";
 import IconButton from "material-ui-next/IconButton";
-import { CircularProgress } from "material-ui-next/Progress";
 import SearchVerIcon from "material-ui-icons-next/Search";
 import BackspaceIcon from "material-ui-icons-next/KeyboardBackspace";
 import MenuIcon from "material-ui-icons-next/Menu";
@@ -24,7 +23,6 @@ import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
 
-import { getIsFirstRender } from "../MyAppReducer";
 import { getIsLoggedIn } from "../../User/UserReducer";
 
 const LogInButton = makeLogInDialogable(Button);
@@ -266,11 +264,7 @@ class Header extends React.Component {
     if (enableBackspaceButton) {
       return <BackspaceButton onClick={this.handleBack} {...props} />;
     } else {
-      if (this.props.isFirstRender) {
-        return <CircularProgress size={24} {...props} />;
-      } else {
-        return <MenuButton onClick={this.handleToggle} {...props} />;
-      }
+      return <MenuButton onClick={this.handleToggle} {...props} />;
     }
   };
 
@@ -337,10 +331,9 @@ export default compose(
   withStyles(styles),
   connect(
     state => {
-      const isFirstRender = getIsFirstRender(state);
       const isLoggedIn = getIsLoggedIn(state);
       const { browser } = state;
-      return { browser, isFirstRender, isLoggedIn };
+      return { browser, isLoggedIn };
     },
     () => {
       return {};

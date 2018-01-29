@@ -2,18 +2,15 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import getDefaultContainerStyles from "../../MyApp/styles/defaultContainerStyles";
+
 import RootWikiForm from "../components/RootWikiForm";
+
 import {
   setHeaderTitle,
   updateSendButtonProps
 } from "../../MyApp/MyAppActions";
-import { addRootWikiRequest } from "../RootWikiActions";
 
-export function getStyles(browser) {
-  const containerStyle = getDefaultContainerStyles(browser);
-  return { container: containerStyle.container };
-}
+import { addRootWikiRequest } from "../RootWikiActions";
 
 class CreateRootWikiPage extends React.PureComponent {
   static defaultProps = {
@@ -78,7 +75,6 @@ class CreateRootWikiPage extends React.PureComponent {
         content: metaDescription
       }
     ];
-    // const styles = getStyles(this.props.browser);
     const { forumBoardId } = this.props;
     const style = {
       paddingTop: 30
@@ -100,7 +96,7 @@ class CreateRootWikiPage extends React.PureComponent {
 
 function mapStateToProps(state, routerProps) {
   const { forumBoardId } = routerProps.params;
-  return { browser: state.browser, forumBoardId };
+  return { forumBoardId };
 }
 
 export default connect(mapStateToProps)(CreateRootWikiPage);

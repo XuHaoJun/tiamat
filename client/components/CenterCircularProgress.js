@@ -1,6 +1,5 @@
 import React from "react";
 
-import CircularProgress from "material-ui-next/Progress/CircularProgress";
 import pure from "recompose/pure";
 
 const CenterCircularProgress = () => {
@@ -19,7 +18,8 @@ const CenterCircularProgress = () => {
   };
   return (
     <div style={styles.container}>
-      <CircularProgress style={styles.container} size={80} thickness={8} />
+      Loading...
+      {/* <CircularProgress style={styles.container} size={80} thickness={8} /> */}
     </div>
   );
 };

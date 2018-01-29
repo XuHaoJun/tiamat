@@ -149,11 +149,11 @@ module.exports = {
       mangle: true,
       minimize: true
     }),
-    new webpack.optimize.AggressiveMergingPlugin({
-      minSizeReduce: 1.5,
-      moveToParents: true
-    }),
-    new webpack.optimize.ModuleConcatenationPlugin(),
+    // new webpack.optimize.AggressiveMergingPlugin({
+    //   minSizeReduce: 1.5,
+    //   moveToParents: true
+    // }),
+    // new webpack.optimize.ModuleConcatenationPlugin(),
     new WebpackBundleSizeAnalyzerPlugin("./plain-report.txt"),
     new ScriptExtHtmlWebpackPlugin({ module: /\.js$/ }),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(zh-tw|en)/),

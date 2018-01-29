@@ -130,14 +130,14 @@ class MyApp extends React.Component {
             searchQuery={this.props.searchQuery}
             onChangeDrawerOpen={this.handleChangeDrawerOpen}
           />
+          <AppBottomNavigation />
+          <ErrorSnackbar />
           <Main
             drawerOpen={drawerOpen}
             onScroll={this.handleChildrenContainerScroll}
           >
             {children}
           </Main>
-          <AppBottomNavigation />
-          <ErrorSnackbar />
         </MuiThemeProviderNext>
       </React.Fragment>
     );
@@ -149,14 +149,11 @@ MyApp.propTypes = {
   intl: PropTypes.object.isRequired
 };
 
-export const MyAppWithoutConnect = MyApp;
-
-// Retrieve data from store as props
 function mapStateToProps(state, routerProps) {
   const { intl, browser } = state;
   const userAgent = getUserAgent(state);
-  const { location } = routerProps;
   const ui = getUI(state);
+  const { location } = routerProps;
   const { pathname } = location;
   const searchQuery = location.query.query;
   return { ui, intl, userAgent, browser, pathname, searchQuery };

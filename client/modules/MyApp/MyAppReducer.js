@@ -17,12 +17,6 @@ const initialState = Immutable.fromJS({
   },
   ui: {
     headerTitle: "Tiamat",
-    styles: {
-      body: {
-        backgroundColor: null
-      },
-      root: {}
-    },
     sendButton: {
       show: false,
       loading: false,

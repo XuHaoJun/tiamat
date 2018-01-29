@@ -44,7 +44,7 @@ export function renderHead(...other) {
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
         ${
-          process.env.NODE_ENV === "production"
+          process.env.NODE_ENV === "production" && assetsManifest["/app.css"]
             ? `<link rel='stylesheet' href='${assetsManifest["/app.css"]}' />`
             : ""
         }
