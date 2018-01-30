@@ -6,7 +6,8 @@ import moment from "moment";
 import { withStyles } from "material-ui-next/styles";
 import Switch from "material-ui-next/Switch";
 import WikiIcon from "material-ui-icons-next/ImportContacts";
-import { FormGroup, FormControlLabel } from "material-ui-next/Form";
+import { FormControlLabel } from "material-ui-next/Form";
+import Card, { CardHeader, CardContent } from "material-ui-next/Card";
 
 import UserAvatar from "../../../User/components/UserAvatar";
 import Editor from "../../../../components/Slate/Editor";
@@ -109,16 +110,10 @@ class DiscussionNode extends React.Component {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-        <h1 className={classes.title}>{title}</h1>
-        <div className={classes.simpleInfo}>
-          <div>
-            <div className={classes.avatarContainer}>
-              <UserAvatar user={authorBasicInfo} />
-              <span style={{ marginLeft: 5 }}>{displayName || "Guset"} </span>
-            </div>
-          </div>
-          <div>
-            <FormGroup row>
+        <Card elevation={0}>
+          <CardHeader
+            avatar={<UserAvatar user={authorBasicInfo} />}
+            action={
               <FormControlLabel
                 control={
                   <Switch
@@ -128,23 +123,24 @@ class DiscussionNode extends React.Component {
                 }
                 label={<WikiIcon />}
               />
-            </FormGroup>
-            <div className={classes.smallFont}>{createdAtFromNow}</div>
-          </div>
-        </div>
-        <div className={classes.content}>
-          <Editor
-            rawContent={content}
-            readOnly={true}
-            semanticRules={semanticRules}
-            semanticReplaceMode={semanticReplaceMode}
+            }
+            title={
+              authorBasicInfo ? authorBasicInfo.get("displayName") : "Guest"
+            }
+            subheader={createdAtFromNow}
           />
-        </div>
+          <CardContent>
+            <Editor
+              rawContent={content}
+              readOnly={true}
+              semanticRules={semanticRules}
+              semanticReplaceMode={semanticReplaceMode}
+            />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 }
 
-const Styled = withStyles(styles)(DiscussionNode);
-
-export default Styled;
+export default withStyles(styles)(DiscussionNode);

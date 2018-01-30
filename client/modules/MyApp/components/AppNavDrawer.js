@@ -22,11 +22,11 @@ const styles = theme => {
       overflowX: "hidden"
     },
     drawerPaperBase: {
+      backgroundColor: theme.palette.background.default,
       userSelect: "none",
       maxWidth: drawerWidth,
       overflowX: "hidden",
       [`${breakpoints.up("sm")}`]: {
-        backgroundColor: theme.palette.background.default,
         height: "calc(100vh - 64px)",
         top: 64
       }

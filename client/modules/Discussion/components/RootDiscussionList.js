@@ -6,9 +6,12 @@ import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import moment from "moment";
 import { Link } from "react-router";
 
+import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import List from "../../../components/List/EnhancedList";
 import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
+import Icon from "material-ui-next/Icon";
+
 import UserAvatar from "../../User/components/UserAvatar";
 
 import { fetchRootDiscussions } from "../DiscussionActions";
@@ -63,7 +66,7 @@ class RootDiscussionList extends React.Component {
     return props.getForumBoardGroup || "_all";
   };
 
-  handleRequestMore = ({ direction }) => {
+  handleRequestMore = async ({ direction }) => {
     const { pageTable, sort } = this.state;
     const { forumBoardId, forumBoardGroup } = this.props;
     const pageInfo = pageTable.get(this.getForumBoardGroup());
@@ -75,36 +78,33 @@ class RootDiscussionList extends React.Component {
     const prevDataSource = this.props.dataSource;
     // TODO
     // cancel fetch when componemntWillUnmount
-    return this.props
-      .dispatch(
-        fetchRootDiscussions(forumBoardId, {
-          page: nextPage,
-          limit,
-          sort,
-          forumBoardGroup
-        })
-      )
-      .then(discussionsJSON => {
-        const currentDataSource = this.props.dataSource;
-        if (
-          discussionsJSON.length < limit ||
-          prevDataSource.count() === currentDataSource.count() ||
-          is(prevDataSource, currentDataSource)
-        ) {
-          return null;
-        } else {
-          const currentPageTable = this.state.pageTable;
-          const nextPageInfo = currentPageTable.get(
-            pageInfo.get("forumBoardGroup")
-          );
-          const nextPageTable = pageTable.set(
-            nextPageInfo.get("forumBoardGroup"),
-            nextPageInfo.set("page", nextPageInfo.get("page") + 1)
-          );
-          this.setState({ pageTable: nextPageTable });
-          return null;
-        }
-      });
+    const discussionsJSON = await this.props.dispatch(
+      fetchRootDiscussions(forumBoardId, {
+        page: nextPage,
+        limit,
+        sort,
+        forumBoardGroup
+      })
+    );
+    const currentDataSource = this.props.dataSource;
+    if (
+      discussionsJSON.length < limit ||
+      prevDataSource.count() === currentDataSource.count() ||
+      is(prevDataSource, currentDataSource)
+    ) {
+      return null;
+    } else {
+      const currentPageTable = this.state.pageTable;
+      const nextPageInfo = currentPageTable.get(
+        pageInfo.get("forumBoardGroup")
+      );
+      const nextPageTable = pageTable.set(
+        nextPageInfo.get("forumBoardGroup"),
+        nextPageInfo.set("page", nextPageInfo.get("page") + 1)
+      );
+      this.setState({ pageTable: nextPageTable });
+      return null;
+    }
   };
 
   makePageInfo = (props = this.props) => {
@@ -135,7 +135,21 @@ class RootDiscussionList extends React.Component {
       ? moment(discussion.get("updatedAt")).format("ll")
       : moment(discussion.get("updatedAt")).fromNow();
     const descendantCount = discussion.get("descendantCount") || 0;
-    return `${fromNowTime} • 留言次數: ${descendantCount}`;
+    const Delimeter = () => <span style={{ margin: "0 4px" }}>•</span>;
+    const authorBasicInfo = discussion.get("authorBasicInfo");
+    const displayName = authorBasicInfo
+      ? authorBasicInfo.get("displayName")
+      : "Guest";
+    return (
+      <span>
+        {displayName}
+        <Delimeter />
+        {`${fromNowTime}`}
+        <Delimeter />
+        {`${descendantCount}`}
+        <span style={{ marginLeft: 4 }}>留言</span>
+      </span>
+    );
   };
 
   listItemLeftAvatar = discussion => {
@@ -161,13 +175,12 @@ class RootDiscussionList extends React.Component {
       <List
         id={id ? `${id}/List` : undefined}
         onRequestMore={this.handleRequestMore}
-        style={this.props.style}
         className={classes.root}
       >
         {dataSource.map(discussion => {
           const key = `RootDiscussionList/${listId}/${discussion.get(
             "_id"
-          )}/isFirstRender/${isFirstRender}`;
+          )}/${String(isFirstRender)}`;
           const to = this.listItemHref(discussion);
           const avatar = this.listItemLeftAvatar(discussion);
           const primary = discussion.get("title");
@@ -197,6 +210,6 @@ function mapStateToProps(store, props) {
   return { forumBoardId, forumBoardGroup, dataSource, isFirstRender };
 }
 
-const Styled = withStyles(styles)(RootDiscussionList);
-
-export default connect(mapStateToProps)(Styled);
+export default compose(withStyles(styles), connect(mapStateToProps))(
+  RootDiscussionList
+);

@@ -2,6 +2,7 @@ import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
 
+import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import slideHeightStyle from "../../MyApp/styles/slideHeight";
 
@@ -141,6 +142,7 @@ function mapDispatchToProps(dispatch, routerProps) {
   };
 }
 
-const Styled = withStyles(styles)(WikiDetailPage);
-
-export default connect(mapStateToProps, mapDispatchToProps)(Styled);
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps, mapDispatchToProps)
+)(WikiDetailPage);

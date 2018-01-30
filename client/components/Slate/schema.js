@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Link as ReactRouterLink } from "react-router";
 import Table, {
   TableBody,
@@ -6,6 +7,8 @@ import Table, {
   TableHead,
   TableRow
 } from "material-ui-next/Table";
+import Typography from "material-ui-next/Typography";
+
 import normalizeHref from "./utils/normailzeHref";
 import { Block } from "slate";
 import Img from "../Img";
@@ -66,7 +69,11 @@ export class Mention extends React.Component {
 
 export class Paragraph extends React.Component {
   render() {
-    return <p {...this.props.attributes}>{this.props.children}</p>;
+    return (
+      <Typography component="p" {...this.props.attributes}>
+        {this.props.children}
+      </Typography>
+    );
   }
 }
 
@@ -114,11 +121,15 @@ export function createSchema() {
         const style = {
           textAlign: align
         };
-        return <TableRowColumn style={style}>{props.children}</TableRowColumn>;
+        return <TableCell style={style}>{props.children}</TableCell>;
       },
       paragraph: Paragraph,
       link: Link,
-      heading: props => <h1 {...props.attributes}>{props.children}</h1>,
+      heading: props => (
+        <Typography type="headline" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
       template: Template,
       code_line: props => <div {...props.attributes}>{props.children}</div>,
       code_block: props => {
@@ -143,9 +154,21 @@ export function createSchema() {
         <blockquote {...props.attributes}>{props.children}</blockquote>
       ),
       "bulleted-list": props => <ul {...props.attributes}>{props.children}</ul>,
-      "heading-one": props => <h1 {...props.attributes}>{props.children}</h1>,
-      "heading-two": props => <h2 {...props.attributes}>{props.children}</h2>,
-      "heading-three": props => <h3 {...props.attributes}>{props.children}</h3>,
+      "heading-one": props => (
+        <Typography type="headline" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
+      "heading-two": props => (
+        <Typography type="title" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
+      "heading-three": props => (
+        <Typography type="subheading" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
       "heading-four": props => <h4 {...props.attributes}>{props.children}</h4>,
       "heading-five": props => <h5 {...props.attributes}>{props.children}</h5>,
       "heading-six": props => <h6 {...props.attributes}>{props.children}</h6>,

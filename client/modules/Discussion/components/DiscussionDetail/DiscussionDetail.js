@@ -9,6 +9,7 @@ import createFastMemoizeDefaultOptions from "../../../../util/createFastMemoizeD
 
 import ScrollContainer from "../../../../components/ScrollContainer";
 
+import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import MuiDivider from "material-ui-next/Divider";
 import CenterCircularProgress from "../../../../components/CenterCircularProgress";
@@ -129,8 +130,6 @@ class DiscussionDetail extends React.Component {
   }
 }
 
-const Styled = withStyles(styles)(DiscussionDetail);
-
 const getSemanticRulesHelper = (() => {
   let f = (rootWikiId, semanticRules) => {
     return semanticRules
@@ -177,4 +176,6 @@ function mapStateToProps(store, props) {
   };
 }
 
-export default connect(mapStateToProps)(Styled);
+export default compose(withStyles(styles), connect(mapStateToProps))(
+  DiscussionDetail
+);

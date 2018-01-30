@@ -1,11 +1,12 @@
 import React from "react";
 import memoize from "fast-memoize";
 import qs from "qs";
-import { is, fromJS } from "immutable";
+import { fromJS } from "immutable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 
+import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import slideHeightStyle from "../../MyApp/styles/slideHeight";
 
@@ -351,6 +352,7 @@ function mapDispatchToProps(dispatch, routerProps) {
   };
 }
 
-const Styled = withStyles(styles)(MixedMainPage);
-
-export default connect(mapStateToProps, mapDispatchToProps)(Styled);
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps, mapDispatchToProps)
+)(MixedMainPage);

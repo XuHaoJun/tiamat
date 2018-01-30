@@ -33,11 +33,15 @@ export default function App(props) {
   const { store } = props;
   // Create an enhanced history that syncs navigation events with the store
   const history = syncHistoryWithStore(browserHistory, store);
-  // Send to google analytics on page change.
+  const routerProps = {};
+  if (process.env.NODE_ENV === "development") {
+    routerProps.key = Math.random();
+  }
   return (
     <Provider store={store}>
       <IntlWrapper>
         <Router
+          {...routerProps}
           history={history}
           render={applyRouterMiddleware(useScrollMiddleware)}
           onUpdate={logPageView}
