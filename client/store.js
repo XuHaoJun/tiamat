@@ -4,7 +4,7 @@
 import { createStore, applyMiddleware, compose } from "redux";
 
 // middlewares
-import { browserHistory } from "react-router";
+import { defaultBrowserHistory as history } from "./createBrowserHistory";
 import { routerMiddleware } from "react-router-redux";
 import thunk from "redux-thunk";
 import { createResponsiveStoreEnhancer } from "redux-responsive";
@@ -22,7 +22,9 @@ export function configureStore(initialState = {}) {
     }
   }
 
-  enhancers.push(applyMiddleware(routerMiddleware(browserHistory)));
+  if (history) {
+    enhancers.push(applyMiddleware(routerMiddleware(history)));
+  }
 
   const responsiveStoreEnhancer = createResponsiveStoreEnhancer({
     calculateInitialState: false

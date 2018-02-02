@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { is } from "immutable";
 import Helmet from "react-helmet";
+
+import { replace } from "react-router-redux";
 
 import { fetchDiscussion, fetchDiscussions } from "../DiscussionActions";
 import { getDiscussion } from "../DiscussionReducer";
@@ -13,12 +13,8 @@ import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
 import DiscussionDetail from "../components/DiscussionDetail";
 
 class DiscussionDetailPage extends React.Component {
-  static contextTypes = {
-    router: PropTypes.object
-  };
-
   static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
-    const { parentDiscussionId } = routerProps.params;
+    const { parentDiscussionId } = routerProps.match.params;
     return async (dispatch, getState) => {
       const _setHeaderTitle = () => {
         const parentDiscussion = getDiscussion(getState(), parentDiscussionId);
@@ -71,21 +67,22 @@ class DiscussionDetailPage extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!is(this.props, nextProps)) {
+    if (this.props.location.pathname !== nextProps.location.pathname) {
       this.fetchComponentData(nextProps);
     }
   }
 
   onSemanticToggle = (event, nextSemanticReplaceMode) => {
     const { parentDiscussionId, semanticReplaceMode } = this.props;
-    const { router } = this.context;
     if (semanticReplaceMode !== nextSemanticReplaceMode) {
       if (nextSemanticReplaceMode) {
-        router.replace(
-          `/rootDiscussions/${parentDiscussionId}?semanticReplaceMode=true`
+        this.props.dispatch(
+          replace(
+            `/rootDiscussions/${parentDiscussionId}?semanticReplaceMode=true`
+          )
         );
       } else {
-        router.replace(`/rootDiscussions/${parentDiscussionId}`);
+        this.props.dispatch(replace(`/rootDiscussions/${parentDiscussionId}`));
       }
     }
   };
@@ -135,11 +132,11 @@ class DiscussionDetailPage extends React.Component {
 }
 
 function mapStateToProps(store, routerProps) {
-  const { parentDiscussionId } = routerProps.params;
+  const { parentDiscussionId } = routerProps.match.params;
   let { semanticReplaceMode } = routerProps.location.query;
   semanticReplaceMode = semanticReplaceMode === "true";
   const parentDiscussion = getDiscussion(store, parentDiscussionId);
-  let { forumBoardId } = routerProps.params;
+  let { forumBoardId } = routerProps.match.params;
   if (!forumBoardId) {
     forumBoardId = parentDiscussion
       ? parentDiscussion.get("forumBoard")
@@ -163,7 +160,8 @@ function mapDispatchToProps(dispatch, routerProps) {
         { tryMore: true }
       );
       return dispatch(action);
-    }
+    },
+    dispatch
   };
 }
 

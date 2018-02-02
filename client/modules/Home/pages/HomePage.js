@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 
+import { replace } from "react-router-redux";
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import slideHeightStyle from "../../MyApp/styles/slideHeight";
@@ -40,10 +41,6 @@ class HomePage extends React.Component {
 
   static PAGE_NAME = "HomePage";
 
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static getInitialAction() {
     return dispatch => {
       dispatch(setHeaderTitle(HomePage.defaultProps.title));
@@ -78,19 +75,18 @@ class HomePage extends React.Component {
     if (this.timeout) clearTimeout(this.timeout);
     if (slideIndex === HOME_SLIDE) {
       this.timeout = setTimeout(() => {
-        this.context.router.replace("/");
+        this.props.dispatch(replace("/"));
       }, 100);
     } else {
       this.timeout = setTimeout(() => {
         const slideIndexEN = getSlideIndexEnAlias(slideIndex);
-        this.context.router.replace(`/?slideIndex=${slideIndexEN}`);
+        this.props.dispatch(replace(`/?slideIndex=${slideIndexEN}`));
       }, 100);
     }
   };
 
   render() {
     const { title } = this.props;
-    // const styles = getStyles(this.context, this.props.browser);
     const metaDescription = "Tiamat | Game forum and wiki.";
     const meta = [
       {
@@ -116,7 +112,7 @@ class HomePage extends React.Component {
 function mapStateToProps(state, routerProps) {
   const { location } = routerProps;
   const slideIndex = (() => {
-    const qsi = location.query.slideIndex;
+    const qsi = location.query.slideIndex || 0;
     let si = Number.parseInt(qsi, 10);
     if (!si) {
       si = getSlideIndexFromEnAlias(qsi) || 0;
@@ -137,7 +133,8 @@ function mapDispatchToProps(dispatch) {
     fetchComponentData() {
       const action = HomePage.getInitialAction();
       return dispatch(action);
-    }
+    },
+    dispatch
   };
 }
 

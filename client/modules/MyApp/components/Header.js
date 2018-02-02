@@ -2,8 +2,9 @@ import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Link } from "react-router";
-
+import { goBack, replace, push } from "react-router-redux";
+import { Link } from "react-router-dom";
+import { matchPath } from "react-router";
 import { Motion, spring } from "react-motion";
 
 import compose from "recompose/compose";
@@ -92,11 +93,9 @@ const styles = theme => {
   };
 };
 
+// TODO
+// make drawer open stateless.
 class Header extends React.Component {
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static propTypes = {
     classes: PropTypes.object.isRequired
   };
@@ -184,24 +183,23 @@ class Header extends React.Component {
   };
 
   handleBack = () => {
-    setTimeout(this.context.router.goBack, 0);
+    this.props.dispatch(goBack());
   };
 
   _fetchSearchResults = v => {
     const noSendRegex = /[\\/ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ]/g;
     const query = v.replace(noSendRegex, "");
     this.setState({ textValue: query });
-    // it will trigger search page and query it.
-    let routerAction;
-    if (this._isInSearchPage()) {
-      routerAction = this.context.router.replace;
-    } else {
-      routerAction = this.context.router.push;
+    if (query) {
+      // it will trigger search page and query it.
+      let routerAction;
+      if (this._isInSearchPage()) {
+        routerAction = replace;
+      } else {
+        routerAction = push;
+      }
+      this.props.dispatch(routerAction(`/search?query=${query}`));
     }
-    if (query === "") {
-      return;
-    }
-    routerAction(`/search?query=${query}`);
   };
 
   handleBlur = () => {
@@ -220,8 +218,11 @@ class Header extends React.Component {
     }
   };
 
+  // TODO
+  // use getCurrentPage() ?
   _isInSearchPage = () => {
-    return /^\/search/.test(this.props.pathname);
+    const { pathname } = this.props;
+    return Boolean(matchPath(pathname, { path: "/search" }));
   };
 
   handleRequestChangeNavDrawer = open => {
@@ -243,28 +244,37 @@ class Header extends React.Component {
 
   handleClose = () => this.setState({ open: false });
 
-  shouldBackspaceButton = pathname => {
+  shouldBackspaceButton = (pathname = this.props.pathname) => {
     if (!this.props.browser.lessThan.medium) {
       return false;
     } else {
-      const upsertPage = new RegExp("^/(create|update|edit)/.+");
-      const etcPage = new RegExp("^/(setting|about|search)");
-      const discussionDetailPage = new RegExp("^/rootDiscussions/(.+)");
-      const wikiDetailPage = new RegExp("^/rootWikis/(.+)/wikis/(.+)");
-      const rules = [upsertPage, etcPage, discussionDetailPage, wikiDetailPage];
-      const enableBackspaceButton = rules.some(regexp => regexp.test(pathname));
-      return enableBackspaceButton;
+      // TODO
+      // use getCurrentPage() ?
+      const paths = [
+        "/create",
+        "/update",
+        "/edit",
+        "/setting",
+        "/settings",
+        "/about",
+        "/search",
+        "/rootWikis/:rootWikiId/wikis/:wikiName",
+        "/rootDiscussions"
+      ];
+      return paths.some(path => {
+        return Boolean(matchPath(pathname, { path }));
+      });
     }
   };
 
   LeftIconButton = props => {
-    const enableBackspaceButton = this.shouldBackspaceButton(
-      this.props.pathname
-    );
+    const enableBackspaceButton = this.shouldBackspaceButton();
     if (enableBackspaceButton) {
       return <BackspaceButton onClick={this.handleBack} {...props} />;
     } else {
-      return <MenuButton onClick={this.handleToggle} {...props} />;
+      return (
+        <MenuButton aria-label="Menu" onClick={this.handleToggle} {...props} />
+      );
     }
   };
 
@@ -305,11 +315,7 @@ class Header extends React.Component {
       <React.Fragment>
         <AppBar elevation={appBarZDepth} position="static">
           <Toolbar>
-            <LeftIconButton
-              className={classes.menuButton}
-              color="inherit"
-              aria-label="Menu"
-            />
+            <LeftIconButton className={classes.menuButton} color="inherit" />
             <Typography type="title" color="inherit" className={classes.flex}>
               {title}
             </Typography>
@@ -331,12 +337,13 @@ export default compose(
   withStyles(styles),
   connect(
     state => {
-      const isLoggedIn = getIsLoggedIn(state);
       const { browser } = state;
-      return { browser, isLoggedIn };
+      const isLoggedIn = getIsLoggedIn(state);
+      const { pathname, query: searchQuery } = state.routing.location;
+      return { browser, isLoggedIn, pathname, searchQuery };
     },
-    () => {
-      return {};
+    dispatch => {
+      return { dispatch };
     }
   )
 )(Header);

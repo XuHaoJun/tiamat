@@ -13,14 +13,12 @@ function defaultGetNeed(component) {
       const need = component[name];
       if (need) {
         if (Array.isArray(need)) {
-          return need.map(_need => {
-            return { name, callback: _need, component };
-          });
+          return need;
         } else if (typeof need === "function") {
-          return [{ name, callback: need, component }];
+          return [need];
         } else if (typeof need === "object") {
           return Object.values(need).map(_need => {
-            return { name, callback: _need, component };
+            return _need;
           });
         }
       }
@@ -30,23 +28,10 @@ function defaultGetNeed(component) {
 }
 
 export function fetchComponentData(
-  {
-    component,
-    props,
-    components,
-    store,
-    dispatch,
-    location,
-
-    params,
-    query,
-    routes,
-    routerProps,
-    serverRequest
-  },
+  { component, store, dispatch, routerProps },
   { promiseAggregation } = { promiseAggregation: pipe }
 ) {
-  const _oriComponents = Array.isArray(components) ? components : [component];
+  const _oriComponents = [component];
   const ps = _oriComponents.map(c => {
     if (c.load) {
       return c.load();
@@ -69,28 +54,16 @@ export function fetchComponentData(
       }, []);
       return needs;
     })
+    .then(needs => [...new Set(needs)])
     .then(needs => {
-      return promiseAggregation(needs, payload => {
-        const { name, callback } = payload;
+      return promiseAggregation(needs, callback => {
         const _dispatch = dispatch || (store ? store.dispatch : null);
-        if (name === "getInitialActions" || name === "getInitialAction") {
-          const action = callback({
-            params,
-            dispatch,
-            location,
-            state: store ? store.getState() : {},
-            query,
-            routes,
-            routerProps,
-            req: serverRequest,
-            props: props || payload.component.defaultProps || {}
-          });
-          return _dispatch(action);
-        } else {
-          return store.dispatch(
-            callback(params, store.getState(), query, routes, routerProps)
-          );
-        }
+        const action = callback({
+          dispatch,
+          routerProps,
+          state: store ? store.getState() : {}
+        });
+        return _dispatch(action);
       });
     });
 }

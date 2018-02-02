@@ -1,10 +1,17 @@
 /* eslint-disable global-require */
 import React from "react";
-import { Route, IndexRoute } from "react-router";
 import Loadable from "react-loadable";
 
-import MyApp from "./modules/MyApp/MyApp";
 import Loading from "./components/CenterCircularProgress";
+import MyAppOri from "./modules/MyApp/MyApp";
+import { injectQuery } from "./createBrowserHistory";
+import HomeRoutes from "./modules/Home/HomeRoutes";
+
+const MyApp = props => {
+  const { location } = props;
+  injectQuery({ location });
+  return <MyAppOri {...props} />;
+};
 
 // FIXME
 // can't wrap loading option by function
@@ -144,111 +151,169 @@ if (process.env.NODE_ENV !== "production") {
   require("./modules/Template/pages/UpsertTemplatePage");
 }
 
-// react-router setup with code-splitting More info:
-// http://blog.mxstbr.com/2016/01/react-apps-with-pages/
-export default (
-  <Route path="/" component={MyApp}>
-    <IndexRoute component={HomePage} />
-    <Route path="/setting" component={SettingDetailPage} />
-    <Route path="/settings" component={SettingDetailPage} />
-    <Route
-      path="/rootDiscussions/:parentDiscussionId"
-      component={DiscussionDetailPage}
-    />
-    <Route path="/whatsHotDiscussions" component={WhatsHotDiscussionsPage} />
-    <Route
-      path="/rootWikis/:rootWikiId/dashboard"
-      component={RootWikiDashboardPage}
-    />
-    <Route
-      path="/forumBoards/:forumBoardId/rootDiscussions"
-      targetKind="rootDiscussions"
-      component={MixedMainPage}
-    />
-    <Route
-      path="/rootWikis/:rootWikiId/wikis"
-      targetKind="wikis"
-      component={MixedMainPage}
-    />
-    <Route
-      path="/rootWikis/:rootWikiId"
-      targetKind="rootWiki"
-      component={MixedMainPage}
-    />
-    <Route path="/wikis/:wikiId" component={WikiDetailPage} />
-    <Route
-      path="/rootWikis/:rootWikiId/wikis/:wikiName"
-      component={WikiDetailPage}
-    />
-    <Route
-      path="/rootWikis/:rootWikiId/wikis/:wikiId"
-      component={WikiDetailPage}
-    />
-    <Route
-      path="/edit/rootWikis/:rootWikiId/rootWikiGroupTree"
-      component={EditRootWikiGroupTreePage}
-    />
-    <Route
-      path="/create/rootWikis/:rootWikiId/rootWikiGroupTree"
-      actionType="create"
-      component={UpsertRootWikiGroupTreePage}
-    />
-    <Route
-      path="/update/rootWikis/:rootWikiId/rootWikiGroupTree"
-      actionType="update"
-      component={UpsertRootWikiGroupTreePage}
-    />
-    <Route
-      path="/create/rootWikis/:rootWikiId/wikiDataForm"
-      component={UpsertWikiDataFormPage}
-      actionType="create"
-    />
-    <Route
-      path="/create/rootWikis/:rootWikiId/template"
-      component={UpsertTemplatePage}
-      actionType="create"
-      sourceKind="rootWiki"
-    />
-    <Route
-      path="/update/wikiDataForms/:wikiDataFormId"
-      component={UpsertWikiDataFormPage}
-      actionType="update"
-    />
-    <Route
-      path="/create/forumBoards/:forumBoardId/rootDiscussion"
-      component={UpsertDiscussionPage}
-      actionType="create"
-      targetKind="rootDiscussion"
-    />
-    <Route
-      path="/create/rootDiscussions/:parentDiscussionId/childDiscussion"
-      component={UpsertDiscussionPage}
-      actionType="create"
-      targetKind="childDiscussion"
-    />
-    <Route
-      path="/update/discussions/:discussionId"
-      component={UpsertDiscussionPage}
-      actionType="update"
-      targetKind="discussion"
-    />
-    <Route path="/create/forumBoard" component={CreateForumBoardPage} />
-    <Route
-      path="/create/forumBoards/:forumBoardId/rootWiki"
-      component={CreateRootWikiPage}
-    />
-    <Route
-      path="/create/forumBoards/:forumBoardId/rootWikis/:rootWikiId/wiki"
-      component={CreateWikiPage}
-    />
-    <Route path="/signup" component={UserSignUpPage} />
-    <Route path="/login" component={UserLogInPage} />
-    <Route
-      path="/api/oauth2/:providerName/callback"
-      component={UserOauth2CallbackPage}
-    />
-    <Route path="/search" component={SearchHomePage} />
-    <Route path="/about" component={AboutPage} />
-    <Route path="*" component={NotFoundPage} />
-  </Route>
-);
+const concat = (...arrays) => {
+  return arrays.reduce((result, array) => {
+    return result.concat(array);
+  }, []);
+};
+
+const routes = [
+  {
+    component: MyApp,
+    routes: concat(HomeRoutes, [
+      {
+        path: "/settings",
+        exact: true,
+        component: SettingDetailPage
+      },
+      {
+        path: "/setting",
+        exact: true,
+        component: SettingDetailPage
+      },
+      {
+        path: "/rootDiscussions/:parentDiscussionId",
+        exact: true,
+        component: DiscussionDetailPage
+      },
+      {
+        path: "/whatsHotDiscussions",
+        exact: true,
+        component: WhatsHotDiscussionsPage
+      },
+      {
+        path: "/forumBoards/:forumBoardId/rootDiscussions",
+        exact: true,
+        component: MixedMainPage,
+        targetKind: "rootDiscussions"
+      },
+      {
+        path: "/rootWikis/:rootWikiId/wikis/:wikiName",
+        exact: true,
+        component: WikiDetailPage
+      },
+      {
+        path: "/rootWikis/:rootWikiId/wikis",
+        exact: true,
+        component: MixedMainPage,
+        targetKind: "wikis"
+      },
+      {
+        path: "/rootWikis/:rootWikiId",
+        exact: true,
+        component: MixedMainPage,
+        targetKind: "rootWiki"
+      },
+      {
+        path: "/wikis/:wikiId",
+        exact: true,
+        component: WikiDetailPage
+      },
+      {
+        path: "/edit/rootWikis/:rootWikiId/rootWikiGroupTree",
+        exact: true,
+        component: EditRootWikiGroupTreePage
+      },
+      {
+        path: "/create/rootWikis/:rootWikiId/rootWikiGroupTree",
+        exact: true,
+        component: UpsertRootWikiGroupTreePage,
+        actionType: "create"
+      },
+      {
+        path: "/update/rootWikis/:rootWikiId/rootWikiGroupTree",
+        exact: true,
+        component: UpsertRootWikiGroupTreePage,
+        actionType: "update"
+      },
+      {
+        path: "/create/rootWikis/:rootWikiId/wikiDataForm",
+        exact: true,
+        component: UpsertWikiDataFormPage,
+        actionType: "create"
+      },
+      {
+        path: "/create/rootWikis/:rootWikiId/template",
+        exact: true,
+        component: UpsertTemplatePage,
+        actionType: "create",
+        sourceKind: "rootWiki"
+      },
+      {
+        path: "/update/wikiDataForms/:wikiDataFormId",
+        exact: true,
+        component: UpsertWikiDataFormPage,
+        actionType: "update"
+      },
+      {
+        path: "/create/forumBoards/:forumBoardId/rootDiscussion",
+        exact: true,
+        component: UpsertWikiDataFormPage,
+        actionType: "create",
+        targetKind: "rootDiscussion"
+      },
+      {
+        path: "/create/rootDiscussions/:parentDiscussionId/childDiscussion",
+        exact: true,
+        component: UpsertDiscussionPage,
+        actionType: "create",
+        targetKind: "childDiscussion"
+      },
+      {
+        path: "/update/discussions/:discussionId",
+        exact: true,
+        component: UpsertDiscussionPage,
+        actionType: "update",
+        targetKind: "discussion"
+      },
+      {
+        path: "/create/forumBoard",
+        exact: true,
+        component: CreateForumBoardPage,
+        actionType: "update",
+        targetKind: "discussion"
+      },
+      {
+        path: "/create/forumBoards/:forumBoardId/rootWiki",
+        exact: true,
+        component: CreateRootWikiPage
+      },
+      {
+        path: "/create/forumBoards/:forumBoardId/rootWikis/:rootWikiId/wiki",
+        exact: true,
+        component: CreateWikiPage
+      },
+      {
+        path: "/signup",
+        exact: true,
+        component: UserSignUpPage
+      },
+      {
+        path: "/login",
+        exact: true,
+        component: UserLogInPage
+      },
+      {
+        path: "/api/oauth2/:providerName/callback",
+        exact: true,
+        component: UserOauth2CallbackPage
+      },
+      {
+        path: "/search",
+        exact: true,
+        component: SearchHomePage
+      },
+      {
+        path: "/about",
+        exact: true,
+        component: AboutPage
+      },
+      {
+        path: "*",
+        component: NotFoundPage
+      }
+    ])
+  }
+];
+
+export default routes;

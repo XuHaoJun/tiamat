@@ -1,17 +1,16 @@
 import * as React from "react";
-import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { Link } from "react-router-dom";
 import { fromJS, Map, List as ImmutableList } from "immutable";
 
 import { withState } from "recompose";
 import List, {
-  ListItem as MuiListItem,
+  ListItem,
   ListItemText,
   ListItemSecondaryAction
 } from "material-ui-next/List";
 import Avatar from "material-ui-next/Avatar";
 import IconButton from "material-ui-next/IconButton";
-import MoreVertIcon from "material-ui-icons-next/MoreVert";
 import ExpandLess from "material-ui-icons-next/ExpandLess";
 import ExpandMore from "material-ui-icons-next/ExpandMore";
 import Collapse from "material-ui-next/transitions/Collapse";
@@ -19,36 +18,6 @@ import Collapse from "material-ui-next/transitions/Collapse";
 import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
 import getRootWikiHref from "../utils/getRootWikiHref";
 import getWikisHref from "../utils/getWikisHref";
-
-class ListItem extends React.Component {
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
-  _handleLinkClick = e => {
-    if (this.props.to) {
-      e.preventDefault();
-      this.context.router.replace(this.props.to);
-    }
-    if (this.props.onClick) {
-      this.props.onClick(e);
-    }
-  };
-
-  render() {
-    const { to, ...other } = this.props;
-    // FIX
-    // add href to listitem, can't disable rightIconButon preventDefault.
-    return (
-      <MuiListItem
-        {...other}
-        component="a"
-        href={to}
-        onClick={this._handleLinkClick}
-      />
-    );
-  }
-}
 
 function defaultGetHrefFunc() {
   return "";
@@ -82,7 +51,13 @@ export function getRootWikiGroupTreeListItemsIter(
     const Items = enhance(({ open, setOpen }) => {
       return (
         <React.Fragment>
-          <ListItem button to={href} style={{ paddingLeft: 12 * depth + 5 }}>
+          <ListItem
+            button
+            component={Link}
+            replace={true}
+            to={href}
+            style={{ paddingLeft: 12 * depth + 5 }}
+          >
             <ListItemText primary={name} />
             {nestedItems ? (
               <ListItemSecondaryAction
@@ -188,17 +163,7 @@ const _rootWikiGroupTree = fromJS([
             name: "深度測試(三)",
             children: [
               {
-                name: "深度測試(四)",
-                children: [
-                  {
-                    name: "深度測試(五)",
-                    children: [
-                      {
-                        name: "你看見我了!"
-                      }
-                    ]
-                  }
-                ]
+                name: "你看見我了!"
               }
             ]
           }
@@ -248,6 +213,8 @@ class RootWikiGroupTreeList extends React.Component {
         <List>
           <ListItem
             button
+            component={Link}
+            replace={true}
             to={this.getRootWikiHref()}
             value={this.getRootWikiHref()}
           >
@@ -256,6 +223,8 @@ class RootWikiGroupTreeList extends React.Component {
           </ListItem>
           <ListItem
             button
+            component={Link}
+            replace={true}
             to={this.getWikisHref("all")}
             value={this.getWikisHref("all")}
           >
@@ -265,6 +234,8 @@ class RootWikiGroupTreeList extends React.Component {
           {rootWikiGroupTreeListItems}
           <ListItem
             button
+            component={Link}
+            replace={true}
             to={this.getWikisHref("null")}
             value={this.getWikisHref("null")}
           >

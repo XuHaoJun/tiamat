@@ -4,13 +4,12 @@ import { Set, is, fromJS } from "immutable";
 import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import moment from "moment";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import List from "../../../components/List/EnhancedList";
 import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
-import Icon from "material-ui-next/Icon";
 
 import UserAvatar from "../../User/components/UserAvatar";
 

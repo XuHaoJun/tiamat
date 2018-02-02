@@ -95,7 +95,7 @@ class CreateRootWikiPage extends React.PureComponent {
 }
 
 function mapStateToProps(state, routerProps) {
-  const { forumBoardId } = routerProps.params;
+  const { forumBoardId } = routerProps.match.params;
   return { forumBoardId };
 }
 

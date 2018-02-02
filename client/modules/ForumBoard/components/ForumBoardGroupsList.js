@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { List } from "immutable";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
+import { Link } from "react-router-dom";
 import { replace } from "react-router-redux";
 import { MenuItem, MenuList } from "material-ui-next/Menu";
 import { ListItemText, ListItemIcon } from "material-ui-next/List";
@@ -69,9 +70,13 @@ class ForumBoardGroupsList extends React.Component {
           const selected = selectedGroup
             ? selectedGroup === group
             : group === defaultAllGroup;
+          const to = this.listItemHref(group);
           return (
             <MenuItem
               key={group}
+              component={Link}
+              to={to}
+              replace={true}
               selected={selected}
               onClick={event => this.handleMenuItemClick(event, group)}
             >
@@ -98,15 +103,8 @@ function mapStateToProps(store, props) {
   };
 }
 
-function mapDispatchToProps(dispatch, ownProps) {
-  return {
-    onMenuItemClick(event, group, href) {
-      if (ownProps.onMenuItemClick) {
-        ownProps.onMenuItemClick(event, group, href);
-      }
-      dispatch(replace(href));
-    }
-  };
+function mapDispatchToProps() {
+  return {};
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(

@@ -11,7 +11,7 @@ import ScrollContainer from "../../../../components/ScrollContainer";
 
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
-import MuiDivider from "material-ui-next/Divider";
+import Divider from "material-ui-next/Divider";
 import CenterCircularProgress from "../../../../components/CenterCircularProgress";
 import DiscussionNode from "./DiscussionNode";
 import ReplyButton from "./ReplyButton";
@@ -20,16 +20,6 @@ import slideHeightStyles from "../../../MyApp/styles/slideHeight";
 import { getDiscussion, getDiscussions } from "../../DiscussionReducer";
 import { getForumBoardById } from "../../../ForumBoard/ForumBoardReducer";
 import { getSemanticRules } from "../../../SemanticRule/SemanticRuleReducer";
-
-const dividerStyles = theme => {
-  return {
-    default: {
-      backgroundColor: theme.palette.primary.light
-    }
-  };
-};
-
-const Divider = withStyles(dividerStyles)(MuiDivider);
 
 export function styles(theme) {
   const heightStyle = slideHeightStyles(theme);

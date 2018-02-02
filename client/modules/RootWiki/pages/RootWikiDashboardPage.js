@@ -9,7 +9,7 @@ import { getRootWiki } from "../RootWikiReducer";
 
 class RootWikiDashboardPage extends React.Component {
   static getInitialAction({ routerProps }) {
-    const { rootWikiId } = routerProps.params;
+    const { rootWikiId } = routerProps.match.params;
     return fetchRootWikiById(rootWikiId);
   }
 
@@ -50,7 +50,7 @@ class RootWikiDashboardPage extends React.Component {
 }
 
 function mapStateToProps(state, routeProps) {
-  const { rootWikiId } = routeProps.params;
+  const { rootWikiId } = routeProps.match.params;
   const rootWiki = getRootWiki(state, rootWikiId);
   return { rootWikiId, rootWiki };
 }

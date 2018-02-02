@@ -3,16 +3,14 @@ import React from "react";
 import Helmet from "react-helmet";
 import { setKeyGenerator } from "slate";
 import serializeJavascript from "serialize-javascript";
-import { renderToNodeStream, renderToString } from "react-dom/server";
-import { match, RouterContext } from "react-router";
 import moment from "moment";
-import { Provider } from "react-redux";
+import { renderToNodeStream, renderToString } from "react-dom/server";
+import { matchRoutes } from "react-router-config";
 
-import { SheetsRegistry } from "react-jss/lib/jss";
-import JssProvider from "react-jss/lib/JssProvider";
 import { createGenerateClassName } from "material-ui-next/styles";
+import { SheetsRegistry } from "react-jss/lib/jss";
 
-import IntlWrapper from "../client/modules/Intl/IntlWrapper";
+import ClientApp from "../client/App";
 import clientRoutes from "../client/routes";
 import { clearTemplateCaches } from "../client/modules/Template/TemplateActions";
 import { setUserAgent } from "../client/modules/UserAgent/UserAgentActions";
@@ -166,139 +164,125 @@ export function renderError(err) {
 }
 
 // Server Side Rendering based on routes matched by React-router.
-export function renderClientRoute(req, res, next) {
-  match(
-    {
-      routes: clientRoutes,
-      location: req.url
-    },
-    async (err, redirectLocation, renderProps) => {
-      if (err) {
-        return res.status(500).end(renderError(err));
-      }
+export async function renderClientRoute(req, res, next) {
+  const store = configureStore();
 
-      if (redirectLocation) {
-        return res.redirect(
-          302,
-          redirectLocation.pathname + redirectLocation.search
-        );
-      }
+  // get userAgent from server side.
+  const userAgent = req.headers["user-agent"];
+  store.dispatch(setUserAgent(userAgent));
 
-      if (!renderProps) {
-        return next();
-      }
+  // get oauth2Client for current render client.
+  const oauth2Client = await Oauth2Client.getAppClient();
+  store.dispatch(setOauth2Client(oauth2Client, "app"));
 
-      const store = configureStore();
+  // guess browser size by userAgent.
+  store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
 
-      // get userAgent from server side.
-      const userAgent = req.headers["user-agent"];
-      store.dispatch(setUserAgent(userAgent));
-      // get oauth2Client for current render client.
-      const oauth2Client = await Oauth2Client.getAppClient();
-      store.dispatch(setOauth2Client(oauth2Client, "app"));
-      // guess browser size by userAgent.
-      store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
+  const { clientID: facebookClientID } = appConfig.oauth2.facebook;
+  if (facebookClientID) {
+    store.dispatch(setOauth2Client({ facebookClientID }, "facebook"));
+  }
 
-      if (appConfig.oauth2.facebook.clientID) {
-        const { clientID } = appConfig.oauth2.facebook;
-        store.dispatch(setOauth2Client({ clientID }, "facebook"));
-      }
-
-      await fetchComponentData({
+  const branch = matchRoutes(clientRoutes, req.path);
+  // Compone.getInitialAction for fetch and update store data.
+  await Promise.all(
+    branch.map(routerProps => {
+      const { route, match } = routerProps;
+      const { component } = route;
+      // inject query for location
+      // because react-router-config not parse query by default
+      // so take req.query.
+      const location = {
+        pathname: match.path,
+        // may be use req.query convert to search string?
+        search: req._parsedOriginalUrl.search,
+        query: req.query
+      };
+      routerProps.location = location; // eslint-disable-line
+      return fetchComponentData({
         store,
-        components: renderProps.components,
-        params: renderProps.params,
-        query: renderProps.location.query,
-        location: renderProps.location,
-        routes: renderProps.routes,
-        routerProps: renderProps,
-        serverRequest: req
+        component,
+        routerProps
       });
-
-      try {
-        let n = 0;
-        setKeyGenerator(() => {
-          n += 1;
-          return `${n}`;
-        });
-        // TODO
-        // locale by request lang.
-        moment.locale(store.getState().intl.locale);
-        if (appConfig.react.domOutput === "stream") {
-          res.set("Content-Type", "text/html").status(200);
-          res.write("<!doctype html><html>");
-          res.write(renderHead());
-          res.write("<body>");
-          res.write('<div id="root">');
-          const generateClassName = createGenerateClassName();
-          const sheetsRegistry = new SheetsRegistry();
-          const stream = renderToNodeStream(
-            <JssProvider
-              registry={sheetsRegistry}
-              generateClassName={generateClassName}
-            >
-              <Provider store={store}>
-                <IntlWrapper>
-                  <RouterContext {...renderProps} />
-                </IntlWrapper>
-              </Provider>
-            </JssProvider>
-          );
-          stream.on("error", error => {
-            console.warn(error);
-          });
-          stream.pipe(res, { end: false });
-          stream.on("end", () => {
-            res.write("</div>");
-            const css = sheetsRegistry.toString();
-            res.write(`<style id="jss-server-side">${css}</style>`);
-            // don't send template caches.
-            store.dispatch(clearTemplateCaches());
-            // send state
-            const stateString = safeStringify(store.getState());
-            res.write(renderScripts(stateString));
-            res.write("</body></html>");
-            res.end();
-          });
-        } else {
-          res.set("Content-Type", "text/html").status(200);
-          res.write("<!doctype html><html>");
-          res.write(renderHead());
-          res.write("<body>");
-          const generateClassName = createGenerateClassName();
-          const sheetsRegistry = new SheetsRegistry();
-          const body = renderToString(
-            <JssProvider
-              registry={sheetsRegistry}
-              generateClassName={generateClassName}
-            >
-              <Provider store={store}>
-                <IntlWrapper>
-                  <RouterContext {...renderProps} />
-                </IntlWrapper>
-              </Provider>
-            </JssProvider>
-          );
-          const css = sheetsRegistry.toString();
-          res.write(`<style id="jss-server-side">${css}</style>`);
-          res.write('<div id="root">');
-          res.write(body);
-          res.write("</div>");
-          // don't send template caches.
-          store.dispatch(clearTemplateCaches());
-          // send state
-          const stateString = safeStringify(store.getState());
-          res.write(renderScripts(stateString));
-          res.write("</body></html>");
-          res.end();
-        }
-        return Promise.resolve(null);
-      } catch (_err) {
-        next(_err);
-        return Promise.resolve(null);
-      }
-    }
+    })
   );
+
+  try {
+    // FIXME
+    // slate editor keyGenerator may be have race condition if use renderToNodeStream
+    let n = 0;
+    setKeyGenerator(() => {
+      n += 1;
+      return `${n}`;
+    });
+    // TODO
+    // locale by request lang.
+    moment.locale(store.getState().intl.locale);
+    // TODO
+    // refactor it.
+    if (appConfig.react.domOutput === "stream") {
+      res.set("Content-Type", "text/html").status(200);
+      res.write("<!doctype html><html>");
+      res.write(renderHead());
+      res.write("<body>");
+      res.write('<div id="root">');
+      const sheetsRegistry = new SheetsRegistry();
+      const generateClassName = createGenerateClassName();
+      const stream = renderToNodeStream(
+        <ClientApp
+          store={store}
+          location={req.url}
+          JssProviderProps={{ sheetsRegistry, generateClassName }}
+        />
+      );
+      stream.on("error", error => {
+        console.warn(error);
+      });
+      stream.pipe(res, { end: false });
+      stream.on("end", () => {
+        res.write("</div>");
+        const css = sheetsRegistry.toString();
+        res.write(`<style id="jss-server-side">${css}</style>`);
+        // don't send template caches.
+        store.dispatch(clearTemplateCaches());
+        // send state
+        const stateString = safeStringify(store.getState());
+        res.write(renderScripts(stateString));
+        res.write("</body></html>");
+        res.end();
+      });
+    } else {
+      res.set("Content-Type", "text/html").status(200);
+      res.write("<!doctype html><html>");
+      res.write(renderHead());
+      res.write("<body>");
+      const sheetsRegistry = new SheetsRegistry();
+      const generateClassName = createGenerateClassName();
+      const body = renderToString(
+        <ClientApp
+          store={store}
+          location={req.url}
+          JssProviderProps={{ sheetsRegistry, generateClassName }}
+        />
+      );
+      const css = sheetsRegistry.toString();
+      res.write(`<style id="jss-server-side">${css}</style>`);
+      res.write('<div id="root">');
+      res.write(body);
+      res.write("</div>");
+      // don't send template caches.
+      store.dispatch(clearTemplateCaches());
+      // send state
+      const stateString = safeStringify(store.getState());
+      res.write(renderScripts(stateString));
+      res.write("</body></html>");
+      res.end();
+    }
+    return Promise.resolve(null);
+  } catch (_err) {
+    next(_err);
+    return Promise.resolve(null);
+  }
 }
 
 const router = new Router();

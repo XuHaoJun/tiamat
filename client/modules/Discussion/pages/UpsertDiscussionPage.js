@@ -34,8 +34,12 @@ const CREATE_ACTION = "create";
 const UPDATE_ACTION = "update";
 const ACTIONS = [CREATE_ACTION, UPDATE_ACTION];
 
-function getHeaderTitle(routerProps = { params: {} }, state = {}) {
-  const { forumBoardId, parentDiscussionId, discussionId } = routerProps.params;
+function getHeaderTitle(routerProps, state = {}) {
+  const {
+    forumBoardId,
+    parentDiscussionId,
+    discussionId
+  } = routerProps.match.params;
   if (forumBoardId) {
     const forumBoard = getForumBoardById(state, forumBoardId);
     if (forumBoard) {
@@ -58,7 +62,11 @@ function getHeaderTitle(routerProps = { params: {} }, state = {}) {
 }
 
 function getForumBoardId(routerProps, state) {
-  const { parentDiscussionId, discussionId, forumBoardId } = routerProps.params;
+  const {
+    parentDiscussionId,
+    discussionId,
+    forumBoardId
+  } = routerProps.match.params;
   if (forumBoardId) {
     return forumBoardId;
   } else if (parentDiscussionId || discussionId) {
@@ -98,7 +106,7 @@ class UpsertRootDiscussionPage extends React.Component {
           parentDiscussionId,
           discussionId,
           forumBoardId
-        } = routerProps.params;
+        } = routerProps.match.params;
         return Promise.all([
           parentDiscussionId
             ? dispatch(fetchDiscussion(parentDiscussionId))
@@ -438,11 +446,15 @@ class UpsertRootDiscussionPage extends React.Component {
 }
 
 function mapStateToProps(state, routerProps) {
-  const leafRoute = routerProps.routes[routerProps.routes.length - 1];
+  const leafRoute = routerProps.route;
   const { actionType, targetKind } = leafRoute;
   const dbIsInitialized = getDBisInitialized(state);
   const isLoggedIn = getIsLoggedIn(state);
-  const { forumBoardId, parentDiscussionId, discussionId } = routerProps.params;
+  const {
+    forumBoardId,
+    parentDiscussionId,
+    discussionId
+  } = routerProps.match.params;
   const { forumBoardGroup } = routerProps.location.query;
   const forumBoard = getForumBoardById(state, forumBoardId);
   const discussion = getDiscussion(state, discussionId);

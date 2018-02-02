@@ -115,15 +115,15 @@ class WikiDetailPage extends React.Component {
 
 function mapStateToProps(state, routerProps) {
   const wiki = getWikiByRouterProps(state, routerProps);
-  let { rootWikiId } = routerProps.params;
+  let { rootWikiId } = routerProps.match.params;
   if (!rootWikiId) {
     if (wiki) {
       rootWikiId = wiki.get("rootWiki");
     }
   }
   const rootWiki = getRootWiki(state, rootWikiId);
-  const wikiId = wiki ? wiki.get("_id") : routerProps.params.wikiId;
-  const wikiName = wiki ? wiki.get("name") : routerProps.params.wikiName;
+  const wikiId = wiki ? wiki.get("_id") : routerProps.match.params.wikiId;
+  const wikiName = wiki ? wiki.get("name") : routerProps.match.params.wikiName;
   return {
     wikiId,
     wikiName,

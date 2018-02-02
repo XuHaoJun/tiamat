@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { renderRoutes } from "react-router-config";
 
 import Reboot from "material-ui-next/Reboot";
 import { MuiThemeProvider as MuiThemeProviderNext } from "material-ui-next/styles";
@@ -116,7 +117,7 @@ class MyApp extends React.Component {
 
   render() {
     const headerTitle = this.props.ui.get("headerTitle");
-    const { children } = this.props;
+    const { route } = this.props;
     const { drawerOpen, theme, sheetsManager } = this.state;
     return (
       <React.Fragment>
@@ -126,8 +127,6 @@ class MyApp extends React.Component {
           <Header
             title={headerTitle}
             appBarZDepth={this.state.appBarZDepth}
-            pathname={this.props.pathname}
-            searchQuery={this.props.searchQuery}
             onChangeDrawerOpen={this.handleChangeDrawerOpen}
           />
           <AppBottomNavigation />
@@ -136,7 +135,7 @@ class MyApp extends React.Component {
             drawerOpen={drawerOpen}
             onScroll={this.handleChildrenContainerScroll}
           >
-            {children}
+            {renderRoutes(route.routes)}
           </Main>
         </MuiThemeProviderNext>
       </React.Fragment>
@@ -145,18 +144,15 @@ class MyApp extends React.Component {
 }
 
 MyApp.propTypes = {
-  children: PropTypes.object.isRequired,
-  intl: PropTypes.object.isRequired
+  intl: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired
 };
 
-function mapStateToProps(state, routerProps) {
+function mapStateToProps(state) {
   const { intl, browser } = state;
   const userAgent = getUserAgent(state);
   const ui = getUI(state);
-  const { location } = routerProps;
-  const { pathname } = location;
-  const searchQuery = location.query.query;
-  return { ui, intl, userAgent, browser, pathname, searchQuery };
+  return { ui, intl, userAgent, browser };
 }
 
 function mapDispatchToProps() {

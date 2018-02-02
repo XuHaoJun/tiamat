@@ -7,7 +7,7 @@ import cdr from "lodash/tail";
 import { Set, List as ImmutableList } from "immutable";
 import memoize from "fast-memoize";
 import moment from "moment";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import List from "../../../components/List/EnhancedList";
 import { ListItem, ListItemText } from "material-ui-next/List";

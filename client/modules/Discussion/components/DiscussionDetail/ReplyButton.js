@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import Portal from "material-ui-next/Portal";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import Button from "material-ui-next/Button";
 import ReplyIcon from "material-ui-icons-next/Reply";

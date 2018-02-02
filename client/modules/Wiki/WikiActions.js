@@ -35,7 +35,7 @@ export function fetchWiki(id, rootWikiId = null) {
 }
 
 export function fetchWikiByRouterProps(routerProps) {
-  const { wikiId, wikiName, rootWikiId } = routerProps.params;
+  const { wikiId, wikiName, rootWikiId } = routerProps.match.params;
   if (rootWikiId) {
     return fetchWiki(wikiName, rootWikiId);
   } else {

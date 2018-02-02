@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import Button from "material-ui-next/Button";
 import CreateIcon from "material-ui-icons-next/Create";

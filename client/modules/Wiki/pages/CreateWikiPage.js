@@ -80,7 +80,7 @@ class CreateWikiPage extends React.PureComponent {
 }
 
 function mapStateToProps(state, routerProps) {
-  const { rootWikiId } = routerProps.params;
+  const { rootWikiId } = routerProps.match.params;
   return { browser: state.browser, rootWikiId };
 }
 

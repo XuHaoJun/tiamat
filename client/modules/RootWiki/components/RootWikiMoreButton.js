@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import Menu, { MenuItem } from "material-ui-next/Menu";
 import Button from "material-ui-next/Button";

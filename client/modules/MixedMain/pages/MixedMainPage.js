@@ -1,19 +1,17 @@
 import React from "react";
-import memoize from "fast-memoize";
 import qs from "qs";
 import { fromJS } from "immutable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { replace } from "react-router-redux";
 
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import slideHeightStyle from "../../MyApp/styles/slideHeight";
 
 import MixedMainTabs, {
-  FORUMBOARD_GROUPS_SLIDE,
   ROOT_DISCUSSIONS_SLIDE,
-  ROOT_WIKI_GROUPS_SLIDE,
   ROOT_WIKI_OR_WIKI_SLIDE
 } from "../components/MixedMainTabs";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
@@ -39,41 +37,19 @@ export const styles = theme => {
   };
 };
 
-const parseRootWikiGroupTree = memoize(queryString => {
-  if (!queryString) {
-    return queryString;
-  }
-  // TODO
-  // let depth limit to 3 or 4?
-  const parsed = qs.parse(queryString, { depth: Infinity });
-  const { rootWikiGroupTree } = parsed;
-  return fromJS(rootWikiGroupTree);
-});
-
 function parseRouterProps(routerProps) {
-  const { forumBoardGroup } = routerProps.location.query;
-  //
-  const rootWikiGroupTree = parseRootWikiGroupTree(
-    routerProps.location.search.length > 0
-      ? routerProps.location.search.slice(1)
-      : ""
-  );
-  //
-  const leafRoute = routerProps.routes[routerProps.routes.length - 1];
+  const {
+    forumBoardGroup,
+    rootWikiGroupTree: rootWikiGroupTreeInput
+  } = routerProps.location.query;
+  const rootWikiGroupTree = fromJS(rootWikiGroupTreeInput);
+  const leafRoute = routerProps.route;
   const { targetKind } = leafRoute;
-  //
-  const { forumBoardId, rootWikiId } = routerProps.params;
-  //
-  let slideIndex = 1;
-  const slideIndexMapping = {
-    forumBoardId: 1,
-    rootWikiId: 3
-  };
-  for (const key in routerProps.params) {
-    if ({}.hasOwnProperty.call(routerProps.params, key)) {
-      slideIndex = slideIndexMapping[key];
-    }
-  }
+  const { forumBoardId, rootWikiId } = routerProps.match.params;
+  const slideIndex =
+    targetKind === "rootDiscussions"
+      ? ROOT_DISCUSSIONS_SLIDE
+      : ROOT_WIKI_OR_WIKI_SLIDE;
   return {
     forumBoardId,
     rootWikiId,
@@ -207,8 +183,8 @@ class MixedMainPage extends React.Component {
       this.props.forumBoardId || (rootWiki && rootWiki.get("forumBoard"));
     const rootWikiId =
       this.props.rootWikiId || (forumBoard && forumBoard.get("rootWiki"));
-    const { router } = this.context;
-    const currentURL = `${router.location.pathname}${router.location.search}`;
+    const { location } = this.props;
+    const currentURL = `${location.pathname}${location.search}`;
     if (slideIndex === ROOT_DISCUSSIONS_SLIDE) {
       let { forumBoardGroup } = this.props;
       forumBoardGroup = !forumBoardGroup
@@ -220,7 +196,9 @@ class MixedMainPage extends React.Component {
         : "";
       const url = `${pathname}${search}`;
       if (url !== currentURL) {
-        this.timeouts.push(setTimeout(() => router.replace(url), 150));
+        this.timeouts.push(
+          setTimeout(() => this.props.dispatch(replace(url)), 150)
+        );
       }
     } else if (slideIndex === ROOT_WIKI_OR_WIKI_SLIDE) {
       let { rootWikiGroupTree } = this.props;
@@ -235,12 +213,16 @@ class MixedMainPage extends React.Component {
         });
         const url = `/rootWikis/${rootWikiId}/wikis?${query}`;
         if (url !== currentURL) {
-          this.timeouts.push(setTimeout(() => router.replace(url), 150));
+          this.timeouts.push(
+            setTimeout(() => this.props.dispatch(replace(url)), 150)
+          );
         }
       } else if (rootWikiId) {
         const url = `/rootWikis/${rootWikiId}`;
         if (url !== currentURL) {
-          this.timeouts.push(setTimeout(() => router.replace(url), 150));
+          this.timeouts.push(
+            setTimeout(() => this.props.dispatch(replace(url)), 150)
+          );
         }
       }
     }
@@ -348,7 +330,8 @@ function mapDispatchToProps(dispatch, routerProps) {
         { tryMore: true, ...options }
       );
       return dispatch(action);
-    }
+    },
+    dispatch
   };
 }
 

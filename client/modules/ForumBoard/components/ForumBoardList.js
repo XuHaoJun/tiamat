@@ -1,7 +1,7 @@
 import React from "react";
 import { Set, is } from "immutable";
 import { connect } from "react-redux";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import { ListItem, ListItemText } from "material-ui-next/List";
 import List from "../../../components/List/EnhancedList";

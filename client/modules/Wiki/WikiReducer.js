@@ -59,8 +59,8 @@ export const getWiki = (state, _id, rootWikiId = null) => {
 };
 
 export function getWikiByRouterProps(state, routerProps) {
-  const { wikiId, wikiName } = routerProps.params;
-  const { rootWikiId } = routerProps.params;
+  const { wikiId, wikiName } = routerProps.match.params;
+  const { rootWikiId } = routerProps.match.params;
   const wiki = rootWikiId
     ? getWiki(state, wikiName, rootWikiId)
     : getWiki(state, wikiId);

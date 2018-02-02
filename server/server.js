@@ -82,7 +82,7 @@ if (process.env.NODE_ENV === "development") {
 }
 app.use(compression());
 app.use(bodyParser.json({ limit: "20mb" }));
-app.use(bodyParser.urlencoded({ limit: "20mb", extended: false }));
+app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
 if (process.env.NODE_ENV === "production") {
   app.use(Express.static(path.resolve(__dirname, "../dist")));
 }

@@ -3,56 +3,99 @@
  */
 import React from "react";
 import PropTypes from "prop-types";
-import { Provider } from "react-redux";
-import { Router, browserHistory, applyRouterMiddleware } from "react-router";
-import { syncHistoryWithStore } from "react-router-redux";
-import useScroll from "react-router-scroll/lib/useScroll";
-import IntlWrapper from "./modules/Intl/IntlWrapper";
-import ReactGA from "react-ga";
-import shouldUpdateScroll from "../client/components/ScrollContainer/shouldUpdateScroll";
+import defaultProps from "recompose/defaultProps";
 
-// Import Routes
+// redux
+import { Provider } from "react-redux";
+
+// react-router
+import { ConnectedRouter } from "react-router-redux";
+import { renderRoutes } from "react-router-config";
 import routes from "./routes";
 
-function logPageView() {
-  if (
-    typeof window !== "undefined" &&
-    process.env.NODE_ENV === "production" &&
-    process.env.CLIENT
-  ) {
-    ReactGA.set({ page: window.location.pathname });
-    ReactGA.pageview(window.location.pathname);
-  }
+import shouldUpdateScroll from "../client/components/ScrollContainer/shouldUpdateScroll";
+import { ScrollContext as ScrollContextOri } from "react-router-scroll-4";
+
+import { SheetsRegistry } from "react-jss/lib/jss";
+import JssProviderOri from "react-jss/lib/JssProvider";
+import { createGenerateClassName } from "material-ui-next/styles";
+
+import createMemoryHistory from "history/createMemoryHistory";
+import { defaultBrowserHistory } from "./createBrowserHistory";
+import IntlWrapper from "./modules/Intl/IntlWrapper";
+
+// isomorphic Router.
+const ServerRouter = defaultProps({ isSSR: true })(ConnectedRouter);
+const ClientRouter = defaultProps({ isSSR: false })(ConnectedRouter);
+const Router = process.browser ? ClientRouter : ServerRouter;
+
+// isomorphic ScrollContext.
+export const ScrollContext = process.browser
+  ? defaultProps({ shouldUpdateScroll })(ScrollContextOri)
+  : React.Fragment;
+
+// isomorphic history.
+export function createHistory(location = "/") {
+  return process.browser
+    ? defaultBrowserHistory
+    : createMemoryHistory({
+        initialEntries: [location]
+      });
 }
 
-const useScrollMiddleware = useScroll({
-  shouldUpdateScroll
-});
+const defaultJssProviderProps = {
+  generateClassName: createGenerateClassName(),
+  sheetsRegistry: new SheetsRegistry()
+};
+const JssProvider = defaultProps({
+  ...defaultJssProviderProps
+})(JssProviderOri);
 
-export default function App(props) {
-  const { store } = props;
-  // Create an enhanced history that syncs navigation events with the store
-  const history = syncHistoryWithStore(browserHistory, store);
-  const routerProps = {};
+const App = props => {
+  const { store, location, history, JssProviderProps } = props;
+  const routerProps = { location, history };
   if (process.env.NODE_ENV === "development") {
     routerProps.key = Math.random();
   }
+  // TODO
+  // refactor it by hoc?
+  // const EnhancedWraper = compose(wrapReduxProvider, wrapIntlWrapper,
+  //                         wrapRouter, wrapScrollContext);
+  // <EnhancedWraper
+  //   ReduxProviderProps={{store}}
+  //   JssProviderProps={JssProviderProps}
+  //   RouterProps=......
+  // >
   return (
     <Provider store={store}>
       <IntlWrapper>
-        <Router
-          {...routerProps}
-          history={history}
-          render={applyRouterMiddleware(useScrollMiddleware)}
-          onUpdate={logPageView}
-        >
-          {routes}
+        <Router {...routerProps}>
+          <ScrollContext>
+            <JssProvider {...JssProviderProps}>
+              {renderRoutes(routes)}
+            </JssProvider>
+          </ScrollContext>
         </Router>
       </IntlWrapper>
     </Provider>
   );
-}
+};
 
 App.propTypes = {
-  store: PropTypes.object.isRequired
+  store: PropTypes.object.isRequired,
+  location: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  history: PropTypes.object,
+  JssProviderProps: PropTypes.object
 };
+
+const defaultLocation = "/";
+
+const defaultHistory = createHistory(defaultLocation);
+
+App.defaultProps = {
+  location: defaultLocation,
+  history: defaultHistory,
+  JssProviderProps: {}
+};
+
+export default App;

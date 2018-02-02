@@ -1,7 +1,7 @@
 import React from "react";
 import { List, Map } from "immutable";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
 import getRootWikiHref from "../utils/getRootWikiHref";
 import getWikisHref from "../utils/getWikisHref";

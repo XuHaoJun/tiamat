@@ -8,11 +8,14 @@ export default function shouldUpdateScroll(prevRouterProps, routerProps) {
     ) {
       return false;
     } else {
-      let isSameComponent = false;
-      prevRouterProps.components.forEach((component, index) => {
-        isSameComponent = routerProps.components[index] === component;
-      });
-      return !isSameComponent;
+      // FIXME
+      // react-router v4 remove components.
+      // let isSameComponent = false;
+      // prevRouterProps.components.forEach((component, index) => {
+      //   isSameComponent = routerProps.components[index] === component;
+      // });
+      // return !isSameComponent;
+      return true;
     }
   } else {
     const userAgent = navigator ? navigator.userAgent : "";

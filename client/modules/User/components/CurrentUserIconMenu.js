@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 import IconButton from "material-ui-next/IconButton";
 import Menu, { MenuItem } from "material-ui-next/Menu";
