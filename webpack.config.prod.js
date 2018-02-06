@@ -18,7 +18,20 @@ module.exports = {
 
   entry: {
     app: ["./client/index.js"],
-    vendor: ["react", "react-dom", "immutable", "intl", "redux", "react-router"]
+    vendor: [
+      "react",
+      "react-dom",
+      "react-loadable",
+      "react-jss",
+      "immutable",
+      "intl",
+      "redux",
+      "react-redux",
+      "react-router",
+      "react-router-dom",
+      "react-router-redux",
+      "react-router-config"
+    ]
   },
 
   output: {
@@ -119,8 +132,8 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
       filename: "vendor.js",
-      chunks: ["app"],
-      minChunks: ({ resource }) => /node_modules/.test(resource)
+      chunks: ["app"]
+      // minChunks: ({ resource }) => /node_modules/.test(resource)
     }),
     new ExtractTextPlugin({
       filename: "app.[chunkhash].css",
@@ -149,7 +162,9 @@ module.exports = {
       mangle: true,
       minimize: true
     }),
-    new webpack.optimize.AggressiveMergingPlugin(),
+    new webpack.optimize.AggressiveMergingPlugin({
+      chiminsizereduceldren: 1.5
+    }),
     new webpack.optimize.ModuleConcatenationPlugin(),
     new WebpackBundleSizeAnalyzerPlugin("./plain-report.txt"),
     new ScriptExtHtmlWebpackPlugin({ module: /\.js$/ }),

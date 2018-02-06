@@ -4,6 +4,7 @@ import map from "lodash/map";
 // Export Constants
 export const ADD_SOCKET = "ADD_SOCKET";
 export const REMOVE_SOCKET = "REMOVE_SOCKET";
+export const SET_SOCKET_IO = "SET_SOCKET_IO";
 
 // Export Actions
 export function addSocket(nsp = "", opts = {}, handlers = []) {
@@ -12,6 +13,10 @@ export function addSocket(nsp = "", opts = {}, handlers = []) {
 
 export function removeSocket(nsp = "") {
   return { type: REMOVE_SOCKET, nsp };
+}
+
+export function setSocketIO(io) {
+  return { type: SET_SOCKET_IO, io };
 }
 
 const defaultActions = {

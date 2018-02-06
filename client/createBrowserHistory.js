@@ -1,20 +1,17 @@
 import createHistory from "history/createBrowserHistory";
-import ReactGA from "react-ga";
 import qs from "qs";
 
 function logPageView(location) {
-  if (
-    typeof window !== "undefined" &&
-    process.env.NODE_ENV === "production" &&
-    process.env.CLIENT
-  ) {
-    ReactGA.set({ page: location.pathname });
-    ReactGA.pageview(location.pathname);
+  if (process.browser && process.env.NODE_ENV === "production") {
+    import(/* webpackChunkName: "react-ga" */ "react-ga").then(module => {
+      const ReactGA = module.default;
+      ReactGA.set({ page: location.pathname });
+      ReactGA.pageview(location.pathname);
+    });
   }
 }
 
-export function injectQuery(h) {
-  const { location } = h;
+export function injectQuery(location) {
   if (!location.query) {
     const { search } = location;
     let query;
@@ -23,14 +20,16 @@ export function injectQuery(h) {
     } else {
       query = {};
     }
-    location.query = query;
+    location.query = query; // eslint-disable-line
   }
 }
 
 function createBrowserHistory() {
   const history = process.browser ? createHistory() : null;
   if (history) {
+    injectQuery(history.location);
     history.listen(location => {
+      injectQuery(location);
       logPageView(location);
     });
   }

@@ -4,7 +4,7 @@ export default function shouldUpdateScroll(prevRouterProps, routerProps) {
   if (prevRouterProps) {
     if (
       prevRouterProps.location.pathname === routerProps.location.pathname &&
-      routerProps.location.action === "REPLACE"
+      routerProps.history.action === "REPLACE"
     ) {
       return false;
     } else {

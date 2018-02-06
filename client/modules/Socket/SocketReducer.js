@@ -1,10 +1,9 @@
 import { fromJS } from "immutable";
-import io from "socket.io-client";
-import { ADD_SOCKET, REMOVE_SOCKET } from "./SocketActions";
+import { ADD_SOCKET, REMOVE_SOCKET, SET_SOCKET_IO } from "./SocketActions";
 
-const initialState = fromJS({ sockets: {} });
+const initialState = fromJS({ sockets: {}, io: null });
 
-function createSocket(nsp, _opts = {}, handlers = []) {
+function createSocket(io, nsp, _opts = {}, handlers = []) {
   const opts = _opts;
   let query = {};
   if (opts.accessToken) {
@@ -32,41 +31,46 @@ const SocketReducer = (state = initialState, action) => {
   if (typeof window === "undefined") {
     return state;
   }
+  const io = state.get("io");
+  if (!io) {
+    return state;
+  }
   switch (action.type) {
-    case ADD_SOCKET:
-      return (() => {
-        const { nsp, opts, handlers } = action;
-        const sockets = state.get("sockets");
-        const found = sockets.get(nsp);
-        // reuse same namespace.
-        if (found) {
-          if (opts.forceNew) {
-            found.disconnect();
-            const socket = createSocket(nsp, opts, handlers);
-            const nextSockets = sockets.set(nsp, socket);
-            return state.set("sockets", nextSockets);
-          } else {
-            // TODO
-            // update socket handlers.
-            return state;
-          }
-        } else {
-          const socket = createSocket(nsp, opts, handlers);
+    case SET_SOCKET_IO: {
+      return state.set("io", action.io);
+    }
+    case ADD_SOCKET: {
+      const { nsp, opts, handlers } = action;
+      const sockets = state.get("sockets");
+      const found = sockets.get(nsp);
+      // reuse same namespace.
+      if (found) {
+        if (opts.forceNew) {
+          found.disconnect();
+          const socket = createSocket(io, nsp, opts, handlers);
           const nextSockets = sockets.set(nsp, socket);
           return state.set("sockets", nextSockets);
+        } else {
+          // TODO
+          // update socket handlers.
+          return state;
         }
-      })();
-    case REMOVE_SOCKET:
-      return (() => {
-        const { nsp } = action;
-        const sockets = state.get("sockets");
-        const found = sockets.get(nsp);
-        if (found) {
-          found.disconnect();
-        }
-        const nextSockets = sockets.delete(nsp);
+      } else {
+        const socket = createSocket(io, nsp, opts, handlers);
+        const nextSockets = sockets.set(nsp, socket);
         return state.set("sockets", nextSockets);
-      })();
+      }
+    }
+    case REMOVE_SOCKET: {
+      const { nsp } = action;
+      const sockets = state.get("sockets");
+      const found = sockets.get(nsp);
+      if (found) {
+        found.disconnect();
+      }
+      const nextSockets = sockets.delete(nsp);
+      return state.set("sockets", nextSockets);
+    }
     default:
       return state;
   }

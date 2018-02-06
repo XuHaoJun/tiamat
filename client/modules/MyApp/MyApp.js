@@ -5,7 +5,7 @@ import Helmet from "react-helmet";
 import { renderRoutes } from "react-router-config";
 
 import Reboot from "material-ui-next/Reboot";
-import { MuiThemeProvider as MuiThemeProviderNext } from "material-ui-next/styles";
+import { MuiThemeProvider } from "material-ui-next/styles";
 import createTheme from "./styles/createTheme";
 
 import _debounce from "lodash/debounce";
@@ -120,25 +120,23 @@ class MyApp extends React.Component {
     const { route } = this.props;
     const { drawerOpen, theme, sheetsManager } = this.state;
     return (
-      <React.Fragment>
+      <MuiThemeProvider theme={theme} sheetsManager={sheetsManager}>
         <Helmet titleTemplate="%s - Tiamat 電玩論壇" meta={meta} />
-        <MuiThemeProviderNext theme={theme} sheetsManager={sheetsManager}>
-          <Reboot />
-          <Header
-            title={headerTitle}
-            appBarZDepth={this.state.appBarZDepth}
-            onChangeDrawerOpen={this.handleChangeDrawerOpen}
-          />
-          <AppBottomNavigation />
-          <ErrorSnackbar />
-          <Main
-            drawerOpen={drawerOpen}
-            onScroll={this.handleChildrenContainerScroll}
-          >
-            {renderRoutes(route.routes)}
-          </Main>
-        </MuiThemeProviderNext>
-      </React.Fragment>
+        <Reboot />
+        <Header
+          title={headerTitle}
+          appBarZDepth={this.state.appBarZDepth}
+          onChangeDrawerOpen={this.handleChangeDrawerOpen}
+        />
+        <AppBottomNavigation />
+        <ErrorSnackbar />
+        <Main
+          drawerOpen={drawerOpen}
+          onScroll={this.handleChildrenContainerScroll}
+        >
+          {renderRoutes(route.routes)}
+        </Main>
+      </MuiThemeProvider>
     );
   }
 }

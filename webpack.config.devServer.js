@@ -49,6 +49,7 @@ module.exports = {
                 "extensible-destructuring",
                 { mode: "optout", impl: "immutable" }
               ],
+              "react-hot-loader/babel",
               "react-loadable/babel"
             ]
           }

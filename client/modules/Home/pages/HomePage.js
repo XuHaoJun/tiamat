@@ -96,7 +96,7 @@ class HomePage extends React.Component {
     ];
     const { slideIndex, classes } = this.props;
     return (
-      <div>
+      <React.Fragment>
         <Helmet title={title} meta={meta} />
         <HomeTabs
           id="HomePage/Tabs"
@@ -104,13 +104,13 @@ class HomePage extends React.Component {
           onTransitionEnd={this.handleTransitionEnd}
           slideIndex={slideIndex}
         />
-      </div>
+      </React.Fragment>
     );
   }
 }
 
-function mapStateToProps(state, routerProps) {
-  const { location } = routerProps;
+function mapStateToProps(state) {
+  const { location } = state.routing;
   const slideIndex = (() => {
     const qsi = location.query.slideIndex || 0;
     let si = Number.parseInt(qsi, 10);

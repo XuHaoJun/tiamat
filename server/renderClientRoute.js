@@ -8,7 +8,7 @@ import { renderToNodeStream, renderToString } from "react-dom/server";
 import { matchRoutes } from "react-router-config";
 
 import { createGenerateClassName } from "material-ui-next/styles";
-import { SheetsRegistry } from "react-jss/lib/jss";
+import { SheetsRegistry } from "react-jss";
 
 import ClientApp from "../client/App";
 import clientRoutes from "../client/routes";
@@ -232,7 +232,7 @@ export async function renderClientRoute(req, res, next) {
         <ClientApp
           store={store}
           location={req.url}
-          JssProviderProps={{ sheetsRegistry, generateClassName }}
+          JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
         />
       );
       stream.on("error", error => {
@@ -262,7 +262,7 @@ export async function renderClientRoute(req, res, next) {
         <ClientApp
           store={store}
           location={req.url}
-          JssProviderProps={{ sheetsRegistry, generateClassName }}
+          JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
         />
       );
       const css = sheetsRegistry.toString();

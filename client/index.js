@@ -3,18 +3,18 @@
  */
 import Debug from "debug";
 import React from "react";
-import { render, hydrate } from "react-dom";
+import { hydrate } from "react-dom";
 import { AppContainer } from "react-hot-loader";
 import { fromJS } from "immutable";
 import { calculateResponsiveState } from "redux-responsive";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import MobileDetect from "mobile-detect";
-import ReactGA from "react-ga";
 import Loadable from "react-loadable";
 import moment from "moment";
 
 import App from "./App";
 import { configureStore } from "./store";
+import { setSocketIO } from "./modules/Socket/SocketActions";
 import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
 import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
 import {
@@ -23,7 +23,6 @@ import {
   initWithStore,
   initAccessToken
 } from "./localdb";
-import { setSocket } from "./modules/Socket/SocketActions";
 import googleAnalyticsConfig from "../server/configs/googleAnalytics";
 import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
 import {
@@ -47,9 +46,12 @@ initDebug();
 
 function initAnalytics() {
   const { code } = googleAnalyticsConfig;
-  Debug("app:googleAnalytics")(`googleAnalytics code: ${code}`);
-  if (process.env.NODE_ENV === "production" && code) {
-    ReactGA.initialize(code);
+  if (process.env.NODE_ENV === "production" && Boolean(code)) {
+    Debug("app:googleAnalytics")(`googleAnalytics code: ${code}`);
+    import(/* webpackChunkName: "react-ga" */ "react-ga").then(module => {
+      const ReactGA = module.default;
+      ReactGA.initialize(code);
+    });
   }
 }
 initAnalytics();
@@ -137,19 +139,29 @@ Loadable.preloadReady().then(() => {
       // db init
       // must after hydrate because have user(access Token) for logIn, some ui data for restore
       // will hydrate fail if init db before hydrate.
-      loadingDBLib.then(() => {
-        const db = connectDB();
-        if (db) {
-          const initPs = initWithStore(db, store);
-          Promise.all(initPs)
-            .then(() => {
-              store.dispatch(setDBisInitialized(null, true));
-            })
-            .catch(err => {
-              store.dispatch(setDBisInitialized(err, false));
-            });
-        }
-      });
+      loadingDBLib
+        .then(() => {
+          const db = connectDB();
+          if (db) {
+            const initPs = initWithStore(db, store);
+            return Promise.all(initPs)
+              .then(() => {
+                store.dispatch(setDBisInitialized(null, true));
+              })
+              .catch(err => {
+                store.dispatch(setDBisInitialized(err, false));
+              });
+          } else {
+            return Promise.resolve(null);
+          }
+        })
+        .finally(() => {
+          import(/* webpackChunkName: "socket.io-client" */ "socket.io-client").then(
+            io => {
+              store.dispatch(setSocketIO(io));
+            }
+          );
+        });
     }
   );
 });

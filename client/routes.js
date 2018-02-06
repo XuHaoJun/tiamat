@@ -3,15 +3,8 @@ import React from "react";
 import Loadable from "react-loadable";
 
 import Loading from "./components/CenterCircularProgress";
-import MyAppOri from "./modules/MyApp/MyApp";
-import { injectQuery } from "./createBrowserHistory";
+import MyApp from "./modules/MyApp/MyApp";
 import HomeRoutes from "./modules/Home/HomeRoutes";
-
-const MyApp = props => {
-  const { location } = props;
-  injectQuery({ location });
-  return <MyAppOri {...props} />;
-};
 
 // FIXME
 // can't wrap loading option by function
