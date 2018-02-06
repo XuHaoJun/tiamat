@@ -22,11 +22,18 @@ import { fetchComponentData } from "./util/fetchData";
 import appConfig from "./configs";
 import Oauth2Client from "./models/oauth2Client";
 
+let assetsManifest =
+  process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+
+let chunkManifest =
+  process.env.webpackChunkAssets && JSON.parse(process.env.webpackChunkAssets);
+
 export function renderHead(...other) {
   const head = Helmet.rewind();
   // Import Manifests
-  const assetsManifest =
-    process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+  assetsManifest =
+    assetsManifest ||
+    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
   if (process.env.NODE_ENV === "production" && !assetsManifest) {
     throw new Error("assetsManifest is required.");
   }
@@ -94,14 +101,16 @@ function safeStringify(state) {
 
 export function renderScripts(initialState) {
   // Import Manifests
-  const assetsManifest =
-    process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+  assetsManifest =
+    assetsManifest ||
+    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
   if (process.env.NODE_ENV === "production" && !assetsManifest) {
     throw new Error("assetsManifest is required.");
   }
-  const chunkManifest =
-    process.env.webpackChunkAssets &&
-    JSON.parse(process.env.webpackChunkAssets);
+  chunkManifest =
+    chunkManifest ||
+    (process.env.webpackChunkAssets &&
+      JSON.parse(process.env.webpackChunkAssets));
   if (process.env.NODE_ENV === "production" && !chunkManifest) {
     throw new Error("chunkManifest is required.");
   }
