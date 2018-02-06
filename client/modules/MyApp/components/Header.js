@@ -17,6 +17,7 @@ import IconButton from "material-ui-next/IconButton";
 import SearchVerIcon from "material-ui-icons-next/Search";
 import BackspaceIcon from "material-ui-icons-next/KeyboardBackspace";
 import MenuIcon from "material-ui-icons-next/Menu";
+import CircularProgress from "material-ui-next/Progress/CircularProgress";
 
 import CurrentUserIconMenu from "../../User/components/CurrentUserIconMenu";
 import AppNavDrawer from "./AppNavDrawer";
@@ -25,6 +26,7 @@ import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
 
 import { getIsLoggedIn } from "../../User/UserReducer";
+import { getIsFirstRender } from "../../MyApp/MyAppReducer";
 
 const LogInButton = makeLogInDialogable(Button);
 
@@ -272,17 +274,30 @@ class Header extends React.Component {
     if (enableBackspaceButton) {
       return <BackspaceButton onClick={this.handleBack} {...props} />;
     } else {
-      return (
-        <MenuButton aria-label="Menu" onClick={this.handleToggle} {...props} />
-      );
+      const { isFirstRender } = this.props;
+      if (isFirstRender) {
+        return (
+          <IconButton {...props}>
+            <CircularProgress size={24} color={props.color} />
+          </IconButton>
+        );
+      } else {
+        return (
+          <MenuButton
+            aria-label="Menu"
+            onClick={this.handleToggle}
+            {...props}
+          />
+        );
+      }
     }
   };
 
   RightIconButton = props => {
     const { pathname } = this.props;
-    const enableSendButtonRules = [/\/create/, /\update/];
-    const enableSendButton = enableSendButtonRules.some(regexp =>
-      regexp.test(pathname)
+    const enableSendButtonRules = ["/create", "/update"];
+    const enableSendButton = enableSendButtonRules.some(path =>
+      Boolean(matchPath(pathname, { path }))
     );
     if (enableSendButton) {
       return <SendButton {...props} />;
@@ -339,8 +354,9 @@ export default compose(
     state => {
       const { browser } = state;
       const isLoggedIn = getIsLoggedIn(state);
+      const isFirstRender = getIsFirstRender(state);
       const { pathname, query: searchQuery } = state.routing.location;
-      return { browser, isLoggedIn, pathname, searchQuery };
+      return { browser, isLoggedIn, pathname, searchQuery, isFirstRender };
     },
     dispatch => {
       return { dispatch };
