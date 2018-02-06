@@ -241,7 +241,7 @@ const routes = [
       {
         path: "/create/forumBoards/:forumBoardId/rootDiscussion",
         exact: true,
-        component: UpsertWikiDataFormPage,
+        component: UpsertDiscussionPage,
         actionType: "create",
         targetKind: "rootDiscussion"
       },

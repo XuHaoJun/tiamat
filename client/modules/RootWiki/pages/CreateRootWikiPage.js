@@ -5,20 +5,16 @@ import Helmet from "react-helmet";
 
 import RootWikiForm from "../components/RootWikiForm";
 
+import { replace } from "react-router-redux";
 import {
   setHeaderTitle,
   updateSendButtonProps
 } from "../../MyApp/MyAppActions";
-
 import { addRootWikiRequest } from "../RootWikiActions";
 
 class CreateRootWikiPage extends React.PureComponent {
   static defaultProps = {
     title: "建立主維基"
-  };
-
-  static contextTypes = {
-    router: PropTypes.object
   };
 
   componentWillMount() {
@@ -54,8 +50,10 @@ class CreateRootWikiPage extends React.PureComponent {
             return rootWikiJSON;
           })
           .then(rootWikiJSON => {
-            this.context.router.replace(
-              `/forumBoards/${forumBoardId}/rootWikis/${rootWikiJSON._id}`
+            this.props.dispatch(
+              replace(
+                `/forumBoards/${forumBoardId}/rootWikis/${rootWikiJSON._id}`
+              )
             );
             return rootWikiJSON;
           })

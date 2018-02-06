@@ -8,6 +8,7 @@ import TextField from "material-ui-next/TextField";
 import Button from "material-ui-next/Button";
 import Divider from "material-ui-next/Divider";
 
+import { push } from "react-router-redux";
 import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";
 import { logInRequest } from "../../UserActions";
 
@@ -19,10 +20,6 @@ const ajv = ajvExtends(new Ajv({ allErrors: true }));
 const validate = ajv.compile(logInFormschema);
 
 class LogInForm extends React.Component {
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static propTypes = {
     initEmail: PropTypes.string,
     initPassword: PropTypes.string,
@@ -217,7 +214,6 @@ class LogInForm extends React.Component {
           <br />
           <Button
             onClick={(...args) => {
-              this.context.router.push("/signup");
               if (this.props.onClickSignUpButton) {
                 this.props.onClickSignUpButton(...args);
               }
@@ -252,14 +248,18 @@ class LogInForm extends React.Component {
   }
 }
 
-export const LogInFormWithoutConnect = LogInForm;
-
 export default connect(
   state => {
     const oauth2Client = getOauth2Client(state);
     return { oauth2Client };
   },
-  null,
+  dispatch => {
+    return {
+      onClickSignUpButton() {
+        dispatch(push("/signup"));
+      }
+    };
+  },
   (stateProps, dispatchProps, ownProps) => {
     const { oauth2Client } = stateProps;
     const { dispatch } = dispatchProps;

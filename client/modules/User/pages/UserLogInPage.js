@@ -7,6 +7,7 @@ import Paper from "material-ui-next/Paper";
 
 import LogInForm from "../components/LogInForm";
 
+import { replace } from "react-router-redux";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { getIsLoggedIn } from "../UserReducer";
 
@@ -32,10 +33,6 @@ class UserLoginPage extends Component {
     isLoggedIn: PropTypes.bool.isRequired
   };
 
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static getInitialAction() {
     return setHeaderTitle("登入");
   }
@@ -55,9 +52,9 @@ class UserLoginPage extends Component {
 
   goBackIfLoggedIn = () => {
     const { isLoggedIn } = this.props;
-    const { router } = this.context;
     if (isLoggedIn) {
-      router.replace("/");
+      const from = this.props.location.query.from || "/";
+      this.props.dispatch(replace(from));
     }
   };
 

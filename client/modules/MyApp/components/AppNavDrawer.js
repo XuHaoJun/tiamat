@@ -64,10 +64,6 @@ class AppNavDrawer extends React.Component {
     onRequestChangeNavDrawer: () => {}
   };
 
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   shouldComponentUpdate(nextProps, nextState) {
     // skip update if not open
     if (this.props.open === false && nextProps.open === false) {

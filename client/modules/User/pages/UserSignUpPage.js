@@ -1,10 +1,15 @@
 import React, { Component } from "react";
-import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import Paper from "material-ui/Paper";
 import Helmet from "react-helmet";
+
+import Paper from "material-ui-next/Paper";
+
 import SignUpForm from "../components/SignUpForm";
+
+import { replace } from "react-router-redux";
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
+
 import { getIsLoggedIn } from "../UserReducer";
 
 const styles = {
@@ -25,10 +30,6 @@ const styles = {
 };
 
 class UserSignUpPage extends Component {
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static propTypes = {
     isLoggedIn: PropTypes.bool.isRequired
   };
@@ -51,9 +52,9 @@ class UserSignUpPage extends Component {
 
   goBackIfLoggedIn = () => {
     const { isLoggedIn } = this.props;
-    const { router } = this.context;
     if (isLoggedIn) {
-      router.replace("/");
+      const from = this.props.location.query.from || "/";
+      this.props.dispatch(replace(from));
     }
   };
 
@@ -80,9 +81,10 @@ class UserSignUpPage extends Component {
       ? this.renderMobile()
       : this.renderDesktop();
     return (
-      <div>
-        <Helmet title="註冊" meta={meta} /> {content}
-      </div>
+      <React.Fragment>
+        <Helmet title="註冊" meta={meta} />
+        <React.Fragment>{content}</React.Fragment>
+      </React.Fragment>
     );
   }
 }

@@ -31,10 +31,6 @@ class CreateRootWikiPage extends React.PureComponent {
     title: "編輯維基分類"
   };
 
-  static contextTypes = {
-    router: PropTypes.object
-  };
-
   constructor(props) {
     super(props);
     const rootWikiGroupTree = fromJS([

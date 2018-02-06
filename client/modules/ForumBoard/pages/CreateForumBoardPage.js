@@ -2,26 +2,18 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import getDefaultContainerStyles from "../../MyApp/styles/defaultContainerStyles";
+
 import {
   setHeaderTitle,
   updateSendButtonProps
 } from "../../MyApp/MyAppActions";
 import CreateForumBoardForm from "../components/CreateForumBoardForm";
 import { addForumBoardRequest } from "../ForumBoardActions";
-
-export function getStyles(browser) {
-  const containerStyle = getDefaultContainerStyles(browser);
-  return { container: containerStyle.container };
-}
+import { push } from "react-router-redux";
 
 class CreateForumBoardPage extends React.PureComponent {
   static defaultProps = {
     title: "建立看板"
-  };
-
-  static contextTypes = {
-    router: PropTypes.object
   };
 
   componentWillMount() {
@@ -59,8 +51,8 @@ class CreateForumBoardPage extends React.PureComponent {
             return forumBoardJSON;
           })
           .then(forumBoardJSON => {
-            this.context.router.push(
-              `/forumBoards/${forumBoardJSON._id}/rootDiscussions`
+            this.props.dispatch(
+              push(`/forumBoards/${forumBoardJSON._id}/rootDiscussions`)
             );
           })
           .catch(() => dispatch(updateSendButtonProps({ loading: false })));
@@ -77,14 +69,13 @@ class CreateForumBoardPage extends React.PureComponent {
         content: metaDescription
       }
     ];
-    const styles = getStyles(this.props.browser);
     return (
-      <div>
+      <React.Fragment>
         <Helmet title={title} meta={meta} />
-        <div style={styles.container}>
+        <div style={{ marginTop: 50 }}>
           <CreateForumBoardForm ref={this.setFormRef} />
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 }

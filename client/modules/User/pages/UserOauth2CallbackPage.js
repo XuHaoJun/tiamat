@@ -1,17 +1,11 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-class UserOauth2CallbackPage extends React.Component {
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
+import { replace } from "react-router-redux";
 
+class UserOauth2CallbackPage extends React.Component {
   componentDidMount() {
-    const { router } = this.context;
-    // TODO
-    // redirect to user profile page?
-    router.replace("/");
+    this.props.dispatch(replace("/"));
   }
 
   shouldComponentUpdate() {

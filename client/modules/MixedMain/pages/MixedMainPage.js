@@ -69,10 +69,6 @@ class MixedMainPage extends React.Component {
     title: "Loading..."
   };
 
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
     const parsed = parseRouterProps(routerProps);
     return async (dispatch, getState) => {
