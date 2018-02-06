@@ -1,20 +1,19 @@
 import mongoose from "mongoose";
-import Discussion from "../models/discussion";
-import RootWiki from "../models/rootWiki";
-import Wiki from "../models/wiki";
-import appConfig from "../configs";
 import RecursiveIterator from "recursive-iterator";
-import Promise from "bluebird";
 import Debug from "debug";
 import semver from "semver";
 import packageInfo from "../../package.json";
 
-mongoose.Promise = Promise;
+import Discussion from "../models/discussion";
+import RootWiki from "../models/rootWiki";
+import Wiki from "../models/wiki";
+import appConfig from "../configs";
 
 const debug = Debug("slateMigrate");
 
 const Models = [Discussion, RootWiki, Wiki];
 
+// refactor to async await
 function migrate(Model) {
   return Model.find({})
     .exec()
@@ -25,11 +24,22 @@ function migrate(Model) {
         const { content } = m;
         if (content) {
           for (const { node } of new RecursiveIterator(content)) {
-            if (node.kind === "text" && node.ranges) {
-              debug(m._id, "text ranges to leaves");
-              node.leaves = node.ranges;
-              delete node.ranges;
-              change = true;
+            let kindName = "kind";
+            if (semver.satisfies(packageInfo.dependencies.slate, ">= 0.32.0")) {
+              if (node.kind) {
+                node.object = node.kind;
+                delete node.kind;
+                change = true;
+              }
+              kindName = "object";
+            }
+            if (semver.satisfies(packageInfo.dependencies.slate, ">= 0.27.0")) {
+              if (node[kindName] === "text" && node.ranges) {
+                debug(m._id, "text ranges to leaves");
+                node.leaves = node.ranges;
+                delete node.ranges;
+                change = true;
+              }
             }
           }
           if (change) {

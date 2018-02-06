@@ -13,6 +13,7 @@ import pure from "recompose/pure";
 import FlipMove from "@xuhaojun/react-flip-move";
 
 import { CircularProgress } from "material-ui-next/Progress";
+import RefreshIcon from "material-ui-icons-next/Refresh";
 import LazyLoad from "react-lazyload";
 
 import compose from "recompose/compose";
@@ -164,36 +165,32 @@ class LoadingListItem extends React.Component {
         const reason = "lazyLoad";
         const event = { reason, direction: "bottom" };
         const p = this.props.onRequestMore(event, reason);
-        if (p.then) {
-          p.then(() => {
+        if (p.then && p.finally) {
+          p.finally(() => {
             this.setState({ loading: false });
           });
         } else {
           this.setState({ loading: false });
         }
       });
+    }
+  };
+
+  LeftIcon = () => {
+    const { loading } = this.state;
+    if (loading) {
+      return <CircularProgress size={16} />;
     } else {
-      this.setState({ loading: false });
+      return <RefreshIcon />;
     }
   };
 
   render() {
     const { loading } = this.state;
-    const progressSize = 32;
+    const { LeftIcon } = this;
     return (
       <ListItem button onClick={this.handleRequestMore} disabled={loading}>
-        {loading ? (
-          <CircularProgress size={progressSize} />
-        ) : (
-          <CircularProgress
-            color="primary"
-            size={progressSize}
-            mode="determinate"
-            value={20}
-            min={0}
-            max={100}
-          />
-        )}
+        <LeftIcon />
         <ListItemText primary="Load More..." />
       </ListItem>
     );
