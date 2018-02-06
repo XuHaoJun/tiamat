@@ -275,10 +275,8 @@ class NavList extends React.Component {
   }
 }
 
-export const NavListWithoutConnect = NavList;
-
 function mapStateToProps(state) {
-  const location = state.routing.locationBeforeTransitions;
+  const { location } = state.routing;
   const isFirstRender = getIsFirstRender(state);
   let value;
   if (location && !isFirstRender) {
