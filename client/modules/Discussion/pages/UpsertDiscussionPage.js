@@ -94,10 +94,6 @@ class UpsertRootDiscussionPage extends React.Component {
     ]).isRequired
   };
 
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
-
   static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
     return async (dispatch, getState) => {
       dispatch(setHeaderTitle(getHeaderTitle(routerProps, getState())));
@@ -188,7 +184,9 @@ class UpsertRootDiscussionPage extends React.Component {
   };
 
   _toLoginPage = () => {
-    this.context.router.replace("/login");
+    // TODO
+    // add ?from=url
+    this.props.dispatch(push(`/login`));
   };
 
   ensureLoggedIn = (props = this.props) => {
