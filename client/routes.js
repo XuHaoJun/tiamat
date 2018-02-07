@@ -1,5 +1,4 @@
 /* eslint-disable global-require */
-import React from "react";
 import Loadable from "react-loadable";
 
 import Loading from "./components/CenterCircularProgress";

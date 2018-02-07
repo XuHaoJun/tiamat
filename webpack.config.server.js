@@ -45,7 +45,8 @@ module.exports = {
                 config: "./webpack.config.babel.js",
                 verbose: false
               }
-            ]
+            ],
+            ["extensible-destructuring", { mode: "optout", impl: "immutable" }]
           ]
         }
       },

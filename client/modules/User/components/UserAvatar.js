@@ -32,26 +32,6 @@ function getTextOrSrcOrIcon(user) {
   }
 }
 
-const getAvatarProps = props => {
-  const { user, enableLazyLoad, ...other } = props;
-  return other;
-};
-
-const renderByText = (text, props) => {
-  const { user } = props;
-  const other = getAvatarProps(props);
-  const { _id } = user;
-  const backgroundColor = randomColor({
-    luminosity: "dark",
-    seed: _id || text
-  });
-  return (
-    <Avatar style={{ backgroundColor }} {...other}>
-      {text}
-    </Avatar>
-  );
-};
-
 const UserAvatar = props => {
   const { user, enableLazyLoad, ...other } = props;
   const { text, src, icon } = getTextOrSrcOrIcon(user);
@@ -72,13 +52,19 @@ const UserAvatar = props => {
       return <Avatar src={src} {...other} />;
     }
   } else if (text) {
-    return renderByText(text, props);
-  } else if (icon) {
+    const { _id } = user;
+    const backgroundColor = randomColor({
+      luminosity: "dark",
+      seed: _id || text
+    });
+    const style = { backgroundColor };
     return (
-      <Avatar {...other}>
-        <GuestPersonIcon />
+      <Avatar {...other} style={style}>
+        {text}
       </Avatar>
     );
+  } else if (icon) {
+    return <Avatar {...other}>{icon}</Avatar>;
   } else {
     return <Avatar {...other} />;
   }
