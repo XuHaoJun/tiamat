@@ -9,6 +9,8 @@ import RootWiki from "../models/rootWiki";
 import Wiki from "../models/wiki";
 import appConfig from "../configs";
 
+mongoose.Promise = Promise;
+
 const debug = Debug("slateMigrate");
 
 const Models = [Discussion, RootWiki, Wiki];
@@ -23,9 +25,18 @@ function migrate(Model) {
         let change = false;
         const { content } = m;
         if (content) {
+          if (content.kind) {
+            delete content.kind;
+            change = true;
+          }
           for (const { node } of new RecursiveIterator(content)) {
             let kindName = "kind";
-            if (semver.satisfies(packageInfo.dependencies.slate, ">= 0.32.0")) {
+            if (
+              semver.satisfies(
+                semver.coerce(packageInfo.dependencies.slate),
+                ">= 0.32.0"
+              )
+            ) {
               if (node.kind) {
                 node.object = node.kind;
                 delete node.kind;
@@ -33,7 +44,12 @@ function migrate(Model) {
               }
               kindName = "object";
             }
-            if (semver.satisfies(packageInfo.dependencies.slate, ">= 0.27.0")) {
+            if (
+              semver.satisfies(
+                semver.coerce(packageInfo.dependencies.slate),
+                ">= 0.27.0"
+              )
+            ) {
               if (node[kindName] === "text" && node.ranges) {
                 debug(m._id, "text ranges to leaves");
                 node.leaves = node.ranges;

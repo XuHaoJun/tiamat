@@ -185,7 +185,7 @@ export function createSchema() {
       // Rule to insert a paragraph block if the document is empty.
       {
         match: node => {
-          return node.kind === "document";
+          return node.object === "document";
         },
         validate: document => {
           return document.nodes.size ? null : true;
@@ -199,7 +199,7 @@ export function createSchema() {
       // document.
       {
         match: node => {
-          return node.kind === "document";
+          return node.object === "document";
         },
         validate: document => {
           const lastNode = document.nodes.last();

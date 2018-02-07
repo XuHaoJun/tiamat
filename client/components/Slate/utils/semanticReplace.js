@@ -32,7 +32,7 @@ function semanticReplace(value, semanticRules) {
   }
   const calcedParentKeys = [];
   startNode.filterDescendants(node => {
-    if (node.kind !== "text") {
+    if (node.object !== "text") {
       return;
     }
     let parent = startNode.getParent(node.key);

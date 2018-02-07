@@ -2,7 +2,7 @@ import SoftBreak from "slate-soft-break";
 import SuggestionsPlugin from "@xuhaojun/slate-suggestions";
 import PluginEditTable from "slate-edit-table";
 import PluginEditList from "slate-edit-list";
-import PluginEditCode from "slate-edit-code";
+// import PluginEditCode from "slate-edit-code";
 
 function getCurrentWord(text, index, initialIndex) {
   if (index === initialIndex) {
@@ -73,18 +73,18 @@ function createPlugins() {
     typeDefault: "paragraph"
   });
 
-  const editCodePlugin = PluginEditCode({
-    containerType: "code_block",
-    lineType: "code_line",
-    onlyIn: node => node.type === "code_template"
-  });
+  // const editCodePlugin = PluginEditCode({
+  //   containerType: "code_block",
+  //   lineType: "code_line",
+  //   onlyIn: node => node.type === "code_template"
+  // });
 
   const plugins = {
     suggestionsPlugin,
     softBreakPlugin,
-    tablePlugin,
-    listPlugin,
-    editCodePlugin
+    // tablePlugin,
+    listPlugin
+    // editCodePlugin
   };
   return plugins;
 }
