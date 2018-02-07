@@ -169,7 +169,7 @@ class RootDiscussionList extends React.Component {
     }
     dataSource = dataSource.sortBy(this.sortBy);
     const listId = this.props.id || "default";
-    const { classes, isFirstRender } = this.props;
+    const { classes } = this.props;
     return (
       <List
         id={id ? `${id}/List` : undefined}
@@ -177,9 +177,7 @@ class RootDiscussionList extends React.Component {
         className={classes.root}
       >
         {dataSource.map(discussion => {
-          const key = `RootDiscussionList/${listId}/${discussion.get(
-            "_id"
-          )}/${String(isFirstRender)}`;
+          const key = `RootDiscussionList/${listId}/${discussion.get("_id")}`;
           const to = this.listItemHref(discussion);
           const avatar = this.listItemLeftAvatar(discussion);
           const primary = discussion.get("title");

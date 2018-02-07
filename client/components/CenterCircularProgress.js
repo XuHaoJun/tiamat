@@ -1,6 +1,6 @@
 import React from "react";
 
-import pure from "recompose/pure";
+import { hot } from "react-hot-loader";
 
 const CenterCircularProgress = () => {
   const styles = {
@@ -24,4 +24,4 @@ const CenterCircularProgress = () => {
   );
 };
 
-export default pure(CenterCircularProgress);
+export default hot(module)(CenterCircularProgress);

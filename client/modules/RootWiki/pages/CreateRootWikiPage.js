@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 import RootWikiForm from "../components/RootWikiForm";
 
@@ -97,4 +99,6 @@ function mapStateToProps(state, routerProps) {
   return { forumBoardId };
 }
 
-export default connect(mapStateToProps)(CreateRootWikiPage);
+export default compose(hot(module), connect(mapStateToProps))(
+  CreateRootWikiPage
+);

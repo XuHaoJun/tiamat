@@ -1,6 +1,8 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 import RootWikiTabs from "../components/RootWikiTabs";
 
@@ -64,6 +66,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  RootWikiDashboardPage
-);
+export default compose(
+  hot(module),
+  connect(mapStateToProps, mapDispatchToProps)
+)(RootWikiDashboardPage);

@@ -2,6 +2,8 @@ import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
 import Loadable from "react-loadable";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 import { FormControlLabel, FormGroup } from "material-ui-next/Form";
 import Switch from "material-ui-next/Switch";
@@ -87,4 +89,6 @@ function mapStateToProps(store, routerProps) {
   return {};
 }
 
-export default connect(mapStateToProps)(SettingDetailPage);
+export default compose(hot(module), connect(mapStateToProps))(
+  SettingDetailPage
+);

@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { renderRoutes } from "react-router-config";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 import Reboot from "material-ui-next/Reboot";
 import { MuiThemeProvider } from "material-ui-next/styles";
@@ -128,14 +130,14 @@ class MyApp extends React.Component {
           appBarZDepth={this.state.appBarZDepth}
           onChangeDrawerOpen={this.handleChangeDrawerOpen}
         />
-        <AppBottomNavigation />
-        <ErrorSnackbar />
         <Main
           drawerOpen={drawerOpen}
           onScroll={this.handleChildrenContainerScroll}
         >
           {renderRoutes(route.routes)}
         </Main>
+        <AppBottomNavigation />
+        <ErrorSnackbar />
       </MuiThemeProvider>
     );
   }
@@ -157,4 +159,7 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MyApp);
+export default compose(
+  hot(module),
+  connect(mapStateToProps, mapDispatchToProps)
+)(MyApp);

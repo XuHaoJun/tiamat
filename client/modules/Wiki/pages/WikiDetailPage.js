@@ -1,6 +1,7 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
+import { hot } from "react-hot-loader";
 
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
@@ -143,6 +144,7 @@ function mapDispatchToProps(dispatch, routerProps) {
 }
 
 export default compose(
+  hot(module),
   withStyles(styles),
   connect(mapStateToProps, mapDispatchToProps)
 )(WikiDetailPage);

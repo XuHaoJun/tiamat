@@ -4,7 +4,7 @@ import { fromJS } from "immutable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
-import { replace } from "react-router-redux";
+import { hot } from "react-hot-loader";
 
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
@@ -14,6 +14,8 @@ import MixedMainTabs, {
   ROOT_DISCUSSIONS_SLIDE,
   ROOT_WIKI_OR_WIKI_SLIDE
 } from "../components/MixedMainTabs";
+
+import { replace } from "react-router-redux";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchWikis } from "../../Wiki/WikiActions";
 import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
@@ -254,7 +256,7 @@ class MixedMainPage extends React.Component {
       ? this.lastForumBoardGroup
       : forumBoardGroup;
     return (
-      <div>
+      <React.Fragment>
         <Helmet title={title} meta={meta} />
         <MixedMainTabs
           // ui
@@ -273,7 +275,7 @@ class MixedMainPage extends React.Component {
           wiki={wiki}
           isWikis={isWikis}
         />
-      </div>
+      </React.Fragment>
     );
   }
 }
@@ -332,6 +334,7 @@ function mapDispatchToProps(dispatch, routerProps) {
 }
 
 export default compose(
+  hot(module),
   withStyles(styles),
   connect(mapStateToProps, mapDispatchToProps)
 )(MixedMainPage);

@@ -1,4 +1,6 @@
 import React from "react";
+import { hot } from "react-hot-loader";
+
 import { Link } from "react-router-dom";
 
 class NotFoundPage extends React.PureComponent {
@@ -14,4 +16,4 @@ class NotFoundPage extends React.PureComponent {
   }
 }
 
-export default NotFoundPage;
+export default hot(module)(NotFoundPage);

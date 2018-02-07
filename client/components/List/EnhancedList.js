@@ -10,7 +10,7 @@ import PullRefresh, { Indicator } from "@xuhaojun/react-pullrefresh";
 import Portal from "material-ui-next/Portal";
 import pure from "recompose/pure";
 
-import FlipMove from "@xuhaojun/react-flip-move";
+import FlipMove from "react-flip-move";
 
 import { CircularProgress } from "material-ui-next/Progress";
 import RefreshIcon from "material-ui-icons-next/Refresh";

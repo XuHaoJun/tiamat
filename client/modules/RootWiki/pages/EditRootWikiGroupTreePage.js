@@ -14,6 +14,8 @@ import { DragDropContext } from "react-dnd";
 import { getUserAgent } from "../../UserAgent/UserAgentReducer";
 import MobileDetect from "mobile-detect";
 import memoize from "fast-memoize";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 function getStyles() {
   const styles = {
@@ -212,4 +214,6 @@ function mapStateToProps(state, routerProps) {
   };
 }
 
-export default connect(mapStateToProps)(CreateRootWikiPage);
+export default compose(hot(module), connect(mapStateToProps))(
+  CreateRootWikiPage
+);

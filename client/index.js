@@ -4,7 +4,6 @@
 import Debug from "debug";
 import React from "react";
 import { hydrate } from "react-dom";
-import { AppContainer } from "react-hot-loader";
 import { fromJS } from "immutable";
 import { calculateResponsiveState } from "redux-responsive";
 import Loadable from "react-loadable";
@@ -97,7 +96,7 @@ function isLoadableComponent(component) {
 async function loadInitialPage() {
   await Loadable.preloadReady();
   const pathname = window.location.pathname;
-  await Promise.all(
+  return await Promise.all(
     matchRoutes(routes, pathname)
       .filter(({ route }) => {
         const { component } = route;
@@ -108,6 +107,18 @@ async function loadInitialPage() {
         return component.preload();
       })
   );
+}
+
+function hydrateAsync(component, dom) {
+  return new Promise((resolve, reject) => {
+    hydrate(component, dom, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
 }
 
 async function main() {
@@ -135,63 +146,37 @@ async function main() {
   await loadInitialPagePromise;
 
   debug("first hydrate start");
-  // TODO
-  // hydrate promiseify to hydrateAsync
-  hydrate(
-    <AppContainer>
-      <App store={store} />
-    </AppContainer>,
-    mountApp,
-    () => {
-      debug("first hydrate end");
-      // client-slide update responsive state by window.
-      store.dispatch(calculateResponsiveState(window));
-      store.dispatch(setIsFirstRender(false));
-      // db init
-      // must after hydrate because have user(access Token) for logIn, some ui data for restore
-      // will hydrate fail if init db before hydrate.
-      loadingDBLibPromise
-        .then(() => {
-          const db = connectDB();
-          if (db) {
-            const initPs = initWithStore(db, store);
-            return Promise.all(initPs)
-              .then(() => {
-                store.dispatch(setDBisInitialized(null, true));
-              })
-              .catch(err => {
-                store.dispatch(setDBisInitialized(err, false));
-              });
-          } else {
-            return Promise.resolve(null);
-          }
-        })
-        .finally(() => {
-          import(/* webpackChunkName: "socket.io-client" */ "socket.io-client").then(
-            io => {
-              store.dispatch(setSocketIO(io));
-            }
-          );
-        });
-    }
-  );
+
+  await hydrateAsync(<App store={store} />, mountApp);
+
+  debug("first hydrate end");
+
+  // client-slide update responsive state by window.
+  store.dispatch(calculateResponsiveState(window));
+  store.dispatch(setIsFirstRender(false));
+
+  // db init
+  // must after hydrate because db have user(access Token) for logIn, some ui data for restore
+  await loadingDBLibPromise;
+  const db = connectDB();
+  if (db) {
+    const initPs = initWithStore(db, store);
+    Promise.all(initPs)
+      .then(() => {
+        store.dispatch(setDBisInitialized(null, true));
+      })
+      .catch(err => {
+        store.dispatch(setDBisInitialized(err, false));
+      });
+  }
 
   initAnalytics();
+
+  const io = await import(/* webpackChunkName: "socket.io-client" */ "socket.io-client");
+  store.dispatch(setSocketIO(io));
+
+  return { store, mountApp };
 }
 
 main();
 debug("Application ready!");
-
-// For hot reloading of react components
-if (module.hot) {
-  debug("start hot reload!");
-  module.hot.accept("./App", () => {
-    hydrate(
-      <AppContainer>
-        <App store={store} />
-      </AppContainer>,
-      mountApp
-    );
-  });
-  debug("end hot reload!");
-}

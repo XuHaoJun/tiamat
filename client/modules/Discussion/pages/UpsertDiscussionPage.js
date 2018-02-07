@@ -3,9 +3,11 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { Set } from "immutable";
-import { push, replace } from "react-router-redux";
 import debounce from "lodash/debounce";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
+import { push, replace } from "react-router-redux";
 import {
   setHeaderTitle,
   updateSendButtonProps
@@ -501,6 +503,7 @@ function mapDispatchToProps(dispatch, routerProps) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  UpsertRootDiscussionPage
-);
+export default compose(
+  hot(module),
+  connect(mapStateToProps, mapDispatchToProps)
+)(UpsertRootDiscussionPage);

@@ -1,7 +1,6 @@
 import React from "react";
 import randomColor from "randomcolor";
 import LazyLoad from "react-lazyload";
-import pure from "recompose/pure";
 
 import Avatar from "material-ui-next/Avatar";
 import GuestPersonIcon from "material-ui-icons-next/Person";
@@ -75,4 +74,4 @@ UserAvatar.defaultProps = {
   enableLazyLoad: true
 };
 
-export default pure(UserAvatar);
+export default UserAvatar;

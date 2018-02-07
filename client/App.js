@@ -4,6 +4,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { defaultProps, compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 // redux
 import { Provider as ReduxProvider } from "react-redux";
@@ -105,9 +106,6 @@ const App = props => {
   if (location !== defaultLocation && history === defaultHistory) {
     RouterProps.history = createHistory(location);
   }
-  if (process.env.NODE_ENV === "development") {
-    RouterProps.key = Math.random();
-  }
   return (
     <EnhancedWraper
       ReduxProviderProps={ReduxProviderProps}
@@ -131,4 +129,4 @@ App.defaultProps = {
   JssProviderProps: null
 };
 
-export default App;
+export default hot(module)(App);

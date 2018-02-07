@@ -113,36 +113,6 @@ export const NotFoundPage = Loadable({
   loading: Loading
 });
 
-/* Workaround for async react routes to work with react-hot-reloader till
-  and it fixed in react-router v4 but react-router-scroll must use v3.
-  https://github.com/reactjs/react-router/issues/2182 and
-  https://github.com/gaearon/react-hot-loader/issues/288 is fixed.
- */
-if (process.env.NODE_ENV !== "production") {
-  // Require async routes only in development for react-hot-reloader to work.
-  require("./modules/Home/pages/HomePage");
-  require("./modules/Search/pages/SearchHomePage");
-  require("./modules/About/pages/AboutPage");
-  require("./modules/User/pages/UserLogInPage");
-  require("./modules/User/pages/UserOauth2CallbackPage");
-  require("./modules/User/pages/UserSignUpPage");
-  require("./modules/ForumBoard/pages/CreateForumBoardPage");
-  require("./modules/Wiki/pages/CreateWikiPage");
-  require("./modules/Wiki/pages/WikiDetailPage");
-  require("./modules/RootWiki/pages/RootWikiDashboardPage");
-  require("./modules/RootWiki/pages/UpsertRootWikiGroupTreePage");
-  require("./modules/RootWiki/pages/UpsertWikiDataFormPage");
-  require("./modules/RootWiki/pages/CreateRootWikiPage");
-  require("./modules/MixedMain/pages/MixedMainPage");
-  require("./modules/Discussion/pages/UpsertDiscussionPage");
-  require("./modules/Discussion/pages/DiscussionDetailPage");
-  require("./modules/Discussion/pages/WhatsHotDiscussionsPage");
-  require("./modules/Setting/pages/SettingDetailPage");
-  require("./modules/Error/pages/NotFoundPage");
-  require("./modules/RootWiki/pages/EditRootWikiGroupTreePage");
-  require("./modules/Template/pages/UpsertTemplatePage");
-}
-
 const concat = (...arrays) => {
   return arrays.reduce((result, array) => {
     return result.concat(array);

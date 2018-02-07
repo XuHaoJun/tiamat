@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 import Paper from "material-ui-next/Paper";
 
@@ -90,4 +92,4 @@ function mapStateToProps(state, routerProps) {
   return { isLoggedIn, browser, location };
 }
 
-export default connect(mapStateToProps)(UserLoginPage);
+export default compose(hot(module), connect(mapStateToProps))(UserLoginPage);

@@ -1,6 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { hot } from "react-hot-loader";
+import compose from "recompose/compose";
 
 import { replace } from "react-router-redux";
 
@@ -165,6 +167,7 @@ function mapDispatchToProps(dispatch, routerProps) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  DiscussionDetailPage
-);
+export default compose(
+  hot(module),
+  connect(mapStateToProps, mapDispatchToProps)
+)(DiscussionDetailPage);

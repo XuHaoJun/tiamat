@@ -1,10 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { hot } from "react-hot-loader";
+import { compose } from "recompose";
+
 import FacebookProvider, { Comments } from "react-facebook";
 
 import { getOauth2Client } from "../../Oauth2Client/Oauth2ClientReducer";
-import { setHeaderTitle, setHeaderTitleThunk } from "../../MyApp/MyAppActions";
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
 
 class AboutPage extends React.Component {
   static defaultProps = {
@@ -66,4 +69,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AboutPage);
+export default compose(
+  hot(module),
+  connect(mapStateToProps, mapDispatchToProps)
+)(AboutPage);

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { hot } from "react-hot-loader";
 
 import { replace } from "react-router-redux";
 import compose from "recompose/compose";
@@ -139,6 +140,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 export default compose(
+  hot(module),
   withStyles(styles, { name: "HomePage" }),
   connect(mapStateToProps, mapDispatchToProps)
 )(HomePage);

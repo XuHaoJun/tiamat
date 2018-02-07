@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
+import { compose } from "recompose";
+import { hot } from "react-hot-loader";
 
 import Paper from "material-ui-next/Paper";
 
@@ -97,4 +99,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(UserSignUpPage);
+export default compose(hot(module), connect(mapStateToProps))(UserSignUpPage);
