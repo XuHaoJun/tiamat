@@ -7,10 +7,11 @@ import { hydrate } from "react-dom";
 import { AppContainer } from "react-hot-loader";
 import { fromJS } from "immutable";
 import { calculateResponsiveState } from "redux-responsive";
-import injectTapEventPlugin from "react-tap-event-plugin";
-import MobileDetect from "mobile-detect";
 import Loadable from "react-loadable";
 import moment from "moment";
+
+import { matchRoutes } from "react-router-config";
+import routes from "./routes";
 
 import App from "./App";
 import { configureStore } from "./store";
@@ -42,7 +43,6 @@ function initDebug() {
     }
   }
 }
-initDebug();
 
 function initAnalytics() {
   const { code } = googleAnalyticsConfig;
@@ -54,9 +54,20 @@ function initAnalytics() {
     });
   }
 }
-initAnalytics();
 
-// Initialize store
+function defaultBrowserUserAgent(state) {
+  const userAgent = getUserAgent(state);
+  if (!userAgent) {
+    if (process.browser) {
+      return window.navigator.userAgent;
+    } else {
+      return "Node.js/6.8.0 (OS X Yosemite; x64)";
+    }
+  } else {
+    return userAgent;
+  }
+}
+
 function deserializeJSONState(jsonState) {
   const initState = Object.assign({}, jsonState);
   const needImmutableObjectNames = [
@@ -78,54 +89,54 @@ function deserializeJSONState(jsonState) {
   }
   return initState;
 }
-const initState = deserializeJSONState(window.__INITIAL_STATE__);
-const store = configureStore(initState);
 
-function defaultBrowserUserAgent(state) {
-  const userAgent = getUserAgent(state);
-  if (!userAgent) {
-    if (window) {
-      return window.navigator.userAgent;
-    } else {
-      return "Node.js/6.8.0 (OS X Yosemite; x64)";
-    }
-  } else {
-    return userAgent;
-  }
+function isLoadableComponent(component) {
+  return typeof component === "function" && component.preload;
 }
 
-// function injectTapEventPluginHelper() {
-//   const userAgent = defaultBrowserUserAgent(store.getState());
-//   const md = new MobileDetect(userAgent);
-//   injectTapEventPlugin({
-//     shouldRejectClick: (lastTouchEventTimestamp, clickEventTimestamp) => {
-//       if (md.mobile()) {
-//         return true;
-//       } else if (
-//         lastTouchEventTimestamp &&
-//         clickEventTimestamp - lastTouchEventTimestamp < 750
-//       ) {
-//         return true;
-//       }
-//     }
-//   });
-// }
-// injectTapEventPluginHelper();
+async function loadInitialPage() {
+  await Loadable.preloadReady();
+  const pathname = window.location.pathname;
+  await Promise.all(
+    matchRoutes(routes, pathname)
+      .filter(({ route }) => {
+        const { component } = route;
+        return isLoadableComponent(component);
+      })
+      .map(({ route }) => {
+        const { component } = route;
+        return component.preload();
+      })
+  );
+}
 
-const loadingDBLib = loadDBLib();
+async function main() {
+  const loadingDBLibPromise = loadDBLib();
 
-const mountElementId = "root";
-const mountApp = document.getElementById(mountElementId);
-debug(`mount application element id: ${mountElementId}`);
+  const loadInitialPagePromise = loadInitialPage();
 
-// sync locale by intl module
-moment.locale(store.getState().intl.locale);
-// sync with server-side responsive state.
-const userAgent = defaultBrowserUserAgent(store.getState());
-store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
-// should wait loadable ready before component start request another component.
-Loadable.preloadReady().then(() => {
+  initDebug();
+
+  // Initialize store
+  const initState = deserializeJSONState(window.__INITIAL_STATE__);
+  const store = configureStore(initState);
+
+  const mountElementId = "root";
+  const mountApp = document.getElementById(mountElementId);
+  debug(`mount application element id: ${mountElementId}`);
+
+  // sync locale by intl module
+  moment.locale(store.getState().intl.locale);
+
+  // sync with server-side responsive state.
+  const userAgent = defaultBrowserUserAgent(store.getState());
+  store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
+
+  await loadInitialPagePromise;
+
   debug("first hydrate start");
+  // TODO
+  // hydrate promiseify to hydrateAsync
   hydrate(
     <AppContainer>
       <App store={store} />
@@ -139,7 +150,7 @@ Loadable.preloadReady().then(() => {
       // db init
       // must after hydrate because have user(access Token) for logIn, some ui data for restore
       // will hydrate fail if init db before hydrate.
-      loadingDBLib
+      loadingDBLibPromise
         .then(() => {
           const db = connectDB();
           if (db) {
@@ -164,8 +175,11 @@ Loadable.preloadReady().then(() => {
         });
     }
   );
-});
 
+  initAnalytics();
+}
+
+main();
 debug("Application ready!");
 
 // For hot reloading of react components
