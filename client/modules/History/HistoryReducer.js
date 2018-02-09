@@ -12,7 +12,7 @@ import {
   CLEAR_HISTORY_BY_CURSOR
 } from "./HistoryActions";
 
-const defaultInitialState = {
+export const defaultInitialState = {
   prevCursor: "/",
   cursor: "/",
   stacks: {

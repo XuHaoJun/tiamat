@@ -30,7 +30,7 @@ import {
   setIsFirstRender,
   setDBisInitialized
 } from "./modules/MyApp/MyAppActions";
-import createHistory from "./modules/History/utils/createHistory";
+import { defaultInitialState as defaultHistoryInitialState } from "./modules/History/HistoryReducer";
 
 const debug = Debug("app:main");
 
@@ -134,8 +134,8 @@ async function main() {
 
   const initState = deserializeJSONState(window.__INITIAL_STATE__);
 
-  // force use browser history
-  initState.history.rawHistory = createHistory({ type: "browser" });
+  // for react-router-redux
+  initState.history = defaultHistoryInitialState;
 
   const store = configureStore(initState);
 

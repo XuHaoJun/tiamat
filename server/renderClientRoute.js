@@ -4,7 +4,7 @@ import Helmet from "react-helmet";
 import { setKeyGenerator } from "slate";
 import serializeJavascript from "serialize-javascript";
 import moment from "moment";
-import { renderToString } from "react-dom/server";
+import { renderToString, renderToStaticNodeStream } from "react-dom/server";
 import { matchRoutes } from "react-router-config";
 
 import { createGenerateClassName } from "material-ui-next/styles";
@@ -15,7 +15,6 @@ import clientRoutes from "../client/routes";
 import { createMemoryHistory } from "../client/modules/History/utils/createHistory";
 import { setRawHistory } from "../client/modules/History/HistoryActions";
 import { createInitialState as createHistoryInitialState } from "../client/modules/History/HistoryReducer";
-import { clearTemplateCaches } from "../client/modules/Template/TemplateActions";
 import { setUserAgent } from "../client/modules/UserAgent/UserAgentActions";
 import { setOauth2Client } from "../client/modules/Oauth2Client/Oauth2ClientActions";
 import googleAnalyticsConfig from "./configs/googleAnalytics";
@@ -34,149 +33,96 @@ let assetsManifest =
 let chunkManifest =
   process.env.webpackChunkAssets && JSON.parse(process.env.webpackChunkAssets);
 
-export function renderHead(...other) {
-  const head = Helmet.rewind();
-  // Import Manifests
-  assetsManifest =
-    assetsManifest ||
-    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
-  if (process.env.NODE_ENV === "production" && !assetsManifest) {
-    throw new Error("assetsManifest is required.");
-  }
-  return `
-      <head>
-        ${head.base.toString()}
-        ${head.title.toString()}
-        ${head.meta.toString()}
-        ${head.link.toString()}
-        ${head.script.toString()}
-        <link href="/appManifest.json" rel="manifest">
-        <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
-        ${
-          process.env.NODE_ENV === "production" && assetsManifest["/app.css"]
-            ? `<link rel='stylesheet' href='${assetsManifest["/app.css"]}' />`
-            : ""
-        }
-        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta charset="utf-8" />
-        <link rel="stylesheet" type="text/css" href="/main.css">
-        ${
-          process.env.NODE_ENV === "production" &&
-          googleAnalyticsConfig["google-site-verification"]
-            ? `<meta name='google-site-verification' content='${
-                googleAnalyticsConfig["google-site-verification"]
-              }'/>`
-            : ""
-        }
-        <script>
-          (function() {
-            if (${process.env.NODE_ENV === "production"}) {
-              if (location && location.protocol === 'https:') {
-                if (navigator && 'serviceWorker' in navigator) {
-                  navigator
-                    .serviceWorker
-                    .register('/precache-service-worker.js');
-                }
-              } else if (location && location.protocol === 'http:') {
-                var localHostnameRegexp = new RegExp(${"'(^127.)|(^192.168.)|(^10.)|(^172.1[6-9].)|(^172.2[0-9].)|(^172.3[0-1].)|(^::1$)|(^[fF][cCdD])'"});
-                var isLocal = location.hostname === 'localhost' || localHostnameRegexp.test(location.hostname);
-                if (!isLocal) {
-                  location.href = location
-                    .href
-                    .replace(/^http:/, 'https:');
-                }
-              }
-            }
-          })();
-        </script>
-        ${other.join()}
-      </head>
-  `;
-}
+const ServiceWorkerScript = () => {
+  const body = `(function() {
+    if (
+      location &&
+      location.protocol === "https:" &&
+      navigator &&
+      navigator.serviceWorker
+    ) {
+      navigator.serviceWorker.register("/precache-service-worker.js");
+    }
+  })();`;
+  return <script dangerouslySetInnerHTML={{ __html: body }} />;
+};
 
-function safeStringify(state) {
+const ForceHttpsScript = () => {
+  const body = `(function() {
+    if (location && location.protocol === "http:") {
+      var localHostnameRegexp = new RegExp(
+        "(^127.)|(^192.168.)|(^10.)|(^172.1[6-9].)|(^172.2[0-9].)|(^172.3[0-1].)|(^::1$)|(^[fF][cCdD])"
+      );
+      var isLocal =
+        location.hostname === "localhost" ||
+        localHostnameRegexp.test(location.hostname);
+      if (!isLocal) {
+        location.href = location.href.replace(/^http:/, "https:");
+      }
+    }
+  })();`;
+  return <script dangerouslySetInnerHTML={{ __html: body }} />;
+};
+
+function safeStringify(json) {
   // use serializeJavascript for prevent XSS attack, don't remove it.
-  const safeInitState = serializeJavascript(state, {
+  const string = serializeJavascript(json, {
     isJSON: true
   });
-  return safeInitState;
+  return string;
 }
 
-export function renderScripts(initialState) {
-  // Import Manifests
-  assetsManifest =
-    assetsManifest ||
-    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
-  if (process.env.NODE_ENV === "production" && !assetsManifest) {
-    throw new Error("assetsManifest is required.");
-  }
+const BodyScripts = ({ state }) => {
+  return (
+    <React.Fragment>
+      <ClientStateScript state={state} />
+      <WebpackManifestScript />
+      <ClientInitScripts />
+    </React.Fragment>
+  );
+};
+
+const ClientStateScript = ({ state }) => {
+  const stateString = safeStringify(state);
+  const body = `window.__INITIAL_STATE__ = ${stateString}`;
+  return <script dangerouslySetInnerHTML={{ __html: body }} />;
+};
+
+const WebpackManifestScript = () => {
   chunkManifest =
     chunkManifest ||
     (process.env.webpackChunkAssets &&
       JSON.parse(process.env.webpackChunkAssets));
-  if (process.env.NODE_ENV === "production" && !chunkManifest) {
-    throw new Error("chunkManifest is required.");
-  }
-  const initialStateString =
-    typeof initialState === "string"
-      ? initialState
-      : safeStringify(initialState);
-  return `
-        <script>
-          window.__INITIAL_STATE__ = ${initialStateString};
-          ${
-            process.env.NODE_ENV === "production"
-              ? `//<![CDATA[
+  const body = `//<![CDATA[
           window.webpackManifest = ${safeStringify(chunkManifest)};
-          //]]>`
-              : ""
-          }
-        </script>
-        <script src='${
+          //]]>`;
+  return <script dangerouslySetInnerHTML={{ __html: body }} />;
+};
+
+const ClientInitScripts = () => {
+  assetsManifest =
+    assetsManifest ||
+    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
+  return (
+    <React.Fragment>
+      <script
+        src={
           process.env.NODE_ENV === "production"
             ? assetsManifest["/vendor.js"]
             : "/vendor.js"
-        }'></script>
-        <script async src='${
+        }
+      />
+      <script
+        async
+        src={
           process.env.NODE_ENV === "production"
             ? assetsManifest["/app.js"]
             : "/app.js"
-        }'></script>
-        `;
-}
-
-// Render Initial HTML
-export function renderFullPage(html, initialState) {
-  const head = renderHead();
-  const scripts = renderScripts(initialState);
-  return `
-    <!doctype html>
-    <html>
-      ${head}
-      <body>
-        <div id="root">${
-          process.env.NODE_ENV === "production" ? html : `<div>${html}</div>`
-        }</div>
-        ${scripts}
-      </body>
-    </html>
-  `;
-}
-
-export function renderError(err) {
-  const softTab = "&#32;&#32;&#32;&#32;";
-  const errTrace =
-    process.env.NODE_ENV !== "production"
-      ? `:<br><br><pre style="color:red">${softTab}${err.stack.replace(
-          /\n/g,
-          `<br>${softTab}`
-        )}</pre>`
-      : "";
-  return renderFullPage(`Server Error${errTrace}`, {});
-}
+        }
+      />
+    </React.Fragment>
+  );
+};
 
 async function createStoreByRequest(req) {
   // use req.url for initial history.
@@ -233,6 +179,56 @@ async function createStoreByRequest(req) {
   return store;
 }
 
+const Head = ({ jssCss, helmet }) => {
+  assetsManifest =
+    assetsManifest ||
+    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
+  chunkManifest =
+    chunkManifest ||
+    (process.env.webpackChunkAssets &&
+      JSON.parse(process.env.webpackChunkAssets));
+  return (
+    <head>
+      {helmet.title.toComponent()}
+      {helmet.meta.toComponent()}
+      {helmet.link.toComponent()}
+      <link href="/appManifest.json" rel="manifest" />
+      <link
+        href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i"
+        rel="stylesheet"
+      />
+      <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet"
+      />
+      {process.env.NODE_ENV === "production" && assetsManifest["/app.css"] ? (
+        <link rel="stylesheet" href={assetsManifest["/app.css"]} />
+      ) : null}
+      <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta charSet="utf-8" />
+      <link rel="stylesheet" type="text/css" href="/main.css" />
+      {process.env.NODE_ENV === "production" &&
+      googleAnalyticsConfig["google-site-verification"] ? (
+        <meta
+          name="google-site-verification"
+          content={googleAnalyticsConfig["google-site-verification"]}
+        />
+      ) : null}
+      {process.env.NODE_ENV === "production" ? (
+        <React.Fragment>
+          <ServiceWorkerScript />
+          <ForceHttpsScript />
+        </React.Fragment>
+      ) : null}
+      <style
+        id="jss-server-side"
+        dangerouslySetInnerHTML={{ __html: jssCss }}
+      />
+    </head>
+  );
+};
+
 export async function renderClientRoute(req, res) {
   const store = await createStoreByRequest(req);
 
@@ -249,9 +245,6 @@ export async function renderClientRoute(req, res) {
     return `${n}`;
   });
 
-  res.set("Content-Type", "text/html").status(200);
-  res.write("<!doctype html><html>");
-
   const sheetsRegistry = new SheetsRegistry();
   const generateClassName = createGenerateClassName();
   const clientAppHTML = renderToString(
@@ -261,31 +254,36 @@ export async function renderClientRoute(req, res) {
     />
   );
 
-  // NOTE
-  // must after renderToString because react-helmet collect head info.
-  res.write(renderHead());
+  const helmet = Helmet.renderStatic();
+  const htmlAttrs = helmet.htmlAttributes.toComponent();
+  const bodyAttrs = helmet.bodyAttributes.toComponent();
 
-  res.write("<body>");
+  res.set("Content-Type", "text/html").status(200);
+  res.write("<!doctype html>");
 
-  const css = sheetsRegistry.toString();
-  res.write(`<style id="jss-server-side">${css}</style>`);
+  // drop side-effect state.
+  const { routing, history, template, ...pureState } = store.getState();
 
-  res.write('<div id="root">');
-  res.write(clientAppHTML);
-  res.write("</div>");
+  const stream = renderToStaticNodeStream(
+    <html {...htmlAttrs}>
+      <Head jssCss={sheetsRegistry.toString()} helmet={helmet} />
+      <body {...bodyAttrs}>
+        <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
+        <BodyScripts state={pureState} />
+      </body>
+    </html>
+  );
 
-  // don't send template caches.
-  store.dispatch(clearTemplateCaches());
-  // don't send history may be both clear routing?
-  store.dispatch(setRawHistory(null));
+  stream.pipe(res);
 
-  // send state
-  const stateString = safeStringify(store.getState());
-  res.write(renderScripts(stateString));
-  res.write("</body></html>");
-  res.end();
-
-  return Promise.resolve(null);
+  return new Promise((resolve, reject) => {
+    stream.on("end", () => {
+      resolve();
+    });
+    stream.on("error", err => {
+      reject(err);
+    });
+  });
 }
 
 const router = new Router();
