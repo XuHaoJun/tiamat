@@ -12,23 +12,25 @@ import moment from "moment";
 import { matchRoutes } from "react-router-config";
 import routes from "./routes";
 
-import App from "./App";
-import { configureStore } from "./store";
-import { setSocketIO } from "./modules/Socket/SocketActions";
-import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
-import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
 import {
   loadDBLib,
   connectDB,
   initWithStore,
   initAccessToken
 } from "./localdb";
+
+import App from "./App";
+import { configureStore } from "./store";
+import { setSocketIO } from "./modules/Socket/SocketActions";
+import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
+import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
 import googleAnalyticsConfig from "../server/configs/googleAnalytics";
 import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
 import {
   setIsFirstRender,
   setDBisInitialized
 } from "./modules/MyApp/MyAppActions";
+import createHistory from "./modules/History/utils/createHistory";
 
 const debug = Debug("app:main");
 
@@ -122,19 +124,18 @@ function hydrateAsync(component, dom) {
 }
 
 async function main() {
+  initDebug();
+
   const loadingDBLibPromise = loadDBLib();
 
   const loadInitialPagePromise = loadInitialPage();
 
-  initDebug();
-
-  // Initialize store
   const initState = deserializeJSONState(window.__INITIAL_STATE__);
-  const store = configureStore(initState);
 
-  const mountElementId = "root";
-  const mountApp = document.getElementById(mountElementId);
-  debug(`mount application element id: ${mountElementId}`);
+  // force use browser history
+  initState.history.rawHistory = createHistory({ type: "browser" });
+
+  const store = configureStore(initState);
 
   // sync locale by intl module
   moment.locale(store.getState().intl.locale);
@@ -144,6 +145,10 @@ async function main() {
   store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
 
   await loadInitialPagePromise;
+
+  const mountElementId = "root";
+  const mountApp = document.getElementById(mountElementId);
+  debug(`mount application element id: ${mountElementId}`);
 
   debug("first hydrate start");
 
@@ -178,5 +183,24 @@ async function main() {
   return { store, mountApp };
 }
 
-main();
-debug("Application ready!");
+function ready(callback) {
+  // in case the document is already rendered
+  if (document.readyState != "loading") callback();
+  else if (document.addEventListener)
+    // modern browsers
+    document.addEventListener("DOMContentLoaded", callback);
+  else
+    // IE <= 8
+    document.attachEvent("onreadystatechange", () => {
+      if (document.readyState == "complete") callback();
+    });
+}
+
+if (module.hot) {
+  window.onload = async () => {
+    await main();
+    debug("Application ready!");
+  };
+} else {
+  main();
+}

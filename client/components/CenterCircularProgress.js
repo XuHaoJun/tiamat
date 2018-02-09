@@ -1,7 +1,5 @@
 import React from "react";
 
-import { hot } from "react-hot-loader";
-
 const CenterCircularProgress = () => {
   const styles = {
     container: {
@@ -24,4 +22,4 @@ const CenterCircularProgress = () => {
   );
 };
 
-export default hot(module)(CenterCircularProgress);
+export default CenterCircularProgress;

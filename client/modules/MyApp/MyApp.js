@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { renderRoutes } from "react-router-config";
 import { compose } from "recompose";
-import { hot } from "react-hot-loader";
 
 import Reboot from "material-ui-next/Reboot";
 import { MuiThemeProvider } from "material-ui-next/styles";
@@ -159,7 +158,4 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default compose(
-  hot(module),
-  connect(mapStateToProps, mapDispatchToProps)
-)(MyApp);
+export default compose(connect(mapStateToProps, mapDispatchToProps))(MyApp);

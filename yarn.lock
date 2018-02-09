@@ -4055,7 +4055,7 @@ faye-websocket@~0.11.0:
   dependencies:
     websocket-driver ">=0.5.1"
 
-fbjs@^0.8.1, fbjs@^0.8.15, fbjs@^0.8.16, fbjs@^0.8.4, fbjs@^0.8.5, fbjs@^0.8.6, fbjs@^0.8.9:
+fbjs@^0.8.1, fbjs@^0.8.15, fbjs@^0.8.16, fbjs@^0.8.4, fbjs@^0.8.5, fbjs@^0.8.9:
   version "0.8.16"
   resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.16.tgz#5e67432f550dc41b572bf55847b8aca64e5337db"
   dependencies:
@@ -8802,12 +8802,6 @@ react-swipeable-views@^0.12.5:
     react-swipeable-views-utils "^0.12.11"
     warning "^3.0.0"
 
-react-tap-event-plugin@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/react-tap-event-plugin/-/react-tap-event-plugin-3.0.2.tgz#280371677b881c31376e0027a0b86d2c6de039ee"
-  dependencies:
-    fbjs "^0.8.6"
-
 react-transition-group@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-2.2.1.tgz#e9fb677b79e6455fd391b03823afe84849df4a10"
@@ -11022,10 +11016,6 @@ webpack-sources@^1.0.1:
   dependencies:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
-
-webpack2-externals-plugin@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/webpack2-externals-plugin/-/webpack2-externals-plugin-1.0.0.tgz#a8114d39f23fca31ced323c0da17c11b51762f4a"
 
 webpack@^3.5.4:
   version "3.10.0"

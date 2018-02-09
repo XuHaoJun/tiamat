@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const StartServerPlugin = require("start-server-webpack-plugin");
-const ExternalsPlugin = require("webpack2-externals-plugin");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 

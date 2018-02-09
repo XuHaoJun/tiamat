@@ -2,13 +2,17 @@ import _findIndex from "lodash/findIndex";
 import { LOCATION_CHANGE } from "react-router-redux";
 
 import { connectDB } from "../../localdb";
+
+import createHistory from "./utils/createHistory";
+
 import {
   SET_HISTORY_STATE,
+  SET_RAW_HISTORY,
   SET_HISTORY_CURSOR,
   CLEAR_HISTORY_BY_CURSOR
 } from "./HistoryActions";
 
-const initialState = {
+const defaultInitialState = {
   prevCursor: "/",
   cursor: "/",
   stacks: {
@@ -16,12 +20,24 @@ const initialState = {
   },
   popedStacks: {
     "/": []
-  }
+  },
+  rawHistory: createHistory()
 };
+
+export function createInitialState(state = defaultInitialState) {
+  if (state === defaultInitialState) {
+    return state;
+  } else {
+    return { ...defaultInitialState, ...state };
+  }
+}
+
+const initialState = createInitialState();
 
 function save(db, state) {
   if (db) {
-    return db.setItem("history", state);
+    const { rawHistory, ...other } = state;
+    return db.setItem("history", other);
   } else {
     return null;
   }
@@ -58,6 +74,9 @@ function limitStack(stack) {
 
 const _HistoryReducer = (state = initialState, action) => {
   switch (action.type) {
+    case SET_RAW_HISTORY: {
+      return { ...state, rawHistory: action.rawHistory };
+    }
     case CLEAR_HISTORY_BY_CURSOR: {
       const { stacks } = state;
       const { cursor } = action;
@@ -70,7 +89,7 @@ const _HistoryReducer = (state = initialState, action) => {
       }
     }
     case SET_HISTORY_STATE: {
-      return action.state || state;
+      return { ...state, ...action.state };
     }
     case SET_HISTORY_CURSOR: {
       const { cursor } = action;

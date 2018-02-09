@@ -29,7 +29,6 @@ import AddIcon from "material-ui-icons-next/Add";
 import { getCurrentUser } from "../../User/UserReducer";
 import logOutRequestComposeEvent from "../../User/composes/logOutRequestComposeEvent";
 import UserAvatar from "../../User/components/UserAvatar";
-import { getIsFirstRender } from "../MyAppReducer";
 
 const LogOutListItem = logOutRequestComposeEvent(MuiListItem, "onClick");
 
@@ -277,11 +276,7 @@ class NavList extends React.Component {
 
 function mapStateToProps(state) {
   const { location } = state.routing;
-  const isFirstRender = getIsFirstRender(state);
-  let value;
-  if (location && !isFirstRender) {
-    value = location.pathname;
-  }
+  const value = location.pathname;
   const user = getCurrentUser(state);
   const { browser } = state;
   return { user, value, browser };

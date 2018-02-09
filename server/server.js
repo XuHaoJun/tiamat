@@ -14,23 +14,20 @@ import Oauth2Client from "./models/oauth2Client";
 import syncElasticsearch from "./util/syncElasticsearch";
 import apiRoutes from "./apiRoutes";
 import renderClientRoute from "./renderClientRoute";
-// React And Redux Setup
-import injectTapEventPlugin from "react-tap-event-plugin";
-
-injectTapEventPlugin();
-
-// Webpack Requirements
-import webpack from "webpack";
-import webpackDevConfig from "../webpack.config.dev";
-import webpackDevMiddleware from "webpack-dev-middleware";
-import webpackHotMiddleware from "webpack-hot-middleware";
 
 // Initialize the Express App
 const app = new Express();
 
 // Run Webpack dev server in development mode
 if (process.env.NODE_ENV === "development") {
+  // Webpack Requirements
+  const webpack = require("webpack"); // eslint-disable-line
+  const webpackDevConfig = require("../webpack.config.dev"); // eslint-disable-line
+  const webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
+  const webpackHotMiddleware = require("webpack-hot-middleware"); // eslint-disable-line
+
   const compiler = webpack(webpackDevConfig);
+
   app.use(
     webpackDevMiddleware(compiler, {
       noInfo: true,

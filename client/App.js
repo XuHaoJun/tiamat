@@ -21,7 +21,6 @@ import { SheetsRegistry, JssProvider as JssProviderOri } from "react-jss";
 import { createGenerateClassName } from "material-ui-next/styles";
 
 import createMemoryHistory from "history/createMemoryHistory";
-import { defaultBrowserHistory, injectQuery } from "./createBrowserHistory";
 import IntlWrapper from "./modules/Intl/IntlWrapper";
 
 const ReduxProviderHoc = Component => ({ ReduxProviderProps, ...other }) => (
@@ -55,23 +54,6 @@ const ScrollContextHoc = Component => ({ ScrollContextProps, ...other }) => (
   </ScrollContext>
 );
 
-// isomorphic history.
-function createHistory(location = "/") {
-  if (process.browser) {
-    // force use window.location.
-    return defaultBrowserHistory;
-  } else {
-    const history = createMemoryHistory({
-      initialEntries: [location]
-    });
-    injectQuery(history.location);
-    history.listen(l => {
-      injectQuery(l);
-    });
-    return history;
-  }
-}
-
 const defaultJssProviderProps = {
   generateClassName: createGenerateClassName(),
   registry: new SheetsRegistry()
@@ -85,10 +67,6 @@ const JssProviderHoc = Component => ({ JssProviderProps, ...other }) => (
   </JssProvider>
 );
 
-const defaultLocation = "/";
-
-const defaultHistory = createHistory(defaultLocation);
-
 const enhance = compose(
   ReduxProviderHoc,
   IntlWrapperHoc,
@@ -100,12 +78,10 @@ const enhance = compose(
 const EnhancedWraper = enhance(React.Fragment);
 
 const App = props => {
-  const { store, location, history, JssProviderProps } = props;
+  const { store, JssProviderProps } = props;
   const ReduxProviderProps = { store };
-  const RouterProps = { location, history };
-  if (location !== defaultLocation && history === defaultHistory) {
-    RouterProps.history = createHistory(location);
-  }
+  const history = store.getState().history.rawHistory;
+  const RouterProps = { history };
   return (
     <EnhancedWraper
       ReduxProviderProps={ReduxProviderProps}
@@ -119,13 +95,10 @@ const App = props => {
 
 App.propTypes = {
   store: PropTypes.object.isRequired,
-  location: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-  history: PropTypes.object,
   JssProviderProps: PropTypes.object
 };
+
 App.defaultProps = {
-  location: defaultLocation,
-  history: defaultHistory,
   JssProviderProps: null
 };
 

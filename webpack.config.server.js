@@ -1,18 +1,20 @@
 const webpack = require("webpack");
 const fs = require("fs");
 const path = require("path");
-const ExternalsPlugin = require("webpack2-externals-plugin");
 const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
+const nodeExternals = require("webpack-node-externals");
 
 module.exports = {
   entry: {
-    server: ["./server/server.js"]
+    server: [path.join(__dirname, "./server/server.js")]
   },
 
   output: {
-    path: `${__dirname}/build/`,
+    path: path.join(__dirname, "./build/"),
     filename: "server.bundle.js"
   },
+
+  externals: [nodeExternals()],
 
   target: "node",
 
@@ -23,7 +25,12 @@ module.exports = {
 
   resolve: {
     extensions: [".js", ".jsx"],
-    modules: ["client", "node_modules"]
+    modules: [
+      path.join(__dirname, "./"),
+      path.join(__dirname, "./server"),
+      path.join(__dirname, "./client"),
+      path.join(__dirname, "./node_modules")
+    ]
   },
 
   module: {
@@ -33,21 +40,13 @@ module.exports = {
         loader: "file-loader?name=fonts/[name].[ext]"
       },
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
-        query: {
-          presets: ["react", "es2015", "stage-0"],
-          plugins: [
-            [
-              "babel-plugin-webpack-loaders",
-              {
-                config: "./webpack.config.babel.js",
-                verbose: false
-              }
-            ],
-            ["extensible-destructuring", { mode: "optout", impl: "immutable" }]
-          ]
+        use: {
+          loader: "babel-loader",
+          options: {
+            cacheDirectory: false
+          }
         }
       },
       {
@@ -74,14 +73,11 @@ module.exports = {
       }
     ]
   },
+
   plugins: [
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify("production")
     }),
-    new LodashModuleReplacementPlugin({ shorthands: true, collections: true }),
-    new ExternalsPlugin({
-      type: "commonjs",
-      include: path.join(__dirname, "./node_modules/")
-    })
+    new LodashModuleReplacementPlugin({ shorthands: true, collections: true })
   ]
 };
