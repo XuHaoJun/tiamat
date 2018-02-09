@@ -207,7 +207,6 @@ const Head = ({ jssCss, helmet }) => {
       <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta charSet="utf-8" />
-      <link rel="stylesheet" type="text/css" href="/main.css" />
       {process.env.NODE_ENV === "production" &&
       googleAnalyticsConfig["google-site-verification"] ? (
         <meta

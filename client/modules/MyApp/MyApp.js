@@ -4,19 +4,19 @@ import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { renderRoutes } from "react-router-config";
 import { compose } from "recompose";
+import _debounce from "lodash/debounce";
 
-import Reboot from "material-ui-next/Reboot";
 import { MuiThemeProvider } from "material-ui-next/styles";
 import createTheme from "./styles/createTheme";
 
-import _debounce from "lodash/debounce";
-
-import { getUserAgent } from "../UserAgent/UserAgentReducer";
-import { getUI } from "./MyAppReducer";
+import Reboot from "./components/Reboot";
 import Header from "./components/Header";
 import Main from "./components/Main";
 import AppBottomNavigation from "./components/AppBottomNavigation";
 import ErrorSnackbar from "../Error/components/ErrorSnackbar";
+
+import { getUserAgent } from "../UserAgent/UserAgentReducer";
+import { getUI } from "./MyAppReducer";
 
 const meta = [
   {
