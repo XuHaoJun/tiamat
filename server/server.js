@@ -127,12 +127,9 @@ Loadable.preloadAll().then(() => {
 
 const hmrDebug = Debug("app:serverHMR");
 if (module.hot) {
-  module.hot.accept(
-    ["./apiRoutes", "../client/routes", "./renderClientRoute"],
-    () => {
-      hmrDebug(`🔁  Server-side HMR Reloading`);
-    }
-  );
+  module.hot.accept(["./apiRoutes", "../client", "./renderClientRoute"], () => {
+    hmrDebug(`🔁  Server-side HMR Reloading`);
+  });
   hmrDebug(`✅  Server-side HMR Enabled!`);
 } else {
   hmrDebug("❌  Server-side HMR Not Supported.");

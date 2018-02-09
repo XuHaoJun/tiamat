@@ -124,7 +124,9 @@ function hydrateAsync(component, dom) {
 }
 
 async function main() {
-  initDebug();
+  if (process.env.NODE_ENV === "development") {
+    initDebug();
+  }
 
   const loadingDBLibPromise = loadDBLib();
 
@@ -180,6 +182,8 @@ async function main() {
   const io = await import(/* webpackChunkName: "socket.io-client" */ "socket.io-client");
   store.dispatch(setSocketIO(io));
 
+  debug("Application ready!");
+
   return { store, mountApp };
 }
 
@@ -196,11 +200,18 @@ function ready(callback) {
     });
 }
 
-if (module.hot) {
-  window.onload = async () => {
-    await main();
-    debug("Application ready!");
-  };
+if (process.env.NODE_ENV === "development") {
+  if (module.hot) {
+    // FIXME
+    // waiting HMR lib load.
+    ready(() => {
+      setTimeout(() => {
+        main();
+      }, 310);
+    });
+  } else {
+    ready(() => main());
+  }
 } else {
-  main();
+  ready(() => main());
 }

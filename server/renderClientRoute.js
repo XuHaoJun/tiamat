@@ -4,7 +4,7 @@ import Helmet from "react-helmet";
 import { setKeyGenerator } from "slate";
 import serializeJavascript from "serialize-javascript";
 import moment from "moment";
-import { renderToNodeStream, renderToString } from "react-dom/server";
+import { renderToString } from "react-dom/server";
 import { matchRoutes } from "react-router-config";
 
 import { createGenerateClassName } from "material-ui-next/styles";
@@ -140,7 +140,7 @@ export function renderScripts(initialState) {
             ? assetsManifest["/vendor.js"]
             : "/vendor.js"
         }'></script>
-        <script src='${
+        <script async src='${
           process.env.NODE_ENV === "production"
             ? assetsManifest["/app.js"]
             : "/app.js"
@@ -178,7 +178,7 @@ export function renderError(err) {
   return renderFullPage(`Server Error${errTrace}`, {});
 }
 
-export async function renderClientRoute(req, res) {
+async function createStoreByRequest(req) {
   // use req.url for initial history.
   const rawHistory = createMemoryHistory({
     initialEntries: [req.url]
@@ -230,6 +230,16 @@ export async function renderClientRoute(req, res) {
     })
   );
 
+  return store;
+}
+
+export async function renderClientRoute(req, res) {
+  const store = await createStoreByRequest(req);
+
+  // TODO
+  // locale by request lang.
+  moment.locale(store.getState().intl.locale);
+
   // TODO
   // Slate editor init.
   // fix if solve https://github.com/ianstormtaylor/slate/issues/1408.
@@ -239,67 +249,42 @@ export async function renderClientRoute(req, res) {
     return `${n}`;
   });
 
-  // TODO
-  // locale by request lang.
-  moment.locale(store.getState().intl.locale);
+  res.set("Content-Type", "text/html").status(200);
+  res.write("<!doctype html><html>");
 
-  if (appConfig.react.domOutput === "stream") {
-    res.set("Content-Type", "text/html").status(200);
-    res.write("<!doctype html><html>");
-    res.write(renderHead());
-    res.write("<body>");
-    res.write('<div id="root">');
-    const sheetsRegistry = new SheetsRegistry();
-    const generateClassName = createGenerateClassName();
-    const stream = renderToNodeStream(
-      <ClientApp
-        store={store}
-        JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
-      />
-    );
-    stream.on("error", error => {
-      console.warn(error);
-    });
-    stream.pipe(res, { end: false });
-    stream.on("end", () => {
-      res.write("</div>");
-      const css = sheetsRegistry.toString();
-      res.write(`<style id="jss-server-side">${css}</style>`);
-      // don't send template caches.
-      store.dispatch(clearTemplateCaches());
-      // send state
-      const stateString = safeStringify(store.getState());
-      res.write(renderScripts(stateString));
-      res.write("</body></html>");
-      res.end();
-    });
-  } else {
-    res.set("Content-Type", "text/html").status(200);
-    res.write("<!doctype html><html>");
-    const sheetsRegistry = new SheetsRegistry();
-    const generateClassName = createGenerateClassName();
-    const body = renderToString(
-      <ClientApp
-        store={store}
-        JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
-      />
-    );
-    res.write(renderHead());
-    res.write("<body>");
-    const css = sheetsRegistry.toString();
-    res.write(`<style id="jss-server-side">${css}</style>`);
-    res.write('<div id="root">');
-    res.write(body);
-    res.write("</div>");
-    // don't send template caches.
-    store.dispatch(clearTemplateCaches());
-    store.dispatch(setRawHistory(null));
-    // send state
-    const stateString = safeStringify(store.getState());
-    res.write(renderScripts(stateString));
-    res.write("</body></html>");
-    res.end();
-  }
+  const sheetsRegistry = new SheetsRegistry();
+  const generateClassName = createGenerateClassName();
+  const clientAppHTML = renderToString(
+    <ClientApp
+      store={store}
+      JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
+    />
+  );
+
+  // NOTE
+  // must after renderToString because react-helmet collect head info.
+  res.write(renderHead());
+
+  res.write("<body>");
+
+  const css = sheetsRegistry.toString();
+  res.write(`<style id="jss-server-side">${css}</style>`);
+
+  res.write('<div id="root">');
+  res.write(clientAppHTML);
+  res.write("</div>");
+
+  // don't send template caches.
+  store.dispatch(clearTemplateCaches());
+  // don't send history may be both clear routing?
+  store.dispatch(setRawHistory(null));
+
+  // send state
+  const stateString = safeStringify(store.getState());
+  res.write(renderScripts(stateString));
+  res.write("</body></html>");
+  res.end();
+
   return Promise.resolve(null);
 }
 

@@ -11,8 +11,5 @@ export default {
   oauth2,
   mongoDB,
   passport,
-  elasticsearch,
-  react: {
-    domOutput: "string"
-  }
+  elasticsearch
 };
