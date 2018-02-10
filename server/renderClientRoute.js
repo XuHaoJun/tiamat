@@ -1,3 +1,5 @@
+/* eslint-disable react/no-danger */
+
 import { Router } from "express";
 import React from "react";
 import Helmet from "react-helmet";
@@ -179,7 +181,7 @@ async function createStoreByRequest(req) {
   return store;
 }
 
-const Head = ({ jssCss, helmet }) => {
+const Head = ({ jssSheets, helmet }) => {
   assetsManifest =
     assetsManifest ||
     (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
@@ -222,7 +224,7 @@ const Head = ({ jssCss, helmet }) => {
       ) : null}
       <style
         id="jss-server-side"
-        dangerouslySetInnerHTML={{ __html: jssCss }}
+        dangerouslySetInnerHTML={{ __html: jssSheets }}
       />
     </head>
   );
@@ -257,15 +259,14 @@ export async function renderClientRoute(req, res) {
   const htmlAttrs = helmet.htmlAttributes.toComponent();
   const bodyAttrs = helmet.bodyAttributes.toComponent();
 
-  res.set("Content-Type", "text/html").status(200);
-  res.write("<!doctype html>");
-
   // drop side-effect state.
   const { routing, history, template, ...pureState } = store.getState();
 
+  const jssSheets = sheetsRegistry.toString();
+
   const stream = renderToStaticNodeStream(
-    <html {...htmlAttrs}>
-      <Head jssCss={sheetsRegistry.toString()} helmet={helmet} />
+    <html lang={req.lang} {...htmlAttrs}>
+      <Head jssSheets={jssSheets} helmet={helmet} />
       <body {...bodyAttrs}>
         <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
         <BodyScripts state={pureState} />
@@ -273,6 +274,8 @@ export async function renderClientRoute(req, res) {
     </html>
   );
 
+  res.set("Content-Type", "text/html").status(200);
+  res.write("<!doctype html>");
   stream.pipe(res);
 
   return new Promise((resolve, reject) => {

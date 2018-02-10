@@ -20,7 +20,6 @@ import MenuIcon from "material-ui-icons-next/Menu";
 import CircularProgress from "material-ui-next/Progress/CircularProgress";
 
 import CurrentUserIconMenu from "../../User/components/CurrentUserIconMenu";
-import AppNavDrawer from "./AppNavDrawer";
 import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
@@ -52,10 +51,14 @@ const LeftElementMotionHoc = Component => props => {
   return (
     <Motion defaultStyle={defaultStyle} style={style}>
       {({ deg }) => {
-        const divStyle = {
-          transform: `rotate(${deg}deg)`
-        };
-        return <Component style={divStyle} {...other} />;
+        return (
+          <Component
+            style={{
+              transform: `rotate(${deg}deg)`
+            }}
+            {...other}
+          />
+        );
       }}
     </Motion>
   );
@@ -75,27 +78,26 @@ const BackspaceButton = props => {
 const AnimateMenuIcon = LeftElementMotionHoc(MenuIcon);
 
 const MenuButton = props => {
-  const { initDeg, ...other } = props;
+  const { initDeg: initDegInput, ...other } = props;
+  const initDeg = initDegInput || -45;
   return (
     <IconButton {...other}>
-      <AnimateMenuIcon initDeg={initDeg || -45} />
+      <AnimateMenuIcon initDeg={initDeg} />
     </IconButton>
   );
 };
 
-const styles = theme => {
-  return {
-    flex: {
-      flex: 1
-    },
-    menuButton: {
-      marginLeft: -12,
-      marginRight: 20
-    }
-  };
+const styles = {
+  flex: {
+    flex: 1
+  },
+  menuButton: {
+    marginLeft: -12,
+    marginRight: 20
+  }
 };
 
-class Header extends React.Component {
+class AppHeader extends React.Component {
   static propTypes = {
     classes: PropTypes.object.isRequired,
     onMenuButtonClick: PropTypes.func
@@ -111,7 +113,7 @@ class Header extends React.Component {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     let defaultQuery = "";
-    if (this._isInSearchPage()) {
+    if (this.isInSearchPage()) {
       defaultQuery = props.searchQuery;
     }
     this.state = {
@@ -122,13 +124,13 @@ class Header extends React.Component {
 
   componentDidUpdate() {
     if (
-      !this._isInSearchPage() &&
+      !this.isInSearchPage() &&
       this.state.textValue !== "" &&
       !this.state.textFieldFocused
     ) {
       this.setState({ textValue: "" });
     }
-    if (this._isInSearchPage() && this.state.textFieldFocused === false) {
+    if (this.isInSearchPage() && this.state.textFieldFocused === false) {
       const query = this.props.searchQuery;
       if (this.state.textValue === "" && query) {
         this.setState({ textValue: query });
@@ -159,7 +161,7 @@ class Header extends React.Component {
     if (query) {
       // it will trigger search page and query it.
       let routerAction;
-      if (this._isInSearchPage()) {
+      if (this.isInSearchPage()) {
         routerAction = replace;
       } else {
         routerAction = push;
@@ -186,7 +188,7 @@ class Header extends React.Component {
 
   // TODO
   // use getCurrentPage() ?
-  _isInSearchPage = () => {
+  isInSearchPage = () => {
     const { pathname } = this.props;
     return Boolean(matchPath(pathname, { path: "/search" }));
   };
@@ -230,16 +232,16 @@ class Header extends React.Component {
     }
   };
 
-  LeftIconButton = props => {
+  LeftIconButton = buttonProps => {
     const enableBackspaceButton = this.shouldBackspaceButton();
     if (enableBackspaceButton) {
-      return <BackspaceButton onClick={this.handleBack} {...props} />;
+      return <BackspaceButton onClick={this.handleBack} {...buttonProps} />;
     } else {
       const { isFirstRender } = this.props;
       if (isFirstRender) {
         return (
-          <IconButton {...props}>
-            <CircularProgress size={24} color={props.color} />
+          <IconButton {...buttonProps}>
+            <CircularProgress size={24} color={buttonProps.color} />
           </IconButton>
         );
       } else {
@@ -247,54 +249,79 @@ class Header extends React.Component {
           <MenuButton
             aria-label="Menu"
             onClick={this.handleMenuButtonClick}
-            {...props}
+            {...buttonProps}
           />
         );
       }
     }
   };
 
-  RightIconButton = props => {
+  RightIconButton = buttonProps => {
     const { pathname } = this.props;
     const enableSendButtonRules = ["/create", "/update"];
     const enableSendButton = enableSendButtonRules.some(path =>
       Boolean(matchPath(pathname, { path }))
     );
     if (enableSendButton) {
-      return <SendButton {...props} />;
+      return <SendButton {...buttonProps} />;
     } else {
       const { browser } = this.props;
       if (browser.lessThan.medium) {
-        return <SearchButton {...props} />;
+        return <SearchButton {...buttonProps} />;
       } else {
         const { isLoggedIn } = this.props;
         if (isLoggedIn) {
-          return <CurrentUserIconMenu {...props} />;
+          return <CurrentUserIconMenu {...buttonProps} />;
         } else {
-          return <LogInButton {...props}>登入</LogInButton>;
+          return <LogInButton {...buttonProps}>登入</LogInButton>;
         }
       }
     }
   };
 
-  render() {
-    let { title } = this.props;
-    if (this._isInSearchPage()) {
-      title = <SearchAutoComplete />;
+  showSearch = () => {
+    const { browser } = this.props;
+    if (browser.greaterThan.small) {
+      return true;
+    } else {
+      return this.isInSearchPage();
     }
-    const appBarZDepth = this.props.appBarZDepth || 0;
-    const { classes } = this.props;
+  };
+
+  showTitle = () => {
+    const { browser } = this.props;
+    if (browser.greaterThan.small) {
+      return true;
+    } else {
+      return !this.isInSearchPage();
+    }
+  };
+
+  render() {
+    const { title, classes } = this.props;
     const { LeftIconButton, RightIconButton } = this;
     return (
-      <AppBar elevation={appBarZDepth} position="static">
-        <Toolbar>
-          <LeftIconButton className={classes.menuButton} color="inherit" />
-          <Typography variant="title" color="inherit" className={classes.flex}>
-            {title}
-          </Typography>
-          <RightIconButton color="inherit" />
-        </Toolbar>
-      </AppBar>
+      <React.Fragment>
+        <AppBar elevation={0} position="fixed">
+          <Toolbar>
+            <LeftIconButton className={classes.menuButton} color="inherit" />
+            {this.showTitle() ? (
+              <Typography
+                variant="title"
+                color="inherit"
+                className={classes.flex}
+              >
+                {title}
+              </Typography>
+            ) : null}
+            {this.showSearch() ? <SearchAutoComplete /> : null}
+            <RightIconButton color="inherit" />
+          </Toolbar>
+        </AppBar>
+        <AppBar elevation={0} position="static">
+          <Toolbar />
+        </AppBar>
+      </React.Fragment>
     );
   }
 }
@@ -313,4 +340,4 @@ export default compose(
       return { dispatch };
     }
   )
-)(Header);
+)(AppHeader);

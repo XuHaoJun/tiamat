@@ -4,23 +4,21 @@ import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { renderRoutes } from "react-router-config";
 import { compose } from "recompose";
-import _debounce from "lodash/debounce";
 import { hot } from "react-hot-loader";
 
 import { MuiThemeProvider } from "material-ui-next/styles";
 import createTheme from "./styles/createTheme";
 
-import Reboot from "./components/Reboot";
-import Header from "./components/Header";
-import Main from "./components/Main";
+import AppReboot from "./components/AppReboot";
+import AppHeader from "./components/AppHeader";
+import AppMain from "./components/AppMain";
 import AppNavDrawer from "./components/AppNavDrawer";
 import AppBottomNavigation from "./components/AppBottomNavigation";
 import ErrorSnackbar from "../Error/components/ErrorSnackbar";
 
-import { getUserAgent } from "../UserAgent/UserAgentReducer";
 import { getUI } from "./MyAppReducer";
 
-const meta = [
+const defaultMetas = [
   {
     charset: "utf-8"
   },
@@ -44,21 +42,26 @@ const meta = [
   {
     name: "format-detection",
     content: "telphone=no, email=no"
-  },
-  {
-    name: "theme-color",
-    content: "#3F51B5"
   }
 ];
 
+const themes = {
+  online: createTheme(),
+  offline: createTheme({ networkStatus: "offline" })
+};
+
 class MyApp extends React.Component {
+  static propTypes = {
+    intl: PropTypes.object.isRequired,
+    route: PropTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.state = {
       drawerOpen: false,
-      appBarZDepth: 0,
       sheetsManager: new Map(),
-      theme: createTheme()
+      theme: themes.online
     };
   }
 
@@ -72,50 +75,20 @@ class MyApp extends React.Component {
   }
 
   componentWillUnmount() {
-    // document.body.style.backgroundColor = null;
-    if (this._debouncedChildrenContainerScroll) {
-      this._debouncedChildrenContainerScroll.cancel();
-    }
     window.removeEventListener("online", this.handleOnline);
     window.removeEventListener("offline", this.handleOffline);
   }
 
   handleOnline = () => {
-    this.setState({ theme: createTheme() });
+    this.setState({ theme: themes.online });
   };
 
   handleOffline = () => {
-    this.setState({ theme: createTheme({ networkStatus: "offline" }) });
+    this.setState({ theme: themes.offline });
   };
 
   handleChangeDrawerOpen = drawerOpen => {
     this.setState({ drawerOpen });
-  };
-
-  _handleChildrenContainerScroll = event => {
-    if (!this.props.browser.greaterThan.small) {
-      if (event.target.scrollTop === 0) {
-        if (this.state.appBarZDepth > 0) {
-          this.setState({ appBarZDepth: 0 });
-        }
-      } else {
-        if (this.state.appBarZDepth < 1) {
-          this.setState({ appBarZDepth: 1 });
-        }
-      }
-    }
-  };
-
-  handleChildrenContainerScroll = _event => {
-    _event.persist();
-    // init debounce
-    if (!this._debouncedChildrenContainerScroll) {
-      this._debouncedChildrenContainerScroll = _debounce(
-        this._handleChildrenContainerScroll,
-        250
-      );
-    }
-    this._debouncedChildrenContainerScroll(_event);
   };
 
   handleMenuButtonClick = () => {
@@ -133,29 +106,28 @@ class MyApp extends React.Component {
   };
 
   render() {
-    const headerTitle = this.props.ui.get("headerTitle");
     const { route } = this.props;
+    const headerTitle = this.props.ui.get("headerTitle");
     const { drawerOpen, theme, sheetsManager } = this.state;
     return (
       <React.Fragment>
-        <Helmet titleTemplate="%s - Tiamat 電玩論壇" meta={meta} />
+        <Helmet titleTemplate="%s - Tiamat 電玩論壇" meta={defaultMetas} />
+        <Helmet>
+          <meta name="theme-color" content={theme.palette.primary.main} />
+        </Helmet>
         <MuiThemeProvider theme={theme} sheetsManager={sheetsManager}>
-          <Reboot />
-          <Header
+          <AppReboot />
+          <AppHeader
             title={headerTitle}
-            appBarZDepth={this.state.appBarZDepth}
             onMenuButtonClick={this.handleMenuButtonClick}
           />
           <AppNavDrawer
             open={drawerOpen}
             onChangeDrawer={this.handleChangeDrawer}
           />
-          <Main
-            drawerOpen={drawerOpen}
-            onScroll={this.handleChildrenContainerScroll}
-          >
+          <AppMain drawerOpen={drawerOpen}>
             {renderRoutes(route.routes)}
-          </Main>
+          </AppMain>
           <AppBottomNavigation />
           <ErrorSnackbar />
         </MuiThemeProvider>
@@ -164,16 +136,10 @@ class MyApp extends React.Component {
   }
 }
 
-MyApp.propTypes = {
-  intl: PropTypes.object.isRequired,
-  route: PropTypes.object.isRequired
-};
-
 function mapStateToProps(state) {
   const { intl, browser } = state;
-  const userAgent = getUserAgent(state);
   const ui = getUI(state);
-  return { ui, intl, userAgent, browser };
+  return { ui, intl, browser };
 }
 
 function mapDispatchToProps() {

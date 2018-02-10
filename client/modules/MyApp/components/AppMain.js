@@ -34,7 +34,7 @@ const styles = theme => {
   };
 };
 
-const Main = ({ children, classes, drawerOpen, ...other }) => {
+const AppMain = ({ children, classes, drawerOpen, ...other }) => {
   const className = classNames(
     classes.mainBase,
     drawerOpen ? classes.mainWithDrawerOpen : classes.mainWithDrawerClose
@@ -46,9 +46,9 @@ const Main = ({ children, classes, drawerOpen, ...other }) => {
   );
 };
 
-Main.propTypes = {
+AppMain.propTypes = {
   drawerOpen: PropTypes.bool.isRequired,
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(Main);
+export default withStyles(styles)(AppMain);

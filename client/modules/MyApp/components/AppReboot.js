@@ -8,9 +8,11 @@ const styles = {
       minHeight: "100%"
     },
     body: {
-      minHeight: "100%",
+      // disable chrome pull refresh, for custom pull refresh.
       overscrollBehaviorY: "contain",
       overflowY: "auto",
+
+      minHeight: "100%",
       margin: 0,
       padding: 0,
       boxSizing: "border-box"
@@ -18,10 +20,10 @@ const styles = {
   }
 };
 
-class Reboot extends React.Component {
+class AppReboot extends React.Component {
   render() {
     return <MuiReboot />;
   }
 }
 
-export default withStyles(styles)(Reboot);
+export default withStyles(styles)(AppReboot);
