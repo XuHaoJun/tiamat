@@ -270,7 +270,7 @@ class SignUpForm extends React.PureComponent {
           />
           <br />
           <Button
-            raised
+            variant="raised"
             type="submit"
             disabled={this.state.progressing}
             color="primary"

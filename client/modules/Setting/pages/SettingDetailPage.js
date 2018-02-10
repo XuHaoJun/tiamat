@@ -71,7 +71,7 @@ class SettingDetailPage extends React.PureComponent {
               }
               label="全螢幕(FullScreen)"
             />
-            <Button raised onClick={this.preloadAll}>
+            <Button variant="raised" onClick={this.preloadAll}>
               預加載其他頁面
             </Button>
             <div>

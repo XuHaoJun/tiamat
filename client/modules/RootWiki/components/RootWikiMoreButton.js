@@ -24,7 +24,7 @@ class RootWikiMoreButton extends React.Component {
     return (
       <div>
         <Button
-          fab
+          variant="fab"
           aria-label="More"
           {...ButtonProps}
           aria-owns={anchorEl ? "long-menu" : null}

@@ -57,7 +57,7 @@ class ActionButton extends React.PureComponent {
       return (
         <Button
           {...other}
-          fab
+          variant="fab"
           style={finalStyle}
           component={Link}
           to={href}

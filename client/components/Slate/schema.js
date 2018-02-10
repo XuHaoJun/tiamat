@@ -126,7 +126,7 @@ export function createSchema() {
       paragraph: Paragraph,
       link: Link,
       heading: props => (
-        <Typography type="headline" {...props.attributes}>
+        <Typography variant="headline" {...props.attributes}>
           {props.children}
         </Typography>
       ),
@@ -155,17 +155,17 @@ export function createSchema() {
       ),
       "bulleted-list": props => <ul {...props.attributes}>{props.children}</ul>,
       "heading-one": props => (
-        <Typography type="headline" {...props.attributes}>
+        <Typography variant="headline" {...props.attributes}>
           {props.children}
         </Typography>
       ),
       "heading-two": props => (
-        <Typography type="title" {...props.attributes}>
+        <Typography variant="title" {...props.attributes}>
           {props.children}
         </Typography>
       ),
       "heading-three": props => (
-        <Typography type="subheading" {...props.attributes}>
+        <Typography variant="subheading" {...props.attributes}>
           {props.children}
         </Typography>
       ),

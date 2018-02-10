@@ -27,7 +27,7 @@ class AddWikiPartDialog extends React.Component {
         <DialogContent>wiki part</DialogContent>
         <DialogActions>
           <Button onClick={this.handleCancel}>取消</Button>
-          <Button raised color="primary" onClick={this.handleSubmit}>
+          <Button variant="raised" color="primary" onClick={this.handleSubmit}>
             確定
           </Button>
         </DialogActions>

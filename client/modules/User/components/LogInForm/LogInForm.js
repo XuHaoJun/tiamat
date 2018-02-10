@@ -200,7 +200,7 @@ class LogInForm extends React.Component {
           />
           <br />
           <Button
-            raised
+            variant="raised"
             style={{
               width: 256,
               marginTop: 20,

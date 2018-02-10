@@ -49,7 +49,7 @@ class ReplyButton extends React.PureComponent {
       <Portal>
         <Button
           {...other}
-          fab
+          variant="fab"
           style={finalStyle}
           color="primary"
           component={Link}

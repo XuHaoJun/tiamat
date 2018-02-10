@@ -46,7 +46,7 @@ class EditButton extends React.Component {
       <Portal>
         <Button
           {...other}
-          fab
+          variant="fab"
           style={finalStyle}
           href={href}
           onClick={this.onClick}

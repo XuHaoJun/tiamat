@@ -63,7 +63,7 @@ const UserPanel = withStyles(userPanelStyles)(
         >
           {!user ? (
             <Button
-              raised
+              variant="raised"
               color="primary"
               component={Link}
               to="/login"

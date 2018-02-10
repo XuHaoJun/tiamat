@@ -289,7 +289,7 @@ class Header extends React.Component {
       <AppBar elevation={appBarZDepth} position="static">
         <Toolbar>
           <LeftIconButton className={classes.menuButton} color="inherit" />
-          <Typography type="title" color="inherit" className={classes.flex}>
+          <Typography variant="title" color="inherit" className={classes.flex}>
             {title}
           </Typography>
           <RightIconButton color="inherit" />

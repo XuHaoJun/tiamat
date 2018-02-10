@@ -261,7 +261,7 @@ class AddImageDialog extends React.PureComponent {
         <DialogActions>
           <Button onClick={this.handleCancel}>取消</Button>
           <Button
-            raised
+            variant="raised"
             disabled={confirmDisabled}
             color="primary"
             onClick={this.handleSubmit}

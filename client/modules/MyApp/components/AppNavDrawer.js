@@ -108,7 +108,7 @@ class AppNavDrawer extends React.Component {
         elevation={browser.greaterThan.small ? 0 : 16}
         open={open}
         onClose={this.handleClose}
-        type={browser.greaterThan.small ? "permanent" : "temporary"}
+        variant={browser.greaterThan.small ? "permanent" : "temporary"}
         classes={{
           paper: classNames(
             classes.drawerPaperBase,
