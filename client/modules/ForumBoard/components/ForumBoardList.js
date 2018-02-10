@@ -3,7 +3,7 @@ import { Set, is } from "immutable";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { ListItem, ListItemText } from "material-ui-next/List";
+import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
 import List from "../../../components/List/EnhancedList";
 import { getForumBoards } from "../ForumBoardReducer";
 import { fetchForumBoards } from "../ForumBoardActions";
@@ -91,7 +91,9 @@ class ForumBoardList extends React.Component {
           const to = `/forumBoards/${_id}/rootDiscussions`;
           return (
             <ListItem key={key} button divider component={Link} to={to}>
-              <Avatar>{defaultAvatar}</Avatar>
+              <ListItemAvatar>
+                <Avatar>{defaultAvatar}</Avatar>
+              </ListItemAvatar>
               <ListItemText primary={primary} secondary={secondary} />
             </ListItem>
           );

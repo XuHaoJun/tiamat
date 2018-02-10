@@ -8,7 +8,6 @@ import ScrollContainer from "../ScrollContainer";
 import PullRefresh, { Indicator } from "@xuhaojun/react-pullrefresh";
 
 import Portal from "material-ui-next/Portal";
-import pure from "recompose/pure";
 
 import FlipMove from "react-flip-move";
 
@@ -38,8 +37,6 @@ function hasPropType(Component, name) {
   }
 }
 
-const PureIndicator = pure(Indicator);
-
 const PortalIndicator = props => {
   const { y, yRefreshing } = props;
   if (y === 0 && yRefreshing === 0) {
@@ -47,7 +44,7 @@ const PortalIndicator = props => {
   } else {
     return (
       <Portal>
-        <PureIndicator {...props} />
+        <Indicator {...props} />
       </Portal>
     );
   }
