@@ -20,7 +20,7 @@ const initialState = Immutable.fromJS({
     sendButton: {
       show: false,
       loading: false,
-      onTouchTap: () => {}
+      onClick: () => {}
     }
   },
   data: {}
@@ -32,13 +32,17 @@ const AppReducer = (state = initialState, action) => {
       const { page } = action;
       return state.set("currentPage", page);
     }
+
     case SET_IS_FIRST_RENDER: {
       const { isFirstRender } = action;
       return state.set("isFirstRender", isFirstRender);
     }
-    case SET_HEADER_TITLE:
+
+    case SET_HEADER_TITLE: {
       return state.setIn(["ui", "headerTitle"], action.headerTitle);
-    case UPDATE_APP_BAR_SEND_BUTTON_PROPS:
+    }
+
+    case UPDATE_APP_BAR_SEND_BUTTON_PROPS: {
       let newState = state;
       for (const key in action.props) {
         if ({}.hasOwnProperty.call(action.props, key)) {
@@ -47,10 +51,14 @@ const AppReducer = (state = initialState, action) => {
         }
       }
       return newState;
+    }
+
     // may be add a DB module?
-    case SET_DB_IS_INITIALIZED:
+    case SET_DB_IS_INITIALIZED: {
       const { isInitialized } = action;
       return state.setIn(["db", "isInitialized"], isInitialized);
+    }
+
     default:
       return state;
   }

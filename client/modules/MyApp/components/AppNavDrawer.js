@@ -1,10 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import compose from "recompose/compose";
+import { connect } from "react-redux";
 
 import classNames from "classnames";
-import { withStyles } from "material-ui-next/styles";
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from "material-ui-next/styles";
 import Drawer from "material-ui-next/Drawer";
+import Paper from "material-ui-next/Paper";
 
 import NavList from "./NavList";
 
@@ -53,44 +60,55 @@ const styles = theme => {
   };
 };
 
+const forceDarkTheme = outerTheme => {
+  if (outerTheme.palette.type !== "dark") {
+    const darkTheme = createMuiTheme({ palette: { type: "dark" } });
+    return {
+      ...outerTheme,
+      palette: darkTheme.palette,
+      typography: darkTheme.typography
+    };
+  } else {
+    return outerTheme;
+  }
+};
+
+const DarkThemeProvider = props => {
+  return <MuiThemeProvider theme={forceDarkTheme} {...props} />;
+};
+
 class AppNavDrawer extends React.Component {
   static propTypes = {
-    onRequestChangeNavDrawer: PropTypes.func,
-    open: PropTypes.bool.isRequired,
-    selectedIndex: PropTypes.string.isRequired
+    onChangeDrawer: PropTypes.func,
+    open: PropTypes.bool.isRequired
   };
 
   static defaultProps = {
-    onRequestChangeNavDrawer: () => {}
+    onChangeDrawer: null
   };
 
   shouldComponentUpdate(nextProps, nextState) {
-    // skip update if not open
-    if (this.props.open === false && nextProps.open === false) {
-      return false;
-    }
     return shouldComponentUpdate.bind(this)(nextProps, nextState);
   }
 
-  handleClose = () => {
-    if (this.props.onRequestChangeNavDrawer) {
-      this.props.onRequestChangeNavDrawer(false);
+  handleClose = (e, reason) => {
+    if (this.props.onChangeDrawer) {
+      const open = false;
+      this.props.onChangeDrawer(e, reason, open);
     }
   };
 
   render() {
-    const {
-      open,
-      onRequestChangeNavDrawer,
-      selectedIndex,
-      classes
-    } = this.props;
+    const { open, onChangeDrawer, browser, classes } = this.props;
+    const ThemeProvider = browser.greaterThan.small
+      ? DarkThemeProvider
+      : React.Fragment;
     return (
       <Drawer
-        elevation={this.props.browser.lessThan.medium ? 16 : 0}
+        elevation={browser.greaterThan.small ? 0 : 16}
         open={open}
         onClose={this.handleClose}
-        type={this.props.browser.lessThan.medium ? "temporary" : "permanent"}
+        type={browser.greaterThan.small ? "permanent" : "temporary"}
         classes={{
           paper: classNames(
             classes.drawerPaperBase,
@@ -100,14 +118,21 @@ class AppNavDrawer extends React.Component {
         // swipeAreaWidth={30}
       >
         <div className={classes.drawerInner}>
-          <NavList
-            selectedIndex={selectedIndex}
-            requestChangeNavDrawer={onRequestChangeNavDrawer}
-          />
+          <ThemeProvider>
+            <Paper style={{ width: "100%", height: "100%" }}>
+              <NavList onChangeDrawer={onChangeDrawer} />
+            </Paper>
+          </ThemeProvider>
         </div>
       </Drawer>
     );
   }
 }
 
-export default withStyles(styles)(AppNavDrawer);
+export default compose(
+  withStyles(styles),
+  connect(state => {
+    const { browser } = state;
+    return { browser };
+  })
+)(AppNavDrawer);

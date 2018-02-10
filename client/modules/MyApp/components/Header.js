@@ -1,13 +1,13 @@
 import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import PropTypes from "prop-types";
+import compose from "recompose/compose";
 import { connect } from "react-redux";
 import { goBack, replace, push } from "react-router-redux";
 import { Link } from "react-router-dom";
 import { matchPath } from "react-router";
 import { Motion, spring } from "react-motion";
 
-import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";
 import AppBar from "material-ui-next/AppBar";
 import Toolbar from "material-ui-next/Toolbar";
@@ -95,19 +95,16 @@ const styles = theme => {
   };
 };
 
-// TODO
-// make drawer open stateless.
 class Header extends React.Component {
   static propTypes = {
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
+    onMenuButtonClick: PropTypes.func
   };
 
   static defaultProps = {
     defaultQuery: "",
     title: "",
-    onChangeDrawerOpen: undefined,
-    onDrawerOpen: undefined,
-    onDrawerClose: undefined
+    onMenuButtonClick: null
   };
 
   constructor(props) {
@@ -117,28 +114,13 @@ class Header extends React.Component {
     if (this._isInSearchPage()) {
       defaultQuery = props.searchQuery;
     }
-    const open = !props.browser.lessThan.medium;
     this.state = {
-      open,
       textValue: defaultQuery || "",
       textFieldFocused: false
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    const nextState = {};
-    if (nextProps.browser !== this.props.browser) {
-      const open = !nextProps.browser.lessThan.medium;
-      if (this.state.open !== open) {
-        nextState.open = open;
-      }
-    }
-    if (Object.keys(nextState).length > 0) {
-      this.setState(nextState);
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate() {
     if (
       !this._isInSearchPage() &&
       this.state.textValue !== "" &&
@@ -152,25 +134,7 @@ class Header extends React.Component {
         this.setState({ textValue: query });
       }
     }
-    if (prevState.open !== this.state.open) {
-      if (this.props.onChangeDrawerOpen) {
-        this.props.onChangeDrawerOpen(this.state.open);
-      }
-      if (this.state.open) {
-        if (this.props.onDrawerOpen) {
-          this.props.onDrawerOpen();
-        }
-      } else {
-        if (this.props.onDrawerClose) {
-          this.props.onDrawerClose();
-        }
-      }
-    }
   }
-
-  getDrawerIsOpen = () => {
-    return this.state.open;
-  };
 
   handleOnSubmit = e => {
     e.preventDefault();
@@ -237,15 +201,6 @@ class Header extends React.Component {
     }
   };
 
-  handleToggle = e => {
-    e.preventDefault();
-    this.setState({
-      open: !this.state.open
-    });
-  };
-
-  handleClose = () => this.setState({ open: false });
-
   shouldBackspaceButton = (pathname = this.props.pathname) => {
     if (!this.props.browser.lessThan.medium) {
       return false;
@@ -269,6 +224,12 @@ class Header extends React.Component {
     }
   };
 
+  handleMenuButtonClick = e => {
+    if (this.props.onMenuButtonClick) {
+      this.props.onMenuButtonClick(e);
+    }
+  };
+
   LeftIconButton = props => {
     const enableBackspaceButton = this.shouldBackspaceButton();
     if (enableBackspaceButton) {
@@ -285,7 +246,7 @@ class Header extends React.Component {
         return (
           <MenuButton
             aria-label="Menu"
-            onClick={this.handleToggle}
+            onClick={this.handleMenuButtonClick}
             {...props}
           />
         );
@@ -317,8 +278,6 @@ class Header extends React.Component {
   };
 
   render() {
-    const { open } = this.state;
-    const selectedIndex = this.props.pathname;
     let { title } = this.props;
     if (this._isInSearchPage()) {
       title = <SearchAutoComplete />;
@@ -327,23 +286,15 @@ class Header extends React.Component {
     const { classes } = this.props;
     const { LeftIconButton, RightIconButton } = this;
     return (
-      <React.Fragment>
-        <AppBar elevation={appBarZDepth} position="static">
-          <Toolbar>
-            <LeftIconButton className={classes.menuButton} color="inherit" />
-            <Typography type="title" color="inherit" className={classes.flex}>
-              {title}
-            </Typography>
-            <RightIconButton color="inherit" />
-          </Toolbar>
-        </AppBar>
-        <AppNavDrawer
-          browser={this.props.browser}
-          selectedIndex={selectedIndex}
-          open={open}
-          onRequestChangeNavDrawer={this.handleRequestChangeNavDrawer}
-        />
-      </React.Fragment>
+      <AppBar elevation={appBarZDepth} position="static">
+        <Toolbar>
+          <LeftIconButton className={classes.menuButton} color="inherit" />
+          <Typography type="title" color="inherit" className={classes.flex}>
+            {title}
+          </Typography>
+          <RightIconButton color="inherit" />
+        </Toolbar>
+      </AppBar>
     );
   }
 }

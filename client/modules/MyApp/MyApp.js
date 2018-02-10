@@ -5,6 +5,7 @@ import Helmet from "react-helmet";
 import { renderRoutes } from "react-router-config";
 import { compose } from "recompose";
 import _debounce from "lodash/debounce";
+import { hot } from "react-hot-loader";
 
 import { MuiThemeProvider } from "material-ui-next/styles";
 import createTheme from "./styles/createTheme";
@@ -12,6 +13,7 @@ import createTheme from "./styles/createTheme";
 import Reboot from "./components/Reboot";
 import Header from "./components/Header";
 import Main from "./components/Main";
+import AppNavDrawer from "./components/AppNavDrawer";
 import AppBottomNavigation from "./components/AppBottomNavigation";
 import ErrorSnackbar from "../Error/components/ErrorSnackbar";
 
@@ -53,7 +55,7 @@ class MyApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      drawerOpen: !props.browser.lessThan.medium,
+      drawerOpen: false,
       appBarZDepth: 0,
       sheetsManager: new Map(),
       theme: createTheme()
@@ -91,7 +93,7 @@ class MyApp extends React.Component {
   };
 
   _handleChildrenContainerScroll = event => {
-    if (!this.props.browser.lessThan.medium) {
+    if (!this.props.browser.greaterThan.small) {
       if (event.target.scrollTop === 0) {
         if (this.state.appBarZDepth > 0) {
           this.setState({ appBarZDepth: 0 });
@@ -116,28 +118,48 @@ class MyApp extends React.Component {
     this._debouncedChildrenContainerScroll(_event);
   };
 
+  handleMenuButtonClick = () => {
+    this.setState({ drawerOpen: !this.state.drawerOpen });
+  };
+
+  handleChangeDrawer = (e, reason, drawerOpen) => {
+    if (reason === "backdropClick") {
+      this.setState({ drawerOpen });
+    } else if (reason === "navListItemClick") {
+      if (this.props.browser.lessThan.medium) {
+        this.setState({ drawerOpen });
+      }
+    }
+  };
+
   render() {
     const headerTitle = this.props.ui.get("headerTitle");
     const { route } = this.props;
     const { drawerOpen, theme, sheetsManager } = this.state;
     return (
-      <MuiThemeProvider theme={theme} sheetsManager={sheetsManager}>
+      <React.Fragment>
         <Helmet titleTemplate="%s - Tiamat 電玩論壇" meta={meta} />
-        <Reboot />
-        <Header
-          title={headerTitle}
-          appBarZDepth={this.state.appBarZDepth}
-          onChangeDrawerOpen={this.handleChangeDrawerOpen}
-        />
-        <Main
-          drawerOpen={drawerOpen}
-          onScroll={this.handleChildrenContainerScroll}
-        >
-          {renderRoutes(route.routes)}
-        </Main>
-        <AppBottomNavigation />
-        <ErrorSnackbar />
-      </MuiThemeProvider>
+        <MuiThemeProvider theme={theme} sheetsManager={sheetsManager}>
+          <Reboot />
+          <Header
+            title={headerTitle}
+            appBarZDepth={this.state.appBarZDepth}
+            onMenuButtonClick={this.handleMenuButtonClick}
+          />
+          <AppNavDrawer
+            open={drawerOpen}
+            onChangeDrawer={this.handleChangeDrawer}
+          />
+          <Main
+            drawerOpen={drawerOpen}
+            onScroll={this.handleChildrenContainerScroll}
+          >
+            {renderRoutes(route.routes)}
+          </Main>
+          <AppBottomNavigation />
+          <ErrorSnackbar />
+        </MuiThemeProvider>
+      </React.Fragment>
     );
   }
 }
@@ -158,4 +180,7 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default compose(connect(mapStateToProps, mapDispatchToProps))(MyApp);
+export default compose(
+  hot(module),
+  connect(mapStateToProps, mapDispatchToProps)
+)(MyApp);

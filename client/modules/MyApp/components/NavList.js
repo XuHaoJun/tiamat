@@ -49,7 +49,7 @@ const userPanelStyles = muiTheme => {
 };
 
 const UserPanel = withStyles(userPanelStyles)(
-  ({ user, classes, onClickLogin }) => {
+  ({ user, classes, onClickLoginButton }) => {
     return (
       <div className={classes.root}>
         <UserAvatar user={user} />
@@ -67,7 +67,7 @@ const UserPanel = withStyles(userPanelStyles)(
               color="primary"
               component={Link}
               to="/login"
-              onClick={onClickLogin}
+              onClick={onClickLoginButton}
             >
               登入
             </Button>
@@ -93,13 +93,13 @@ const SelectedListItem = withStyles(selectedListItemStyles)(MuiListItem);
 
 class NavList extends React.Component {
   static propTypes = {
-    requestChangeNavDrawer: PropTypes.func,
+    onChangeDrawer: PropTypes.func,
     user: PropTypes.object,
     value: PropTypes.string
   };
 
   static defaultProps = {
-    requestChangeNavDrawer: () => {},
+    onChangeDrawer: null,
     user: null,
     value: null
   };
@@ -109,15 +109,11 @@ class NavList extends React.Component {
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
   }
 
-  requestChangeNavDrawer = open => {
-    if (this.props.requestChangeNavDrawer) {
-      this.props.requestChangeNavDrawer(open);
-    }
-  };
-
-  closeNavDrawer = () => {
-    if (this.props.requestChangeNavDrawer) {
-      this.props.requestChangeNavDrawer(false);
+  closeNavDrawer = e => {
+    if (this.props.onChangeDrawer) {
+      const reason = "navListItemClick";
+      const open = false;
+      this.props.onChangeDrawer(e, reason, open);
     }
   };
 
@@ -139,7 +135,7 @@ class NavList extends React.Component {
         <div style={{ overflow: "auto", height: "100%", width: "100%" }}>
           {browser.lessThan.medium ? (
             <React.Fragment>
-              <UserPanel user={user} onClickLogin={this.closeNavDrawer} />
+              <UserPanel user={user} onClickLoginButton={this.closeNavDrawer} />
               <Divider />
             </React.Fragment>
           ) : null}
