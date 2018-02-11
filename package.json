@@ -234,7 +234,7 @@
     "semver": "^5.4.1",
     "sinon": "^3.2.0",
     "start-server-webpack-plugin": "^2.2.0",
-    "style-loader": "^0.19.0",
+    "style-loader": "^0.20.1",
     "supertest": "^3.0.0",
     "sw-precache-webpack-plugin": "^0.11.4",
     "universal-style-loader": "^0.16.3",
