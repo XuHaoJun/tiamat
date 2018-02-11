@@ -41,8 +41,8 @@ export const SendButtonWithoutConnect = SendButton;
 
 function mapStateToProps(store) {
   const ui = getUI(store);
-  const onClick = ui.getIn(["sendButton", "onClick"]);
-  const loading = !!ui.getIn(["sendButton", "loading"]);
+  const onClick = ui.getIn(["sendButtonProps", "onClick"]);
+  const loading = !!ui.getIn(["sendButtonProps", "loading"]);
   return { onClick, loading };
 }
 

@@ -15,15 +15,20 @@ import MixedMainTabs, {
   ROOT_WIKI_OR_WIKI_SLIDE
 } from "../components/MixedMainTabs";
 
+/* Actions and Selectors */
 import { replace } from "react-router-redux";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchWikis } from "../../Wiki/WikiActions";
 import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
 import { getRootWiki } from "../../RootWiki/RootWikiReducer";
+
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
+
 import { fetchRootDiscussions } from "../../Discussion/DiscussionActions";
+
 import { getCurrentAccessToken } from "../../User/UserReducer";
+
+import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { getDBisInitialized } from "../../MyApp/MyAppReducer";
 
 export const styles = theme => {
@@ -74,9 +79,8 @@ class MixedMainPage extends React.Component {
   static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
     const parsed = parseRouterProps(routerProps);
     return async (dispatch, getState) => {
-      const _setHeaderTitle = () => {
+      const _setHeaderTitle = state => {
         const { forumBoardId, rootWikiId } = parsed;
-        const state = getState();
         const forumBoard = forumBoardId
           ? getForumBoardById(state, forumBoardId)
           : null;
@@ -87,7 +91,7 @@ class MixedMainPage extends React.Component {
         return setHeaderTitle(title);
       };
       // set default title before fetch.
-      dispatch(_setHeaderTitle());
+      dispatch(_setHeaderTitle(getState()));
       // fetch
       const { targetKind } = parsed;
       await (() => {
@@ -115,7 +119,7 @@ class MixedMainPage extends React.Component {
         }
       })();
       // update title after fetch.
-      dispatch(_setHeaderTitle());
+      dispatch(_setHeaderTitle(getState()));
       // tryMore
       if (tryMore) {
         const { forumBoardId, rootWikiId } = parsed;

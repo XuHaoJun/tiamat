@@ -1,9 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
-import _clone from "lodash/clone";
 
-import ScrollContainer from "../ScrollContainer";
+import ScrollContainerHoc from "../ScrollContainer/ScrollContainerHoc";
 
 import PullRefresh, { Indicator } from "@xuhaojun/react-pullrefresh";
 
@@ -76,18 +75,16 @@ function PullRefreshHoc(Component) {
       if (!hasPropType(Component, "onRequestMore")) {
         delete other.onRequestMore;
       }
-      const _pullRefreshProps = Object.assign(
-        {
-          wraperComponent: null,
-          onRefresh: this.handleRefresh,
-          IndicatorComponent: PortalIndicator,
-          disableMouse: true,
-          zIndex: 9999,
-          color: "#3F51B5"
-        },
-        _clone(pullRefreshProps) || {},
-        { component: Component }
-      );
+      const _pullRefreshProps = {
+        wraperComponent: null,
+        onRefresh: this.handleRefresh,
+        IndicatorComponent: PortalIndicator,
+        disableMouse: true,
+        zIndex: 9999,
+        color: "#3F51B5",
+        ...pullRefreshProps,
+        component: Component
+      };
       return (
         <PullRefresh pullRefreshProps={_pullRefreshProps} {...other}>
           {children}
@@ -237,25 +234,6 @@ function BottomLazyLoadHoc(Component) {
           </LazyLoad>
         </Component>
       );
-    }
-  };
-}
-
-function ScrollContainerHoc(Component) {
-  return class _ScrollContainerHoc extends React.Component {
-    static propTypes = Component.propTypes;
-
-    render() {
-      const { id } = this.props;
-      if (typeof id === "string" && id !== "") {
-        return (
-          <ScrollContainer scrollKey={id}>
-            <Component {...this.props} />
-          </ScrollContainer>
-        );
-      } else {
-        return <Component {...this.props} />;
-      }
     }
   };
 }

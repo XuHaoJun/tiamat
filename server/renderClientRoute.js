@@ -29,11 +29,24 @@ import appConfig from "./configs";
 
 import Oauth2Client from "./models/oauth2Client";
 
-let assetsManifest =
-  process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+let _assetsManifestCache;
+function getAssetsManifest() {
+  if (!_assetsManifestCache) {
+    _assetsManifestCache =
+      process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+  }
+  return _assetsManifestCache;
+}
 
-let chunkManifest =
-  process.env.webpackChunkAssets && JSON.parse(process.env.webpackChunkAssets);
+let _chunkManifestCache;
+function getChunkManifest() {
+  if (!_chunkManifestCache) {
+    _chunkManifestCache =
+      process.env.webpackChunkAssets &&
+      JSON.parse(process.env.webpackChunkAssets);
+  }
+  return _chunkManifestCache;
+}
 
 const ServiceWorkerScript = () => {
   const body = `(function() {
@@ -74,14 +87,12 @@ function safeStringify(json) {
   return string;
 }
 
-const BodyScripts = ({ state }) => {
-  return (
-    <React.Fragment>
-      <ClientStateScript state={state} />
-      <WebpackManifestScript />
-      <ClientInitScripts />
-    </React.Fragment>
-  );
+const WebpackManifestScript = () => {
+  const chunkManifest = getChunkManifest();
+  const body = `//<![CDATA[
+          window.webpackManifest = ${safeStringify(chunkManifest)};
+          //]]>`;
+  return <script dangerouslySetInnerHTML={{ __html: body }} />;
 };
 
 const ClientStateScript = ({ state }) => {
@@ -90,38 +101,21 @@ const ClientStateScript = ({ state }) => {
   return <script dangerouslySetInnerHTML={{ __html: body }} />;
 };
 
-const WebpackManifestScript = () => {
-  chunkManifest =
-    chunkManifest ||
-    (process.env.webpackChunkAssets &&
-      JSON.parse(process.env.webpackChunkAssets));
-  const body = `//<![CDATA[
-          window.webpackManifest = ${safeStringify(chunkManifest)};
-          //]]>`;
-  return <script dangerouslySetInnerHTML={{ __html: body }} />;
-};
-
-const ClientInitScripts = () => {
-  assetsManifest =
-    assetsManifest ||
-    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
+const ClientInitialScripts = ({ state }) => {
+  const assetsManifest = getAssetsManifest();
+  const vendorSrc =
+    process.env.NODE_ENV === "production"
+      ? assetsManifest["/vendor.js"]
+      : "/vendor.js";
+  const appSrc =
+    process.env.NODE_ENV === "production"
+      ? assetsManifest["/app.js"]
+      : "/app.js";
   return (
     <React.Fragment>
-      <script
-        src={
-          process.env.NODE_ENV === "production"
-            ? assetsManifest["/vendor.js"]
-            : "/vendor.js"
-        }
-      />
-      <script
-        async
-        src={
-          process.env.NODE_ENV === "production"
-            ? assetsManifest["/app.js"]
-            : "/app.js"
-        }
-      />
+      <script src={vendorSrc} />
+      <ClientStateScript state={state} />
+      <script async src={appSrc} />
     </React.Fragment>
   );
 };
@@ -182,33 +176,22 @@ async function createStoreByRequest(req) {
 }
 
 const Head = ({ jssSheets, helmet }) => {
-  assetsManifest =
-    assetsManifest ||
-    (process.env.webpackAssets && JSON.parse(process.env.webpackAssets));
-  chunkManifest =
-    chunkManifest ||
-    (process.env.webpackChunkAssets &&
-      JSON.parse(process.env.webpackChunkAssets));
+  const assetsManifest = getAssetsManifest();
   return (
     <head>
+      <meta charSet="utf-8" />
+      <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+      <link href="/appManifest.json" rel="manifest" />
       {helmet.title.toComponent()}
       {helmet.meta.toComponent()}
       {helmet.link.toComponent()}
-      <link href="/appManifest.json" rel="manifest" />
-      <link
-        href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i"
-        rel="stylesheet"
-      />
-      <link
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-        rel="stylesheet"
-      />
       {process.env.NODE_ENV === "production" && assetsManifest["/app.css"] ? (
         <link rel="stylesheet" href={assetsManifest["/app.css"]} />
       ) : null}
-      <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-      <meta name="mobile-web-app-capable" content="yes" />
-      <meta charSet="utf-8" />
+      <style
+        id="jss-server-side"
+        dangerouslySetInnerHTML={{ __html: jssSheets }}
+      />
       {process.env.NODE_ENV === "production" &&
       googleAnalyticsConfig["google-site-verification"] ? (
         <meta
@@ -222,10 +205,7 @@ const Head = ({ jssSheets, helmet }) => {
           <ForceHttpsScript />
         </React.Fragment>
       ) : null}
-      <style
-        id="jss-server-side"
-        dangerouslySetInnerHTML={{ __html: jssSheets }}
-      />
+      <WebpackManifestScript />
     </head>
   );
 };
@@ -264,25 +244,25 @@ export async function renderClientRoute(req, res) {
 
   const jssSheets = sheetsRegistry.toString();
 
-  const stream = renderToStaticNodeStream(
+  const htmlStream = renderToStaticNodeStream(
     <html lang={req.lang} {...htmlAttrs}>
       <Head jssSheets={jssSheets} helmet={helmet} />
       <body {...bodyAttrs}>
         <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
-        <BodyScripts state={pureState} />
+        <ClientInitialScripts state={pureState} />
       </body>
     </html>
   );
 
   res.set("Content-Type", "text/html").status(200);
   res.write("<!doctype html>");
-  stream.pipe(res);
+  htmlStream.pipe(res);
 
   return new Promise((resolve, reject) => {
-    stream.on("end", () => {
+    htmlStream.on("end", () => {
       resolve();
     });
-    stream.on("error", err => {
+    htmlStream.on("error", err => {
       reject(err);
     });
   });

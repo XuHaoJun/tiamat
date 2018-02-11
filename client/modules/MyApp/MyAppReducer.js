@@ -1,6 +1,10 @@
 import Immutable from "immutable";
+import createTheme from "./styles/createTheme";
+import toJS from "../../util/toJS";
+
 // Import Actions
 import {
+  SET_NETWORK_STATUS,
   SET_HEADER_TITLE,
   UPDATE_APP_BAR_SEND_BUTTON_PROPS,
   SET_DB_IS_INITIALIZED,
@@ -8,10 +12,19 @@ import {
   SET_CURRENT_PAGE
 } from "./MyAppActions";
 
+export function getDefaultNetworkStatus() {
+  if (process.browser) {
+    return window.navigator.onLine ? "online" : "offline";
+  } else {
+    return "online";
+  }
+}
+
 // Initial State
 const initialState = Immutable.fromJS({
   isFirstRender: true,
   currentPage: "",
+  networkStatus: getDefaultNetworkStatus(),
   db: {
     isInitialized: false
   },
@@ -20,7 +33,7 @@ const initialState = Immutable.fromJS({
     header: {
       title: "Tiamat"
     },
-    sendButton: {
+    sendButtonProps: {
       show: false,
       loading: false,
       onClick: () => {}
@@ -30,6 +43,11 @@ const initialState = Immutable.fromJS({
 
 const AppReducer = (state = initialState, action) => {
   switch (action.type) {
+    case SET_NETWORK_STATUS: {
+      const { networkStatus } = action;
+      return state.set("networkStatus", networkStatus);
+    }
+
     case SET_CURRENT_PAGE: {
       const { page } = action;
       return state.set("currentPage", page);
@@ -49,7 +67,7 @@ const AppReducer = (state = initialState, action) => {
       for (const key in action.props) {
         if ({}.hasOwnProperty.call(action.props, key)) {
           const prop = action.props[key];
-          newState = newState.setIn(["ui", "sendButton", key], prop);
+          newState = newState.setIn(["ui", "sendButtonProps", key], prop);
         }
       }
       return newState;
@@ -68,10 +86,16 @@ const AppReducer = (state = initialState, action) => {
 
 /* Selectors */
 
-// get ui
+// ui Selectors
 export const getUI = state => state.app.get("ui");
 
-// get db is initialized
+export const getTheme = state => {
+  const networkStatus = state.app.get("networkStatus");
+  return createTheme({ networkStatus });
+};
+
+// other Selectors
+
 export const getDBisInitialized = state =>
   state.app.getIn(["db", "isInitialized"]);
 

@@ -1,20 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
+import { connect } from "react-redux";
+import { getIsFirstRender } from "../modules/MyApp/MyAppReducer";
 
-class PureSwipableChild extends React.Component {
-  shouldComponentUpdate() {
-    return this.props.index === this.props.currentIndex;
-  }
-
-  render() {
-    return this.props.children;
-  }
-}
-
-export class EnhancedSwipableViews extends React.Component {
+class EnhancedSwipableViews extends React.Component {
   static propTypes = {
-    pure: PropTypes.bool,
     disableOnDrawerStart: PropTypes.bool,
     resistance: PropTypes.bool,
     scrollKey: PropTypes.string,
@@ -24,7 +15,6 @@ export class EnhancedSwipableViews extends React.Component {
   };
 
   static defaultProps = {
-    pure: false,
     disableOnDrawerStart: true,
     disableLazyLoading: true,
     resistance: true,
@@ -138,7 +128,6 @@ export class EnhancedSwipableViews extends React.Component {
 
   render() {
     const {
-      pure,
       index,
       disableOnDrawerStart,
       scrollKey,
@@ -151,15 +140,6 @@ export class EnhancedSwipableViews extends React.Component {
       ...other
     } = this.props;
     const { disabled } = this.state;
-    const _children = pure
-      ? React.Children.map(children, (child, i) => {
-          return (
-            <PureSwipableChild key={child.key} index={i} currentIndex={index}>
-              {child}
-            </PureSwipableChild>
-          );
-        })
-      : children;
     return (
       <SwipeableViews
         {...other}
@@ -169,10 +149,21 @@ export class EnhancedSwipableViews extends React.Component {
         disabled={disabled}
         disableLazyLoading={disableLazyLoading}
       >
-        {_children}
+        {children}
       </SwipeableViews>
     );
   }
 }
 
-export default EnhancedSwipableViews;
+function mapStateToProps(state) {
+  const isFirstRender = getIsFirstRender(state);
+  return { disableLazyLoading: isFirstRender };
+}
+
+function mapDispatchToProps() {
+  return {};
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  EnhancedSwipableViews
+);

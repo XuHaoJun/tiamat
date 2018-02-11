@@ -1,13 +1,14 @@
-import grey from "material-ui-next/colors/grey";
+import memoize from "fast-memoize";
+import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
 
+import grey from "material-ui-next/colors/grey";
 import { createMuiTheme } from "material-ui-next/styles";
 
-const createTheme = (
-  { networkStatus, pageThemeOptions } = {
-    networkStatus: "online",
-    pageThemeOptions: {}
+function createTheme(
+  { networkStatus } = {
+    networkStatus: "online"
   }
-) => {
+) {
   const baseThemeOpts = {
     overrides: {
       MuiList: {
@@ -23,8 +24,15 @@ const createTheme = (
     }
   };
   const nsThemeOpts = networkStatus === "offline" ? offlineThemeOpts : {};
-  const themeOpts = { ...baseThemeOpts, ...pageThemeOptions, ...nsThemeOpts };
+  const themeOpts = { ...baseThemeOpts, ...nsThemeOpts };
   return createMuiTheme(themeOpts);
-};
+}
 
-export default createTheme;
+const createThemeWithoutMemoize = createTheme;
+
+const memoized = memoize(
+  createTheme,
+  createFastMemoizeDefaultOptions({ size: 2 })
+);
+
+export { memoized as default, createThemeWithoutMemoize };

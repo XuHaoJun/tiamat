@@ -88,17 +88,12 @@ class HomePage extends React.Component {
 
   render() {
     const { title } = this.props;
-    const metaDescription = "Tiamat | Game forum and wiki.";
-    const meta = [
-      {
-        name: "description",
-        content: metaDescription
-      }
-    ];
     const { slideIndex, classes } = this.props;
     return (
       <React.Fragment>
-        <Helmet title={title} meta={meta} />
+        <Helmet titleTemplate="" title={title}>
+          <meta name="description" content="Tiamat | Game forum and wiki." />
+        </Helmet>
         <HomeTabs
           id="HomePage/Tabs"
           slideClassName={classes.slideHeight}

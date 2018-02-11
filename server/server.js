@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Express from "express";
+import qs from "qs";
 import compression from "compression";
 import morgan from "morgan";
 import bodyParser from "body-parser";
@@ -17,6 +18,9 @@ import renderClientRoute from "./renderClientRoute";
 
 // Initialize the Express App
 const app = new Express();
+app.set("query parser", str => {
+  return qs.parse(str, { depth: 6 });
+});
 
 // Run Webpack dev server in development mode
 if (process.env.NODE_ENV === "development") {
@@ -45,7 +49,6 @@ import passport from "passport";
 
 passportConfig();
 
-// Set native promises as mongoose promise
 mongoose.Promise = Promise;
 
 // MongoDB Connection
@@ -73,7 +76,6 @@ process.on("SIGINT", () => {
   });
 });
 
-// Apply body Parser and server public assets and routes
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -127,9 +129,12 @@ Loadable.preloadAll().then(() => {
 
 const hmrDebug = Debug("app:serverHMR");
 if (module.hot) {
-  module.hot.accept(["./apiRoutes", "../client", "./renderClientRoute"], () => {
-    hmrDebug(`🔁  Server-side HMR Reloading`);
-  });
+  module.hot.accept(
+    ["./apiRoutes", "../client/App", "./renderClientRoute"],
+    () => {
+      hmrDebug(`🔁  Server-side HMR Reloading`);
+    }
+  );
   hmrDebug(`✅  Server-side HMR Enabled!`);
 } else {
   hmrDebug("❌  Server-side HMR Not Supported.");

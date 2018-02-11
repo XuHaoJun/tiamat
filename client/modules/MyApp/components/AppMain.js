@@ -34,10 +34,17 @@ const styles = theme => {
   };
 };
 
-const AppMain = ({ children, classes, drawerOpen, ...other }) => {
+const AppMain = ({
+  children,
+  classes,
+  className: classNameInput,
+  drawerOpen,
+  ...other
+}) => {
   const className = classNames(
     classes.mainBase,
-    drawerOpen ? classes.mainWithDrawerOpen : classes.mainWithDrawerClose
+    drawerOpen ? classes.mainWithDrawerOpen : classes.mainWithDrawerClose,
+    classNameInput
   );
   return (
     <main className={className} {...other}>

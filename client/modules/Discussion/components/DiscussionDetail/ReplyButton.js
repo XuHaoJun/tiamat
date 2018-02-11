@@ -9,34 +9,15 @@ import ReplyIcon from "material-ui-icons-next/Reply";
 
 class ReplyButton extends React.PureComponent {
   static propTypes = {
-    isOpen: PropTypes.bool,
-    href: PropTypes.string,
-    onClick: PropTypes.func
+    to: PropTypes.string
   };
 
   static defaultProps = {
-    isOpen: true,
-    href: "",
-    onClick: () => {}
-  };
-
-  setPortalRef = v => {
-    this.portal = v;
+    to: ""
   };
 
   render() {
-    const {
-      style,
-      isOpen,
-      iconType,
-      href,
-      onTouchTap,
-      onClick,
-      ...other
-    } = this.props;
-    if (!isOpen) {
-      return null;
-    }
+    const { to, style, ...other } = this.props;
     const _style = {
       position: "fixed",
       bottom: 60,
@@ -48,15 +29,14 @@ class ReplyButton extends React.PureComponent {
     return (
       <Portal>
         <Button
-          {...other}
           variant="fab"
           style={finalStyle}
           color="primary"
           component={Link}
-          to={href}
-          onClick={this.onClick}
+          to={to}
+          {...other}
         >
-          <ReplyIcon href={href} />
+          <ReplyIcon />
         </Button>
       </Portal>
     );

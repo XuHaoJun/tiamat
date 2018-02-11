@@ -1,4 +1,5 @@
 import React from "react";
+import CircularProgress from "material-ui-next/Progress/CircularProgress";
 
 const CenterCircularProgress = () => {
   const styles = {
@@ -9,15 +10,11 @@ const CenterCircularProgress = () => {
       height: "100%",
       padding: 20,
       margin: 0
-    },
-    progress: {
-      maxWidth: "50%"
     }
   };
   return (
     <div style={styles.container}>
-      Loading...
-      {/* <CircularProgress style={styles.container} size={80} thickness={8} /> */}
+      <CircularProgress size={60} thickness={5} />
     </div>
   );
 };

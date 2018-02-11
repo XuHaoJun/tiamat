@@ -56,7 +56,7 @@ const UserAvatar = props => {
       luminosity: "dark",
       seed: _id || text
     });
-    const style = { backgroundColor };
+    const style = { backgroundColor, ...props.style };
     return (
       <Avatar {...other} style={style}>
         {text}

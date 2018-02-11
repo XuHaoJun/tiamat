@@ -1,4 +1,3 @@
-import qs from "qs";
 import RootWiki from "../models/rootWiki";
 import Wiki from "../models/wiki";
 import dotNotationTool from "mongo-dot-notation-tool";
@@ -120,8 +119,7 @@ function rootWikiGroupTreeToMongoQuery2(rootWikiGroupTree) {
 
 export function getWikis(req, res) {
   const { rootWikiId } = req.params;
-  const rawQuery = req._parsedOriginalUrl.query;
-  const reqQuery = qs.parse(rawQuery, { depth: 8 });
+  const reqQuery = req.query;
   const { rootWikiGroupTree } = reqQuery;
   const page = Number.parseInt(req.query.page, 10) || 1;
   const limit = Number.parseInt(req.query.limit, 10) || 10;

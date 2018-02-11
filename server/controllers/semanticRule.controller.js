@@ -1,12 +1,10 @@
 import _ from "lodash";
-import qs from "qs";
 import Wiki from "../models/wiki";
 
 export function getSemantic(req, res) {}
 
 export function getSemanticRules(req, res) {
-  const rawQuery = req._parsedOriginalUrl.query;
-  const reqQuery = qs.parse(rawQuery);
+  const reqQuery = req.query;
   const { scope } = reqQuery;
   if (!scope || !Array.isArray(scope)) {
     res.status(403).send({ errmsg: "must have scope paramter" });

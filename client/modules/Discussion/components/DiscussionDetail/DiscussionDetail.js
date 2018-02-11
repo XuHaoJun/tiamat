@@ -1,41 +1,33 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Set, OrderedSet } from "immutable";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import compose from "recompose/compose";
 import memoize from "fast-memoize";
 import createFastMemoizeDefaultOptions from "../../../../util/createFastMemoizeDefaultOptions";
+import ScrollContainerHoc from "../../../../components/ScrollContainer/ScrollContainerHoc";
 
-import ScrollContainer from "../../../../components/ScrollContainer";
-
-import compose from "recompose/compose";
+import classNames from "classnames";
 import { withStyles } from "material-ui-next/styles";
 import Divider from "material-ui-next/Divider";
 import CenterCircularProgress from "../../../../components/CenterCircularProgress";
 import DiscussionNode from "./DiscussionNode";
 import ReplyButton from "./ReplyButton";
-import slideHeightStyles from "../../../MyApp/styles/slideHeight";
 
-import { getDiscussion, getDiscussions } from "../../DiscussionReducer";
+import {
+  getDiscussionById,
+  getChildDiscussions
+} from "../../DiscussionReducer";
 import { getForumBoardById } from "../../../ForumBoard/ForumBoardReducer";
 import { getSemanticRules } from "../../../SemanticRule/SemanticRuleReducer";
 
-export function styles(theme) {
-  const heightStyle = slideHeightStyles(theme);
-  return {
-    root: Object.assign(
-      {
-        overflow: "auto"
-      },
-      heightStyle.slideHeight
-    ),
-    list: {
-      height: "100%",
-      overflow: "auto"
-    }
-  };
-}
+const styles = {
+  root: {
+    width: "100%",
+    height: "100%",
+    overflow: "auto"
+  }
+};
 
 class DiscussionDetail extends React.Component {
   static defaultProps = {
@@ -51,21 +43,6 @@ class DiscussionDetail extends React.Component {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
   }
-  componentDidMount() {
-    const list = ReactDOM.findDOMNode(this.list);
-    if (list) {
-      list.addEventListener("scroll", this.handleScroll);
-    }
-  }
-
-  componentWillUnmount() {
-    const list = ReactDOM.findDOMNode(this.list);
-    list.removeEventListener("scroll", this.handleScroll);
-  }
-
-  handleScroll = e => {
-    console.log("e scroll", e);
-  };
 
   render() {
     const {
@@ -86,34 +63,21 @@ class DiscussionDetail extends React.Component {
       });
     const { classes } = this.props;
     return (
-      <div className={classes.root}>
-        <ScrollContainer scrollKey={parentDiscussionId}>
-          <div
-            className={classes.list}
-            onScroll={this.handleScroll}
-            ref={ele => {
-              this.list = ele;
-            }}
-          >
-            {discussions
-              .map((d, i) => {
-                const dividerKey = `divider-${i}`;
-                return [
-                  <DiscussionNode
-                    onSemanticToggle={this.props.onSemanticToggle}
-                    semanticReplaceMode={semanticReplaceMode}
-                    discussion={d}
-                    semanticRules={semanticRules}
-                    key={d.get("_id")}
-                  />,
-                  <Divider key={dividerKey} />
-                ];
-              })
-              .toJS()}
-          </div>
-        </ScrollContainer>
+      <div className={classNames(classes.root, this.props.className)}>
+        {discussions.map(d => {
+          return (
+            <DiscussionNode
+              key={d.get("_id")}
+              discussion={d}
+              semanticRules={semanticRules}
+              onSemanticToggle={this.props.onSemanticToggle}
+              semanticReplaceMode={semanticReplaceMode}
+              divider={true}
+            />
+          );
+        })}
         <ReplyButton
-          href={`/create/rootDiscussions/${parentDiscussionId}/childDiscussion`}
+          to={`/create/rootDiscussions/${parentDiscussionId}/childDiscussion`}
         />
       </div>
     );
@@ -121,40 +85,29 @@ class DiscussionDetail extends React.Component {
 }
 
 const getSemanticRulesHelper = (() => {
-  let f = (rootWikiId, semanticRules) => {
+  const f = (rootWikiId, semanticRules) => {
     return semanticRules
       .filter(ele => ele.get("rootWikiId") === rootWikiId)
       .sortBy(ele => ele.get("name").length);
   };
-  if (typeof window === "object") {
-    f = memoize(f, createFastMemoizeDefaultOptions(1));
+  if (process.browser) {
+    return memoize(f, createFastMemoizeDefaultOptions(1));
+  } else {
+    return f;
   }
-  return f;
 })();
 
-const getChildrenDiscussionsHelper = (() => {
-  let f = (parentDiscussionId, discussions) => {
-    return discussions
-      .filter(v => v.get("parentDiscussion") === parentDiscussionId)
-      .toSet();
-  };
-  if (typeof window === "object") {
-    f = memoize(f, createFastMemoizeDefaultOptions(1));
-  }
-  return f;
-})();
-
-function mapStateToProps(store, props) {
+function mapStateToProps(state, props) {
   const { parentDiscussionId, forumBoardId } = props;
-  const forumBoard = getForumBoardById(store, forumBoardId);
-  const parentDiscussion = getDiscussion(store, parentDiscussionId);
-  const childDiscussions = getChildrenDiscussionsHelper(
-    parentDiscussionId,
-    getDiscussions(store)
-  );
+  const forumBoard = getForumBoardById(state, forumBoardId);
+  const parentDiscussion = getDiscussionById(state, parentDiscussionId);
+  const childDiscussions = getChildDiscussions(
+    state,
+    parentDiscussionId
+  ).toSet();
   const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : null;
   const semanticRules = rootWikiId
-    ? getSemanticRulesHelper(rootWikiId, getSemanticRules(store))
+    ? getSemanticRulesHelper(rootWikiId, getSemanticRules(state))
     : Set();
   return {
     parentDiscussionId,
@@ -166,6 +119,8 @@ function mapStateToProps(store, props) {
   };
 }
 
-export default compose(withStyles(styles), connect(mapStateToProps))(
-  DiscussionDetail
-);
+export default compose(
+  ScrollContainerHoc,
+  withStyles(styles),
+  connect(mapStateToProps)
+)(DiscussionDetail);

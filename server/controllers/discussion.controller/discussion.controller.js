@@ -1,4 +1,3 @@
-import qs from "qs";
 import _ from "lodash";
 import Discussion from "../../models/discussion";
 import ForumBoard from "../../models/forumBoard";
@@ -69,8 +68,7 @@ export function getRootDiscussions(req, res) {
   const forumBoardGroup =
     req.query.forumBoardGroup || req.query.group || undefined;
   const sort = req.query.sort || "-updatedAt";
-  const rawQuery = req._parsedOriginalUrl.query;
-  const reqQuery = qs.parse(rawQuery);
+  const reqQuery = req.query;
   const select = parseSelect(reqQuery.select) || {};
   const sortWays = ["-updatedAt"];
   if (!sortWays.some(s => s === sort) || page <= 0 || limit > 30) {
@@ -186,15 +184,28 @@ export function addDiscussion(req, res) {
     });
 }
 
+export function getDiscussionByTest(req, res) {
+  const reqQuery = req.query;
+  const select = parseSelect(reqQuery.select) || {};
+  Discussion.findById(req.params.id)
+    .select(select)
+    .exec((err, discussion) => {
+      if (err) {
+        res.status(403).send(err);
+        return;
+      }
+      res.json({ discussion });
+    });
+}
+
 /**
  * Get a single post
  * @param req
  * @param res
  * @returns void
  */
-export function getDiscussion(req, res) {
-  const rawQuery = req._parsedOriginalUrl.query;
-  const reqQuery = qs.parse(rawQuery);
+export function getDiscussionById(req, res) {
+  const reqQuery = req.query;
   const select = parseSelect(reqQuery.select) || {};
   Discussion.findById(req.params.id)
     .select(select)
@@ -213,8 +224,7 @@ export function getDiscussions(req, res) {
     res.status(403).send(new Error("must have parentDiscussionId"));
     return;
   }
-  const rawQuery = req._parsedOriginalUrl.query;
-  const reqQuery = qs.parse(rawQuery);
+  const reqQuery = req.query;
   const select = parseSelect(reqQuery.select) || {};
   const query = {
     parentDiscussion: parentDiscussionId

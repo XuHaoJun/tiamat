@@ -16,9 +16,9 @@ import { getDBisInitialized } from "../../MyApp/MyAppReducer";
 import {
   setUpsertDiscussionPageForm,
   addDiscussionRequest,
-  fetchDiscussion
+  fetchDiscussionById
 } from "../DiscussionActions";
-import { getDiscussion, getUI } from "../DiscussionReducer";
+import { getDiscussionById, getUI } from "../DiscussionReducer";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
@@ -50,7 +50,7 @@ function getHeaderTitle(routerProps, state = {}) {
       return "建立文章";
     }
   } else if (parentDiscussionId) {
-    const parentDiscussion = getDiscussion(state, parentDiscussionId);
+    const parentDiscussion = getDiscussionById(state, parentDiscussionId);
     if (parentDiscussion) {
       return `RE:${parentDiscussion.get("title")}`;
     } else {
@@ -73,7 +73,7 @@ function getForumBoardId(routerProps, state) {
     return forumBoardId;
   } else if (parentDiscussionId || discussionId) {
     const id = parentDiscussionId || discussionId;
-    const discussion = getDiscussion(state, id);
+    const discussion = getDiscussionById(state, id);
     if (discussion) {
       return discussion.get("forumBoard");
     } else {
@@ -107,9 +107,9 @@ class UpsertRootDiscussionPage extends React.Component {
         } = routerProps.match.params;
         return Promise.all([
           parentDiscussionId
-            ? dispatch(fetchDiscussion(parentDiscussionId))
+            ? dispatch(fetchDiscussionById(parentDiscussionId))
             : null,
-          discussionId ? dispatch(fetchDiscussion(discussionId)) : null,
+          discussionId ? dispatch(fetchDiscussionById(discussionId)) : null,
           forumBoardId ? dispatch(fetchForumBoardById(forumBoardId)) : null
         ]);
       };
@@ -246,12 +246,12 @@ class UpsertRootDiscussionPage extends React.Component {
     } = props;
     if (!discussion) {
       if (discussionId) {
-        dispatch(fetchDiscussion(discussionId));
+        dispatch(fetchDiscussionById(discussionId));
       }
     }
     if (!parentDiscussion) {
       if (parentDiscussionId) {
-        dispatch(fetchDiscussion(parentDiscussionId));
+        dispatch(fetchDiscussionById(parentDiscussionId));
       }
     }
     if (!forumBoard) {
@@ -457,8 +457,8 @@ function mapStateToProps(state, routerProps) {
   } = routerProps.match.params;
   const { forumBoardGroup } = routerProps.location.query;
   const forumBoard = getForumBoardById(state, forumBoardId);
-  const discussion = getDiscussion(state, discussionId);
-  const parentDiscussion = getDiscussion(state, parentDiscussionId);
+  const discussion = getDiscussionById(state, discussionId);
+  const parentDiscussion = getDiscussionById(state, parentDiscussionId);
   const ui = getUI(state);
   let initForm;
   if (parentDiscussionId) {

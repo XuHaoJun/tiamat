@@ -45,19 +45,24 @@ export function fetchWikiByRouterProps(routerProps) {
 
 export function fetchWikis(
   rootWikiId,
-  { page = 1, limit = 10, sort = "-updatedAt", rootWikiGroupTree = "all" } = {},
+  {
+    page = 1,
+    limit = 10,
+    sort = "-updatedAt",
+    rootWikiGroupTree: rootWikiGroupTreeInput = "all"
+  } = {},
   reqConfig = {}
 ) {
-  rootWikiGroupTree = rootWikiGroupTree.toJSON
-    ? rootWikiGroupTree.toJSON()
-    : rootWikiGroupTree;
+  const rootWikiGroupTree = rootWikiGroupTreeInput.toJSON
+    ? rootWikiGroupTreeInput.toJSON()
+    : rootWikiGroupTreeInput;
   const query = qs.stringify({ page, limit, sort, rootWikiGroupTree });
   const url = `rootWikis/${rootWikiId}/wikis?${query}`;
   return dispatch => {
     return callApi(url, "get", null, reqConfig)
-      .then(res => {
-        dispatch(addWikis(res.wikis));
-        return res.wikis;
+      .then(data => {
+        dispatch(addWikis(data.wikis));
+        return data.wikis;
       })
       .catch(err => defaultRequestCatchHandler(dispatch, err));
   };

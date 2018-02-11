@@ -75,7 +75,16 @@ export function fetchDiscussions({ parentDiscussionId = "" }) {
   };
 }
 
-export function fetchDiscussion(id = "") {
+export function fetchDiscussionByTest(test) {
+  const search = `?${qs.stringify(test)}`;
+  return dispatch => {
+    return callApi(`discussion${search}`).then(data => {
+      dispatch(addDiscussion(data.discussion));
+    });
+  };
+}
+
+export function fetchDiscussionById(id = "") {
   return dispatch => {
     return callApi(`discussions/${id}`)
       .then(res => {

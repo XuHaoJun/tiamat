@@ -257,7 +257,8 @@ export default connect(
     return {
       onClickSignUpButton() {
         dispatch(push("/signup"));
-      }
+      },
+      dispatch
     };
   },
   (stateProps, dispatchProps, ownProps) => {

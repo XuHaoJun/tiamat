@@ -8,6 +8,7 @@ import Switch from "material-ui-next/Switch";
 import WikiIcon from "material-ui-icons-next/ImportContacts";
 import { FormControlLabel } from "material-ui-next/Form";
 import Card, { CardHeader, CardContent } from "material-ui-next/Card";
+import Divider from "material-ui-next/Divider";
 
 import UserAvatar from "../../../User/components/UserAvatar";
 import Editor from "../../../../components/Slate/Editor";
@@ -44,7 +45,8 @@ class DiscussionNode extends React.Component {
   static defaultProps = {
     discussion: null,
     semanticReplaceMode: false,
-    semanticRules: Set()
+    semanticRules: Set(),
+    divider: false
   };
 
   constructor(props) {
@@ -138,6 +140,7 @@ class DiscussionNode extends React.Component {
             />
           </CardContent>
         </Card>
+        {this.props.divider ? <Divider /> : null}
       </div>
     );
   }

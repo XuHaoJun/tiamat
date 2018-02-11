@@ -24,6 +24,7 @@ import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
 
+import { getUI } from "../MyAppReducer";
 import { getIsLoggedIn } from "../../User/UserReducer";
 import { getIsFirstRender } from "../../MyApp/MyAppReducer";
 
@@ -334,7 +335,16 @@ export default compose(
       const isLoggedIn = getIsLoggedIn(state);
       const isFirstRender = getIsFirstRender(state);
       const { pathname, query: searchQuery } = state.routing.location;
-      return { browser, isLoggedIn, pathname, searchQuery, isFirstRender };
+      const ui = getUI(state);
+      const title = ui.getIn(["header", "title"]);
+      return {
+        browser,
+        isLoggedIn,
+        pathname,
+        searchQuery,
+        isFirstRender,
+        title
+      };
     },
     dispatch => {
       return { dispatch };

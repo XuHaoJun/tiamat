@@ -1,4 +1,6 @@
 import { fromJS, Set, List } from "immutable";
+import memoize from "fast-memoize";
+import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
 
 import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
 import { connectDB } from "../../localdb";
@@ -72,18 +74,42 @@ const DiscussionReducer = (state = initialState, action) => {
 
 /* Selectors */
 
-export const getRootDiscussions = (state, forumBoardId) => {
-  return state.discussions
-    .get("data")
-    .filter(d => d.get("isRoot") && d.get("forumBoard") === forumBoardId);
-};
-
-export const getDiscussion = (state, id) => {
-  return state.discussions.get("data").find(v => v.get("_id") === id);
-};
-
 export const getDiscussions = state => {
   return state.discussions.get("data");
+};
+
+export const getDiscussionsByForumBoard = (state, forumBoardId) => {
+  const discussions = getDiscussions(state);
+  return discussions.filter(d => d.get("forumBoard") === forumBoardId);
+};
+
+const _getRootDiscussions = memoize(discussions => {
+  return discussions.filter(d => d.get("isRoot"));
+}, createFastMemoizeDefaultOptions({ size: 2 }));
+
+export const getRootDiscussions = (state, forumBoardId) => {
+  const discussions = getDiscussionsByForumBoard(state, forumBoardId);
+  return _getRootDiscussions(discussions);
+};
+
+const _getDiscussion = memoize((discussions, id) => {
+  return discussions.find(d => d.get("_id") === id);
+}, createFastMemoizeDefaultOptions({ size: 10 }));
+
+export const getDiscussionById = (state, id) => {
+  const discussions = getDiscussions(state);
+  return _getDiscussion(discussions, id);
+};
+
+const _getChildDiscussions = memoize((discussions, parentDiscussionId) => {
+  return discussions.filter(
+    d => d.get("parentDiscussion") === parentDiscussionId
+  );
+}, createFastMemoizeDefaultOptions({ size: 2 }));
+
+export const getChildDiscussions = (state, parentDiscussionId) => {
+  const discussions = getDiscussions(state);
+  return _getChildDiscussions(discussions, parentDiscussionId);
 };
 
 export const getUI = state => state.discussions.get("ui");

@@ -4,22 +4,36 @@ import Helmet from "react-helmet";
 import { hot } from "react-hot-loader";
 import compose from "recompose/compose";
 
-import { replace } from "react-router-redux";
+import { withStyles } from "material-ui-next/styles";
+import slideHeightStyles from "../../MyApp/styles/slideHeight";
 
-import { fetchDiscussion, fetchDiscussions } from "../DiscussionActions";
-import { getDiscussion } from "../DiscussionReducer";
+import DiscussionDetail from "../components/DiscussionDetail";
+
+import { replace } from "react-router-redux";
+import { getDiscussionById } from "../DiscussionReducer";
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
-import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
-import DiscussionDetail from "../components/DiscussionDetail";
+import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
+import { fetchDiscussionById, fetchDiscussions } from "../DiscussionActions";
+
+function styles(theme) {
+  const heightStyle = slideHeightStyles(theme);
+  return {
+    root: {
+      ...heightStyle.slideHeight,
+      width: "100vw",
+      overflow: "auto"
+    }
+  };
+}
 
 class DiscussionDetailPage extends React.Component {
   static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
     const { parentDiscussionId } = routerProps.match.params;
     return async (dispatch, getState) => {
       const _setHeaderTitle = () => {
-        const parentDiscussion = getDiscussion(getState(), parentDiscussionId);
+        const parentDiscussion = getDiscussionById(getState(), parentDiscussionId);
         const title = parentDiscussion
           ? parentDiscussion.get("title")
           : "Loading...";
@@ -28,38 +42,32 @@ class DiscussionDetailPage extends React.Component {
       dispatch(_setHeaderTitle());
       await Promise.all(
         [
-          fetchDiscussion(parentDiscussionId),
+          fetchDiscussionById(parentDiscussionId),
           fetchDiscussions({ parentDiscussionId })
         ].map(dispatch)
       );
       dispatch(_setHeaderTitle());
       if (tryMore) {
-        const parentDiscussion = getDiscussion(getState(), parentDiscussionId);
-        if (parentDiscussion && parentDiscussion.get("forumBoard")) {
+        const parentDiscussion = getDiscussionById(getState(), parentDiscussionId);
+        if (parentDiscussion) {
           const forumBoardId = parentDiscussion.get("forumBoard");
-          await dispatch(fetchForumBoardById(forumBoardId));
-          const forumBoard = getForumBoardById(getState(), forumBoardId);
-          if (forumBoard) {
-            const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
-            if (rootWikiId) {
-              const scope = [
-                {
-                  type: "wiki",
-                  rootWikiId
-                }
-              ];
-              return dispatch(fetchSemanticRules(scope));
-            } else {
-              return Promise.resolve(null);
+          if (forumBoardId) {
+            await dispatch(fetchForumBoardById(forumBoardId));
+            const forumBoard = getForumBoardById(getState(), forumBoardId);
+            if (forumBoard) {
+              const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+              if (rootWikiId) {
+                const scope = [
+                  {
+                    type: "wiki",
+                    rootWikiId
+                  }
+                ];
+                await dispatch(fetchSemanticRules(scope));
+              }
             }
-          } else {
-            return Promise.resolve(null);
           }
-        } else {
-          return Promise.resolve(null);
         }
-      } else {
-        return Promise.resolve(null);
       }
     };
   }
@@ -73,21 +81,6 @@ class DiscussionDetailPage extends React.Component {
       this.fetchComponentData(nextProps);
     }
   }
-
-  onSemanticToggle = (event, nextSemanticReplaceMode) => {
-    const { parentDiscussionId, semanticReplaceMode } = this.props;
-    if (semanticReplaceMode !== nextSemanticReplaceMode) {
-      if (nextSemanticReplaceMode) {
-        this.props.dispatch(
-          replace(
-            `/rootDiscussions/${parentDiscussionId}?semanticReplaceMode=true`
-          )
-        );
-      } else {
-        this.props.dispatch(replace(`/rootDiscussions/${parentDiscussionId}`));
-      }
-    }
-  };
 
   getHelmetTitle = (props = this.props) => {
     const { parentDiscussion, forumBoard } = props;
@@ -112,23 +105,42 @@ class DiscussionDetailPage extends React.Component {
     }
   };
 
+  handleSemanticToggle = (event, nextSemanticReplaceMode) => {
+    const { parentDiscussionId, semanticReplaceMode } = this.props;
+    if (semanticReplaceMode !== nextSemanticReplaceMode) {
+      if (nextSemanticReplaceMode) {
+        this.props.dispatch(
+          replace(
+            `/rootDiscussions/${parentDiscussionId}?semanticReplaceMode=true`
+          )
+        );
+      } else {
+        this.props.dispatch(replace(`/rootDiscussions/${parentDiscussionId}`));
+      }
+    }
+  };
+
   render() {
     const {
       forumBoardId,
       parentDiscussionId,
-      semanticReplaceMode
+      semanticReplaceMode,
+      classes
     } = this.props;
     const helmetTitle = this.getHelmetTitle();
     return (
-      <div>
+      <React.Fragment>
         <Helmet title={helmetTitle} />
-        <DiscussionDetail
-          semanticReplaceMode={semanticReplaceMode}
-          forumBoardId={forumBoardId}
-          parentDiscussionId={parentDiscussionId}
-          onSemanticToggle={this.onSemanticToggle}
-        />
-      </div>
+        <div className={classes.root}>
+          <DiscussionDetail
+            id="DiscussionDetailPage/DiscussionDetail"
+            semanticReplaceMode={semanticReplaceMode}
+            forumBoardId={forumBoardId}
+            parentDiscussionId={parentDiscussionId}
+            onSemanticToggle={this.handleSemanticToggle}
+          />
+        </div>
+      </React.Fragment>
     );
   }
 }
@@ -137,7 +149,7 @@ function mapStateToProps(store, routerProps) {
   const { parentDiscussionId } = routerProps.match.params;
   let { semanticReplaceMode } = routerProps.location.query;
   semanticReplaceMode = semanticReplaceMode === "true";
-  const parentDiscussion = getDiscussion(store, parentDiscussionId);
+  const parentDiscussion = getDiscussionById(store, parentDiscussionId);
   let { forumBoardId } = routerProps.match.params;
   if (!forumBoardId) {
     forumBoardId = parentDiscussion
@@ -159,7 +171,7 @@ function mapDispatchToProps(dispatch, routerProps) {
     fetchComponentData() {
       const action = DiscussionDetailPage.getInitialAction(
         { routerProps },
-        { tryMore: true }
+        { tryMore: process.browser }
       );
       return dispatch(action);
     },
@@ -168,6 +180,7 @@ function mapDispatchToProps(dispatch, routerProps) {
 }
 
 export default compose(
+  withStyles(styles),
   hot(module),
   connect(mapStateToProps, mapDispatchToProps)
 )(DiscussionDetailPage);

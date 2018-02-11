@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import Loadable from "react-loadable";
+import { connect } from "react-redux";
+import pure from "recompose/pure";
 
 import Tabs from "../../../components/Tabs";
 import { Tab } from "material-ui-next/Tabs";
@@ -13,21 +15,37 @@ import RootWikiGroupTreeList from "../../RootWiki/components/RootWikiGroupTreeLi
 import WikiList from "../../Wiki/components/WikiList";
 import ActionButton from "./ActionButton";
 
+import { getIsFirstRender } from "../../MyApp/MyAppReducer";
+
+const Loading = pure(() => <div>Loading...</div>);
+
 // optimize size beacuse RootWikiDetail use Editor module.
 // TODO
 // disable lazy load for bot crawler.
-const RootWikiDetail = Loadable({
-  loader: () => {
-    const isServer = typeof window === "undefined";
-    // use same Component with client-side and server-side for hydrate.
-    if (isServer) {
-      return Promise.resolve(() => null);
-    } else {
-      return import(/* webpackChunkName: "RootWikiDetail" */ "../../RootWiki/components/RootWikiDetail");
-    }
-  },
-  loading: () => null
-});
+const RootWikiDetail = connect(state => {
+  return { isFirstRender: getIsFirstRender(state) };
+})(
+  Loadable({
+    loader: async () => {
+      // use same Component with client-side and server-side for hydrate.
+      if (process.browser) {
+        const Component = await import(/* webpackChunkName: "RootWikiDetail" */ "../../RootWiki/components/RootWikiDetail");
+        return Component;
+      } else {
+        return Loading;
+      }
+    },
+    render(loaded, props) {
+      const Component = loaded.default;
+      if (props.isFirstRender) {
+        return <Loading />;
+      } else {
+        return <Component {...props} />;
+      }
+    },
+    loading: Loading
+  })
+);
 
 export const FORUMBOARD_GROUPS_SLIDE = 0;
 export const ROOT_DISCUSSIONS_SLIDE = 1;
@@ -40,7 +58,7 @@ class RootWikiDetailOrWikiList extends React.Component {
   };
 
   static defaultProps = {
-    targetKind: undefined
+    targetKind: null
   };
 
   constructor(props) {
@@ -60,7 +78,7 @@ class RootWikiDetailOrWikiList extends React.Component {
     } else if (targetKind === "rootWiki") {
       return <RootWikiDetail rootWikiId={rootWikiId} />;
     } else {
-      return <div>Loading...</div>;
+      return <Loading />;
     }
   }
 }
