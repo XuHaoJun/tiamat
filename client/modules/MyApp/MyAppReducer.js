@@ -16,14 +16,16 @@ const initialState = Immutable.fromJS({
     isInitialized: false
   },
   ui: {
-    headerTitle: "Tiamat",
+    pageThemeOptions: {},
+    header: {
+      title: "Tiamat"
+    },
     sendButton: {
       show: false,
       loading: false,
       onClick: () => {}
     }
-  },
-  data: {}
+  }
 });
 
 const AppReducer = (state = initialState, action) => {
@@ -39,7 +41,7 @@ const AppReducer = (state = initialState, action) => {
     }
 
     case SET_HEADER_TITLE: {
-      return state.setIn(["ui", "headerTitle"], action.headerTitle);
+      return state.setIn(["ui", "header", "title"], action.headerTitle);
     }
 
     case UPDATE_APP_BAR_SEND_BUTTON_PROPS: {

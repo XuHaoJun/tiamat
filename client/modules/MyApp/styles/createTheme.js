@@ -2,9 +2,13 @@ import grey from "material-ui-next/colors/grey";
 
 import { createMuiTheme } from "material-ui-next/styles";
 
-const createTheme = ({ networkStatus } = { networkStatus: "online" }) => {
-  let themeOpts;
-  const baseOpts = {
+const createTheme = (
+  { networkStatus, pageThemeOptions } = {
+    networkStatus: "online",
+    pageThemeOptions: {}
+  }
+) => {
+  const baseThemeOpts = {
     overrides: {
       MuiList: {
         root: {
@@ -13,15 +17,13 @@ const createTheme = ({ networkStatus } = { networkStatus: "online" }) => {
       }
     }
   };
-  if (networkStatus === "offline") {
-    themeOpts = Object.assign({}, baseOpts, {
-      palette: {
-        primary: grey
-      }
-    });
-  } else {
-    themeOpts = baseOpts;
-  }
+  const offlineThemeOpts = {
+    palette: {
+      primary: grey
+    }
+  };
+  const nsThemeOpts = networkStatus === "offline" ? offlineThemeOpts : {};
+  const themeOpts = { ...baseThemeOpts, ...pageThemeOptions, ...nsThemeOpts };
   return createMuiTheme(themeOpts);
 };
 

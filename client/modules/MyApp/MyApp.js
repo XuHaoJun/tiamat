@@ -45,10 +45,13 @@ const defaultMetas = [
   }
 ];
 
-const themes = {
-  online: createTheme(),
-  offline: createTheme({ networkStatus: "offline" })
-};
+function getNetworkStatus() {
+  if (process.env.browser) {
+    return window.navigator.onLine ? "online" : "offline";
+  } else {
+    return "online";
+  }
+}
 
 class MyApp extends React.Component {
   static propTypes = {
@@ -59,19 +62,19 @@ class MyApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      theme: this.createTheme(props),
       drawerOpen: false,
-      sheetsManager: new Map(),
-      theme: themes.online
+      sheetsManager: new Map()
     };
   }
 
   componentDidMount() {
-    window.addEventListener("online", this.handleOnline);
-    window.addEventListener("offline", this.handleOffline);
     const jssStyles = document.getElementById("jss-server-side");
     if (jssStyles && jssStyles.parentNode) {
       jssStyles.parentNode.removeChild(jssStyles);
     }
+    window.addEventListener("online", this.handleOnline);
+    window.addEventListener("offline", this.handleOffline);
   }
 
   componentWillUnmount() {
@@ -80,15 +83,15 @@ class MyApp extends React.Component {
   }
 
   handleOnline = () => {
-    this.setState({ theme: themes.online });
+    this.setState({ theme: this.createTheme() });
   };
 
   handleOffline = () => {
-    this.setState({ theme: themes.offline });
+    this.setState({ theme: this.createTheme() });
   };
 
-  handleChangeDrawerOpen = drawerOpen => {
-    this.setState({ drawerOpen });
+  handleChangeDrawerOpen = nextDrawerOpen => {
+    this.setState({ drawerOpen: nextDrawerOpen });
   };
 
   handleMenuButtonClick = () => {
@@ -105,10 +108,17 @@ class MyApp extends React.Component {
     }
   };
 
+  createTheme = (props = this.props) => {
+    const { ui } = props;
+    const pageThemeOptions = ui.get("pageThemeOptions");
+    const networkStatus = getNetworkStatus();
+    return createTheme({ networkStatus, pageThemeOptions });
+  };
+
   render() {
-    const { route } = this.props;
-    const headerTitle = this.props.ui.get("headerTitle");
+    const { ui, route } = this.props;
     const { drawerOpen, theme, sheetsManager } = this.state;
+    const headerTitle = ui.getIn(["header", "title"]);
     return (
       <React.Fragment>
         <Helmet titleTemplate="%s - Tiamat 電玩論壇" meta={defaultMetas} />
