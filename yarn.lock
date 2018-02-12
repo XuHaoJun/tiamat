@@ -8544,16 +8544,16 @@ react-sortable-hoc@^0.6.8:
     lodash "^4.12.0"
     prop-types "^15.5.7"
 
-react-sortable-tree@^1.4.0:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/react-sortable-tree/-/react-sortable-tree-1.8.1.tgz#648f72eff758e029a1458ce9a1dc4de1783534e2"
+react-sortable-tree@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-sortable-tree/-/react-sortable-tree-2.0.1.tgz#090cf47851277cf68766b897b7c9c69d958c01ed"
   dependencies:
     lodash.isequal "^4.4.0"
     prop-types "^15.6.0"
     react-dnd "2.5.4"
     react-dnd-html5-backend "2.5.4"
     react-dnd-scrollzone "^4.0.0"
-    react-virtualized "^9.16.1"
+    react-virtualized "^9.18.5"
 
 react-spinner-children@^1.0.8:
   version "1.0.8"
@@ -8602,15 +8602,15 @@ react-transition-group@^2.2.1:
     prop-types "^15.5.8"
     warning "^3.0.0"
 
-react-virtualized@^9.16.1:
-  version "9.17.3"
-  resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.17.3.tgz#3854588f067235c00ae5cd134d96508956630033"
+react-virtualized@^9.18.5:
+  version "9.18.5"
+  resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.18.5.tgz#42dd390ebaa7ea809bfcaf775d39872641679b89"
   dependencies:
     babel-runtime "^6.26.0"
     classnames "^2.2.3"
     dom-helpers "^2.4.0 || ^3.0.0"
     loose-envify "^1.3.0"
-    prop-types "^15.5.4"
+    prop-types "^15.6.0"
 
 react@*, react@16.2.0, "react@^15.6.2 || ^16.0":
   version "16.2.0"
