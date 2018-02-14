@@ -84,19 +84,16 @@ export function initWithStore(db, store) {
 
 let localForage = null;
 
-export async function loadDBLib() {
-  const module = await import(/* webpackChunkName: "localForage" */ "localForage");
-  localForage = module;
-  return module;
+export async function loadDBAdapter() {
+  const m = await import(/* webpackChunkName: "localForage" */ "localForage");
+  localForage = m;
+  return m;
 }
 
 // TODO
 // rename to getDB?
 export function connectDB() {
   // never connect db on server side
-  const db =
-    typeof window !== "undefined" && typeof document !== "undefined"
-      ? localForage
-      : null;
+  const db = process.browser ? localForage : null;
   return db;
 }

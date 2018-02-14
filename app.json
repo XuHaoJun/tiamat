@@ -3,7 +3,13 @@
   "description": "Tiamat - a modern gaming forum",
   "repository": "https://github.com/XuHaoJun/tiamat",
   "keywords": ["node", "express", "react", "forum", "game"],
-  "addons": [{
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "addons": [
+    {
       "plan": "mongolab:sandbox"
     },
     {

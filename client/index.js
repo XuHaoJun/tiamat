@@ -13,7 +13,7 @@ import { matchRoutes } from "react-router-config";
 import routes from "./routes";
 
 import {
-  loadDBLib,
+  loadDBAdapter,
   connectDB,
   initWithStore,
   initAccessToken
@@ -128,7 +128,7 @@ async function main() {
     initDebug();
   }
 
-  const loadingDBLibPromise = loadDBLib();
+  const loadingDBLibPromise = loadDBAdapter();
 
   const loadInitialPagePromise = loadInitialPage();
 

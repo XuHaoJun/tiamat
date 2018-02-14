@@ -1,10 +1,9 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Set, OrderedSet } from "immutable";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import compose from "recompose/compose";
-import memoize from "fast-memoize";
-import createFastMemoizeDefaultOptions from "../../../../util/createFastMemoizeDefaultOptions";
 import ScrollContainerHoc from "../../../../components/ScrollContainer/ScrollContainerHoc";
 
 import classNames from "classnames";
@@ -19,7 +18,7 @@ import {
   getChildDiscussions
 } from "../../DiscussionReducer";
 import { getForumBoardById } from "../../../ForumBoard/ForumBoardReducer";
-import { getSemanticRules } from "../../../SemanticRule/SemanticRuleReducer";
+import { getSemanticRulesByRootWikiId } from "../../../SemanticRule/SemanticRuleReducer";
 
 const styles = {
   root: {
@@ -30,10 +29,18 @@ const styles = {
 };
 
 class DiscussionDetail extends React.Component {
+  static propTypes = {
+    parentDiscussionId: PropTypes.string.isRequired,
+    parentDiscussion: PropTypes.object,
+    forumBoardId: PropTypes.string,
+    forumBoard: PropTypes.object,
+    childDiscussions: PropTypes.object,
+    semanticReplaceMode: PropTypes.bool
+  };
+
   static defaultProps = {
     forumBoardId: "",
     forumBoard: null,
-    parentDiscussionId: "",
     parentDiscussion: null,
     childDiscussions: null,
     semanticReplaceMode: false
@@ -63,51 +70,42 @@ class DiscussionDetail extends React.Component {
       });
     const { classes } = this.props;
     return (
-      <div className={classNames(classes.root, this.props.className)}>
-        {discussions.map(d => {
-          return (
-            <DiscussionNode
-              key={d.get("_id")}
-              discussion={d}
-              semanticRules={semanticRules}
-              onSemanticToggle={this.props.onSemanticToggle}
-              semanticReplaceMode={semanticReplaceMode}
-              divider={true}
-            />
-          );
-        })}
+      <React.Fragment>
+        <div className={classNames(classes.root, this.props.className)}>
+          <h1>{parentDiscussion.get("title")}</h1>
+          <Divider />
+          {discussions.map(d => {
+            return (
+              <DiscussionNode
+                key={d.get("_id")}
+                discussion={d}
+                semanticRules={semanticRules}
+                onSemanticToggle={this.props.onSemanticToggle}
+                semanticReplaceMode={semanticReplaceMode}
+                divider={true}
+              />
+            );
+          })}
+        </div>
         <ReplyButton
           to={`/create/rootDiscussions/${parentDiscussionId}/childDiscussion`}
         />
-      </div>
+      </React.Fragment>
     );
   }
 }
 
-const getSemanticRulesHelper = (() => {
-  const f = (rootWikiId, semanticRules) => {
-    return semanticRules
-      .filter(ele => ele.get("rootWikiId") === rootWikiId)
-      .sortBy(ele => ele.get("name").length);
-  };
-  if (process.browser) {
-    return memoize(f, createFastMemoizeDefaultOptions(1));
-  } else {
-    return f;
-  }
-})();
-
 function mapStateToProps(state, props) {
   const { parentDiscussionId, forumBoardId } = props;
-  const forumBoard = getForumBoardById(state, forumBoardId);
   const parentDiscussion = getDiscussionById(state, parentDiscussionId);
   const childDiscussions = getChildDiscussions(
     state,
     parentDiscussionId
   ).toSet();
-  const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : null;
+  const forumBoard = getForumBoardById(state, forumBoardId);
+  const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
   const semanticRules = rootWikiId
-    ? getSemanticRulesHelper(rootWikiId, getSemanticRules(state))
+    ? getSemanticRulesByRootWikiId(state, rootWikiId)
     : Set();
   return {
     parentDiscussionId,

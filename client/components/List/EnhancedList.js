@@ -17,6 +17,9 @@ import LazyLoad from "react-lazyload";
 import compose from "recompose/compose";
 import List, { ListItem, ListItemText } from "material-ui-next/List";
 
+import { connect } from "react-redux";
+import { getIsFirstRender } from "../../modules/MyApp/MyAppReducer";
+
 function hasPropType(Component, name) {
   const ctype = typeof Component;
   if (ctype === "string") {
@@ -132,7 +135,7 @@ function FlipMoveHoc(Component) {
   };
 }
 
-class LoadingListItem extends React.Component {
+class LoadingListItemBase extends React.Component {
   static defaultProps = {
     enableMountRequestMore: true
   };
@@ -142,13 +145,17 @@ class LoadingListItem extends React.Component {
   };
 
   componentDidMount() {
-    if (this.props.enableMountRequestMore) {
+    if (this.props.enableMountRequestMore && !this.props.isFirstRender) {
       this.handleRequestMore();
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.type !== nextProps.type && !this.state.loading) {
+    if (
+      this.props.type !== nextProps.type &&
+      !this.state.loading &&
+      !nextProps.isFirstRender
+    ) {
       this.handleRequestMore();
     }
   }
@@ -191,6 +198,10 @@ class LoadingListItem extends React.Component {
   }
 }
 
+const LoadingListItem = connect(state => {
+  return { isFirstRender: getIsFirstRender(state) };
+})(LoadingListItemBase);
+
 // TODO
 // append lazyload to children?
 function BottomLazyLoadHoc(Component) {
@@ -217,7 +228,6 @@ function BottomLazyLoadHoc(Component) {
           {children}
           <LazyLoad
             key="BottomLazyLoad"
-            offset={30}
             height={30}
             overflow={true}
             unmountIfInvisible={true}

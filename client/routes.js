@@ -124,77 +124,91 @@ const routes = [
     component: MyApp,
     routes: concat(HomeRoutes, [
       {
+        key: "SettingDetailPage",
         path: "/settings",
         exact: true,
         component: SettingDetailPage
       },
       {
+        key: "SettingDetailPage",
         path: "/setting",
         exact: true,
         component: SettingDetailPage
       },
       {
+        key: "DiscussionDetailPage",
         path: "/rootDiscussions/:parentDiscussionId",
         exact: true,
         component: DiscussionDetailPage
       },
       {
+        key: "WhatsHotDiscussionsPage",
         path: "/whatsHotDiscussions",
         exact: true,
         component: WhatsHotDiscussionsPage
       },
       {
+        key: "MixedMainPage",
         path: "/forumBoards/:forumBoardId/rootDiscussions",
         exact: true,
         component: MixedMainPage,
         targetKind: "rootDiscussions"
       },
       {
+        key: "WikiDetailPage",
         path: "/rootWikis/:rootWikiId/wikis/:wikiName",
         exact: true,
         component: WikiDetailPage
       },
       {
+        key: "MixedMainPage",
         path: "/rootWikis/:rootWikiId/wikis",
         exact: true,
         component: MixedMainPage,
         targetKind: "wikis"
       },
       {
+        key: "MixedMainPage",
         path: "/rootWikis/:rootWikiId",
         exact: true,
         component: MixedMainPage,
         targetKind: "rootWiki"
       },
       {
+        key: "WikiDetailPage",
         path: "/wikis/:wikiId",
         exact: true,
         component: WikiDetailPage
       },
       {
+        key: "EditRootWikiGroupTreePage",
         path: "/edit/rootWikis/:rootWikiId/rootWikiGroupTree",
         exact: true,
         component: EditRootWikiGroupTreePage
       },
       {
+        key: "UpsertRootWikiGroupTreePage",
         path: "/create/rootWikis/:rootWikiId/rootWikiGroupTree",
         exact: true,
         component: UpsertRootWikiGroupTreePage,
         actionType: "create"
       },
       {
+        key: "UpsertRootWikiGroupTreePage",
         path: "/update/rootWikis/:rootWikiId/rootWikiGroupTree",
         exact: true,
         component: UpsertRootWikiGroupTreePage,
         actionType: "update"
       },
       {
+        key: "UpsertWikiDataFormPage",
         path: "/create/rootWikis/:rootWikiId/wikiDataForm",
         exact: true,
         component: UpsertWikiDataFormPage,
         actionType: "create"
       },
       {
+        key: "UpsertTemplatePage",
         path: "/create/rootWikis/:rootWikiId/template",
         exact: true,
         component: UpsertTemplatePage,
@@ -202,12 +216,14 @@ const routes = [
         sourceKind: "rootWiki"
       },
       {
+        key: "UpsertWikiDataFormPage",
         path: "/update/wikiDataForms/:wikiDataFormId",
         exact: true,
         component: UpsertWikiDataFormPage,
         actionType: "update"
       },
       {
+        key: "UpsertDiscussionPage",
         path: "/create/forumBoards/:forumBoardId/rootDiscussion",
         exact: true,
         component: UpsertDiscussionPage,
@@ -215,6 +231,7 @@ const routes = [
         targetKind: "rootDiscussion"
       },
       {
+        key: "UpsertDiscussionPage",
         path: "/create/rootDiscussions/:parentDiscussionId/childDiscussion",
         exact: true,
         component: UpsertDiscussionPage,
@@ -222,6 +239,7 @@ const routes = [
         targetKind: "childDiscussion"
       },
       {
+        key: "UpsertDiscussionPage",
         path: "/update/discussions/:discussionId",
         exact: true,
         component: UpsertDiscussionPage,

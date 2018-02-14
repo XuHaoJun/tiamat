@@ -1,22 +1,22 @@
 import axios from "axios";
-import { port } from "../../server/configs/server";
 import Debug from "debug";
+
+import { port } from "../../server/configs/server";
 
 const debug = Debug("app:apiCaller");
 
 export const API_URL =
-  typeof window === "undefined" || process.env.NODE_ENV === "test"
+  !process.browser || process.env.NODE_ENV === "test"
     ? process.env.BASE_URL || `http://localhost:${process.env.PORT || port}/api`
     : "/api";
 
 // in server-side call this skip error for no crush when not handle rejection.
-const handleError =
-  typeof window === "undefined" && typeof document === "undefined"
-    ? error => {
-        debug("error", error);
-        return error;
-      }
-    : undefined;
+const handleError = !process.browser
+  ? error => {
+      debug("error", error);
+      return error;
+    }
+  : undefined;
 
 export default function callApi(
   endpoint,
@@ -24,17 +24,15 @@ export default function callApi(
   data = null,
   config = {}
 ) {
-  const reqConfig = Object.assign(
-    {
-      url: `${API_URL}/${endpoint}`,
-      headers: {
-        "content-type": "application/json"
-      },
-      method,
-      data
+  const reqConfig = {
+    url: `${API_URL}/${endpoint}`,
+    headers: {
+      "content-type": "application/json"
     },
-    config || {}
-  );
+    method,
+    data,
+    ...config
+  };
   debug("start fetch", reqConfig.url);
   return axios(reqConfig)
     .then(response => {

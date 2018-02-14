@@ -83,9 +83,13 @@ app.use(compression());
 app.use(bodyParser.json({ limit: "20mb" }));
 app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
 if (process.env.NODE_ENV === "production") {
-  app.use(Express.static(path.resolve(__dirname, "../dist")));
+  app.use(
+    Express.static(path.resolve(__dirname, "../dist"), { maxAge: "10d" })
+  );
 }
-app.use(Express.static(path.resolve(__dirname, "../assets")));
+app.use(
+  Express.static(path.resolve(__dirname, "../assets"), { maxAge: "10d" })
+);
 app.use(passport.initialize());
 // api.use("api", apiRoutes) can't hot reload it.
 app.use("/api", (...args) => apiRoutes.handle(...args));

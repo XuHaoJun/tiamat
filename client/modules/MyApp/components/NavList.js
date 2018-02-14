@@ -1,17 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Scrollbars } from "react-custom-scrollbars";
-import { Link } from "react-router-dom";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
 
+import { Scrollbars } from "react-custom-scrollbars";
+import { Link, Route } from "react-router-dom";
+
 import { withStyles } from "material-ui-next/styles";
-
 import Button from "material-ui-next/Button";
-
 import Divider from "material-ui-next/Divider";
-
-import ListSubheader from "material-ui-next/List/ListSubheader";
 import List, {
   ListItem as MuiListItem,
   ListItemIcon,
@@ -91,17 +88,42 @@ const selectedListItemStyles = theme => {
 
 const SelectedListItem = withStyles(selectedListItemStyles)(MuiListItem);
 
+const ListItemBase = props => {
+  const { location, to, ...listItemProps } = props;
+  const routeChildren = ({ match }) => {
+    if (match) {
+      return <SelectedListItem to={to} {...listItemProps} disableRipple />;
+    } else {
+      return <MuiListItem to={to} {...listItemProps} />;
+    }
+  };
+  if (to) {
+    return (
+      <Route location={location} path={to} exact>
+        {routeChildren}
+      </Route>
+    );
+  } else {
+    return <MuiListItem {...listItemProps} />;
+  }
+};
+
+const ListItem = connect(
+  state => {
+    return { location: state.routing.location };
+  },
+  () => Object.create(null)
+)(ListItemBase);
+
 class NavList extends React.Component {
   static propTypes = {
     onChangeDrawer: PropTypes.func,
-    user: PropTypes.object,
-    value: PropTypes.string
+    user: PropTypes.object
   };
 
   static defaultProps = {
     onChangeDrawer: null,
-    user: null,
-    value: null
+    user: null
   };
 
   constructor(props) {
@@ -117,22 +139,15 @@ class NavList extends React.Component {
     }
   };
 
-  ListItem = props => {
-    const { value } = this.props;
-    const { to } = props;
-    if (typeof to === "string" && to === value) {
-      return <SelectedListItem {...props} disableRipple />;
-    } else {
-      return <MuiListItem {...props} />;
-    }
-  };
-
   render() {
     const { user, browser } = this.props;
-    const { ListItem } = this;
     return (
-      <Scrollbars universal={true} autoHide={true}>
-        <div style={{ overflow: "auto", height: "100%", width: "100%" }}>
+      <Scrollbars
+        universal={true}
+        autoHide={true}
+        style={{ overflow: "auto", height: "100%", width: "100%" }}
+      >
+        <div>
           {browser.lessThan.medium ? (
             <React.Fragment>
               <UserPanel user={user} onClickLoginButton={this.closeNavDrawer} />
@@ -219,7 +234,6 @@ class NavList extends React.Component {
               <ListItemText inset primary="聊天室近期更新02" />
             </ListItem>
             <Divider />
-            <ListSubheader>App 相關</ListSubheader>
             <ListItem
               button
               component={Link}
@@ -254,12 +268,7 @@ class NavList extends React.Component {
               <ListItemText primary="設定" />
             </ListItem>
             {user ? (
-              <LogOutListItem
-                button
-                component={Link}
-                to="/logout"
-                onClick={this.closeNavDrawer}
-              >
+              <LogOutListItem button onClick={this.closeNavDrawer}>
                 <ListItemText inset primary="登出" />
               </LogOutListItem>
             ) : null}
@@ -271,11 +280,9 @@ class NavList extends React.Component {
 }
 
 function mapStateToProps(state) {
-  const { location } = state.routing;
-  const value = location.pathname;
   const user = getCurrentUser(state);
   const { browser } = state;
-  return { user, value, browser };
+  return { user, browser };
 }
 
 export default connect(mapStateToProps)(NavList);

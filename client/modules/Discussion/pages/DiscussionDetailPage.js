@@ -22,7 +22,6 @@ function styles(theme) {
   return {
     root: {
       ...heightStyle.slideHeight,
-      width: "100vw",
       overflow: "auto"
     }
   };
@@ -33,7 +32,10 @@ class DiscussionDetailPage extends React.Component {
     const { parentDiscussionId } = routerProps.match.params;
     return async (dispatch, getState) => {
       const _setHeaderTitle = () => {
-        const parentDiscussion = getDiscussionById(getState(), parentDiscussionId);
+        const parentDiscussion = getDiscussionById(
+          getState(),
+          parentDiscussionId
+        );
         const title = parentDiscussion
           ? parentDiscussion.get("title")
           : "Loading...";
@@ -48,7 +50,10 @@ class DiscussionDetailPage extends React.Component {
       );
       dispatch(_setHeaderTitle());
       if (tryMore) {
-        const parentDiscussion = getDiscussionById(getState(), parentDiscussionId);
+        const parentDiscussion = getDiscussionById(
+          getState(),
+          parentDiscussionId
+        );
         if (parentDiscussion) {
           const forumBoardId = parentDiscussion.get("forumBoard");
           if (forumBoardId) {

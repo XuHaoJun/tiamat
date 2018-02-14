@@ -58,16 +58,26 @@ class RootWikiDetailOrWikiList extends React.Component {
   };
 
   static defaultProps = {
-    targetKind: null
+    targetKind: ""
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+    this.state = {
+      ...props
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { targetKind } = nextProps;
+    if (targetKind === "wikis" || targetKind === "rootWiki") {
+      this.setState({ ...nextProps });
+    }
   }
 
   render() {
-    const { targetKind, rootWikiId, rootWikiGroupTree } = this.props;
+    const { targetKind, rootWikiId, rootWikiGroupTree } = this.state;
     if (targetKind === "wikis") {
       return (
         <WikiList

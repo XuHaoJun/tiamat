@@ -10,7 +10,6 @@ class EnhancedSwipableViews extends React.Component {
     resistance: PropTypes.bool,
     scrollKey: PropTypes.string,
     scrollBehaviorShouldUpdateScroll: PropTypes.func,
-    userAgent: PropTypes.string,
     disableLazyLoading: PropTypes.bool
   };
 
@@ -19,8 +18,7 @@ class EnhancedSwipableViews extends React.Component {
     disableLazyLoading: true,
     resistance: true,
     scrollKey: "",
-    scrollBehaviorShouldUpdateScroll: undefined,
-    userAgent: ""
+    scrollBehaviorShouldUpdateScroll: undefined
   };
 
   static contextTypes = {
@@ -134,7 +132,6 @@ class EnhancedSwipableViews extends React.Component {
       resistance,
       dispatch,
       scrollBehaviorShouldUpdateScroll,
-      userAgent,
       disableLazyLoading,
       children,
       ...other

@@ -7,7 +7,7 @@ const initialState = fromJS({ data: Set() });
 
 const SemanticRuleReducer = (state = initialState, action) => {
   switch (action.type) {
-    case ADD_SEMANTIC_RULES:
+    case ADD_SEMANTIC_RULES: {
       if (!action.semanticRules) {
         return state;
       }
@@ -19,11 +19,13 @@ const SemanticRuleReducer = (state = initialState, action) => {
         .map(eles => defaultSameIdElesMax(eles))
         .toSet();
       return state.set("data", data);
-    default:
+    }
+    default: {
       if (List.isList(state.get("data"))) {
         return state.set("data", state.get("data").toSet());
       }
       return state;
+    }
   }
 };
 
@@ -34,9 +36,13 @@ export const getSemanticRules = state => {
 };
 
 export const getSemanticRulesByType = (state, type) => {
-  return state.semanticRules
-    .get("data")
-    .filter(ele => ele.get("type") === type);
+  return getSemanticRules(state).filter(ele => ele.get("type") === type);
+};
+
+export const getSemanticRulesByRootWikiId = (state, rootWikiId) => {
+  return getSemanticRules(state).filter(
+    ele => ele.get("rootWikiId") === rootWikiId
+  );
 };
 
 // Export Reducer
