@@ -3,11 +3,7 @@ import PropTypes from "prop-types";
 import _reduce from "lodash/reduce";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
-import Tabs from "../../../components/Tabs";
-import { Tab } from "material-ui-next/Tabs";
-import WhatsHotIcon from "material-ui-icons-next/Whatshot";
-import ActionHomeIcon from "material-ui-icons-next/Home";
-import WikiIcon from "material-ui-icons-next/ImportContacts";
+import Tabs, { Tab } from "../../../components/Tabs";
 
 import ForumBoardList from "../../ForumBoard/components/ForumBoardList";
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
@@ -81,16 +77,6 @@ class HomeTabs extends React.Component {
     if (this.props.onTransitionEnd) {
       this.props.onTransitionEnd(this.state.slideIndex);
     }
-  };
-
-  handleTabMouseOver = slideIndex => {
-    // this.setState({ slideIndex });
-  };
-
-  handleTabMouseOvers = {
-    [HOME_SLIDE]: this.handleTabMouseOver.bind(this, HOME_SLIDE),
-    [WHAT_HOT_SLIDE]: this.handleTabMouseOver.bind(this, WHAT_HOT_SLIDE),
-    [WIKI_SLIDE]: this.handleTabMouseOver.bind(this, WIKI_SLIDE)
   };
 
   render() {
