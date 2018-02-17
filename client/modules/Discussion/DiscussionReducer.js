@@ -92,13 +92,13 @@ export const getRootDiscussions = (state, forumBoardId) => {
   return _getRootDiscussions(discussions);
 };
 
-const _getDiscussion = memoize((discussions, id) => {
+const _getDiscussionById = memoize((discussions, id) => {
   return discussions.find(d => d.get("_id") === id);
 }, createFastMemoizeDefaultOptions({ size: 10 }));
 
 export const getDiscussionById = (state, id) => {
   const discussions = getDiscussions(state);
-  return _getDiscussion(discussions, id);
+  return _getDiscussionById(discussions, id);
 };
 
 const _getChildDiscussions = memoize((discussions, parentDiscussionId) => {

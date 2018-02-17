@@ -142,6 +142,12 @@ const routes = [
         component: DiscussionDetailPage
       },
       {
+        key: "DiscussionDetailPage",
+        path: "/discussions/:parentDiscussionId",
+        exact: true,
+        component: DiscussionDetailPage
+      },
+      {
         key: "WhatsHotDiscussionsPage",
         path: "/whatsHotDiscussions",
         exact: true,

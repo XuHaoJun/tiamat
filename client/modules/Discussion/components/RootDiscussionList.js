@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Set, is, fromJS } from "immutable";
 import { connect } from "react-redux";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { immutableRenderDecorator } from "react-immutable-render-mixin";
 import moment from "moment";
 import { Link } from "react-router-dom";
 
@@ -41,7 +41,6 @@ class RootDiscussionList extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     const pageInfo = this.makePageInfo();
     const pageTable = fromJS({}).merge(pageInfo);
     this.state = {
@@ -125,7 +124,7 @@ class RootDiscussionList extends React.Component {
   };
 
   listItemHref = payload => {
-    return `/rootDiscussions/${payload.get("_id")}`;
+    return `/discussions/${payload.get("_id")}`;
   };
 
   listItemSecondaryText = discussion => {
@@ -207,6 +206,15 @@ function mapStateToProps(store, props) {
   return { forumBoardId, forumBoardGroup, dataSource, isFirstRender };
 }
 
-export default compose(withStyles(styles), connect(mapStateToProps))(
-  RootDiscussionList
-);
+export default compose(
+  withStyles(styles),
+  connect(
+    mapStateToProps,
+    dispatch => {
+      return { dispatch };
+    },
+    null,
+    { pure: false }
+  ),
+  immutableRenderDecorator
+)(RootDiscussionList);

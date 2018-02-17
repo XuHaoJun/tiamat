@@ -9,6 +9,7 @@ import WikiIcon from "material-ui-icons-next/ImportContacts";
 import { FormControlLabel } from "material-ui-next/Form";
 import Card, { CardHeader, CardContent } from "material-ui-next/Card";
 import Divider from "material-ui-next/Divider";
+import CircularProgress from "material-ui-next/Progress/CircularProgress";
 
 import UserAvatar from "../../../User/components/UserAvatar";
 import Editor from "../../../../components/Slate/Editor";
@@ -104,10 +105,10 @@ class DiscussionNode extends React.Component {
   render() {
     const { semanticReplaceMode, semanticReplaceToggled } = this.state;
     const { discussion, semanticRules } = this.props;
-    const { title, authorBasicInfo, createdAt, content } = discussion;
+    const { authorBasicInfo, createdAt, content } = discussion;
     const displayName = authorBasicInfo
       ? authorBasicInfo.get("displayName")
-      : "";
+      : "Guest";
     const createdAtFromNow = moment(createdAt).fromNow();
     const { classes } = this.props;
     return (
@@ -126,18 +127,20 @@ class DiscussionNode extends React.Component {
                 label={<WikiIcon />}
               />
             }
-            title={
-              authorBasicInfo ? authorBasicInfo.get("displayName") : "Guest"
-            }
+            title={displayName}
             subheader={createdAtFromNow}
           />
           <CardContent>
-            <Editor
-              rawContent={content}
-              readOnly={true}
-              semanticRules={semanticRules}
-              semanticReplaceMode={semanticReplaceMode}
-            />
+            {content ? (
+              <Editor
+                rawContent={content}
+                readOnly={true}
+                semanticRules={semanticRules}
+                semanticReplaceMode={semanticReplaceMode}
+              />
+            ) : (
+              <CircularProgress />
+            )}
           </CardContent>
         </Card>
         {this.props.divider ? <Divider /> : null}

@@ -12,9 +12,11 @@ router
 
 router.route("/discussions/:id").get(Controller.getDiscussionById);
 
-router.route("/discussion").get(Controller.getDiscussionByTest);
+router
+  .route("/discussions/:id/childDiscussions")
+  .get(Controller.getChildDiscussions);
 
-router.route("/discussions").get(Controller.getDiscussions);
+router.route("/discussion").get(Controller.getDiscussionByTest);
 
 router
   .route("/discussions")

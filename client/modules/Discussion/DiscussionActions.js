@@ -1,5 +1,6 @@
-import callApi from "../../util/apiCaller";
 import qs from "qs";
+
+import callApi from "../../util/apiCaller";
 import { addError } from "../Error/ErrorActions";
 
 // Export Constants
@@ -37,7 +38,7 @@ export function fetchRootDiscussions(forumBoardId, _opts, reqConfig = {}) {
     limit: 10,
     sort: "-updatedAt",
     forumBoardGroup: "",
-    select: {}
+    select: { content: 0 }
   };
   const opts = Object.assign(defaultFetchRootDiscussionsOptions, _opts);
   const query = qs.stringify(opts);
@@ -60,7 +61,7 @@ export function fetchRootDiscussions(forumBoardId, _opts, reqConfig = {}) {
 
 export function fetchDiscussions({ parentDiscussionId = "" }) {
   return dispatch => {
-    return callApi(`discussions?parentDiscussionId=${parentDiscussionId}`)
+    return callApi(`discussions/${parentDiscussionId}/childDiscussions`)
       .then(res => {
         dispatch(addDiscussions(res.discussions));
         return res;
@@ -75,8 +76,11 @@ export function fetchDiscussions({ parentDiscussionId = "" }) {
   };
 }
 
-export function fetchDiscussionByTest(test) {
-  const search = `?${qs.stringify(test)}`;
+export function fetchDiscussionByTest(
+  test = { updatedAt: { $lte: new Date() } },
+  { select, sort } = {}
+) {
+  const search = `?${qs.stringify({ test, select, sort })}`;
   return dispatch => {
     return callApi(`discussion${search}`).then(data => {
       dispatch(addDiscussion(data.discussion));

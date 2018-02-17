@@ -16,7 +16,7 @@ const discussionSchema = new Schema({
   },
   // TODO
   // add required: true for author
-  author: { type: Schema.Types.ObjectId, ref: "User", index: true },
+  author: { type: Schema.Types.ObjectId, ref: "User" },
   authorBasicInfo: { type: Schema.Types.Mixed },
   // show last 2 or 5 (mobile or desktop) of comment by default, and click more load all comment.
   lastChildComments: { type: [Schema.Types.Mixed] },
@@ -32,12 +32,16 @@ const discussionSchema = new Schema({
       return contentToText(content);
     }
   },
-  isRoot: { type: Boolean, default: false, index: true, es_indexed: true },
+  isRoot: { type: Boolean, default: false, es_indexed: true },
   parentDiscussion: {
     type: Schema.Types.ObjectId,
     ref: "Discussion",
     index: true,
     es_indexed: true
+  },
+  replayTo: {
+    type: Schema.Types.ObjectId,
+    ref: "Discussion"
   },
   votes: { type: Number, default: 0, es_index: true },
   totalVotes: { type: Number, default: 0, es_index: true },
@@ -48,7 +52,6 @@ const discussionSchema = new Schema({
   forumBoard: {
     type: Schema.Types.ObjectId,
     // required: true,
-    index: true,
     ref: "ForumBoard",
     es_indexed: true,
     es_type: "text"
@@ -85,11 +88,14 @@ const discussionSchema = new Schema({
   }
 });
 
-discussionSchema.index({ isRoot: 1, forumBoard: 1 });
-
-discussionSchema.index({ isRoot: 1, forumBoard: 1, forumBoardGroup: 1 });
-
-discussionSchema.index({ isRoot: 1, forumBoard: 1, tags: 1 });
+discussionSchema.index({
+  _id: 1,
+  isRoot: 1,
+  forumBoard: 1,
+  forumBoardGroup: 1,
+  updatedAt: 1,
+  createdAt: 1
+});
 
 discussionSchema.plugin(mongoosePaginate);
 
