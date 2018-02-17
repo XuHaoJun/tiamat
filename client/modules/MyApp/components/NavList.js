@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { connect } from "react-redux";
 
-import { Scrollbars } from "react-custom-scrollbars";
 import { Link, Route } from "react-router-dom";
 
 import { withStyles } from "material-ui-next/styles";
@@ -142,139 +141,133 @@ class NavList extends React.Component {
   render() {
     const { user, browser } = this.props;
     return (
-      <Scrollbars
-        universal={true}
-        autoHide={true}
-        style={{ overflow: "auto", height: "100%", width: "100%" }}
-      >
-        <div>
-          {browser.lessThan.medium ? (
-            <React.Fragment>
-              <UserPanel user={user} onClickLoginButton={this.closeNavDrawer} />
-              <Divider />
-            </React.Fragment>
+      <div>
+        {browser.lessThan.medium ? (
+          <React.Fragment>
+            <UserPanel user={user} onClickLoginButton={this.closeNavDrawer} />
+            <Divider />
+          </React.Fragment>
+        ) : null}
+        <List style={{ paddingTop: 0 }}>
+          <ListItem
+            button
+            component={Link}
+            to="/"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <ActionHomeIcon />
+            </ListItemIcon>
+            <ListItemText inset primary="首頁" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/whatsHotDiscussions"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <WhatsHotIcon />
+            </ListItemIcon>
+            <ListItemText primary="熱門話題" />
+          </ListItem>
+          <Divider />
+          <ListItem
+            button
+            component={Link}
+            to="/subscriptions"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <SubscriptionIcon />
+            </ListItemIcon>
+            <ListItemText primary="訂閱內容" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/subscriptions/1"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemText inset primary="訂閱內容近期更新01" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/subscriptions/2"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemText inset primary="訂閱內容近期更新02" />
+          </ListItem>
+          <Divider />
+          <ListItem
+            button
+            component={Link}
+            to="/chatRooms"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <ChatIcon />
+            </ListItemIcon>
+            <ListItemText primary="聊天室" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/chatRooms/1"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemText inset primary="聊天室近期更新01" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/chatRooms/2"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemText inset primary="聊天室近期更新02" />
+          </ListItem>
+          <Divider />
+          <ListItem
+            button
+            component={Link}
+            to="/create/forumBoard"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <AddIcon />
+            </ListItemIcon>
+            <ListItemText primary="建立看板" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/about"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <HelpIcon />
+            </ListItemIcon>
+            <ListItemText primary="說明" />
+          </ListItem>
+          <ListItem
+            button
+            component={Link}
+            to="/settings"
+            onClick={this.closeNavDrawer}
+          >
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="設定" />
+          </ListItem>
+          {user ? (
+            <LogOutListItem button onClick={this.closeNavDrawer}>
+              <ListItemText inset primary="登出" />
+            </LogOutListItem>
           ) : null}
-          <List style={{ paddingTop: 0 }}>
-            <ListItem
-              button
-              component={Link}
-              to="/"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <ActionHomeIcon />
-              </ListItemIcon>
-              <ListItemText inset primary="首頁" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/whatsHotDiscussions"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <WhatsHotIcon />
-              </ListItemIcon>
-              <ListItemText primary="熱門話題" />
-            </ListItem>
-            <Divider />
-            <ListItem
-              button
-              component={Link}
-              to="/subscriptions"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <SubscriptionIcon />
-              </ListItemIcon>
-              <ListItemText primary="訂閱內容" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/subscriptions/1"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemText inset primary="訂閱內容近期更新01" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/subscriptions/2"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemText inset primary="訂閱內容近期更新02" />
-            </ListItem>
-            <Divider />
-            <ListItem
-              button
-              component={Link}
-              to="/chatRooms"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <ChatIcon />
-              </ListItemIcon>
-              <ListItemText primary="聊天室" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/chatRooms/1"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemText inset primary="聊天室近期更新01" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/chatRooms/2"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemText inset primary="聊天室近期更新02" />
-            </ListItem>
-            <Divider />
-            <ListItem
-              button
-              component={Link}
-              to="/create/forumBoard"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <AddIcon />
-              </ListItemIcon>
-              <ListItemText primary="建立看板" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/about"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <HelpIcon />
-              </ListItemIcon>
-              <ListItemText primary="說明" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/settings"
-              onClick={this.closeNavDrawer}
-            >
-              <ListItemIcon>
-                <SettingsIcon />
-              </ListItemIcon>
-              <ListItemText primary="設定" />
-            </ListItem>
-            {user ? (
-              <LogOutListItem button onClick={this.closeNavDrawer}>
-                <ListItemText inset primary="登出" />
-              </LogOutListItem>
-            ) : null}
-          </List>
-        </div>
-      </Scrollbars>
+        </List>
+      </div>
     );
   }
 }

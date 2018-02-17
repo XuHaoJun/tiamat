@@ -6,21 +6,20 @@ export default function defaultSameIdElesMax(sameIdEles) {
     const bUpdatedAt = date2Time(b.get("updatedAt"));
     if (aUpdatedAt > bUpdatedAt) {
       return 1;
-    }
-    if (aUpdatedAt < bUpdatedAt) {
+    } else if (aUpdatedAt < bUpdatedAt) {
       return -1;
-    }
-    if (aUpdatedAt === bUpdatedAt) {
+    } else if (aUpdatedAt === bUpdatedAt) {
       const aCount = a.count();
       const bCount = b.count();
       if (aCount > bCount) {
         return 1;
-      }
-      if (aCount < bCount) {
+      } else if (aCount < bCount) {
         return -1;
+      } else {
+        return 0;
       }
+    } else {
       return 0;
     }
-    return 0;
   });
 }
