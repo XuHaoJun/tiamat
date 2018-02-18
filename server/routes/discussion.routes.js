@@ -10,13 +10,23 @@ router
   .route("/forumBoards/:forumBoardId/rootDiscussions")
   .get(Controller.getRootDiscussions);
 
-router.route("/discussions/:id").get(Controller.getDiscussionById);
+router.route("/discussions/:id").get((req, res, next) => {
+  if (process.env.NODE_ENV === "production") {
+    res.set("Cache-Control", "private, max-age=60");
+  }
+  next();
+}, Controller.getDiscussionById);
 
 router
   .route("/discussions/:id/childDiscussions")
   .get(Controller.getChildDiscussions);
 
-router.route("/discussion").get(Controller.getDiscussionByTest);
+router.route("/discussion").get((req, res, next) => {
+  if (process.env.NODE_ENV === "production") {
+    res.set("Cache-Control", "private, max-age=15");
+  }
+  next();
+}, Controller.getDiscussionByTest);
 
 router
   .route("/discussions")

@@ -23,13 +23,16 @@ router.use((req, res, next) => {
   next();
 });
 
-router.use(
-  new RateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minutes
-    max: 200, // limit each IP to 200 requests per windowMs
-    delayMs: 0 // disable delaying - full speed until the max limit is reached
-  })
-);
+if (process.env.NODE_ENV === "production") {
+  router.use(
+    new RateLimit({
+      windowMs: 1 * 60 * 1000,
+      max: 600,
+      delayAfter: 450,
+      delayMs: 150
+    })
+  );
+}
 
 router.use(require("./routes/user.routes").default);
 router.use(require("./routes/oauth2.routes").default);

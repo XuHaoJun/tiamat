@@ -91,9 +91,21 @@ app.use(
   Express.static(path.resolve(__dirname, "../assets"), { maxAge: "10d" })
 );
 app.use(passport.initialize());
-// api.use("api", apiRoutes) can't hot reload it.
-app.use("/api", (...args) => apiRoutes.handle(...args));
-app.use((...args) => renderClientRoute.handle(...args));
+
+// closure handle hot reload route.
+const _apiRoutes =
+  process.env.NODE_ENV === "production"
+    ? apiRoutes
+    : (...args) => apiRoutes.handle(...args);
+
+app.use("/api", _apiRoutes);
+
+const _renderClientRoute =
+  process.env.NODE_ENV === "production"
+    ? renderClientRoute
+    : (...args) => renderClientRoute.handle(...args);
+
+app.use(_renderClientRoute);
 
 const server = http.Server(app);
 
