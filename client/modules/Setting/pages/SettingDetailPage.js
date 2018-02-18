@@ -49,6 +49,7 @@ class SettingDetailPage extends React.PureComponent {
             <FormControlLabel
               control={
                 <Switch
+                  color="primary"
                   checked={this.state.check}
                   onChange={(event, checked) =>
                     this.setState({ check: checked })
@@ -60,6 +61,7 @@ class SettingDetailPage extends React.PureComponent {
             <FormControlLabel
               control={
                 <Switch
+                  color="primary"
                   checked={this.state.isFullScreen}
                   onChange={(event, checked) => {
                     this.setState({ isFullScreen: checked });

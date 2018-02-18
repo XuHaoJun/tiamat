@@ -120,6 +120,7 @@ class DiscussionNode extends React.Component {
               <FormControlLabel
                 control={
                   <Switch
+                    color="primary"
                     onChange={this.onSemanticToggle}
                     checked={semanticReplaceToggled}
                   />
