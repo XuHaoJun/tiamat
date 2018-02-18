@@ -1,6 +1,5 @@
 import Immutable from "immutable";
 import createTheme from "./styles/createTheme";
-import toJS from "../../util/toJS";
 
 // Import Actions
 import {
@@ -20,7 +19,6 @@ export function getDefaultNetworkStatus() {
   }
 }
 
-// Initial State
 const initialState = Immutable.fromJS({
   isFirstRender: true,
   currentPage: "",

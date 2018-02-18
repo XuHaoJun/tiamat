@@ -73,7 +73,7 @@ export function getRootDiscussions(req, res) {
       isRoot: true,
       forumBoard: forumBoardId
     };
-    if (forumBoardGroup) {
+    if (forumBoardGroup && forumBoardGroup !== "_all") {
       query.forumBoardGroup = forumBoardGroup;
     }
     Discussion.paginate(
@@ -127,8 +127,9 @@ export function addDiscussion(req, res) {
         });
         if (!validServer) {
           return Promise.reject(validateServerRoot.errors);
+        } else {
+          return forumBoard;
         }
-        return forumBoard;
       });
   } else {
     validP = Discussion.findById(form.parentDiscussion)
@@ -143,8 +144,9 @@ export function addDiscussion(req, res) {
         });
         if (!validServer) {
           return Promise.reject(validateServerChild.errors);
+        } else {
+          return parentDiscussion;
         }
-        return parentDiscussion;
       });
   }
   const { user } = req;
@@ -271,7 +273,6 @@ export function getDiscussionByTest(req, res) {
   if (!vali) {
     res.status(403).send(testSchema);
   } else {
-    // delete test._id;
     Discussion.find(test)
       .sort(sort)
       .limit(1)

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Map, List } from "immutable";
 import { connect } from "react-redux";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { shallowEqualImmutable } from "react-immutable-render-mixin";
 
 import classNames from "classnames";
 import { withStyles } from "material-ui-next/styles";
@@ -90,7 +90,6 @@ class ErrorSnackbar extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
       open: false
     };
@@ -144,4 +143,6 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ErrorSnackbar);
+export default connect(mapStateToProps, mapDispatchToProps, null, {
+  areStatePropsEqual: shallowEqualImmutable
+})(ErrorSnackbar);

@@ -83,18 +83,24 @@ export const getDiscussionsByForumBoard = (state, forumBoardId) => {
   return discussions.filter(d => d.get("forumBoard") === forumBoardId);
 };
 
-const _getRootDiscussions = memoize(discussions => {
-  return discussions.filter(d => d.get("isRoot"));
-}, createFastMemoizeDefaultOptions({ size: 2 }));
+const _getRootDiscussions = memoize((discussions, fourmBoardGroup) => {
+  return discussions.filter(d => {
+    const inGroup =
+      fourmBoardGroup && fourmBoardGroup !== "_all"
+        ? d.get("forumBoardGroup") === fourmBoardGroup
+        : true;
+    return d.get("isRoot") && inGroup;
+  });
+}, createFastMemoizeDefaultOptions({ size: 1 }));
 
-export const getRootDiscussions = (state, forumBoardId) => {
+export const getRootDiscussions = (state, forumBoardId, fourmBoardGroup) => {
   const discussions = getDiscussionsByForumBoard(state, forumBoardId);
-  return _getRootDiscussions(discussions);
+  return _getRootDiscussions(discussions, fourmBoardGroup);
 };
 
 const _getDiscussionById = memoize((discussions, id) => {
   return discussions.find(d => d.get("_id") === id);
-}, createFastMemoizeDefaultOptions({ size: 10 }));
+}, createFastMemoizeDefaultOptions({ size: 5 }));
 
 export const getDiscussionById = (state, id) => {
   const discussions = getDiscussions(state);
@@ -105,7 +111,7 @@ const _getChildDiscussions = memoize((discussions, parentDiscussionId) => {
   return discussions.filter(
     d => d.get("parentDiscussion") === parentDiscussionId
   );
-}, createFastMemoizeDefaultOptions({ size: 2 }));
+}, createFastMemoizeDefaultOptions({ size: 1 }));
 
 export const getChildDiscussions = (state, parentDiscussionId) => {
   const discussions = getDiscussions(state);

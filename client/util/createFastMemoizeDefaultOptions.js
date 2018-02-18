@@ -1,3 +1,5 @@
+// TODO
+// calc sizeof and limit it.
 class MemoryCache {
   constructor(maxSize) {
     this.store = new Map();

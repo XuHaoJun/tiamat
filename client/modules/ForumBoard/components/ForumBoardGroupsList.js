@@ -1,10 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { List } from "immutable";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { shallowEqualImmutable } from "react-immutable-render-mixin";
 
 import { Link } from "react-router-dom";
-import { replace } from "react-router-redux";
 import { MenuItem, MenuList } from "material-ui-next/Menu";
 import { ListItemText, ListItemIcon } from "material-ui-next/List";
 import RightArrowIcon from "material-ui-icons-next/KeyboardArrowRight";
@@ -21,7 +20,6 @@ class ForumBoardGroupsList extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
       selectedGroup: props.forumBoardGroup
     };
@@ -107,6 +105,6 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  ForumBoardGroupsList
-);
+export default connect(mapStateToProps, mapDispatchToProps, null, {
+  areStatePropsEqual: shallowEqualImmutable
+})(ForumBoardGroupsList);

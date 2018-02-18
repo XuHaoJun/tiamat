@@ -131,7 +131,6 @@ module.exports = {
     new LodashModuleReplacementPlugin({ shorthands: true, collections: true }),
     new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
-      filename: "vendor.js",
       chunks: ["app"]
       // minChunks: ({ resource }) => /node_modules/.test(resource)
     }),

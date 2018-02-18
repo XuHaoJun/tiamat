@@ -200,18 +200,4 @@ function ready(callback) {
     });
 }
 
-if (process.env.NODE_ENV === "development") {
-  if (module.hot) {
-    // FIXME
-    // waiting HMR lib load.
-    ready(() => {
-      setTimeout(() => {
-        main();
-      }, 310);
-    });
-  } else {
-    ready(() => main());
-  }
-} else {
-  ready(() => main());
-}
+ready(() => main());

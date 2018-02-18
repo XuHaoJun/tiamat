@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Set, is, fromJS } from "immutable";
 import { connect } from "react-redux";
-import { immutableRenderDecorator } from "react-immutable-render-mixin";
+import { shallowEqualImmutable } from "react-immutable-render-mixin";
 import moment from "moment";
 import { Link } from "react-router-dom";
 
@@ -26,15 +26,19 @@ const styles = theme => ({
   }
 });
 
+const FORUM_BOARD_GROUP_ALL = "_all";
+
 class RootDiscussionList extends React.Component {
   static propTypes = {
     forumBoardId: PropTypes.string,
+    forumBoardGroup: PropTypes.string,
     dataSource: PropTypes.object,
     isFirstRender: PropTypes.bool
   };
 
   static defaultProps = {
-    forumBoardId: undefined,
+    forumBoardId: "",
+    forumBoardGroup: FORUM_BOARD_GROUP_ALL,
     dataSource: Set(),
     isFirstRender: false
   };
@@ -61,7 +65,7 @@ class RootDiscussionList extends React.Component {
   }
 
   getForumBoardGroup = (props = this.props) => {
-    return props.getForumBoardGroup || "_all";
+    return props.getForumBoardGroup || FORUM_BOARD_GROUP_ALL;
   };
 
   handleRequestMore = async ({ direction }) => {
@@ -156,18 +160,12 @@ class RootDiscussionList extends React.Component {
   };
 
   render() {
-    const { id, forumBoardId, forumBoardGroup } = this.props;
+    const { id, forumBoardId } = this.props;
     if (!forumBoardId) {
       return <div>Loading...</div>;
     }
-    let { dataSource } = this.props;
-    if (forumBoardGroup) {
-      dataSource = dataSource.filter(discussion => {
-        return discussion.get("forumBoardGroup") === forumBoardGroup;
-      });
-    }
-    dataSource = dataSource.sortBy(this.sortBy);
-    const listId = this.props.id || "default";
+    const { dataSource: dataSourceInput } = this.props;
+    const dataSource = dataSourceInput.sortBy(this.sortBy);
     const { classes } = this.props;
     return (
       <List
@@ -176,7 +174,7 @@ class RootDiscussionList extends React.Component {
         className={classes.root}
       >
         {dataSource.map(discussion => {
-          const key = `RootDiscussionList/${listId}/${discussion.get("_id")}`;
+          const key = discussion.get("_id");
           const to = this.listItemHref(discussion);
           const avatar = this.listItemLeftAvatar(discussion);
           const primary = discussion.get("title");
@@ -200,7 +198,7 @@ function mapStateToProps(store, props) {
     ? forumBoard.get("_id") || forumBoardId
     : forumBoardId;
   const dataSource = forumBoardId
-    ? getRootDiscussions(store, forumBoardId)
+    ? getRootDiscussions(store, forumBoardId, forumBoardGroup)
     : Set();
   const isFirstRender = getIsFirstRender(store);
   return { forumBoardId, forumBoardGroup, dataSource, isFirstRender };
@@ -214,7 +212,8 @@ export default compose(
       return { dispatch };
     },
     null,
-    { pure: false }
-  ),
-  immutableRenderDecorator
+    {
+      areStatePropsEqual: shallowEqualImmutable
+    }
+  )
 )(RootDiscussionList);

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Set, OrderedSet } from "immutable";
-import { immutableRenderDecorator } from "react-immutable-render-mixin";
+import { shallowEqualImmutable } from "react-immutable-render-mixin";
 import compose from "recompose/compose";
 import { Link } from "react-router-dom";
 import ScrollContainerHoc from "../../../../components/ScrollContainer/ScrollContainerHoc";
@@ -248,6 +248,7 @@ function mapStateToProps(state, props) {
 export default compose(
   ScrollContainerHoc,
   withStyles(styles),
-  connect(mapStateToProps, null, null, { pure: false }),
-  immutableRenderDecorator
+  connect(mapStateToProps, null, null, {
+    areStatePropsEqual: shallowEqualImmutable
+  })
 )(DiscussionDetail);
