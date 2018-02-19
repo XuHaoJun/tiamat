@@ -24,9 +24,8 @@ import SendButton from "./SendButton";
 import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
 import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
 
-import { getUI } from "../MyAppReducer";
+import { getUI, getIsFirstRender } from "../MyAppReducer";
 import { getIsLoggedIn } from "../../User/UserReducer";
-import { getIsFirstRender } from "../../MyApp/MyAppReducer";
 
 const LogInButton = makeLogInDialogable(Button);
 
@@ -102,12 +101,6 @@ class AppHeader extends React.Component {
   static propTypes = {
     classes: PropTypes.object.isRequired,
     onMenuButtonClick: PropTypes.func
-  };
-
-  static defaultProps = {
-    defaultQuery: "",
-    title: "",
-    onMenuButtonClick: null
   };
 
   constructor(props) {

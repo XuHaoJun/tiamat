@@ -8,8 +8,6 @@ import { CircularProgress } from "material-ui-next/Progress";
 import { getUI } from "../MyAppReducer";
 
 class SendButton extends React.PureComponent {
-  static muiName = IconButton.muiName;
-
   static defaultProps = {
     loading: false
   };

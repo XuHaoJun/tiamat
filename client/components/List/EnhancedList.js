@@ -59,10 +59,6 @@ function PullRefreshHoc(Component) {
       onRequestMore: PropTypes.func
     };
 
-    static defaultProps = {
-      onRequestMore: null
-    };
-
     handleRefresh = () => {
       if (this.props.onRequestMore) {
         const reason = "pullRefresh";
@@ -213,7 +209,6 @@ function BottomLazyLoadHoc(Component) {
     };
 
     static defaultProps = {
-      onRequestMore: null,
       bottomLazyLoadProps: {}
     };
 

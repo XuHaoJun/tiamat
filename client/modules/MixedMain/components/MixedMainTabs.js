@@ -58,7 +58,7 @@ class RootWikiDetailOrWikiList extends React.Component {
   };
 
   static defaultProps = {
-    targetKind: ""
+    targetKind: "rootDiscussions"
   };
 
   constructor(props) {
@@ -129,33 +129,30 @@ class MixedMainTabs extends React.Component {
   }
 
   getActionButtonIsOpened = slideIndex => {
-    if (this.state.lastScrollDirection === "down") {
-      return false;
-    }
-    return true;
+    return this.state.lastScrollDirection !== "down";
   };
 
   getActionButtonHref = (slideIndex, forumBoardGroup = "") => {
     const { forumBoardId, rootWiki } = this.props;
-    const rootWikiId = rootWiki ? rootWiki.get("_id") : "";
-    let href = "";
+    const rootWikiId = rootWiki ? rootWiki.get("_id") : null;
     if (slideIndex === ROOT_DISCUSSIONS_SLIDE && forumBoardId) {
       const search = forumBoardGroup
         ? `?forumBoardGroup=${encodeURIComponent(forumBoardGroup)}`
         : "";
-      href = `/create/forumBoards/${forumBoardId}/rootDiscussion${search}`;
+      return `/create/forumBoards/${forumBoardId}/rootDiscussion${search}`;
     } else if (slideIndex === ROOT_WIKI_OR_WIKI_SLIDE) {
       if (rootWikiId && forumBoardId) {
-        href = `/create/forumBoards/${forumBoardId}/rootWikis/${rootWikiId}/wiki`;
+        return `/create/forumBoards/${forumBoardId}/rootWikis/${rootWikiId}/wiki`;
+      } else if (forumBoardId) {
+        return `/create/forumBoards/${forumBoardId}/rootWiki`;
       } else {
-        href = `/create/forumBoards/${forumBoardId}/rootWiki`;
+        return null;
       }
-    } else if (slideIndex === ROOT_WIKI_GROUPS_SLIDE) {
-      if (rootWikiId) {
-        href = `/create/rootWikis/${rootWikiId}/rootWikiGroupTree`;
-      }
+    } else if (slideIndex === ROOT_WIKI_GROUPS_SLIDE && rootWikiId) {
+      return `/create/rootWikis/${rootWikiId}/rootWikiGroupTree`;
+    } else {
+      return null;
     }
-    return href;
   };
 
   getActionButtonIconType = slideIndex => {
@@ -164,8 +161,9 @@ class MixedMainTabs extends React.Component {
       slideIndex === ROOT_WIKI_GROUPS_SLIDE
     ) {
       return "add";
+    } else {
+      return "create";
     }
-    return "create";
   };
 
   getActionButtonProps = (slideIndex, forumBoardGroup) => {

@@ -79,12 +79,8 @@ const DarkThemeProvider = props => {
 
 class AppNavDrawer extends React.Component {
   static propTypes = {
-    onChangeDrawer: PropTypes.func,
-    open: PropTypes.bool.isRequired
-  };
-
-  static defaultProps = {
-    onChangeDrawer: null
+    open: PropTypes.bool.isRequired,
+    onChangeDrawer: PropTypes.func
   };
 
   shouldComponentUpdate(nextProps, nextState) {

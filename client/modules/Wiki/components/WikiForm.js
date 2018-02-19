@@ -32,8 +32,6 @@ class WikiForm extends React.Component {
 
   static defaultProps = {
     name: "",
-    content: null,
-    rootWikiGroupTree: null,
     nameReadOnly: false,
     editorEnableAutoFullScreen: true
   };

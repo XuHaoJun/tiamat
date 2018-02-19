@@ -13,9 +13,7 @@ import { getForumBoardById } from "../ForumBoardReducer";
 class ForumBoardGroupsList extends React.Component {
   static defaultProps = {
     groups: List(),
-    defaultAllGroup: "全部",
-    forumBoardId: "",
-    forumBoard: null
+    defaultAllGroup: "全部"
   };
 
   constructor(props) {

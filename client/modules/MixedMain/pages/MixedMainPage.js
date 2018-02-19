@@ -1,12 +1,9 @@
 import React from "react";
 import qs from "qs";
 import { fromJS } from "immutable";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Helmet from "react-helmet";
 import { hot } from "react-hot-loader";
-import _omitBy from "lodash/omitBy";
-import _isEmpty from "lodash/isEmpty";
 
 import compose from "recompose/compose";
 import { withStyles } from "material-ui-next/styles";

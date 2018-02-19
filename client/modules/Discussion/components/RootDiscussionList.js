@@ -37,7 +37,6 @@ class RootDiscussionList extends React.Component {
   };
 
   static defaultProps = {
-    forumBoardId: "",
     forumBoardGroup: FORUM_BOARD_GROUP_ALL,
     dataSource: Set(),
     isFirstRender: false

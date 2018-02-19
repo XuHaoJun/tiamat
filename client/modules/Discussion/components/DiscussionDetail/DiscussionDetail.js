@@ -85,20 +85,12 @@ class DiscussionDetail extends React.Component {
     parentDiscussion: PropTypes.object,
     nextParentDiscussion: PropTypes.object,
     prevParentDiscussion: PropTypes.object,
-    forumBoardId: PropTypes.string,
-    forumBoard: PropTypes.object,
     childDiscussions: PropTypes.object,
     semanticReplaceMode: PropTypes.bool
   };
 
   static defaultProps = {
-    forumBoardId: "",
-    forumBoard: null,
-    parentDiscussion: null,
-    childDiscussions: null,
-    semanticReplaceMode: false,
-    nextParentDiscussion: null,
-    prevParentDiscussion: null
+    semanticReplaceMode: false
   };
 
   render() {

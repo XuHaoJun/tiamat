@@ -6,11 +6,6 @@ import { getRootWiki } from "../RootWikiReducer";
 import Editor from "../../../components/Slate/Editor";
 
 class RootWikiDetail extends React.Component {
-  static defaultProps = {
-    rootWikiId: "",
-    rootWiki: undefined
-  };
-
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
@@ -33,11 +28,11 @@ class RootWikiDetail extends React.Component {
   }
 }
 
-function mapStateToProps(store, props) {
+function mapStateToProps(state, props) {
   const { rootWikiId, rootWiki } = props;
   return {
     rootWikiId,
-    rootWiki: rootWiki || getRootWiki(store, rootWikiId)
+    rootWiki: rootWiki || getRootWiki(state, rootWikiId)
   };
 }
 

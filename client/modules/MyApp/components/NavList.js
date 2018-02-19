@@ -120,11 +120,6 @@ class NavList extends React.Component {
     user: PropTypes.object
   };
 
-  static defaultProps = {
-    onChangeDrawer: null,
-    user: null
-  };
-
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);

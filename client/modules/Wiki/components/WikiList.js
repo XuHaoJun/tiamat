@@ -29,7 +29,6 @@ class WikiList extends React.Component {
   };
 
   static defaultProps = {
-    rootWikiId: "",
     rootWikiGroupTree: "all",
     dataSource: Set()
   };

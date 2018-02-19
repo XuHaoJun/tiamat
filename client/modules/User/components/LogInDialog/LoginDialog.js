@@ -15,8 +15,7 @@ class LoginDialog extends React.Component {
 
   static defaultProps = {
     open: false,
-    onRequestClose: undefined,
-    loginFormProps: undefined
+    loginFormProps: {}
   };
 
   setFormRef = form => {

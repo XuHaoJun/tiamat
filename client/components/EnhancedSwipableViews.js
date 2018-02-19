@@ -16,9 +16,7 @@ class EnhancedSwipableViews extends React.Component {
   static defaultProps = {
     disableOnDrawerStart: true,
     disableLazyLoading: true,
-    resistance: true,
-    scrollKey: "",
-    scrollBehaviorShouldUpdateScroll: undefined
+    resistance: true
   };
 
   static contextTypes = {

@@ -51,8 +51,7 @@ class AddImageDialog extends React.PureComponent {
   };
 
   static defaultProps = {
-    title: "插入圖片",
-    onRequestClose: null
+    title: "插入圖片"
   };
 
   constructor(props) {

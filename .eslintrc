@@ -1,15 +1,7 @@
 {
-  "extends": [
-    "airbnb",
-    "plugin:ava/recommended",
-    "prettier",
-    "prettier/react"
-  ],
+  "extends": ["airbnb", "plugin:ava/recommended", "prettier", "prettier/react"],
   "parser": "babel-eslint",
-  "plugins": [
-    "ava",
-    "prettier"
-  ],
+  "plugins": ["ava", "prettier"],
   "env": {
     "es6": true,
     "browser": true,
@@ -32,12 +24,12 @@
     "no-underscore-dangle": 0,
     "max-len": [1, 80, 4],
     "arrow-body-style": [0],
-    "react/jsx-no-bind": [0],
     "import/no-unresolved": [0],
     "import/no-named-as-default": [0],
     "import/imports-first": [0],
     "import/no-extraneous-dependencies": [0],
     "import/first": [0],
+    "react/jsx-no-bind": [0],
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "react/jsx-space-before-closing": [0],
     "react/jsx-first-prop-new-line": [0],
@@ -52,6 +44,7 @@
     "react/no-string-refs": [1],
     "react/no-find-dom-node": [0],
     "react/jsx-tag-spacing": [0],
+    "react/require-default-props": [0],
     "jsx-a11y/href-no-hash": [0],
     "jsx-a11y/no-static-element-interactions": [1],
     "jsx-a11y/img-has-alt": [0],

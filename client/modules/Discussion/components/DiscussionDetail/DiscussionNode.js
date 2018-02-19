@@ -44,7 +44,6 @@ const styles = {
 
 class DiscussionNode extends React.Component {
   static defaultProps = {
-    discussion: null,
     semanticReplaceMode: false,
     semanticRules: Set(),
     divider: false

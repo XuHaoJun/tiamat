@@ -41,11 +41,6 @@ export const styles = theme => {
 };
 
 class WikiDetailPage extends React.Component {
-  static defaultProps = {
-    wikiId: "",
-    wiki: null
-  };
-
   static getInitialAction({ routerProps }) {
     return async (dispatch, getState) => {
       const _setHeaderTitle = () => {

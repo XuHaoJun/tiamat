@@ -175,9 +175,7 @@ const _rootWikiGroupTree = fromJS([
 
 class RootWikiGroupTreeList extends React.Component {
   static defaultProps = {
-    rootWikiId: "",
-    baseRootWikiGroupTree: _rootWikiGroupTree,
-    queryRootWikiGroupTree: null
+    baseRootWikiGroupTree: _rootWikiGroupTree
   };
 
   constructor(props) {

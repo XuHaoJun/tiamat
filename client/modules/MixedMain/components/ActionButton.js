@@ -20,8 +20,7 @@ class ActionButton extends React.PureComponent {
 
   static defaultProps = {
     isOpen: true,
-    iconType: "create",
-    href: ""
+    iconType: "create"
   };
 
   renderButton = () => {
@@ -54,18 +53,22 @@ class ActionButton extends React.PureComponent {
         />
       );
     } else {
-      return (
-        <Button
-          {...other}
-          variant="fab"
-          style={finalStyle}
-          component={Link}
-          to={href}
-          color="primary"
-        >
-          {iconType === "create" ? <CreateIcon /> : <AddIcon />}
-        </Button>
-      );
+      if (href) {
+        return (
+          <Button
+            {...other}
+            variant="fab"
+            style={finalStyle}
+            component={Link}
+            to={href}
+            color="primary"
+          >
+            {iconType === "create" ? <CreateIcon /> : <AddIcon />}
+          </Button>
+        );
+      } else {
+        return null;
+      }
     }
   };
 
