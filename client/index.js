@@ -32,6 +32,13 @@ import {
 } from "./modules/MyApp/MyAppActions";
 import { defaultInitialState as defaultHistoryInitialState } from "./modules/History/HistoryReducer";
 
+import { MyAppState } from "./modules/MyApp/MyAppReducer";
+import { UserState } from "./modules/User/UserReducer";
+import { RootWikiState } from "./modules/RootWiki/RootWikiReducer";
+import { WikiState } from "./modules/Wiki/WikiReducer";
+import { DiscussionState } from "./modules/Discussion/DiscussionReducer";
+import { ForumBoardState } from "./modules/ForumBoard/ForumBoardReducer";
+
 const debug = Debug("app:main");
 
 function initDebug() {
@@ -49,10 +56,14 @@ function initAnalytics() {
   const { code } = googleAnalyticsConfig;
   if (process.env.NODE_ENV === "production" && Boolean(code)) {
     Debug("app:googleAnalytics")(`googleAnalytics code: ${code}`);
-    import(/* webpackChunkName: "react-ga" */ "react-ga").then(module => {
-      const ReactGA = module.default;
-      ReactGA.initialize(code);
-    });
+    return import(/* webpackChunkName: "react-ga" */ "react-ga").then(
+      module => {
+        const ReactGA = module.default;
+        ReactGA.initialize(code);
+      }
+    );
+  } else {
+    return Promise.resolve(null);
   }
 }
 
@@ -69,26 +80,22 @@ function defaultBrowserUserAgent(state) {
   }
 }
 
-function deserializeJSONState(jsonState) {
-  const initState = Object.assign({}, jsonState);
-  const needImmutableObjectNames = [
-    "app",
-    "oauth2Client",
-    "user",
-    "wikis",
-    "rootWikis",
-    "errors",
-    "forumBoards",
-    "discussions",
-    "semanticRules",
-    "sockets",
-    "search",
-    "template"
-  ];
-  for (const field of needImmutableObjectNames) {
-    initState[field] = fromJS(jsonState[field]);
-  }
-  return initState;
+function deserializeJSONState(json) {
+  return {
+    ...json,
+    app: new MyAppState(json.app),
+    oauth2Client: fromJS(json.oauth2Client),
+    user: new UserState(json.user),
+    wikis: new WikiState(json.wikis),
+    rootWikis: new RootWikiState(json.rootWikis),
+    errors: fromJS(json.errors),
+    forumBoards: new ForumBoardState(json.forumBoards),
+    discussions: new DiscussionState(json.discussions),
+    semanticRules: fromJS(json.semanticRules),
+    sockets: fromJS(json.sockets),
+    search: fromJS(json.search),
+    template: fromJS(json.template)
+  };
 }
 
 function isLoadableComponent(component) {
@@ -128,8 +135,6 @@ async function main() {
     initDebug();
   }
 
-  const loadingDBLibPromise = loadDBAdapter();
-
   const loadInitialPagePromise = loadInitialPage();
 
   const initState = deserializeJSONState(window.__INITIAL_STATE__);
@@ -146,17 +151,19 @@ async function main() {
   const userAgent = defaultBrowserUserAgent(store.getState());
   store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
 
-  await loadInitialPagePromise;
-
   const mountElementId = "root";
   const mountApp = document.getElementById(mountElementId);
   debug(`mount application element id: ${mountElementId}`);
+
+  await loadInitialPagePromise;
 
   debug("first hydrate start");
 
   await hydrateAsync(<App store={store} />, mountApp);
 
   debug("first hydrate end");
+
+  const loadingDBLibPromise = loadDBAdapter();
 
   // client-slide update responsive state by window.
   store.dispatch(calculateResponsiveState(window));
@@ -168,7 +175,7 @@ async function main() {
   const db = connectDB();
   if (db) {
     const initPs = initWithStore(db, store);
-    Promise.all(initPs)
+    await Promise.all(initPs)
       .then(() => {
         store.dispatch(setDBisInitialized(null, true));
       })
@@ -177,27 +184,16 @@ async function main() {
       });
   }
 
-  initAnalytics();
+  const initAnalyticsPromise = initAnalytics();
 
   const io = await import(/* webpackChunkName: "socket.io-client" */ "socket.io-client");
   store.dispatch(setSocketIO(io));
+
+  await initAnalyticsPromise;
 
   debug("Application ready!");
 
   return { store, mountApp };
 }
 
-function ready(callback) {
-  // in case the document is already rendered
-  if (document.readyState != "loading") callback();
-  else if (document.addEventListener)
-    // modern browsers
-    document.addEventListener("DOMContentLoaded", callback);
-  else
-    // IE <= 8
-    document.attachEvent("onreadystatechange", () => {
-      if (document.readyState == "complete") callback();
-    });
-}
-
-ready(() => main());
+main();

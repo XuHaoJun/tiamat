@@ -11,7 +11,7 @@ import {
   SET_CURRENT_PAGE
 } from "./MyAppActions";
 
-export function getDefaultNetworkStatus() {
+export function getNetworkStatus() {
   if (process.browser) {
     return window.navigator.onLine ? "online" : "offline";
   } else {
@@ -19,25 +19,54 @@ export function getDefaultNetworkStatus() {
   }
 }
 
-const initialState = Immutable.fromJS({
-  isFirstRender: true,
-  currentPage: "",
-  networkStatus: getDefaultNetworkStatus(),
-  db: {
-    isInitialized: false
-  },
-  ui: {
-    pageThemeOptions: {},
-    header: {
-      title: "Tiamat"
-    },
-    sendButtonProps: {
-      show: false,
-      loading: false,
-      onClick: () => {}
-    }
-  }
+const DB = Immutable.Record({
+  isInitialized: false
 });
+
+const HeaderProps = Immutable.Record({
+  title: "Tiamat"
+});
+
+const SendButtonProps = Immutable.Record({
+  show: false,
+  loading: false,
+  onClick: undefined
+});
+
+class UI extends Immutable.Record({
+  header: new HeaderProps(),
+  sendButtonProps: new SendButtonProps()
+}) {
+  constructor(args = {}) {
+    const record = super({
+      ...args,
+      header: new HeaderProps(args.header),
+      sendButtonProps: new SendButtonProps(args.sendButtonProps)
+    });
+    return record;
+  }
+}
+
+const MyAppStateBase = Immutable.Record({
+  currentPage: undefined,
+  isFirstRender: true,
+  networkStatus: getNetworkStatus(),
+  db: new DB(),
+  ui: new UI()
+});
+
+export class MyAppState extends MyAppStateBase {
+  constructor(args = {}) {
+    const record = super({
+      ...args,
+      db: new DB(args.db),
+      ui: new UI(args.ui)
+    });
+    return record;
+  }
+}
+
+const initialState = new MyAppState();
 
 const AppReducer = (state = initialState, action) => {
   switch (action.type) {

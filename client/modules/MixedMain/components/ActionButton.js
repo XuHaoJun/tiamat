@@ -67,7 +67,11 @@ class ActionButton extends React.PureComponent {
           </Button>
         );
       } else {
-        return null;
+        return (
+          <Button {...other} variant="fab" style={finalStyle} color="primary">
+            {iconType === "create" ? <CreateIcon /> : <AddIcon />}
+          </Button>
+        );
       }
     }
   };

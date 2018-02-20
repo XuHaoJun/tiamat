@@ -1,4 +1,4 @@
-import { fromJS, Set, List } from "immutable";
+import { fromJS, Set, Record, is } from "immutable";
 import memoize from "fast-memoize";
 import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
 
@@ -12,35 +12,92 @@ import {
   SET_UPSERT_DISCUSSION_PAGE_FORM
 } from "./DiscussionActions";
 
-// Initial State
-const initialState = fromJS({
-  ui: {
+const UserBasicInfo = Record({
+  _id: null,
+  displayName: null,
+  avatarURL: null
+});
+
+const DISCUSSION_RECORD_DEFAULT = {
+  _id: null,
+  title: "",
+  author: null,
+  authorBasicInfo: null,
+  lastChildComments: null,
+  lastChildCommentCount: 0,
+  content: null,
+  isRoot: false,
+  parentDiscussion: null,
+  replayTo: null,
+  childDiscussionCount: 0,
+  forumBoardGroup: null,
+  tags: new Set(),
+  forumBoard: null,
+  titleUpdatedAt: null,
+  repliedAt: null,
+  contentUpdatedAt: null,
+  createdAt: null,
+  updatedAt: null
+};
+
+export class Discussion extends Record(DISCUSSION_RECORD_DEFAULT) {
+  constructor(json = {}) {
+    const record = super({
+      ...json,
+      content: json.content ? fromJS(json.content) : null,
+      authorBasicInfo: json.authorBasicInfo
+        ? new UserBasicInfo(json.authorBasicInfo)
+        : null,
+      tags: new Set(json.tags),
+      titleUpdatedAt: new Date(json.titleUpdatedAt),
+      repliedAt: new Date(json.repliedAt),
+      contentUpdatedAt: new Date(json.contentUpdatedAt),
+      createdAt: new Date(json.createdAt),
+      updatedAt: new Date(json.updatedAt)
+    });
+    return record;
+  }
+}
+
+const DISCUSSION_STATE_RECORD_DEFAULT = {
+  ui: fromJS({
     CreateRootDiscussionPage: {
       forms: {
         // ${forumBoardId}: {   title: '',   content: null  }
       }
     }
-  },
-  data: Set()
-});
+  }),
+  data: new Set()
+};
+
+export class DiscussionState extends Record(DISCUSSION_STATE_RECORD_DEFAULT) {
+  constructor({ ui, data = [] } = {}) {
+    const record = super({
+      ui: fromJS(ui),
+      data: new Set(data.map(d => new Discussion(d)))
+    });
+    return record;
+  }
+}
+
+// Initial State
+const initialState = new DiscussionState();
 
 const DiscussionReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_DISCUSSION:
     case ADD_DISCUSSIONS:
-      if (!action.discussions && !action.discussion) {
-        return state;
-      }
       const newDiscussions = action.discussions
-        ? fromJS(action.discussions).toSet()
-        : Set([fromJS(action.discussion)]);
-      const data = state
-        .get("data")
-        .union(newDiscussions)
-        .groupBy(ele => ele.get("_id"))
-        .map(eles => defaultSameIdElesMax(eles))
-        .toSet();
-      return state.set("data", data);
+        ? new Set(action.discussions.map(d => new Discussion(d)))
+        : new Set([new Discussion(action.discussion)]);
+      const unionData = state.get("data").union(newDiscussions);
+      const nextData = !is(unionData, state.data)
+        ? unionData
+            .groupBy(ele => ele.get("_id"))
+            .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
+            .toSet()
+        : unionData;
+      return state.set("data", nextData);
 
     case CLEAR_DISCUSSIONS:
       return state.set("data", Set());
@@ -62,12 +119,6 @@ const DiscussionReducer = (state = initialState, action) => {
       return state.set("ui", fromJS(action.ui));
 
     default:
-      const list2set = ["data"];
-      for (const field of list2set) {
-        if (List.isList(state.get(field))) {
-          return state.set(field, state.get(field).toSet());
-        }
-      }
       return state;
   }
 };

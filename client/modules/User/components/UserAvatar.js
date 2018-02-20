@@ -7,24 +7,22 @@ import GuestPersonIcon from "material-ui-icons-next/Person";
 
 function getTextOrSrcOrIcon(user) {
   if (user) {
-    const { avatarURL } = user;
+    const { avatarURL, displayName } = user;
     if (avatarURL) {
       return { src: avatarURL };
-    } else {
+    } else if (displayName) {
       let text;
-      const { displayName, email } = user;
-      text = displayName || email || "";
-      if (text) {
-        const chineseRegExp = new RegExp("^[\u4E00-\uFA29]*$");
-        if (chineseRegExp.test(text.substring(0, 2))) {
-          text = text.substring(0, 2);
-        } else {
-          text = text.substring(0, 1);
-        }
+      const chineseRegExp = new RegExp("^[\u4E00-\uFA29]*$");
+      if (chineseRegExp.test(displayName.substring(0, 2))) {
+        text = displayName.substring(0, 2);
+      } else {
+        text = displayName.substring(0, 1);
       }
       return {
         text
       };
+    } else {
+      return { icon: <GuestPersonIcon /> };
     }
   } else {
     return { icon: <GuestPersonIcon /> };

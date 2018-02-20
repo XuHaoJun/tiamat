@@ -1,41 +1,80 @@
-import { fromJS, Set, List } from "immutable";
+import { fromJS, Set, is, Record } from "immutable";
 import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
 import { ADD_WIKI, ADD_WIKIS, SET_UI_WIKI_FORM } from "./WikiActions";
 
-// Initial State
-const initialState = fromJS({
-  ui: {
+const WIKI_RECORD_DEFAULT = {
+  _id: null,
+  name: null,
+  content: null,
+  isNickName: false,
+  rootWiki: null,
+  wikiDataForm: null,
+  data: null,
+  rootWikiGroupTree: null,
+  tags: new Set(),
+  popularityCounter: 0,
+  createdAt: null,
+  updatedAt: null
+};
+
+export class Wiki extends Record(WIKI_RECORD_DEFAULT) {
+  constructor(json = {}) {
+    const record = super({
+      ...json,
+      content: fromJS(json.content),
+      data: fromJS(json.data),
+      rootWikiGroupTree: fromJS(json.rootWikiGroupTree),
+      tags: new Set(json.tags),
+      createdAt: new Date(json.createdAt),
+      updatedAt: new Date(json.updatedAt)
+    });
+    return record;
+  }
+}
+
+const WIKI_STATE_RECORD_DEFAULT = {
+  ui: fromJS({
     form: {
       type: "",
       content: null
     }
-  },
-  data: Set()
-});
+  }),
+  data: new Set()
+};
+
+export class WikiState extends Record(WIKI_STATE_RECORD_DEFAULT) {
+  constructor({ ui, data = [] } = {}) {
+    const record = super({
+      ui: fromJS(ui),
+      data: new Set(data.map(d => new Wiki(d)))
+    });
+    return record;
+  }
+}
+
+// Initial State
+const initialState = new WikiState();
 
 const WikiReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_WIKI:
     case ADD_WIKIS:
-      if (!action.wiki && !action.wikis) {
-        return state;
-      }
       const newWikis = action.wikis
-        ? fromJS(action.wikis).toSet()
-        : Set([fromJS(action.wiki)]);
-      const data = state
-        .get("data")
-        .union(newWikis)
-        .groupBy(ele => ele.get("_id"))
-        .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
-        .toSet();
-      return state.set("data", data);
+        ? new Set(action.wikis.map(d => new Wiki(d)))
+        : new Set([new Wiki(action.wiki)]);
+      const unionData = state.get("data").union(newWikis);
+      const nextData = !is(unionData, state.data)
+        ? unionData
+            .groupBy(ele => ele.get("_id"))
+            .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
+            .toSet()
+        : unionData;
+      return state.set("data", nextData);
+
     case SET_UI_WIKI_FORM:
       return state.setIn(["ui", "form"], fromJS(action.form));
+
     default:
-      if (List.isList(state.get("data"))) {
-        return state.set("data", state.get("data").toSet());
-      }
       return state;
   }
 };

@@ -16,7 +16,7 @@ export function addDiscussion(discussion) {
   return { type: ADD_DISCUSSION, discussion };
 }
 
-export function addDiscussions(discussions) {
+export function addDiscussions(discussions = []) {
   return { type: ADD_DISCUSSIONS, discussions };
 }
 

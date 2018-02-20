@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
+import _throttle from "lodash/throttle";
 
 import ScrollContainerHoc from "../ScrollContainer/ScrollContainerHoc";
 
@@ -133,12 +134,17 @@ function FlipMoveHoc(Component) {
 
 class LoadingListItemBase extends React.Component {
   static defaultProps = {
-    enableMountRequestMore: true
+    enableMountRequestMore: true,
+    throttle: 250
   };
 
-  state = {
-    loading: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false
+    };
+    this.handleRequestMore = _throttle(this._handleRequestMore, props.throttle);
+  }
 
   componentDidMount() {
     if (this.props.enableMountRequestMore && !this.props.isFirstRender) {
@@ -156,7 +162,11 @@ class LoadingListItemBase extends React.Component {
     }
   }
 
-  handleRequestMore = () => {
+  componentWillUnmount() {
+    this.handleRequestMore.cancel();
+  }
+
+  _handleRequestMore = () => {
     if (this.props.onRequestMore) {
       this.setState({ loading: true }, () => {
         const reason = "lazyLoad";
