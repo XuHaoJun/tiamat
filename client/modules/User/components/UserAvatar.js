@@ -39,7 +39,7 @@ const UserAvatar = props => {
           <GuestPersonIcon />
         </Avatar>
       );
-      const displayName = user.get("displayName");
+      const { displayName } = user;
       return (
         <LazyLoad height={32} once={true} placeholder={placeholder}>
           <Avatar alt={displayName} src={src} {...other} />

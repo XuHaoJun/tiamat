@@ -87,8 +87,8 @@ module.exports = {
         ]
       },
       {
-        test: /\.jsx*$/,
-        exclude: [/node_modules/, /.+\.config.js/],
+        test: /\.jsx?$/,
+        exclude: [/node_modules/, /webpack\.config\.?.*\.js/],
         loader: "babel-loader"
       },
       {

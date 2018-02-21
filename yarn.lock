@@ -913,10 +913,6 @@ babel-plugin-espower@^2.3.2:
     espurify "^1.6.0"
     estraverse "^4.1.1"
 
-babel-plugin-extensible-destructuring@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-extensible-destructuring/-/babel-plugin-extensible-destructuring-4.1.0.tgz#f73412fa110b773500c743dd489bb46a3ce02238"
-
 babel-plugin-lodash@^3.2.11:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/babel-plugin-lodash/-/babel-plugin-lodash-3.3.2.tgz#da3a5b49ba27447f54463f6c4fa81396ccdd463f"

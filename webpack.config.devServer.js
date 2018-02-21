@@ -26,32 +26,10 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
+        test: /\.jsx?$/,
+        exclude: [/node_modules/, /webpack\.config\.?.*\.js/],
         use: {
-          loader: "babel-loader",
-          options: {
-            babelrc: false,
-            cacheDirectory: true,
-            presets: [
-              [
-                "es2015",
-                {
-                  modules: false
-                }
-              ],
-              "react",
-              "stage-0"
-            ],
-            plugins: [
-              [
-                "extensible-destructuring",
-                { mode: "optout", impl: "immutable" }
-              ],
-              "react-hot-loader/babel",
-              "react-loadable/babel"
-            ]
-          }
+          loader: "babel-loader"
         }
       },
       {

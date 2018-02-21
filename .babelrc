@@ -4,8 +4,6 @@
     "react-hot-loader/babel",
     "lodash",
     "transform-runtime",
-    "react-loadable/babel", [
-      "extensible-destructuring", { "mode": "optout", "impl": "immutable" }
-    ]
+    "react-loadable/babel"
   ]
 }
