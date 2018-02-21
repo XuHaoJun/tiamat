@@ -5,7 +5,7 @@ import {
   ADD_USER,
   ADD_USERS,
   REMOVE_CURRENT_USER,
-  SET_CURRENT_USER,
+  SET_CURRENT_USER_EMAIL,
   REMOVE_CURRENT_ACCESS_TOKEN,
   SET_CURRENT_ACCESS_TOKEN
 } from "./UserActions";
@@ -65,7 +65,7 @@ export class User extends Record(USER_RECORD_DEFAULT) {
 
 const USER_STATE_RECORD_DEFAULT = {
   users: new Set(),
-  currentUser: null,
+  currentUserEmail: null,
   currentAccessToken: null
 };
 
@@ -85,8 +85,7 @@ export class UserState extends Record(USER_STATE_RECORD_DEFAULT) {
 // Initial State
 const initialState = new UserState();
 
-const UserReducer = (state = initialState, action) => {
-  const db = connectDB();
+const _UserReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_USER:
     case ADD_USERS:
@@ -100,40 +99,23 @@ const UserReducer = (state = initialState, action) => {
             .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
             .toSet()
         : unionUsers;
-      if (db) {
-        if (!is(state.users, nextUsers)) {
-          db.setItem("users", nextUsers.toJS());
-        }
-      }
       return state.set("users", nextUsers);
 
     case REMOVE_CURRENT_USER:
-      if (db) {
-        db.removeItem("currentUser");
-      }
-      return state.set("currentUser", "");
+      return state.set("currentUserEmail", null);
 
-    // TODO
-    // rename to SET_CURRENT_USER_EMAIL?
-    case SET_CURRENT_USER:
+    case SET_CURRENT_USER_EMAIL:
       const { email } = action;
-      if (db) {
-        db.setItem("currentUser", email);
-      }
-      return state.set("currentUser", email);
+      return state.set("currentUserEmail", email);
 
     case REMOVE_CURRENT_ACCESS_TOKEN:
-      if (db) {
-        db.removeItem("currentAccessToken");
-      }
       return state.set("currentAccessToken", null);
 
     case SET_CURRENT_ACCESS_TOKEN:
       const { currentAccessToken } = action;
-      const accessToken = new AccessToken(currentAccessToken);
-      if (db) {
-        db.setItem("currentAccessToken", accessToken.toJSON());
-      }
+      const accessToken = currentAccessToken
+        ? new AccessToken(currentAccessToken)
+        : null;
       return state.set("currentAccessToken", accessToken);
 
     default:
@@ -141,11 +123,28 @@ const UserReducer = (state = initialState, action) => {
   }
 };
 
+function syncLocalDB(state) {
+  const db = connectDB();
+  if (db) {
+    db.setItem("currentUserEmail", state.currentUserEmail);
+    db.setItem("currentAccessToken", state.currentAccessToken);
+    db.setItem("users", state.users);
+  }
+}
+
+const UserReducer = (state = initialState, action) => {
+  const nextState = _UserReducer(state, action);
+  if (!is(state, nextState)) {
+    syncLocalDB(nextState);
+  }
+  return nextState;
+};
+
 export const getUsers = state => state.user.users;
 
 export const getCurrentUser = state =>
   getUsers(state).find(user => {
-    return user.get("email") === state.user.get("currentUser");
+    return user.email === state.user.currentUserEmail;
   });
 
 export const getCurrentAccessToken = state => state.user.currentAccessToken;

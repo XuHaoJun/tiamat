@@ -4,7 +4,7 @@ import { defaultRequestErrorHandler } from "../Error/ErrorActions";
 
 export const ADD_USER = "ADD_USER";
 export const ADD_USERS = "ADD_USERS";
-export const SET_CURRENT_USER = "SET_CURRENT_USER";
+export const SET_CURRENT_USER_EMAIL = "SET_CURRENT_USER_EMAIL";
 export const REMOVE_CURRENT_USER = "REMOVE_CURRENT_USER";
 export const SET_CURRENT_ACCESS_TOKEN = "SET_CURRENT_ACCESS_TOKEN";
 export const REMOVE_CURRENT_ACCESS_TOKEN = "REMOVE_CURRENT_ACCESS_TOEKN";
@@ -22,8 +22,8 @@ export function removeCurrentUser() {
   return { type: REMOVE_CURRENT_USER };
 }
 
-export function setCurrentUser(email) {
-  return { type: SET_CURRENT_USER, email };
+export function setCurrentUserEmail(email) {
+  return { type: SET_CURRENT_USER_EMAIL, email };
 }
 
 export function removeCurrentAccessToken() {
@@ -92,7 +92,7 @@ export function fetchCurrentUser(accessToken = {}) {
         const { user } = res;
         const { email } = user;
         dispatch(addUser(user));
-        dispatch(setCurrentUser(email));
+        dispatch(setCurrentUserEmail(email));
         return user;
       })
       .catch(err => defaultRequestErrorHandler(dispatch, err));
