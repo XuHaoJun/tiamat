@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Set, is, fromJS } from "immutable";
+import { Set, Map, is, Record } from "immutable";
 import { connect } from "react-redux";
 import { shallowEqualImmutable } from "react-immutable-render-mixin";
 import moment from "moment";
@@ -28,6 +28,12 @@ const styles = theme => ({
 
 const FORUM_BOARD_GROUP_ALL = "_all";
 
+const PageInfo = Record({
+  forumBoardGroup: FORUM_BOARD_GROUP_ALL,
+  limit: 10,
+  page: 1
+});
+
 class RootDiscussionList extends React.Component {
   static propTypes = {
     forumBoardId: PropTypes.string,
@@ -44,8 +50,8 @@ class RootDiscussionList extends React.Component {
 
   constructor(props) {
     super(props);
-    const pageInfo = this.makePageInfo();
-    const pageTable = fromJS({}).merge(pageInfo);
+    const pageInfo = this.createPageInfo();
+    const pageTable = new Map().merge(pageInfo);
     this.state = {
       pageTable,
       sort: "-updatedAt"
@@ -55,7 +61,7 @@ class RootDiscussionList extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.forumBoardGroup !== nextProps.forumBoardGroup) {
       const nextPageTable = this.state.pageTable.merge(
-        this.makePageInfo(nextProps, { page: 1 })
+        this.createPageInfo(nextProps, { page: 1 })
       );
       this.setState({ pageTable: nextPageTable }, () => {
         this.handleRequestMore("top");
@@ -64,7 +70,7 @@ class RootDiscussionList extends React.Component {
   }
 
   getForumBoardGroup = (props = this.props) => {
-    return props.getForumBoardGroup || FORUM_BOARD_GROUP_ALL;
+    return props.forumBoardGroup || FORUM_BOARD_GROUP_ALL;
   };
 
   handleRequestMore = async ({ direction }) => {
@@ -108,17 +114,17 @@ class RootDiscussionList extends React.Component {
     }
   };
 
-  makePageInfo = (props = this.props) => {
+  createPageInfo = (props = this.props) => {
     const { dataSource } = props;
     const forumBoardGroup = this.getForumBoardGroup(props);
     const limit = props.limit || 10;
     const page = props.page || Math.floor(dataSource.count() / limit) || 1;
-    return fromJS({
-      [forumBoardGroup]: {
+    return new Map({
+      [forumBoardGroup]: new PageInfo({
         forumBoardGroup,
         limit,
         page
-      }
+      })
     });
   };
 

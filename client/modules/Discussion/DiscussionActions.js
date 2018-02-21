@@ -37,8 +37,7 @@ export function fetchRootDiscussions(forumBoardId, _opts, reqConfig = {}) {
     page: 1,
     limit: 10,
     sort: "-updatedAt",
-    forumBoardGroup: "",
-    select: { content: 0 }
+    forumBoardGroup: ""
   };
   const opts = Object.assign(defaultFetchRootDiscussionsOptions, _opts);
   const query = qs.stringify(opts);

@@ -95,7 +95,10 @@ class MixedMainPage extends React.Component {
             return Promise.all(
               [
                 fetchForumBoardById(forumBoardId),
-                fetchRootDiscussions(forumBoardId, { forumBoardGroup })
+                fetchRootDiscussions(forumBoardId, {
+                  forumBoardGroup,
+                  select: { content: 0 }
+                })
               ].map(dispatch)
             );
           }
