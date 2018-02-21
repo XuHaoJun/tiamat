@@ -7,7 +7,6 @@ import bodyParser from "body-parser";
 import path from "path";
 import http from "http";
 import socketIO from "socket.io";
-import Promise from "bluebird";
 import Debug from "debug";
 import Loadable from "react-loadable";
 

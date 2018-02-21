@@ -13,7 +13,7 @@ module.exports = {
   devtool: "inline-sourcemap",
 
   entry: {
-    server: ["babel-polyfill", "webpack/hot/poll?300", "./server/server.js"]
+    server: ["webpack/hot/poll?300", "./server/server.js"]
   },
 
   externals: [nodeExternals({ whitelist: [/^webpack\/hot\/poll/] })],
@@ -29,7 +29,19 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: [/node_modules/, /webpack\.config\.?.*\.js/],
         use: {
-          loader: "babel-loader"
+          loader: "babel-loader",
+          options: {
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  targets: {
+                    node: "current"
+                  }
+                }
+              ]
+            ]
+          }
         }
       },
       {

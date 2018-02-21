@@ -41,11 +41,21 @@ module.exports = {
       },
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /webpack\.config\.?.*\.js/],
         use: {
           loader: "babel-loader",
           options: {
-            cacheDirectory: false
+            cacheDirectory: false,
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  targets: {
+                    node: "current"
+                  }
+                }
+              ]
+            ]
           }
         }
       },

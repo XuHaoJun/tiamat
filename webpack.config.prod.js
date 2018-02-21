@@ -104,9 +104,27 @@ module.exports = {
         })
       },
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: "babel-loader"
+        test: /\.jsx?$/,
+        exclude: [/node_modules/, /webpack\.config\.?.*\.js/],
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  useBuiltIns: "usage",
+                  modules: false,
+                  loose: true,
+                  targets: {
+                    chrome: 52,
+                    browsers: ["last 2 versions", "safari 7"]
+                  }
+                }
+              ]
+            ]
+          }
+        }
       },
       {
         test: /\.(jpe?g|gif|png|svg)$/i,
