@@ -1,4 +1,4 @@
-import Immutable from "immutable";
+import { Record } from "immutable";
 import createTheme from "./styles/createTheme";
 
 // Import Actions
@@ -19,21 +19,21 @@ export function getNetworkStatus() {
   }
 }
 
-const DB = Immutable.Record({
+const DB = Record({
   isInitialized: false
 });
 
-const HeaderProps = Immutable.Record({
+const HeaderProps = Record({
   title: "Tiamat"
 });
 
-const SendButtonProps = Immutable.Record({
+const SendButtonProps = Record({
   show: false,
   loading: false,
   onClick: undefined
 });
 
-class UI extends Immutable.Record({
+class UI extends Record({
   header: new HeaderProps(),
   sendButtonProps: new SendButtonProps()
 }) {
@@ -47,7 +47,7 @@ class UI extends Immutable.Record({
   }
 }
 
-const MyAppStateBase = Immutable.Record({
+const MyAppStateBase = Record({
   currentPage: undefined,
   isFirstRender: true,
   networkStatus: getNetworkStatus(),
@@ -56,17 +56,17 @@ const MyAppStateBase = Immutable.Record({
 });
 
 export class MyAppState extends MyAppStateBase {
-  constructor(args = {}) {
-    const record = super({
-      ...args,
-      db: new DB(args.db),
-      ui: new UI(args.ui)
+  static fromJS(obj = {}) {
+    const record = new MyAppState({
+      ...obj,
+      db: new DB(obj.db),
+      ui: new UI(obj.ui)
     });
     return record;
   }
 }
 
-const initialState = new MyAppState();
+const initialState = MyAppState.fromJS();
 
 const AppReducer = (state = initialState, action) => {
   switch (action.type) {

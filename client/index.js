@@ -80,21 +80,21 @@ function defaultBrowserUserAgent(state) {
   }
 }
 
-function deserializeJSONState(json) {
+function decodeInitialState(obj = {}) {
   return {
-    ...json,
-    app: new MyAppState(json.app),
-    oauth2Client: fromJS(json.oauth2Client),
-    user: new UserState(json.user),
-    wikis: new WikiState(json.wikis),
-    rootWikis: new RootWikiState(json.rootWikis),
-    errors: fromJS(json.errors),
-    forumBoards: new ForumBoardState(json.forumBoards),
-    discussions: new DiscussionState(json.discussions),
-    semanticRules: fromJS(json.semanticRules),
-    sockets: fromJS(json.sockets),
-    search: fromJS(json.search),
-    template: fromJS(json.template)
+    ...obj,
+    app: MyAppState.fromJS(obj.app),
+    oauth2Client: fromJS(obj.oauth2Client),
+    user: UserState.fromJS(obj.user),
+    wikis: WikiState.fromJS(obj.wikis),
+    rootWikis: RootWikiState.fromJS(obj.rootWikis),
+    errors: fromJS(obj.errors),
+    forumBoards: ForumBoardState.fromJS(obj.forumBoards),
+    discussions: DiscussionState.fromJS(obj.discussions),
+    semanticRules: fromJS(obj.semanticRules),
+    sockets: fromJS(obj.sockets),
+    search: fromJS(obj.search),
+    template: fromJS(obj.template)
   };
 }
 
@@ -137,7 +137,7 @@ async function main() {
 
   const loadInitialPagePromise = loadInitialPage();
 
-  const initState = deserializeJSONState(window.__INITIAL_STATE__);
+  const initState = decodeInitialState(window.__INITIAL_STATE__);
 
   // for react-router-redux
   initState.history = defaultHistoryInitialState;

@@ -1,37 +1,28 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Set, OrderedSet } from "immutable";
 import { shallowEqualImmutable } from "react-immutable-render-mixin";
 import compose from "recompose/compose";
 import { Link } from "react-router-dom";
 import ScrollContainerHoc from "../../../../components/ScrollContainer/ScrollContainerHoc";
 
-import classNames from "classnames";
 import { withStyles } from "material-ui-next/styles";
 import Typography from "material-ui-next/Typography";
+import Paper from "material-ui-next/Paper";
 import Button from "material-ui-next/Button";
-import Grid from "material-ui-next/Grid";
 import Divider from "material-ui-next/Divider";
+import Grid from "material-ui-next/Grid";
 import CenterCircularProgress from "../../../../components/CenterCircularProgress";
 import DiscussionNode from "./DiscussionNode";
 import ReplyButton from "./ReplyButton";
 
 import {
-  getDiscussions,
   getDiscussionById,
-  getChildDiscussions
+  getChildDiscussions,
+  getDiscussionByDirection
 } from "../../DiscussionReducer";
 import { getForumBoardById } from "../../../ForumBoard/ForumBoardReducer";
 import { getSemanticRulesByRootWikiId } from "../../../SemanticRule/SemanticRuleReducer";
-
-const styles = {
-  root: {
-    width: "100%",
-    height: "100%",
-    overflow: "auto"
-  }
-};
 
 const GotoDiscussionButton = (
   { direction = "next", discussion, ...other } = {
@@ -39,8 +30,8 @@ const GotoDiscussionButton = (
     discussion: null
   }
 ) => {
-  const id = discussion ? discussion.get("_id") : "";
-  const title = discussion ? discussion.get("title") : "";
+  const id = discussion ? discussion._id : "";
+  const title = discussion ? discussion.title : "\u00A0";
   const to = id ? `/discussions/${id}` : "";
   const LinkProps = to
     ? {
@@ -67,21 +58,40 @@ const GotoDiscussionButton = (
             {direction === "next" ? "下一篇" : "上一篇"}
           </Typography>
         </Grid>
-        {title ? (
-          <Grid item xs zeroMinWidth>
-            <Typography noWrap variant="caption">
-              {title}
-            </Typography>
-          </Grid>
-        ) : null}
+        <Grid item xs zeroMinWidth>
+          <Typography noWrap variant="caption">
+            {title}
+          </Typography>
+        </Grid>
       </Grid>
     </Button>
   );
 };
 
+const styles = theme => {
+  const { breakpoints } = theme;
+  return {
+    title: {
+      padding: 16
+    },
+    parentDiscussionInner: {
+      [breakpoints.up("sm")]: {
+        padding: "0 8%"
+      }
+    },
+    childDiscussionsInner: {
+      marginTop: 16,
+      [breakpoints.up("sm")]: {
+        padding: "0 8%"
+      }
+    }
+  };
+};
+
 class DiscussionDetail extends React.Component {
   static propTypes = {
     parentDiscussionId: PropTypes.string.isRequired,
+    forumBoardId: PropTypes.string.isRequired,
     parentDiscussion: PropTypes.object,
     nextParentDiscussion: PropTypes.object,
     prevParentDiscussion: PropTypes.object,
@@ -95,6 +105,10 @@ class DiscussionDetail extends React.Component {
 
   render() {
     const {
+      // ui
+      classes,
+      //
+      forumBoardId,
       parentDiscussion,
       parentDiscussionId,
       childDiscussions,
@@ -106,61 +120,72 @@ class DiscussionDetail extends React.Component {
     if (!parentDiscussion) {
       return <CenterCircularProgress />;
     }
-    const forumBoardId = parentDiscussion.get("forumBoard");
-    const discussions = OrderedSet()
-      .add(parentDiscussion)
-      .union(childDiscussions)
-      .sortBy(d => {
-        return new Date(d.get("updatedAt")).getTime();
-      });
-    const { classes } = this.props;
     return (
       <React.Fragment>
-        <div className={classNames(classes.root, this.props.className)}>
-          <div style={{ maxWidth: "100%" }}>
-            <Grid
-              container
-              direction="row"
-              justify="flex-start"
-              alignItems="center"
-              spacing={0}
-            >
-              <Grid item>
-                <GotoDiscussionButton
-                  direction="prev"
-                  discussion={prevParentDiscussion}
-                />
-              </Grid>
-              <Grid item>
-                <Button
-                  component={Link}
-                  to={`/forumBoards/${forumBoardId}/rootDiscussions`}
-                >
-                  返回列表
-                </Button>
-              </Grid>
-              <Grid item>
-                <GotoDiscussionButton
-                  direction="next"
-                  discussion={nextParentDiscussion}
-                />
-              </Grid>
-            </Grid>
-          </div>
-          <h2>{parentDiscussion.get("title")}</h2>
-          <Divider />
-          {discussions.map(d => {
-            return (
-              <DiscussionNode
-                key={d.get("_id")}
-                discussion={d}
-                semanticRules={semanticRules}
-                onSemanticToggle={this.props.onSemanticToggle}
-                semanticReplaceMode={semanticReplaceMode}
-                divider={true}
+        <div>
+          <Grid
+            container
+            direction="row"
+            justify="flex-start"
+            alignItems="center"
+            spacing={0}
+          >
+            <Grid item>
+              <GotoDiscussionButton
+                direction="prev"
+                discussion={prevParentDiscussion}
               />
-            );
-          })}
+            </Grid>
+            <Grid item>
+              <Button
+                component={Link}
+                to={`/forumBoards/${forumBoardId}/rootDiscussions`}
+              >
+                返回列表
+              </Button>
+            </Grid>
+            <Grid item>
+              <GotoDiscussionButton
+                direction="next"
+                discussion={nextParentDiscussion}
+              />
+            </Grid>
+          </Grid>
+          <Paper className={classes.parentDiscussionInner}>
+            <Typography
+              variant="headline"
+              component="h1"
+              className={classes.title}
+            >
+              {parentDiscussion.title}
+            </Typography>
+            <Divider />
+            <DiscussionNode
+              elevation={0}
+              discussion={parentDiscussion}
+              semanticRules={semanticRules}
+              onSemanticToggle={this.props.onSemanticToggle}
+              semanticReplaceMode={semanticReplaceMode}
+            />
+          </Paper>
+          <div className={classes.childDiscussionsInner}>
+            <Typography variant="subheading" gutterBottom>
+              {childDiscussions.size}
+              {"\u00A0"}回覆
+            </Typography>
+            {childDiscussions.map((x, index) => {
+              return (
+                <DiscussionNode
+                  key={x._id}
+                  index={index}
+                  discussion={x}
+                  semanticRules={semanticRules}
+                  onSemanticToggle={this.props.onSemanticToggle}
+                  semanticReplaceMode={semanticReplaceMode}
+                />
+              );
+            })}
+          </div>
         </div>
         <ReplyButton
           to={`/create/rootDiscussions/${parentDiscussionId}/childDiscussion`}
@@ -170,60 +195,24 @@ class DiscussionDetail extends React.Component {
   }
 }
 
-// TODO
-// rename and move to discussion reducer and memoized.
-function getDiscussionByDirection(
-  discussions,
-  parentDiscussion,
-  direction = "next",
-  timestampField = "updatedAt"
-) {
-  const found = discussions
-    .toOrderedSet()
-    .filter(d => {
-      const _id = d.get("_id");
-      const forumBoard = d.get("forumBoard");
-      const isRoot = d.get("isRoot");
-      return (
-        _id !== parentDiscussion.get("_id") &&
-        forumBoard === parentDiscussion.get("forumBoard") &&
-        isRoot === parentDiscussion.get("isRoot")
-      );
-    })
-    .sortBy(d => {
-      return direction === "next"
-        ? -1 * new Date(d.get("updatedAt")).getTime()
-        : new Date(d.get("updatedAt")).getTime();
-    })
-    .find(d => {
-      const updatedAt = new Date(d.get("updatedAt"));
-      return direction === "next"
-        ? updatedAt.getTime() <=
-            new Date(parentDiscussion.get("updatedAt")).getTime()
-        : updatedAt.getTime() >=
-            new Date(parentDiscussion.get("updatedAt")).getTime();
-    });
-  return found;
-}
-
 function mapStateToProps(state, props) {
   const { parentDiscussionId, forumBoardId } = props;
   const parentDiscussion = getDiscussionById(state, parentDiscussionId);
-  const childDiscussions = getChildDiscussions(
-    state,
-    parentDiscussionId
-  ).toSet();
+  const childDiscussions = getChildDiscussions(state, parentDiscussionId).sort(
+    ({ createdAt: a }, { createdAt: b }) => {
+      return a - b;
+    }
+  );
   const forumBoard = getForumBoardById(state, forumBoardId);
-  const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+  const rootWikiId = forumBoard ? forumBoard.rootWiki : null;
   const semanticRules = rootWikiId
     ? getSemanticRulesByRootWikiId(state, rootWikiId)
-    : Set();
-  const discussions = getDiscussions(state);
+    : null;
   const nextParentDiscussion = parentDiscussion
-    ? getDiscussionByDirection(discussions, parentDiscussion, "next")
+    ? getDiscussionByDirection(state, parentDiscussion, "next")
     : null;
   const prevParentDiscussion = parentDiscussion
-    ? getDiscussionByDirection(discussions, parentDiscussion, "prev")
+    ? getDiscussionByDirection(state, parentDiscussion, "prev")
     : null;
   return {
     parentDiscussionId,

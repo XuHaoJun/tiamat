@@ -13,47 +13,49 @@ import {
 } from "./DiscussionActions";
 
 const UserBasicInfo = Record({
-  _id: null,
-  displayName: null,
-  avatarURL: null
+  _id: "",
+  displayName: "",
+  avatarURL: ""
 });
 
 const DISCUSSION_RECORD_DEFAULT = {
-  _id: null,
-  title: "",
-  author: null,
+  _id: "",
+  title: null,
+  author: "",
   authorBasicInfo: null,
   lastChildComments: null,
   lastChildCommentCount: 0,
   content: null,
   isRoot: false,
-  parentDiscussion: null,
-  replayTo: null,
+  parentDiscussion: "",
+  replayTo: "",
   childDiscussionCount: 0,
   forumBoardGroup: null,
-  tags: new Set(),
-  forumBoard: null,
-  titleUpdatedAt: null,
-  repliedAt: null,
-  contentUpdatedAt: null,
-  createdAt: null,
-  updatedAt: null
+  tags: Set(),
+  forumBoard: "",
+  titleUpdatedAt: new Date(),
+  repliedAt: new Date(),
+  contentUpdatedAt: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
 
-export class Discussion extends Record(DISCUSSION_RECORD_DEFAULT) {
-  constructor(json = {}) {
-    const record = super({
-      ...json,
-      content: json.content ? fromJS(json.content) : null,
-      authorBasicInfo: json.authorBasicInfo
-        ? new UserBasicInfo(json.authorBasicInfo)
+const DiscussionRecord = Record(DISCUSSION_RECORD_DEFAULT);
+
+export class Discussion extends DiscussionRecord {
+  static fromJS(obj = {}) {
+    const record = new Discussion({
+      ...obj,
+      content: obj.content ? fromJS(obj.content) : null,
+      authorBasicInfo: obj.authorBasicInfo
+        ? new UserBasicInfo(obj.authorBasicInfo)
         : null,
-      tags: new Set(json.tags),
-      titleUpdatedAt: new Date(json.titleUpdatedAt),
-      repliedAt: new Date(json.repliedAt),
-      contentUpdatedAt: new Date(json.contentUpdatedAt),
-      createdAt: new Date(json.createdAt),
-      updatedAt: new Date(json.updatedAt)
+      tags: Set(obj.tags),
+      titleUpdatedAt: new Date(obj.titleUpdatedAt),
+      repliedAt: new Date(obj.repliedAt),
+      contentUpdatedAt: new Date(obj.contentUpdatedAt),
+      createdAt: new Date(obj.createdAt),
+      updatedAt: new Date(obj.updatedAt)
     });
     return record;
   }
@@ -67,40 +69,44 @@ const DISCUSSION_STATE_RECORD_DEFAULT = {
       }
     }
   }),
-  data: new Set()
+  data: Set()
 };
 
-export class DiscussionState extends Record(DISCUSSION_STATE_RECORD_DEFAULT) {
-  constructor({ ui, data = [] } = {}) {
-    const record = super({
+const DiscussionStateRecord = Record(DISCUSSION_STATE_RECORD_DEFAULT);
+
+export class DiscussionState extends DiscussionStateRecord {
+  static fromJS(obj = {}) {
+    const { ui, discussions = [] } = obj;
+    const record = new DiscussionState({
       ui: fromJS(ui),
-      data: new Set(data.map(d => new Discussion(d)))
+      data: Set(discussions.map(Discussion.fromJS))
     });
     return record;
   }
 }
 
-// Initial State
-const initialState = new DiscussionState();
+const initialState = DiscussionState.fromJS();
 
 const DiscussionReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_DISCUSSION:
     case ADD_DISCUSSIONS:
-      const newDiscussions = action.discussions
-        ? new Set(action.discussions.map(d => new Discussion(d)))
-        : new Set([new Discussion(action.discussion)]);
-      const unionData = state.get("data").union(newDiscussions);
-      const nextData = !is(unionData, state.data)
-        ? unionData
-            .groupBy(ele => ele.get("_id"))
-            .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
+      const xs = state.discussions;
+      const dataInput = action.discussion
+        ? [action.discussion]
+        : action.discussions;
+      const newXs = DiscussionState.fromJS({ data: dataInput }).data;
+      const unionXs = xs.union(newXs);
+      const nextXs = !is(unionXs, xs)
+        ? unionXs
+            .groupBy(x => x._id)
+            .map(defaultSameIdElesMax)
             .toSet()
-        : unionData;
-      return state.set("data", nextData);
+        : unionXs;
+      return state.set("discussions", nextXs);
 
     case CLEAR_DISCUSSIONS:
-      return state.set("data", Set());
+      return state.set("discussions", Set());
 
     case SET_UPSERT_DISCUSSION_PAGE_FORM:
       const { forumBoardId, form } = action;
@@ -123,24 +129,22 @@ const DiscussionReducer = (state = initialState, action) => {
   }
 };
 
-/* Selectors */
-
 export const getDiscussions = state => {
-  return state.discussions.get("data");
+  return state.discussions.discussions;
 };
 
 export const getDiscussionsByForumBoard = (state, forumBoardId) => {
   const discussions = getDiscussions(state);
-  return discussions.filter(d => d.get("forumBoard") === forumBoardId);
+  return discussions.filter(x => x.forumBoard === forumBoardId);
 };
 
 const _getRootDiscussions = memoize((discussions, fourmBoardGroup) => {
-  return discussions.filter(d => {
+  return discussions.filter(x => {
     const inGroup =
       fourmBoardGroup && fourmBoardGroup !== "_all"
-        ? d.get("forumBoardGroup") === fourmBoardGroup
+        ? x.forumBoardGroup === fourmBoardGroup
         : true;
-    return d.get("isRoot") && inGroup;
+    return x.isRoot && inGroup;
   });
 }, createFastMemoizeDefaultOptions({ size: 1 }));
 
@@ -150,7 +154,7 @@ export const getRootDiscussions = (state, forumBoardId, fourmBoardGroup) => {
 };
 
 const _getDiscussionById = memoize((discussions, id) => {
-  return discussions.find(d => d.get("_id") === id);
+  return discussions.find(x => x._id === id);
 }, createFastMemoizeDefaultOptions({ size: 5 }));
 
 export const getDiscussionById = (state, id) => {
@@ -159,9 +163,7 @@ export const getDiscussionById = (state, id) => {
 };
 
 const _getChildDiscussions = memoize((discussions, parentDiscussionId) => {
-  return discussions.filter(
-    d => d.get("parentDiscussion") === parentDiscussionId
-  );
+  return discussions.filter(x => x.parentDiscussion === parentDiscussionId);
 }, createFastMemoizeDefaultOptions({ size: 1 }));
 
 export const getChildDiscussions = (state, parentDiscussionId) => {
@@ -169,7 +171,67 @@ export const getChildDiscussions = (state, parentDiscussionId) => {
   return _getChildDiscussions(discussions, parentDiscussionId);
 };
 
-export const getUI = state => state.discussions.get("ui");
+// import mingo from "mingo";
+// function getDiscussionByDirection(
+//   discussions,
+//   parentDiscussion,
+//   direction = "next",
+//   orderPropName = "updatedAt",
+//   select = null
+// ) {
+//   const { isRoot } = parentDiscussion;
+//   const parentDiscussionId = parentDiscussion._id;
+//   const orderProp = parentDiscussion[orderPropName];
+//   const forumBoardId = parentDiscussion.forumBoard;
+//   const test = {
+//     _id: {
+//       $ne: parentDiscussionId
+//     },
+//     forumBoard: forumBoardId,
+//     isRoot,
+//     [orderPropName]: {
+//       [direction === "next" ? "$lte" : "$gte"]: orderProp
+//     }
+//   };
+//   const sort = {
+//     [orderPropName]: direction === "next" ? -1 : 1
+//   };
+//   return new mingo.Query(test, select)
+//     .find(discussions.values())
+//     .sort(sort)
+//     .limit(1)
+//     .all()[0];
+// }
+
+export const getDiscussionByDirection = (
+  state,
+  parentDiscussion,
+  direction = "next",
+  orderPropName = "updatedAt"
+) => {
+  const discussions = getDiscussions(state);
+  const found = discussions
+    .filter(x => {
+      return (
+        x._id !== parentDiscussion._id &&
+        x.forumBoard === parentDiscussion.forumBoard &&
+        x.isRoot === parentDiscussion.isRoot
+      );
+    })
+    .sortBy(x => {
+      return direction === "next" ? -1 * x[orderPropName] : x[orderPropName];
+    })
+    .find(x => {
+      const orderProp = x[orderPropName];
+      const parentOrderProp = parentDiscussion[orderPropName];
+      return direction === "next"
+        ? orderProp <= parentOrderProp
+        : orderProp >= parentOrderProp;
+    });
+  return found;
+};
+
+export const getUI = state => state.discussions.ui;
 
 // Export Reducer
 export default DiscussionReducer;

@@ -10,19 +10,19 @@ const FORUM_BOARD_RECORD_DEFAULT = {
   name: null,
   popularityCounter: 0,
   rootWiki: null,
-  groups: new List(),
+  groups: List(),
   category: null,
   createdAt: null,
   updatedAt: null
 };
 
 export class ForumBoard extends Record(FORUM_BOARD_RECORD_DEFAULT) {
-  constructor(json = {}) {
-    const record = super({
-      ...json,
-      groups: new List(json.groups),
-      createdAt: new Date(json.createdAt),
-      updatedAt: new Date(json.updatedAt)
+  static fromJS(obj = {}) {
+    const record = new ForumBoard({
+      ...obj,
+      groups: List(obj.groups),
+      createdAt: new Date(obj.createdAt),
+      updatedAt: new Date(obj.updatedAt)
     });
     return record;
   }
@@ -30,55 +30,53 @@ export class ForumBoard extends Record(FORUM_BOARD_RECORD_DEFAULT) {
 
 const FORUM_BOARD_STATE_RECORD_DEFAULT = {
   ui: fromJS({}),
-  data: new Set()
+  data: Set()
 };
 
 export class ForumBoardState extends Record(FORUM_BOARD_STATE_RECORD_DEFAULT) {
-  constructor({ ui, data = [] } = {}) {
-    const record = super({
+  static fromJS({ ui, data = [] } = {}) {
+    const record = new ForumBoardState({
       ui: fromJS(ui),
-      data: new Set(data.map(d => new ForumBoard(d)))
+      data: Set(data.map(ForumBoard.fromJS))
     });
     return record;
   }
 }
 
-const initialState = new ForumBoardState();
+const initialState = ForumBoardState.fromJS();
 
 const ForumBoardReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_FORUM_BOARD:
     case ADD_FORUM_BOARDS:
       const newForumBoards = action.forumBoards
-        ? new Set(action.forumBoards.map(d => new ForumBoard(d)))
-        : new Set([new ForumBoard(action.forumBoard)]);
-      const data = state
-        .get("data")
+        ? Set(action.forumBoards.map(ForumBoard.fromJS))
+        : Set([ForumBoard.fromJS(action.forumBoard)]);
+      const nextData = state.data
         .union(newForumBoards)
-        .groupBy(ele => ele.get("_id"))
-        .map(ele => ele.maxBy(v => new Date(v.get("updatedAt")).getTime()))
+        .groupBy(x => x._id)
+        .map(xs => xs.maxBy(x => x.updatedAt.getTime()))
         .toSet();
-      return state.set("data", data);
+      return state.set("data", nextData);
 
     case CLEAR_FORUM_BOARDS:
       return state.set("data", Set());
+
     default:
-      if (List.isList(state.get("data"))) {
-        return state.set("data", state.get("data").toSet());
-      }
       return state;
   }
 };
 
-/* Selectors */
-
-// Get all posts
-export const getForumBoards = state => state.forumBoards.get("data");
+export const getForumBoards = state => state.forumBoards.data;
 
 export const getForumBoardById = (state, _id) =>
-  getForumBoards(state).find(v => v.get("_id") === _id);
+  getForumBoards(state).find(x => x._id === _id);
 
 export const getForumBoard = getForumBoardById;
+
+export const DiscussionSelector = {
+  findById: getForumBoardById
+};
 
 // Export Reducer
 export default ForumBoardReducer;

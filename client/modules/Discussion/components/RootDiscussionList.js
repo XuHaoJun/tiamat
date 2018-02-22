@@ -13,7 +13,7 @@ import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
 
 import UserAvatar from "../../User/components/UserAvatar";
 
-import { fetchRootDiscussions } from "../DiscussionActions";
+import { DiscussionRemote } from "../DiscussionActions";
 import { getRootDiscussions } from "../DiscussionReducer";
 import { getIsFirstRender } from "../../MyApp/MyAppReducer";
 
@@ -39,22 +39,23 @@ class RootDiscussionList extends React.Component {
     forumBoardId: PropTypes.string,
     forumBoardGroup: PropTypes.string,
     dataSource: PropTypes.object,
-    isFirstRender: PropTypes.bool
+    isFirstRender: PropTypes.bool,
+    sort: PropTypes.string
   };
 
   static defaultProps = {
     forumBoardGroup: FORUM_BOARD_GROUP_ALL,
     dataSource: Set(),
-    isFirstRender: false
+    isFirstRender: false,
+    sort: "-updatedAt"
   };
 
   constructor(props) {
     super(props);
     const pageInfo = this.createPageInfo();
-    const pageTable = new Map().merge(pageInfo);
+    const pageTable = Map().merge(pageInfo);
     this.state = {
-      pageTable,
-      sort: "-updatedAt"
+      pageTable
     };
   }
 
@@ -64,7 +65,7 @@ class RootDiscussionList extends React.Component {
         this.createPageInfo(nextProps, { page: 1 })
       );
       this.setState({ pageTable: nextPageTable }, () => {
-        this.handleRequestMore("top");
+        this.handleRequestMore({ direction: "top" });
       });
     }
   }
@@ -74,8 +75,8 @@ class RootDiscussionList extends React.Component {
   };
 
   handleRequestMore = async ({ direction }) => {
-    const { pageTable, sort } = this.state;
-    const { forumBoardId, forumBoardGroup } = this.props;
+    const { pageTable } = this.state;
+    const { forumBoardId, forumBoardGroup, sort } = this.props;
     const pageInfo = pageTable.get(this.getForumBoardGroup());
     const { page, limit } = pageInfo;
     if (!forumBoardId) {
@@ -86,7 +87,7 @@ class RootDiscussionList extends React.Component {
     // TODO
     // cancel fetch when componemntWillUnmount
     const discussionsJSON = await this.props.dispatch(
-      fetchRootDiscussions(forumBoardId, {
+      DiscussionRemote.getRootDiscussions(forumBoardId, {
         page: nextPage,
         limit,
         sort,
@@ -119,7 +120,7 @@ class RootDiscussionList extends React.Component {
     const forumBoardGroup = this.getForumBoardGroup(props);
     const limit = props.limit || 10;
     const page = props.page || Math.floor(dataSource.count() / limit) || 1;
-    return new Map({
+    return Map({
       [forumBoardGroup]: new PageInfo({
         forumBoardGroup,
         limit,
@@ -179,10 +180,10 @@ class RootDiscussionList extends React.Component {
         className={classes.root}
       >
         {dataSource.map(discussion => {
-          const key = discussion.get("_id");
+          const key = discussion._id;
           const to = this.listItemHref(discussion);
           const avatar = this.listItemLeftAvatar(discussion);
-          const primary = discussion.get("title");
+          const primary = discussion.title;
           const secondary = this.listItemSecondaryText(discussion);
           return (
             <ListItem key={key} button component={Link} to={to} divider>
@@ -199,9 +200,7 @@ class RootDiscussionList extends React.Component {
 function mapStateToProps(store, props) {
   const { forumBoard, forumBoardGroup } = props;
   let { forumBoardId } = props;
-  forumBoardId = forumBoard
-    ? forumBoard.get("_id") || forumBoardId
-    : forumBoardId;
+  forumBoardId = forumBoard ? forumBoard._id || forumBoardId : forumBoardId;
   const dataSource = forumBoardId
     ? getRootDiscussions(store, forumBoardId, forumBoardGroup)
     : Set();

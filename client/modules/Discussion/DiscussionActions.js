@@ -1,4 +1,5 @@
 import qs from "qs";
+import { omitBy } from "lodash";
 
 import callApi from "../../util/apiCaller";
 import { addError } from "../Error/ErrorActions";
@@ -58,9 +59,15 @@ export function fetchRootDiscussions(forumBoardId, _opts, reqConfig = {}) {
   };
 }
 
-export function fetchDiscussions({ parentDiscussionId = "" }) {
+export function fetchChildDiscussions(
+  parentDiscussionId,
+  options = { withParent: false }
+) {
+  const search = `?${qs.stringify(omitBy(options, v => v === false))}`;
   return dispatch => {
-    return callApi(`discussions/${parentDiscussionId}/childDiscussions`)
+    return callApi(
+      `discussions/${parentDiscussionId}/childDiscussions${search}`
+    )
       .then(res => {
         dispatch(addDiscussions(res.discussions));
         return res;
@@ -105,7 +112,7 @@ export function fetchDiscussionById(id = "") {
 }
 
 export function addDiscussionRequest(discussion, accessToken) {
-  const q = qs.stringify({ access_token: accessToken.get("token") });
+  const q = qs.stringify({ access_token: accessToken.token });
   return dispatch => {
     return callApi(`discussions?${q}`, "post", { discussion })
       .then(res => {
@@ -121,3 +128,13 @@ export function addDiscussionRequest(discussion, accessToken) {
       });
   };
 }
+
+export const Remote = {
+  findById: fetchDiscussionById,
+  findOne: fetchDiscussionByTest,
+  getRootDiscussions: fetchRootDiscussions,
+  getChildDiscussions: fetchChildDiscussions,
+  add: addDiscussionRequest
+};
+
+export const DiscussionRemote = Remote;

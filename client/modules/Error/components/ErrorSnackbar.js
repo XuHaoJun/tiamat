@@ -81,7 +81,7 @@ const CloseButton = withStyles(closeButtonStyles)(CloseButtonBase);
 
 class ErrorSnackbar extends React.Component {
   static propTypes = {
-    error: PropTypes.object
+    error: PropTypes.oneOfType([PropTypes.object, PropTypes.string])
   };
 
   constructor(props) {

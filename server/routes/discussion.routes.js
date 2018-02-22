@@ -12,7 +12,7 @@ router
 
 router.route("/discussions/:id").get((req, res, next) => {
   if (process.env.NODE_ENV === "production") {
-    res.set("Cache-Control", "private, max-age=60");
+    res.set("Cache-Control", "private, max-age=15");
   }
   next();
 }, Controller.getDiscussionById);

@@ -123,7 +123,7 @@ const ClientInitialScripts = ({ state }) => {
 async function createStoreByRequest(req) {
   // use req.url for initial history.
   const rawHistory = createMemoryHistory({
-    initialEntries: [req.url]
+    initialEntries: [decodeURI(req.url)]
   });
 
   const store = configureStore({
@@ -148,7 +148,7 @@ async function createStoreByRequest(req) {
     store.dispatch(setOauth2Client({ facebookClientID }, "facebook"));
   }
 
-  const branch = matchRoutes(clientRoutes, req.path);
+  const branch = matchRoutes(clientRoutes, decodeURI(req.path));
   // Compone.getInitialAction for fetch and update store data.
   await Promise.all(
     branch.map(routerProps => {

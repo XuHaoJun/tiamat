@@ -54,7 +54,9 @@ export function fetchComponentData(
       }, []);
       return needs;
     })
-    .then(needs => [...new Set(needs)])
+    .then(needs =>
+      needs.filter((value, index, self) => self.indexOf(value) === index)
+    )
     .then(needs => {
       return promiseAggregation(needs, callback => {
         const _dispatch = dispatch || (store ? store.dispatch : null);

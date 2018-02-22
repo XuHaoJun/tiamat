@@ -23,13 +23,22 @@ router.use((req, res, next) => {
   next();
 });
 
+function skipLocalRequestLimit(req) {
+  const ip =
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.headers["x-forwarded-for"];
+  return ip === "127.0.0.1" || ip === "::ffff:127.0.0.1" || ip === "::1";
+}
+
 if (process.env.NODE_ENV === "production") {
   router.use(
     new RateLimit({
       windowMs: 1 * 60 * 1000,
       max: 600,
       delayAfter: 450,
-      delayMs: 150
+      delayMs: 150,
+      skip: skipLocalRequestLimit
     })
   );
 }

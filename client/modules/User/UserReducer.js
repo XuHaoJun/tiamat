@@ -21,7 +21,7 @@ const ACCESS_TOKEN_RECORD_DEFAULT = {
 };
 
 export class AccessToken extends Record(ACCESS_TOKEN_RECORD_DEFAULT) {
-  constructor(json = {}) {
+  static fromJS(obj = {}) {
     const {
       tokenType,
       token,
@@ -29,15 +29,15 @@ export class AccessToken extends Record(ACCESS_TOKEN_RECORD_DEFAULT) {
       refreshToken,
       expiresIn,
       refreshExpiresIn
-    } = json;
+    } = obj;
     const normalrized = {
-      tokenType: tokenType || json.token_type,
-      token: token || accessToken || json.access_token,
-      refreshToken: refreshToken || json.refresh_token,
-      expiresIn: expiresIn || json.expires_in,
-      refreshExpiresIn: refreshExpiresIn || json.refresh_expires_in
+      tokenType: tokenType || obj.token_type,
+      token: token || accessToken || obj.access_token,
+      refreshToken: refreshToken || obj.refresh_token,
+      expiresIn: expiresIn || obj.expires_in,
+      refreshExpiresIn: refreshExpiresIn || obj.refresh_expires_in
     };
-    const record = super(normalrized);
+    const record = new AccessToken(normalrized);
     return record;
   }
 }
@@ -53,29 +53,29 @@ const USER_RECORD_DEFAULT = {
 };
 
 export class User extends Record(USER_RECORD_DEFAULT) {
-  constructor(json = {}) {
-    const record = super({
-      ...json,
-      createdAt: new Date(json.createdAt),
-      updatedAt: new Date(json.updatedAt)
+  static fromJS(obj = {}) {
+    const record = new User({
+      ...obj,
+      createdAt: new Date(obj.createdAt),
+      updatedAt: new Date(obj.updatedAt)
     });
     return record;
   }
 }
 
 const USER_STATE_RECORD_DEFAULT = {
-  users: new Set(),
+  users: Set(),
   currentUserEmail: null,
   currentAccessToken: null
 };
 
 export class UserState extends Record(USER_STATE_RECORD_DEFAULT) {
-  constructor({ users = [], currentUser, currentAccessToken } = {}) {
-    const record = super({
-      users: new Set(users.map(user => new User(user))),
+  static fromJS({ users = [], currentUser, currentAccessToken } = {}) {
+    const record = new UserState({
+      users: Set(users.map(User.fromJS)),
       currentUser,
       currentAccessToken: currentAccessToken
-        ? new AccessToken(currentAccessToken)
+        ? AccessToken.fromJS(currentAccessToken)
         : null
     });
     return record;
@@ -83,15 +83,15 @@ export class UserState extends Record(USER_STATE_RECORD_DEFAULT) {
 }
 
 // Initial State
-const initialState = new UserState();
+const initialState = UserState.fromJS();
 
 const _UserReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_USER:
     case ADD_USERS:
       const newUsers = action.users
-        ? new Set(action.users.map(d => new User(d)))
-        : new Set([new User(action.user)]);
+        ? Set(action.users.map(User.fromJS))
+        : Set([User.fromJS(action.user)]);
       const unionUsers = state.users.union(newUsers);
       const nextUsers = !is(unionUsers, state.users)
         ? unionUsers

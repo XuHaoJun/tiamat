@@ -80,3 +80,11 @@ export function addForumBoardRequest(forumBoard) {
       });
   };
 }
+
+export const Remote = {
+  findById: fetchForumBoardById,
+  getForumBoards: fetchForumBoards,
+  add: addForumBoardRequest
+};
+
+export const ForumBoardRemote = Remote;

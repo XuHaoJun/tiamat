@@ -1,52 +1,27 @@
 import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Set } from "immutable";
 import moment from "moment";
 
-import { withStyles } from "material-ui-next/styles";
 import Switch from "material-ui-next/Switch";
 import WikiIcon from "material-ui-icons-next/ImportContacts";
 import { FormControlLabel } from "material-ui-next/Form";
-import Card, { CardHeader, CardContent } from "material-ui-next/Card";
-import Divider from "material-ui-next/Divider";
+import Card, {
+  CardHeader,
+  CardContent,
+  CardActions
+} from "material-ui-next/Card";
 import CircularProgress from "material-ui-next/Progress/CircularProgress";
+import IconButton from "material-ui-next/IconButton";
+import FavoriteIcon from "material-ui-icons-next/Favorite";
+import ShareIcon from "material-ui-icons-next/Share";
 
 import UserAvatar from "../../../User/components/UserAvatar";
 import Editor from "../../../../components/Slate/Editor";
 
-const styles = {
-  root: {
-    boxSizing: "border-box"
-  },
-  title: {
-    boxSizing: "border-box",
-    padding: "5px 5px 0px 5px"
-  },
-  content: {
-    boxSizing: "border-box",
-    padding: "15px"
-  },
-  simpleInfo: {
-    margin: "0px 5px 0px 5px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
-  avatarContainer: {
-    display: "flex",
-    alignItems: "center"
-  },
-  smallFont: {
-    color: "#999",
-    fontSize: "13px"
-  }
-};
-
 class DiscussionNode extends React.Component {
   static defaultProps = {
     semanticReplaceMode: false,
-    semanticRules: Set(),
-    divider: false
+    semanticRules: null
   };
 
   constructor(props) {
@@ -89,7 +64,7 @@ class DiscussionNode extends React.Component {
   };
 
   semanticToggle = (time = 160) => {
-    if (typeof window === "object") {
+    if (process.browser) {
       // emulate after toggle transition.
       const timeout = setTimeout(() => {
         const { semanticReplaceMode } = this.state;
@@ -103,50 +78,61 @@ class DiscussionNode extends React.Component {
 
   render() {
     const { semanticReplaceMode, semanticReplaceToggled } = this.state;
-    const { discussion, semanticRules } = this.props;
+    const {
+      index,
+      discussion,
+      semanticRules,
+      onSemanticToggle,
+      semanticReplaceMode: semanticReplaceModeInput,
+      ...other
+    } = this.props;
     const { authorBasicInfo, createdAt, content } = discussion;
-    const displayName = authorBasicInfo
-      ? authorBasicInfo.get("displayName")
-      : "Guest";
+    const displayName = authorBasicInfo ? authorBasicInfo.displayName : "Guest";
+    const indexDisplay = typeof index === "number" ? `#${index}` : index || "";
+    const cardHeaderTitle = `${displayName} ${indexDisplay}`;
     const createdAtFromNow = moment(createdAt).fromNow();
-    const { classes } = this.props;
     return (
-      <div className={classes.root}>
-        <Card elevation={0}>
-          <CardHeader
-            avatar={<UserAvatar user={authorBasicInfo} />}
-            action={
-              <FormControlLabel
-                control={
-                  <Switch
-                    color="primary"
-                    onChange={this.onSemanticToggle}
-                    checked={semanticReplaceToggled}
-                  />
-                }
-                label={<WikiIcon />}
-              />
-            }
-            title={displayName}
-            subheader={createdAtFromNow}
-          />
-          <CardContent>
-            {content ? (
-              <Editor
-                rawContent={content}
-                readOnly={true}
-                semanticRules={semanticRules}
-                semanticReplaceMode={semanticReplaceMode}
-              />
-            ) : (
-              <CircularProgress />
-            )}
-          </CardContent>
-        </Card>
-        {this.props.divider ? <Divider /> : null}
-      </div>
+      <Card {...other}>
+        <CardHeader
+          avatar={<UserAvatar user={authorBasicInfo} />}
+          action={
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  onChange={this.onSemanticToggle}
+                  checked={semanticReplaceToggled}
+                />
+              }
+              label={<WikiIcon />}
+            />
+          }
+          title={cardHeaderTitle}
+          subheader={createdAtFromNow}
+        />
+        <CardContent>
+          {content ? (
+            <Editor
+              rawContent={content}
+              readOnly={true}
+              semanticRules={semanticRules}
+              semanticReplaceMode={semanticReplaceMode}
+            />
+          ) : (
+            <CircularProgress />
+          )}
+        </CardContent>
+        <CardActions>
+          <IconButton aria-label="Add to favorites">
+            <FavoriteIcon />
+          </IconButton>
+          <IconButton aria-label="Share">
+            <ShareIcon />
+          </IconButton>
+        </CardActions>
+      </Card>
     );
   }
 }
 
-export default withStyles(styles)(DiscussionNode);
+export default DiscussionNode;

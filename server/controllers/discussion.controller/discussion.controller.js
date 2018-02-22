@@ -273,10 +273,9 @@ export function getDiscussionByTest(req, res) {
   if (!vali) {
     res.status(403).send(testSchema);
   } else {
-    Discussion.find(test)
+    Discussion.find(test, select)
       .sort(sort)
       .limit(1)
-      .select(select)
       .exec((err, discussions) => {
         if (err) {
           res.status(403).send(err);
@@ -311,18 +310,28 @@ export function getChildDiscussions(req, res) {
     res.status(403).send(new Error("must have parentDiscussionId"));
     return;
   }
+  const { withParent = false } = req.query;
   const select = normalizeSelect(req.query.select) || {};
-  const query = {
+  const queryBase = {
     parentDiscussion: parentDiscussionId
   };
-  Discussion.find(query)
+  const withParentQuery = withParent
+    ? {
+        _id: parentDiscussionId
+      }
+    : {};
+  Discussion.find()
+    .or(queryBase)
+    .or(withParentQuery)
     .select(select)
     .exec((err, discussions) => {
       if (err) {
         res.status(403).send(err);
-        return;
+      } else if (discussions.length === 0) {
+        res.status(404).end();
+      } else {
+        res.json({ discussions });
       }
-      res.json({ discussions });
     });
 }
 

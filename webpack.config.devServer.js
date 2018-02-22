@@ -35,8 +35,12 @@ module.exports = {
               [
                 "@babel/preset-env",
                 {
+                  useBuiltIns: "usage",
+                  modules: false,
+                  loose: true,
                   targets: {
-                    node: "current"
+                    chrome: 52,
+                    browsers: ["last 2 versions", "safari 7"]
                   }
                 }
               ]

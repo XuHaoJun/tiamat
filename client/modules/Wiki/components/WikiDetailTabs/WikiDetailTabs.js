@@ -36,7 +36,7 @@ export const WIKI_HITSTORY_SLIDE = 4;
 
 class WikiDetailTabs extends React.Component {
   static defaultProps = {
-    wikiId: "",
+    wikiId: null,
     wiki: null,
     slideIndex: WIKI_CONTENT_SLIDE,
     scrollKey: ""
@@ -126,10 +126,10 @@ class WikiDetailTabs extends React.Component {
   }
 }
 
-function mapStateToProps(store, props) {
-  const { wikiId, rootWikiId } = props;
-  const wiki = getWiki(store, wikiId);
-  const rootWiki = getRootWiki(store, rootWikiId);
+function mapStateToProps(state, props) {
+  const { wikiInput, wikiId, rootWikiId } = props;
+  const wiki = !wikiInput ? getWiki(state, wikiId) : wikiInput;
+  const rootWiki = getRootWiki(state, rootWikiId);
   return { wiki, rootWiki };
 }
 

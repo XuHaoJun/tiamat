@@ -23,7 +23,7 @@ import { getRootWiki } from "../../RootWiki/RootWikiReducer";
 import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
 
-import { fetchRootDiscussions } from "../../Discussion/DiscussionActions";
+import { DiscussionRemote } from "../../Discussion/DiscussionActions";
 
 import { getCurrentAccessToken } from "../../User/UserReducer";
 
@@ -95,7 +95,7 @@ class MixedMainPage extends React.Component {
             return Promise.all(
               [
                 fetchForumBoardById(forumBoardId),
-                fetchRootDiscussions(forumBoardId, {
+                DiscussionRemote.getRootDiscussions(forumBoardId, {
                   forumBoardGroup,
                   select: { content: 0 }
                 })
@@ -194,7 +194,9 @@ class MixedMainPage extends React.Component {
         ? `?forumBoardGroup=${encodeURIComponent(forumBoardGroup)}`
         : "";
       const url = `${pathname}${search}`;
-      this.props.dispatch(replace(url));
+      if (forumBoardId) {
+        this.props.dispatch(replace(url));
+      }
     } else if (slideIndex === ROOT_WIKI_OR_WIKI_SLIDE) {
       if (this.rootOrWikisSlideKind === "wikis") {
         const { rootWikiId } = this.props;
@@ -209,14 +211,18 @@ class MixedMainPage extends React.Component {
               : rootWikiGroupTree
         });
         const url = `/rootWikis/${rootWikiId}/wikis?${query}`;
-        this.props.dispatch(replace(url));
+        if (rootWikiId) {
+          this.props.dispatch(replace(url));
+        }
       } else {
         const { rootWikiId } =
           this.props.targetKind !== "rootWiki"
             ? this.oldProps.rootWiki || this.props
             : this.props;
-        const url = `/rootWikis/${rootWikiId}`;
-        this.props.dispatch(replace(url));
+        if (rootWikiId) {
+          const url = `/rootWikis/${rootWikiId}`;
+          this.props.dispatch(replace(url));
+        }
       }
     }
   };
@@ -280,17 +286,17 @@ function mapStateToProps(state, routerProps) {
   let { forumBoardId, rootWikiId } = parsed;
   let forumBoard = getForumBoardById(state, forumBoardId);
   if (!rootWikiId && forumBoard) {
-    rootWikiId = forumBoard.get("rootWiki");
+    rootWikiId = forumBoard.rootWiki;
   }
   const rootWiki = getRootWiki(state, rootWikiId);
   if (!forumBoardId && rootWiki) {
-    forumBoardId = rootWiki.get("forumBoard");
+    forumBoardId = rootWiki.forumBoard;
   }
   if (!forumBoard) {
     forumBoard = getForumBoardById(state, forumBoardId);
   }
-  const forumBoardName = forumBoard ? forumBoard.get("name") : "";
-  const rootWikiName = rootWiki ? rootWiki.get("name") : "";
+  const forumBoardName = forumBoard ? forumBoard.name : "";
+  const rootWikiName = rootWiki ? rootWiki.name : "";
   const title = rootWikiName || forumBoardName;
   const dbIsInitialized = getDBisInitialized(state);
   return {

@@ -9,13 +9,11 @@ class EnhancedSwipableViews extends React.Component {
     disableOnDrawerStart: PropTypes.bool,
     resistance: PropTypes.bool,
     scrollKey: PropTypes.string,
-    scrollBehaviorShouldUpdateScroll: PropTypes.func,
-    disableLazyLoading: PropTypes.bool
+    scrollBehaviorShouldUpdateScroll: PropTypes.func
   };
 
   static defaultProps = {
     disableOnDrawerStart: true,
-    disableLazyLoading: true,
     resistance: true
   };
 
@@ -130,19 +128,17 @@ class EnhancedSwipableViews extends React.Component {
       resistance,
       dispatch,
       scrollBehaviorShouldUpdateScroll,
-      disableLazyLoading,
       children,
       ...other
     } = this.props;
     const { disabled } = this.state;
     return (
       <SwipeableViews
-        {...other}
+        ref={this.setOriginalSwipableViewsRef}
         index={index}
         resistance={resistance}
-        ref={this.setOriginalSwipableViewsRef}
         disabled={disabled}
-        disableLazyLoading={disableLazyLoading}
+        {...other}
       >
         {children}
       </SwipeableViews>
@@ -150,15 +146,4 @@ class EnhancedSwipableViews extends React.Component {
   }
 }
 
-function mapStateToProps(state) {
-  const isFirstRender = getIsFirstRender(state);
-  return { disableLazyLoading: isFirstRender };
-}
-
-function mapDispatchToProps() {
-  return {};
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(
-  EnhancedSwipableViews
-);
+export default EnhancedSwipableViews;

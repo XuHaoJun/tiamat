@@ -106,11 +106,11 @@ class Editor extends React.Component {
     semanticReplaceMode: false,
     readOnly: false,
     rawContent: emptyContent,
-    defaultValue: undefined,
+    defaultValue: null,
     schemaType: "",
     sendAddImage: null,
     targetKind: "rootWiki",
-    rootWiki: ""
+    rootWiki: null
   };
 
   constructor(props) {
@@ -128,7 +128,9 @@ class Editor extends React.Component {
     if (semanticReplaceMode) {
       state = semanticReplace(state, props.semanticRules).value;
     }
-    const suggestions = semanticRulesToSuggestions(semanticRules);
+    const suggestions = semanticRules
+      ? semanticRulesToSuggestions(semanticRules)
+      : List();
     const { id, key } = this.props;
     const storeKey = getStoreKey({ id, key });
     this.storeKey = storeKey;
@@ -502,16 +504,19 @@ class Editor extends React.Component {
 
   onDrop = (event, change, editor) => {
     const target = getEventRange(event);
-    if (!target) return;
-    const transfer = getEventTransfer(event);
-    const { type } = transfer;
-    switch (type) {
-      case "files":
-        return this.onDropOrPasteFiles(event, change, editor);
-      case "node":
-        return this.onDropNode(event, change, editor);
-      default:
-        break;
+    if (target) {
+      const transfer = getEventTransfer(event);
+      const { type } = transfer;
+      switch (type) {
+        case "files":
+          this.onDropOrPasteFiles(event, change, editor);
+          break;
+        case "node":
+          this.onDropNode(event, change, editor);
+          break;
+        default:
+          break;
+      }
     }
   };
 

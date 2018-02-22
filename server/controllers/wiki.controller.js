@@ -5,12 +5,6 @@ import _ from "lodash";
 import car from "lodash/first";
 import cdr from "lodash/tail";
 
-/**
- * Save a post
- * @param req
- * @param res
- * @returns void
- */
 export function getWiki(req, res) {
   const { id, name, rootWikiId } = req.params;
   if (!id && (!name && !rootWikiId)) {
@@ -28,6 +22,8 @@ export function getWiki(req, res) {
     .exec((err, wiki) => {
       if (err) {
         res.status(403).send(err);
+      } else if (!wiki) {
+        res.status(404).send("Not found.");
       } else {
         res.json({ wiki });
       }

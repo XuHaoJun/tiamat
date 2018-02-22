@@ -18,15 +18,16 @@ const WIKI_RECORD_DEFAULT = {
 };
 
 export class Wiki extends Record(WIKI_RECORD_DEFAULT) {
-  constructor(json = {}) {
-    const record = super({
-      ...json,
-      content: fromJS(json.content),
-      data: fromJS(json.data),
-      rootWikiGroupTree: fromJS(json.rootWikiGroupTree),
-      tags: new Set(json.tags),
-      createdAt: new Date(json.createdAt),
-      updatedAt: new Date(json.updatedAt)
+  static fromJS(obj = {}) {
+    const record = new Wiki({
+      ...obj,
+      wikiDataForm: obj.wikiDataForm ? fromJS(obj.wikiDataForm) : null,
+      content: obj.content ? fromJS(obj.content) : null,
+      data: fromJS(obj.data),
+      rootWikiGroupTree: fromJS(obj.rootWikiGroupTree),
+      tags: Set(obj.tags),
+      createdAt: new Date(obj.createdAt),
+      updatedAt: new Date(obj.updatedAt)
     });
     return record;
   }
@@ -39,33 +40,33 @@ const WIKI_STATE_RECORD_DEFAULT = {
       content: null
     }
   }),
-  data: new Set()
+  data: Set()
 };
 
 export class WikiState extends Record(WIKI_STATE_RECORD_DEFAULT) {
-  constructor({ ui, data = [] } = {}) {
-    const record = super({
+  static fromJS({ ui, data = [] } = {}) {
+    const record = new WikiState({
       ui: fromJS(ui),
-      data: new Set(data.map(d => new Wiki(d)))
+      data: Set(data.map(Wiki.fromJS))
     });
     return record;
   }
 }
 
 // Initial State
-const initialState = new WikiState();
+const initialState = WikiState.fromJS();
 
 const WikiReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_WIKI:
     case ADD_WIKIS:
       const newWikis = action.wikis
-        ? new Set(action.wikis.map(d => new Wiki(d)))
-        : new Set([new Wiki(action.wiki)]);
-      const unionData = state.get("data").union(newWikis);
+        ? Set(action.wikis.map(Wiki.fromJS))
+        : Set([Wiki.fromJS(action.wiki)]);
+      const unionData = state.data.union(newWikis);
       const nextData = !is(unionData, state.data)
         ? unionData
-            .groupBy(ele => ele.get("_id"))
+            .groupBy(x => x._id)
             .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
             .toSet()
         : unionData;
@@ -79,21 +80,20 @@ const WikiReducer = (state = initialState, action) => {
   }
 };
 
-/* Selectors */
-
-// Get all posts
 export const getUI = state => {
-  return state.wikis.get("ui");
+  return state.wikis.ui;
 };
+
+export const getWikis = state => state.wikis.data;
 
 export const getWiki = (state, _id, rootWikiId = null) => {
   if (rootWikiId) {
     const name = _id;
-    return state.wikis
-      .get("data")
-      .find(v => v.get("name") === name && v.get("rootWiki") === rootWikiId);
+    return getWikis(state).find(
+      x => x.name === name && x.rootWiki === rootWikiId
+    );
   } else {
-    return state.wikis.get("data").find(v => v.get("_id") === _id);
+    return getWikis(state).find(x => x._id === _id);
   }
 };
 
@@ -107,7 +107,7 @@ export function getWikiByRouterProps(state, routerProps) {
 }
 
 export const getWikisByRootWikiId = (state, rootWikiId) => {
-  return state.wikis.get("data").filter(v => v.get("rootWiki") === rootWikiId);
+  return getWikis(state).filter(x => x.rootWiki === rootWikiId);
 };
 
 // Export Reducer

@@ -105,7 +105,7 @@ module.exports = {
       },
       {
         test: /\.jsx?$/,
-        exclude: [/node_modules/, /webpack\.config\.?.*\.js/],
+        exclude: [/node_modules/],
         use: {
           loader: "babel-loader",
           options: {
@@ -202,7 +202,7 @@ module.exports = {
         },
         {
           urlPattern: /^https?:\/\/(.+)\/(?!.*(api|\.)).*$/,
-          handler: "cacheFirst"
+          handler: "networkFirst"
         }
       ],
       verbose: true

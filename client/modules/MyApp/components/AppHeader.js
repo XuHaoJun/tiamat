@@ -204,15 +204,15 @@ class AppHeader extends React.Component {
       // TODO
       // use getCurrentPage() ?
       const paths = [
+        "/discussions",
+        "/rootWikis/:rootWikiId/wikis/:wikiName",
+        "/search",
         "/create",
         "/update",
         "/edit",
         "/setting",
         "/settings",
-        "/about",
-        "/search",
-        "/rootWikis/:rootWikiId/wikis/:wikiName",
-        "/rootDiscussions"
+        "/about"
       ];
       return paths.some(path => {
         return Boolean(matchPath(pathname, { path }));

@@ -14,13 +14,13 @@ const ROOT_WIKI_RECORD_DEFAULT = {
 };
 
 export class RootWiki extends Record(ROOT_WIKI_RECORD_DEFAULT) {
-  constructor(json = {}) {
-    const record = super({
-      ...json,
-      content: fromJS(json.content),
-      groupTree: fromJS(json.groupTree),
-      createdAt: new Date(json.createdAt),
-      updatedAt: new Date(json.updatedAt)
+  static fromJS(obj = {}) {
+    const record = new RootWiki({
+      ...obj,
+      content: fromJS(obj.content),
+      groupTree: fromJS(obj.groupTree),
+      createdAt: new Date(obj.createdAt),
+      updatedAt: new Date(obj.updatedAt)
     });
     return record;
   }
@@ -37,10 +37,10 @@ const ROOT_WIKI_STATE_RECORD_DEFAULT = {
 };
 
 export class RootWikiState extends Record(ROOT_WIKI_STATE_RECORD_DEFAULT) {
-  constructor({ ui, data = [] } = {}) {
-    const record = super({
+  static fromJS({ ui, data = [] } = {}) {
+    const record = new RootWikiState({
       ui: fromJS(ui),
-      data: new Set(data.map(d => new RootWiki(d)))
+      data: Set(data.map(RootWiki.fromJS))
     });
     return record;
   }
@@ -52,12 +52,11 @@ const initialState = new RootWikiState();
 const RootWikiReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_ROOT_WIKI:
-      const newRootWikis = Set([new RootWiki(action.rootWiki)]);
-      const data = state
-        .get("data")
+      const newRootWikis = Set([RootWiki.fromJS(action.rootWiki)]);
+      const data = state.data
         .union(newRootWikis)
-        .groupBy(ele => ele.get("_id"))
-        .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
+        .groupBy(ele => ele._id)
+        .map(defaultSameIdElesMax)
         .toSet();
       return state.set("data", data);
 

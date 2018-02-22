@@ -5,33 +5,15 @@ import { hot } from "react-hot-loader";
 import compose from "recompose/compose";
 import qs from "qs";
 
-import { withStyles } from "material-ui-next/styles";
-import slideHeightStyles from "../../MyApp/styles/slideHeight";
-
 import DiscussionDetail from "../components/DiscussionDetail";
 
 import { replace } from "react-router-redux";
 import { getDiscussionById } from "../DiscussionReducer";
-import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
+import { ForumBoardRemote } from "../../ForumBoard/ForumBoardActions";
 import { setHeaderTitle } from "../../MyApp/MyAppActions";
 import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
 import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
-import {
-  fetchDiscussionById,
-  fetchDiscussions,
-  fetchDiscussionByTest
-} from "../DiscussionActions";
-
-function styles(theme) {
-  const heightStyle = slideHeightStyles(theme);
-  return {
-    root: {
-      ...heightStyle.slideHeight,
-      width: "100vw",
-      maxWidth: "100vw"
-    }
-  };
-}
+import { DiscussionRemote } from "../DiscussionActions";
 
 class DiscussionDetailPage extends React.Component {
   static getInitialAction(
@@ -48,11 +30,10 @@ class DiscussionDetailPage extends React.Component {
         return setHeaderTitle(title);
       };
       dispatch(_setHeaderTitle(getState()));
-      await Promise.all(
-        [
-          fetchDiscussionById(parentDiscussionId),
-          fetchDiscussions({ parentDiscussionId })
-        ].map(dispatch)
+      await dispatch(
+        DiscussionRemote.getChildDiscussions(parentDiscussionId, {
+          withParent: true
+        })
       );
       dispatch(_setHeaderTitle(getState()));
       if (tryMore) {
@@ -60,10 +41,10 @@ class DiscussionDetailPage extends React.Component {
           const parentDiscussion = getDiscussionById(state, parentDiscussionId);
           if (parentDiscussion) {
             const forumBoardId = parentDiscussion.get("forumBoard");
-            await dispatch(fetchForumBoardById(forumBoardId));
+            await dispatch(ForumBoardRemote.findById(forumBoardId));
             const forumBoard = getForumBoardById(getState(), forumBoardId);
             if (forumBoard) {
-              const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+              const rootWikiId = forumBoard ? forumBoard.rootWiki : "";
               if (rootWikiId) {
                 const scope = [
                   {
@@ -79,37 +60,38 @@ class DiscussionDetailPage extends React.Component {
         const _tryNextAndPrevParentDiscussion = async state => {
           const parentDiscussion = getDiscussionById(state, parentDiscussionId);
           if (parentDiscussion) {
-            const updatedAt = parentDiscussion.get("updatedAt");
-            const isRoot = parentDiscussion.get("isRoot");
-            const forumBoardId = parentDiscussion.get("forumBoard");
+            const orderPropName = "updatedAt";
+            const { isRoot } = parentDiscussion;
+            const orderProp = parentDiscussion[orderPropName];
+            const forumBoardId = parentDiscussion.forumBoard;
             const nextParentTest = {
               _id: {
                 $ne: parentDiscussionId
               },
               forumBoard: forumBoardId,
               isRoot,
-              updatedAt: {
-                $lte: updatedAt
+              [orderPropName]: {
+                $lte: orderProp
               }
             };
             const prevParentTest = {
               ...nextParentTest,
-              updatedAt: {
-                $gte: updatedAt
+              [orderPropName]: {
+                $gte: orderProp
               }
             };
             const select = { content: 0 };
             await Promise.all(
               [
-                fetchDiscussionByTest(nextParentTest, {
+                DiscussionRemote.findOne(nextParentTest, {
                   select,
                   sort: {
-                    updatedAt: -1
+                    [orderPropName]: -1
                   }
                 }),
-                fetchDiscussionByTest(prevParentTest, {
+                DiscussionRemote.findOne(prevParentTest, {
                   select,
-                  sort: { updatedAt: 1 }
+                  sort: { [orderPropName]: 1 }
                 })
               ].map(dispatch)
             );
@@ -136,9 +118,9 @@ class DiscussionDetailPage extends React.Component {
   getHelmetTitle = (props = this.props) => {
     const { parentDiscussion, forumBoard } = props;
     if (parentDiscussion) {
-      const title = parentDiscussion.get("title");
+      const { title } = parentDiscussion;
       if (forumBoard) {
-        const name = forumBoard.get("name");
+        const { name } = forumBoard;
         return `${title} - ${name}`;
       } else {
         return title;
@@ -171,14 +153,13 @@ class DiscussionDetailPage extends React.Component {
     const {
       forumBoardId,
       parentDiscussionId,
-      semanticReplaceMode,
-      classes
+      semanticReplaceMode
     } = this.props;
     const helmetTitle = this.getHelmetTitle();
     return (
       <React.Fragment>
         <Helmet title={helmetTitle} />
-        <div className={classes.root}>
+        <div>
           <DiscussionDetail
             id="DiscussionDetailPage/DiscussionDetail"
             semanticReplaceMode={semanticReplaceMode}
@@ -228,7 +209,6 @@ function mapDispatchToProps(dispatch, routerProps) {
 }
 
 export default compose(
-  withStyles(styles),
   hot(module),
   connect(mapStateToProps, mapDispatchToProps)
 )(DiscussionDetailPage);

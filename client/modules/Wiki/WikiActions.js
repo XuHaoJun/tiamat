@@ -20,15 +20,15 @@ export function setUIWikiForm(form) {
   return { type: SET_UI_WIKI_FORM, form };
 }
 
-export function fetchWiki(id, rootWikiId = null) {
+export function fetchWiki(idOrName, rootWikiId = null) {
   return dispatch => {
     const uri = rootWikiId
-      ? `rootWikis/${rootWikiId}/wikis/${encodeURIComponent(id)}`
-      : `wikis/${id}`;
+      ? `rootWikis/${rootWikiId}/wikis/${encodeURIComponent(idOrName)}`
+      : `wikis/${idOrName}`;
     return callApi(uri)
-      .then(res => {
-        dispatch(addWiki(res.wiki));
-        return res.wiki;
+      .then(data => {
+        dispatch(addWiki(data.wiki));
+        return data.wiki;
       })
       .catch(err => defaultRequestCatchHandler(dispatch, err));
   };

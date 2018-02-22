@@ -43,26 +43,21 @@ export const styles = theme => {
 class WikiDetailPage extends React.Component {
   static getInitialAction({ routerProps }) {
     return async (dispatch, getState) => {
-      const _setHeaderTitle = () => {
-        const state = getState();
+      const _setHeaderTitle = state => {
+        const { rootWikiId: rootWikiIdInput } = routerProps.match.params;
         const wiki = getWikiByRouterProps(state, routerProps);
-        if (wiki) {
-          const rootWiki = getRootWiki(state, wiki.get("rootWiki"));
-          const title = getTitle({ rootWiki });
-          return setHeaderTitle(title);
-        } else {
-          return setHeaderTitle("Loading...");
-        }
+        const rootWikiId = wiki ? wiki.rootWiki : rootWikiIdInput;
+        const rootWiki = getRootWiki(state, rootWikiId);
+        const title = getTitle({ rootWiki });
+        return setHeaderTitle(title);
       };
-      dispatch(_setHeaderTitle());
+      dispatch(_setHeaderTitle(getState()));
       await dispatch(fetchWikiByRouterProps(routerProps));
       const wiki = getWikiByRouterProps(getState(), routerProps);
       if (wiki) {
-        const rootWikiId = wiki.get("rootWiki");
+        const rootWikiId = wiki.rootWiki;
         await dispatch(fetchRootWikiById(rootWikiId));
-        return dispatch(_setHeaderTitle());
-      } else {
-        return Promise.resolve(null);
+        dispatch(_setHeaderTitle(getState()));
       }
     };
   }
@@ -72,7 +67,7 @@ class WikiDetailPage extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.location !== nextProps.location) {
+    if (this.props.location.url !== nextProps.location.url) {
       this.fetchComponentData(nextProps);
     }
   }
@@ -118,8 +113,8 @@ function mapStateToProps(state, routerProps) {
     }
   }
   const rootWiki = getRootWiki(state, rootWikiId);
-  const wikiId = wiki ? wiki.get("_id") : routerProps.match.params.wikiId;
-  const wikiName = wiki ? wiki.get("name") : routerProps.match.params.wikiName;
+  const wikiId = wiki ? wiki._id : routerProps.match.params.wikiId;
+  const wikiName = wiki ? wiki.name : routerProps.match.params.wikiName;
   return {
     wikiId,
     wikiName,
