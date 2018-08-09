@@ -26,17 +26,17 @@ if (process.env.NODE_ENV === "development") {
   // Webpack Requirements
   const webpack = require("webpack"); // eslint-disable-line
   const webpackDevConfig = require("../webpack.config.dev"); // eslint-disable-line
-  const webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
-  const webpackHotMiddleware = require("webpack-hot-middleware"); // eslint-disable-line
-
   const compiler = webpack(webpackDevConfig);
 
+  const webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
   app.use(
     webpackDevMiddleware(compiler, {
-      noInfo: true,
+      logLevel: "silent",
       publicPath: webpackDevConfig.output.publicPath
     })
   );
+
+  const webpackHotMiddleware = require("webpack-hot-middleware"); // eslint-disable-line
   app.use(webpackHotMiddleware(compiler));
 }
 

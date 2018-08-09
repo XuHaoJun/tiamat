@@ -35,9 +35,9 @@ const GotoDiscussionButton = (
   const to = id ? `/discussions/${id}` : "";
   const LinkProps = to
     ? {
-        component: Link,
-        to
-      }
+      component: Link,
+      to
+    }
     : null;
   return (
     <Button
@@ -177,7 +177,7 @@ class DiscussionDetail extends React.Component {
               return (
                 <DiscussionNode
                   key={x._id}
-                  index={index}
+                  index={index + 2}
                   discussion={x}
                   semanticRules={semanticRules}
                   onSemanticToggle={this.props.onSemanticToggle}
@@ -198,7 +198,7 @@ class DiscussionDetail extends React.Component {
 function mapStateToProps(state, props) {
   const { parentDiscussionId, forumBoardId } = props;
   const parentDiscussion = getDiscussionById(state, parentDiscussionId);
-  const childDiscussions = getChildDiscussions(state, parentDiscussionId).sort(
+  const childDiscussions = getChildDiscussions(state, parentDiscussionId).toList().sort(
     ({ createdAt: a }, { createdAt: b }) => {
       return a - b;
     }

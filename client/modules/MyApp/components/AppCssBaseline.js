@@ -1,6 +1,6 @@
 import React from "react";
 import { withStyles } from "material-ui-next/styles";
-import MuiReboot from "material-ui-next/Reboot";
+import MuiCssBaseline from "material-ui-next/CssBaseline";
 
 const styles = {
   "@global": {
@@ -11,7 +11,7 @@ const styles = {
       // disable chrome pull refresh, for custom pull refresh.
       overscrollBehaviorY: "contain",
       overflowY: "auto",
-
+      // reset
       minHeight: "100%",
       margin: 0,
       padding: 0,
@@ -20,10 +20,10 @@ const styles = {
   }
 };
 
-class AppReboot extends React.Component {
+class AppCssBaseline extends React.Component {
   render() {
-    return <MuiReboot />;
+    return <MuiCssBaseline />;
   }
 }
 
-export default withStyles(styles)(AppReboot);
+export default withStyles(styles)(AppCssBaseline);

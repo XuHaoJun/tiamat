@@ -44,12 +44,14 @@ const DiscussionRecord = Record(DISCUSSION_RECORD_DEFAULT);
 
 export class Discussion extends DiscussionRecord {
   static fromJS(obj = {}) {
-    const record = new Discussion({
+    const content = obj.content ? fromJS(obj.content) : null;
+    const authorBasicInfo = obj.authorBasicInfo
+      ? new UserBasicInfo(obj.authorBasicInfo)
+      : null;
+    return new Discussion({
       ...obj,
-      content: obj.content ? fromJS(obj.content) : null,
-      authorBasicInfo: obj.authorBasicInfo
-        ? new UserBasicInfo(obj.authorBasicInfo)
-        : null,
+      content,
+      authorBasicInfo,
       tags: Set(obj.tags),
       titleUpdatedAt: new Date(obj.titleUpdatedAt),
       repliedAt: new Date(obj.repliedAt),
@@ -57,18 +59,19 @@ export class Discussion extends DiscussionRecord {
       createdAt: new Date(obj.createdAt),
       updatedAt: new Date(obj.updatedAt)
     });
-    return record;
   }
 }
 
-const DISCUSSION_STATE_RECORD_DEFAULT = {
-  ui: fromJS({
-    CreateRootDiscussionPage: {
-      forms: {
-        // ${forumBoardId}: {   title: '',   content: null  }
-      }
+const DEFAULT_UI = {
+  CreateRootDiscussionPage: {
+    forms: {
+      // ${forumBoardId}: {   title: '',   content: null  }
     }
-  }),
+  }
+};
+
+const DISCUSSION_STATE_RECORD_DEFAULT = {
+  ui: fromJS(DEFAULT_UI),
   data: Set()
 };
 
@@ -76,10 +79,10 @@ const DiscussionStateRecord = Record(DISCUSSION_STATE_RECORD_DEFAULT);
 
 export class DiscussionState extends DiscussionStateRecord {
   static fromJS(obj = {}) {
-    const { ui, discussions = [] } = obj;
+    const { ui = DEFAULT_UI, data = [] } = obj;
     const record = new DiscussionState({
       ui: fromJS(ui),
-      data: Set(discussions.map(Discussion.fromJS))
+      data: Set(data.map(Discussion.fromJS))
     });
     return record;
   }
@@ -91,7 +94,7 @@ const DiscussionReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_DISCUSSION:
     case ADD_DISCUSSIONS:
-      const xs = state.discussions;
+      const xs = state.data;
       const dataInput = action.discussion
         ? [action.discussion]
         : action.discussions;
@@ -99,26 +102,28 @@ const DiscussionReducer = (state = initialState, action) => {
       const unionXs = xs.union(newXs);
       const nextXs = !is(unionXs, xs)
         ? unionXs
-            .groupBy(x => x._id)
-            .map(defaultSameIdElesMax)
-            .toSet()
+          .groupBy(x => x._id)
+          .map(defaultSameIdElesMax)
+          .toSet()
         : unionXs;
-      return state.set("discussions", nextXs);
+      return state.set("data", nextXs);
 
     case CLEAR_DISCUSSIONS:
-      return state.set("discussions", Set());
+      return state.set("data", Set());
 
-    case SET_UPSERT_DISCUSSION_PAGE_FORM:
+    case SET_UPSERT_DISCUSSION_PAGE_FORM: {
       const { forumBoardId, form } = action;
-      const newState = state.setIn(
-        ["ui", "UpsertDiscussionPage", "forms", forumBoardId],
+      const nextUiState = state.ui.setIn(
+        ["UpsertDiscussionPage", "forms", forumBoardId],
         fromJS(form)
       );
+      const nextState = state.set("ui", nextUiState);
       const db = connectDB();
       if (db) {
-        db.setItem("discussion:ui", newState.get("ui").toJSON());
+        db.setItem("discussion:ui", nextState.get("ui").toJS());
       }
-      return newState;
+      return nextState;
+    }
 
     case SET_DISCUSSIONS_UI:
       // const nextUI = state.get("ui")action.ui;
@@ -130,7 +135,7 @@ const DiscussionReducer = (state = initialState, action) => {
 };
 
 export const getDiscussions = state => {
-  return state.discussions.discussions;
+  return state.discussions.data;
 };
 
 export const getDiscussionsByForumBoard = (state, forumBoardId) => {

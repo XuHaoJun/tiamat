@@ -10,7 +10,7 @@ import {
 } from "../../MyApp/MyAppActions";
 import { addWikiRequest } from "../WikiActions";
 
-class CreateWikiPage extends React.PureComponent {
+class CreateWikiPage extends React.Component {
   static defaultProps = {
     title: "建立維基"
   };
@@ -23,12 +23,12 @@ class CreateWikiPage extends React.PureComponent {
   setFormRef = formComponent => {
     if (formComponent) {
       this.formComponent = formComponent;
-      const onTouchTap = this.sendForm;
-      this.props.dispatch(updateSendButtonProps({ onTouchTap }));
+      const onClick = this.sendForm;
+      this.props.dispatch(updateSendButtonProps({ onClick }));
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onTouchTap: () => {}
+          onClick: () => { }
         })
       );
     }

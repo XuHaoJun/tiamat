@@ -1,12 +1,6 @@
 import RootWiki from "../models/rootWiki";
 import ForumBoard from "../models/forumBoard";
 
-/**
- * Save a post
- * @param req
- * @param res
- * @returns void
- */
 export function getRootWiki(req, res) {
   const { id } = req.params;
   RootWiki.findById(id).exec((err, rootWiki) => {

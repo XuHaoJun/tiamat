@@ -107,11 +107,13 @@ export function addDiscussion(req, res) {
   } else {
     validate = validateChild;
   }
-  const valid = validate(form);
-  if (!valid) {
-    res.status(403).send(validate.errors);
-    return;
-  }
+  // FIXME
+  // update form validate format.
+  // const valid = validate(form);
+  // if (!valid) {
+  //  res.status(403).send(validate.errors);
+  //  return;
+  // }
   let validP;
   if (form.isRoot) {
     validP = ForumBoard.findById(form.forumBoard)

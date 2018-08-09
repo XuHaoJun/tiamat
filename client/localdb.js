@@ -85,7 +85,7 @@ export function initWithStore(db, store) {
 let localForage = null;
 
 export async function loadDBAdapter() {
-  const m = await import(/* webpackChunkName: "localForage" */ "localForage");
+  const m = await import(/* webpackChunkName: "localforage" */ "localforage");
   localForage = m;
   return m;
 }

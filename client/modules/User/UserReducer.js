@@ -95,9 +95,9 @@ const _UserReducer = (state = initialState, action) => {
       const unionUsers = state.users.union(newUsers);
       const nextUsers = !is(unionUsers, state.users)
         ? unionUsers
-            .groupBy(ele => ele.get("_id"))
-            .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
-            .toSet()
+          .groupBy(ele => ele.get("_id"))
+          .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
+          .toSet()
         : unionUsers;
       return state.set("users", nextUsers);
 
@@ -114,7 +114,7 @@ const _UserReducer = (state = initialState, action) => {
     case SET_CURRENT_ACCESS_TOKEN:
       const { currentAccessToken } = action;
       const accessToken = currentAccessToken
-        ? new AccessToken(currentAccessToken)
+        ? AccessToken.fromJS(currentAccessToken)
         : null;
       return state.set("currentAccessToken", accessToken);
 
@@ -126,9 +126,23 @@ const _UserReducer = (state = initialState, action) => {
 function syncLocalDB(state) {
   const db = connectDB();
   if (db) {
-    db.setItem("currentUserEmail", state.currentUserEmail);
-    db.setItem("currentAccessToken", state.currentAccessToken);
-    db.setItem("users", state.users);
+    if (state.currentUserEmail) {
+      db.setItem("currentUserEmail", state.currentUserEmail);
+    } else {
+      db.removeItem("currentUserEmail");
+    }
+    if (state.currentAccessToken) {
+      db.setItem("currentAccessToken", state.currentAccessToken.toJS());
+    } else {
+      db.removeItem("currentAccessToken");
+    }
+    if (state.users) {
+      db.setItem("users", state.users.toJS());
+    } else if (!state.users || state.users.count() === 0) {
+      db.removeItem("users");
+    } else {
+      db.removeItem("users");
+    }
   }
 }
 

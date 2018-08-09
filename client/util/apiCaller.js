@@ -36,9 +36,7 @@ export default function callApi(
   debug("start fetch", reqConfig.url);
   return axios(reqConfig)
     .then(response => {
-      const json = response.data;
-      debug("end fetch", reqConfig.url);
-      return json;
+      return response.data;
     })
     .then(response => response, handleError);
 }

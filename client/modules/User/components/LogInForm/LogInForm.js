@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import _ from "lodash";
 import Ajv from "ajv";
+import { Link } from "react-router-dom";
 
 import TextField from "material-ui-next/TextField";
 import Button from "material-ui-next/Button";
@@ -212,13 +213,7 @@ class LogInForm extends React.Component {
             登入
           </Button>
           <br />
-          <Button
-            onClick={(...args) => {
-              if (this.props.onClickSignUpButton) {
-                this.props.onClickSignUpButton(...args);
-              }
-            }}
-          >
+          <Button component={Link} to="/signup">
             註冊新帳號
           </Button>
           <Button>忘記密碼?(尚未完成)</Button>
@@ -261,6 +256,7 @@ export default connect(
       dispatch
     };
   },
+  // FIXME
   (stateProps, dispatchProps, ownProps) => {
     const { oauth2Client } = stateProps;
     const { dispatch } = dispatchProps;

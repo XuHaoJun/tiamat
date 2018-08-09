@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 
 import { MuiThemeProvider } from "material-ui-next/styles";
 
-import AppReboot from "./AppReboot";
+import AppCssBaseline from "./AppCssBaseline";
 import AppHeader from "./AppHeader";
 import AppMain from "./AppMain";
 import AppNavDrawer from "./AppNavDrawer";
@@ -57,7 +57,7 @@ class AppFrame extends React.Component {
           />
         </Helmet>
         <MuiThemeProvider theme={theme} sheetsManager={sheetsManager}>
-          <AppReboot />
+          <AppCssBaseline />
           <AppHeader onMenuButtonClick={this.handleMenuButtonClick} />
           <AppNavDrawer
             open={drawerOpen}
