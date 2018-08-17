@@ -8,16 +8,16 @@ import { Link } from "react-router-dom";
 import { matchPath } from "react-router";
 import { Motion, spring } from "react-motion";
 
-import { withStyles } from "material-ui-next/styles";
-import AppBar from "material-ui-next/AppBar";
-import Toolbar from "material-ui-next/Toolbar";
-import Typography from "material-ui-next/Typography";
-import Button from "material-ui-next/Button";
-import IconButton from "material-ui-next/IconButton";
-import SearchVerIcon from "material-ui-icons-next/Search";
-import BackspaceIcon from "material-ui-icons-next/KeyboardBackspace";
-import MenuIcon from "material-ui-icons-next/Menu";
-import CircularProgress from "material-ui-next/Progress/CircularProgress";
+import { withStyles } from "@material-ui/core/styles";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import SearchVerIcon from "@material-ui/icons/Search";
+import BackspaceIcon from "@material-ui/icons/KeyboardBackspace";
+import MenuIcon from "@material-ui/icons/Menu";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import CurrentUserIconMenu from "../../User/components/CurrentUserIconMenu";
 import SendButton from "./SendButton";

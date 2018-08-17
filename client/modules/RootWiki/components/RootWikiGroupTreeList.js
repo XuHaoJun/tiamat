@@ -4,16 +4,15 @@ import { Link } from "react-router-dom";
 import { fromJS, Map, List as ImmutableList } from "immutable";
 
 import { withState } from "recompose";
-import List, {
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction
-} from "material-ui-next/List";
-import Avatar from "material-ui-next/Avatar";
-import IconButton from "material-ui-next/IconButton";
-import ExpandLess from "material-ui-icons-next/ExpandLess";
-import ExpandMore from "material-ui-icons-next/ExpandMore";
-import Collapse from "material-ui-next/transitions/Collapse";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import Avatar from "@material-ui/core/Avatar";
+import IconButton from "@material-ui/core/IconButton";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import Collapse from "@material-ui/core/Collapse";
 
 import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
 import getRootWikiHref from "../utils/getRootWikiHref";

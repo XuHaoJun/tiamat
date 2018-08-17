@@ -18,7 +18,7 @@ import shouldUpdateScroll from "../client/components/ScrollContainer/shouldUpdat
 import { ScrollContext as ScrollContextOri } from "react-router-scroll-4";
 
 import { SheetsRegistry, JssProvider as JssProviderOri } from "react-jss";
-import { createGenerateClassName } from "material-ui-next/styles";
+import { createGenerateClassName } from "@material-ui/core/styles";
 
 import createMemoryHistory from "history/createMemoryHistory";
 import IntlWrapper from "./modules/Intl/IntlWrapper";

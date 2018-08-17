@@ -5,10 +5,10 @@ import { connect } from "react-redux";
 import { shallowEqualImmutable } from "react-immutable-render-mixin";
 
 import classNames from "classnames";
-import { withStyles } from "material-ui-next/styles";
-import Snackbar from "material-ui-next/Snackbar";
-import IconButton from "material-ui-next/IconButton";
-import CloseIcon from "material-ui-icons-next/Close";
+import { withStyles } from "@material-ui/core/styles";
+import Snackbar from "@material-ui/core/Snackbar";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 
 import { getLastError } from "../ErrorReducer";
 

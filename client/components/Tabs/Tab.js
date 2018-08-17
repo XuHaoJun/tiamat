@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Tab from "material-ui-next/Tabs/Tab";
+import Tab from "@material-ui/core/Tab";
 
 class EnhancedTab extends React.Component {
   static propTypes = {

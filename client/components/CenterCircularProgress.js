@@ -1,5 +1,5 @@
 import React from "react";
-import CircularProgress from "material-ui-next/Progress/CircularProgress";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const CenterCircularProgress = () => {
   const styles = {

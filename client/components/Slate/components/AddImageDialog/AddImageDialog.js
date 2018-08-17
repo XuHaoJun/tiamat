@@ -2,15 +2,14 @@ import React from "react";
 import PropTypes from "prop-types";
 import isUrl from "is-url";
 
-import Button from "material-ui-next/Button";
-import Dialog, {
-  DialogActions,
-  DialogContent,
-  DialogTitle
-} from "material-ui-next/Dialog";
-import PhotoIcon from "material-ui-icons-next/PhotoCamera";
-import TextField from "material-ui-next/TextField";
-import LinearProgress from "material-ui-next/Progress/LinearProgress";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import PhotoIcon from "@material-ui/icons/PhotoCamera";
+import TextField from "@material-ui/core/TextField";
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 const styles = {
   imgContainer: {
@@ -163,7 +162,7 @@ class AddImageDialog extends React.PureComponent {
 
   _defaultOnProgress = progressEvent => {
     const percentCompleted = Math.round(
-      progressEvent.loaded * 100 / progressEvent.total
+      (progressEvent.loaded * 100) / progressEvent.total
     );
     const { progressValue } = this.state;
     const nextProgressValue = progressValue + percentCompleted;

@@ -1,8 +1,8 @@
 import memoize from "fast-memoize";
 import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
 
-import grey from "material-ui-next/colors/grey";
-import { createMuiTheme } from "material-ui-next/styles";
+import grey from "@material-ui/core/colors/grey";
+import { createMuiTheme } from "@material-ui/core/styles";
 
 function createTheme(
   { networkStatus } = {

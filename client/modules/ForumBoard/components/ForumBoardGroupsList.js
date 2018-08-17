@@ -4,9 +4,11 @@ import { List } from "immutable";
 import { shallowEqualImmutable } from "react-immutable-render-mixin";
 
 import { Link } from "react-router-dom";
-import { MenuItem, MenuList } from "material-ui-next/Menu";
-import { ListItemText, ListItemIcon } from "material-ui-next/List";
-import RightArrowIcon from "material-ui-icons-next/KeyboardArrowRight";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuList from "@material-ui/core/MenuList";
+import ListItemText from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import RightArrowIcon from "@material-ui/icons/KeyboardArrowRight";
 
 import { getForumBoardById } from "../ForumBoardReducer";
 

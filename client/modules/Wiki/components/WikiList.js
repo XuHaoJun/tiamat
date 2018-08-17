@@ -10,9 +10,10 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 
 import List from "../../../components/List/EnhancedList";
-import { ListItem, ListItemText } from "material-ui-next/List";
-import Avatar from "material-ui-next/Avatar";
-import WikiIcon from "material-ui-icons-next/ImportContacts";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Avatar from "@material-ui/core/Avatar";
+import WikiIcon from "@material-ui/icons/ImportContacts";
 
 import { fetchWikis } from "../WikiActions";
 import { getWikisByRootWikiId } from "../WikiReducer";

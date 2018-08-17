@@ -1,12 +1,11 @@
 import React from "react";
 import { Set } from "immutable";
 
-import Button from "material-ui-next/Button";
-import Dialog, {
-  DialogActions,
-  DialogContent,
-  DialogTitle
-} from "material-ui-next/Dialog";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 class AddWikiPartDialog extends React.Component {
   static defaultProps = {

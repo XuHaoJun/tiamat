@@ -1,8 +1,8 @@
 import * as React from "react";
 
-import MuiMenuItem from "material-ui-next/Menu/MenuItem";
-import Menu from "material-ui-next/Menu/Menu";
-import ArrowDropDown from "material-ui-icons-next/ArrowDropDown";
+import MuiMenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu/Menu";
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 
 class NestingMenu extends React.Component {
   setAnchorRef = el => {

@@ -13,7 +13,7 @@ import Portal from "../Portal";
 import NextList, {
   ListItem as NextListItem,
   ListItemText as NextListItemText
-} from "material-ui-next/List";
+} from "@material-ui/core/List";
 
 import Debug from "debug";
 

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
-import TextField from "material-ui-next/TextField";
+import TextField from "@material-ui/core/TextField";
 
 import Editor from "../../../components/Slate";
 import RootWikiGroupTreePopover from "../../RootWiki/components/RootWikiGroupTreePopover";

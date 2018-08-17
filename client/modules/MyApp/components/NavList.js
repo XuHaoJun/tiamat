@@ -5,22 +5,21 @@ import { connect } from "react-redux";
 
 import { Link, Route } from "react-router-dom";
 
-import { withStyles } from "material-ui-next/styles";
-import Button from "material-ui-next/Button";
-import Divider from "material-ui-next/Divider";
-import List, {
-  ListItem as MuiListItem,
-  ListItemIcon,
-  ListItemText
-} from "material-ui-next/List";
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
+import List from "@material-ui/core/List";
+import MuiListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
 
-import WhatsHotIcon from "material-ui-icons-next/Whatshot";
-import ActionHomeIcon from "material-ui-icons-next/Home";
-import ChatIcon from "material-ui-icons-next/Chat";
-import SubscriptionIcon from "material-ui-icons-next/RssFeed";
-import HelpIcon from "material-ui-icons-next/Help";
-import SettingsIcon from "material-ui-icons-next/Settings";
-import AddIcon from "material-ui-icons-next/Add";
+import WhatsHotIcon from "@material-ui/icons/Whatshot";
+import ActionHomeIcon from "@material-ui/icons/Home";
+import ChatIcon from "@material-ui/icons/Chat";
+import SubscriptionIcon from "@material-ui/icons/RssFeed";
+import HelpIcon from "@material-ui/icons/Help";
+import SettingsIcon from "@material-ui/icons/Settings";
+import AddIcon from "@material-ui/icons/Add";
 
 import { getCurrentUser } from "../../User/UserReducer";
 import logOutRequestComposeEvent from "../../User/composes/logOutRequestComposeEvent";

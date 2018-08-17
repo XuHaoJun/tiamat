@@ -2,8 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import { Map } from "immutable";
 
-import Dialog, { DialogActions, DialogContent } from "material-ui-next/Dialog";
-import Button from "material-ui-next/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import Button from "@material-ui/core/Button";
 
 import { getModule } from "../../../../modules/Template/TemplateReducer";
 import AceEditor from "../../../AceEditor";

@@ -6,8 +6,8 @@ import isEmail from "validator/lib/isEmail";
 import isBoolean from "lodash/isBoolean";
 import isPromise from "is-promise";
 
-import TextField from "material-ui-next/TextField";
-import Button from "material-ui-next/Button";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 
 import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";
 import {

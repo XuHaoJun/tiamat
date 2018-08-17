@@ -9,7 +9,7 @@ import moment from "moment";
 import { renderToString, renderToStaticNodeStream } from "react-dom/server";
 import { matchRoutes } from "react-router-config";
 
-import { createGenerateClassName } from "material-ui-next/styles";
+import { createGenerateClassName } from "@material-ui/core/styles";
 import { SheetsRegistry } from "react-jss";
 
 import ClientApp from "../client/App";
@@ -193,12 +193,12 @@ const Head = ({ jssSheets, helmet }) => {
         dangerouslySetInnerHTML={{ __html: jssSheets }}
       />
       {process.env.NODE_ENV === "production" &&
-      googleAnalyticsConfig["google-site-verification"] ? (
-        <meta
-          name="google-site-verification"
-          content={googleAnalyticsConfig["google-site-verification"]}
-        />
-      ) : null}
+        googleAnalyticsConfig["google-site-verification"] ? (
+          <meta
+            name="google-site-verification"
+            content={googleAnalyticsConfig["google-site-verification"]}
+          />
+        ) : null}
       {process.env.NODE_ENV === "production" ? (
         <React.Fragment>
           <ServiceWorkerScript />
@@ -228,12 +228,11 @@ export async function renderClientRoute(req, res) {
 
   const sheetsRegistry = new SheetsRegistry();
   const generateClassName = createGenerateClassName();
-  const clientAppHTML = renderToString(
-    <ClientApp
-      store={store}
-      JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
-    />
-  );
+  const clientAppEle = <ClientApp
+    store={store}
+    JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
+  />;
+  const clientAppHTML = renderToString(clientAppEle);
 
   const helmet = Helmet.renderStatic();
   const htmlAttrs = helmet.htmlAttributes.toComponent();
@@ -244,15 +243,14 @@ export async function renderClientRoute(req, res) {
 
   const jssSheets = sheetsRegistry.toString();
 
-  const htmlStream = renderToStaticNodeStream(
-    <html lang={req.lang} {...htmlAttrs}>
-      <Head jssSheets={jssSheets} helmet={helmet} />
-      <body {...bodyAttrs}>
-        <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
-        <ClientInitialScripts state={pureState} />
-      </body>
-    </html>
-  );
+  const htmlEle = <html lang={req.lang} {...htmlAttrs}>
+    <Head jssSheets={jssSheets} helmet={helmet} />
+    <body {...bodyAttrs}>
+      <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
+      <ClientInitialScripts state={pureState} />
+    </body>
+  </html>;
+  const htmlStream = renderToStaticNodeStream(htmlEle);
 
   res.set("Content-Type", "text/html").status(200);
   res.write("<!doctype html>");

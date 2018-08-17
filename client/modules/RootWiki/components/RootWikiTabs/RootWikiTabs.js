@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
 import Tabs from "../../../../components/Tabs";
-import { Tab } from "material-ui-next/Tabs";
+import Tab from "@material-ui/core/Tab";
 
 import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
 import WikiDataFormList from "./WikiDataFormList";

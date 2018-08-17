@@ -2,8 +2,8 @@ import React from "react";
 import randomColor from "randomcolor";
 import LazyLoad from "react-lazyload";
 
-import Avatar from "material-ui-next/Avatar";
-import GuestPersonIcon from "material-ui-icons-next/Person";
+import Avatar from "@material-ui/core/Avatar";
+import GuestPersonIcon from "@material-ui/icons/Person";
 
 function getTextOrSrcOrIcon(user) {
   if (user) {

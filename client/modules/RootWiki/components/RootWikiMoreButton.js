@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import Menu, { MenuItem } from "material-ui-next/Menu";
-import Button from "material-ui-next/Button";
-import MoreVertIcon from "material-ui-icons-next/FormatListBulleted";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
+import MoreVertIcon from "@material-ui/icons/FormatListBulleted";
 
 class RootWikiMoreButton extends React.Component {
   state = {

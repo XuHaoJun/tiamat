@@ -5,9 +5,9 @@ import _ from "lodash";
 import Ajv from "ajv";
 import { Link } from "react-router-dom";
 
-import TextField from "material-ui-next/TextField";
-import Button from "material-ui-next/Button";
-import Divider from "material-ui-next/Divider";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
 
 import { push } from "react-router-redux";
 import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";

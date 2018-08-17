@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 
 import { Link } from "react-router-dom";
 
-import Button from "material-ui-next/Button";
-import CreateIcon from "material-ui-icons-next/Create";
-import AddIcon from "material-ui-icons-next/Add";
-import Zoom from "material-ui-next/transitions/Zoom";
+import Button from "@material-ui/core/Button";
+import CreateIcon from "@material-ui/icons/Create";
+import AddIcon from "@material-ui/icons/Add";
+import Zoom from "@material-ui/core/Zoom";
 
 import { ROOT_WIKI_OR_WIKI_SLIDE } from "./MixedMainTabs";
 import RootWikiMoreButton from "../../RootWiki/components/RootWikiMoreButton";

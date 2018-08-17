@@ -2,7 +2,7 @@ import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
 
-import { MuiThemeProvider } from "material-ui-next/styles";
+import { MuiThemeProvider } from "@material-ui/core/styles";
 
 import AppCssBaseline from "./AppCssBaseline";
 import AppHeader from "./AppHeader";

@@ -3,15 +3,14 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import compose from "recompose/compose";
-import { withStyles } from "material-ui-next/styles";
-import BottomNavigation, {
-  BottomNavigationAction
-} from "material-ui-next/BottomNavigation";
+import { withStyles } from "@material-ui/core/styles";
+import BottomNavigation from "@material-ui/core/BottomNavigation";
+import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
 
-import WhatsHotIcon from "material-ui-icons-next/Whatshot";
-import ActionHomeIcon from "material-ui-icons-next/Home";
-import ChatIcon from "material-ui-icons-next/Chat";
-import SubscriptionIcon from "material-ui-icons-next/RssFeed";
+import WhatsHotIcon from "@material-ui/icons/Whatshot";
+import ActionHomeIcon from "@material-ui/icons/Home";
+import ChatIcon from "@material-ui/icons/Chat";
+import SubscriptionIcon from "@material-ui/icons/RssFeed";
 
 const styles = theme => {
   const { breakpoints } = theme;

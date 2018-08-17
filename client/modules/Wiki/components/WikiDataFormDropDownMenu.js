@@ -1,7 +1,7 @@
 import React from "react";
 
-import Select from "material-ui-next/Select";
-import { MenuItem } from "material-ui-next/Menu";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
 class WikiDataFormDropDownMenu extends React.Component {
   constructor(props) {

@@ -2,18 +2,17 @@ import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import moment from "moment";
 
-import Switch from "material-ui-next/Switch";
-import WikiIcon from "material-ui-icons-next/ImportContacts";
-import { FormControlLabel } from "material-ui-next/Form";
-import Card, {
-  CardHeader,
-  CardContent,
-  CardActions
-} from "material-ui-next/Card";
-import CircularProgress from "material-ui-next/Progress/CircularProgress";
-import IconButton from "material-ui-next/IconButton";
-import FavoriteIcon from "material-ui-icons-next/Favorite";
-import ShareIcon from "material-ui-icons-next/Share";
+import Switch from "@material-ui/core/Switch";
+import WikiIcon from "@material-ui/icons/ImportContacts";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import IconButton from "@material-ui/core/IconButton";
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import ShareIcon from "@material-ui/icons/Share";
 
 import UserAvatar from "../../../User/components/UserAvatar";
 import Editor from "../../../../components/Slate/Editor";

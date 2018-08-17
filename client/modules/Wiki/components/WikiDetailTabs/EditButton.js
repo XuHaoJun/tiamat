@@ -1,9 +1,9 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 
-import Portal from "material-ui-next/Portal";
-import CreateIcon from "material-ui-icons-next/Create";
-import Button from "material-ui-next/Button";
+import Portal from "@material-ui/core/Portal";
+import CreateIcon from "@material-ui/icons/Create";
+import Button from "@material-ui/core/Button";
 
 class EditButton extends React.Component {
   static propTypes = {

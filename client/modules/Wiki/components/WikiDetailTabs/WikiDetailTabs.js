@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Loadable from "react-loadable";
 
 import Tabs from "../../../../components/Tabs";
-import { Tab } from "material-ui-next/Tabs";
+import Tab from "@material-ui/core/Tab";
 
 import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
 import { getWiki } from "../../WikiReducer";

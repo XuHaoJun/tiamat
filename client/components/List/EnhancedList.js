@@ -7,16 +7,18 @@ import ScrollContainerHoc from "../ScrollContainer/ScrollContainerHoc";
 
 import PullRefresh, { Indicator } from "@xuhaojun/react-pullrefresh";
 
-import Portal from "material-ui-next/Portal";
+import Portal from "@material-ui/core/Portal";
 
 import FlipMove from "react-flip-move";
 
-import { CircularProgress } from "material-ui-next/Progress";
-import RefreshIcon from "material-ui-icons-next/Refresh";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import LazyLoad from "react-lazyload";
 
 import compose from "recompose/compose";
-import List, { ListItem, ListItemText } from "material-ui-next/List";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
 
 import { connect } from "react-redux";
 import { getIsFirstRender } from "../../modules/MyApp/MyAppReducer";

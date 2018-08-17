@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import pure from "recompose/pure";
 
 import Tabs from "../../../components/Tabs";
-import { Tab } from "material-ui-next/Tabs";
+import Tab from "@material-ui/core/Tab";
 import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
 
 import RootDiscussionList from "../../Discussion/components/RootDiscussionList";

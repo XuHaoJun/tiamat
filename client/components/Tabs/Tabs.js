@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import AppBar from "material-ui-next/AppBar";
-import Tabs from "material-ui-next/Tabs";
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
 
 const ReponsiveTabs = props => {
   const { browser, AppBarProps, ...other } = props;

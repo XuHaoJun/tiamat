@@ -3,12 +3,14 @@ import { connect } from "react-redux";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { Link } from "react-router-dom";
 
-import IconButton from "material-ui-next/IconButton";
-import Menu, { MenuItem } from "material-ui-next/Menu";
-import { ListItemIcon, ListItemText } from "material-ui-next/List";
+import IconButton from "@material-ui/core/IconButton";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
 
-import SettingsIcon from "material-ui-icons-next/Settings";
-import LogOutIcon from "material-ui-icons-next/Input";
+import SettingsIcon from "@material-ui/icons/Settings";
+import LogOutIcon from "@material-ui/icons/Input";
 
 import UserAvatar from "./UserAvatar";
 import { getCurrentUser } from "../UserReducer";

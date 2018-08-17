@@ -9,9 +9,9 @@ import {
   withStyles,
   MuiThemeProvider,
   createMuiTheme
-} from "material-ui-next/styles";
-import Drawer from "material-ui-next/Drawer";
-import Paper from "material-ui-next/Paper";
+} from "@material-ui/core/styles";
+import Drawer from "@material-ui/core/Drawer";
+import Paper from "@material-ui/core/Paper";
 
 import NavList from "./NavList";
 

@@ -1,13 +1,12 @@
 import React from "react";
 
 import { Link as ReactRouterLink } from "react-router-dom";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow
-} from "material-ui-next/Table";
-import Typography from "material-ui-next/Typography";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Typography from "@material-ui/core/Typography";
 
 import normalizeHref from "./utils/normailzeHref";
 import { Block } from "slate";

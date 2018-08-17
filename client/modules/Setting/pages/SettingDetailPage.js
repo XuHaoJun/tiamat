@@ -5,9 +5,10 @@ import Loadable from "react-loadable";
 import { compose } from "recompose";
 import { hot } from "react-hot-loader";
 
-import { FormControlLabel, FormGroup } from "material-ui-next/Form";
-import Switch from "material-ui-next/Switch";
-import Button from "material-ui-next/Button";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import Switch from "@material-ui/core/Switch";
+import Button from "@material-ui/core/Button";
 import { SketchPicker } from "react-color";
 import screenfull from "screenfull";
 

@@ -1,10 +1,11 @@
 import React from "react";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
-import TextField from "material-ui-next/TextField";
-import Menu, { MenuItem } from "material-ui-next/Menu";
-import Button from "material-ui-next/Button";
-import ArrowDropDown from "material-ui-icons-next/ArrowDropDown";
+import TextField from "@material-ui/core/TextField";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 
 export function getStyles() {
   return {

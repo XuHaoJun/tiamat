@@ -50,6 +50,8 @@
   "license": "MIT",
   "dependencies": {
     "@babel/polyfill": "^7.0.0-beta.40",
+    "@material-ui/core": "^1.5.0",
+    "@material-ui/icons": "^2.0.2",
     "@xuhaojun/react-pullrefresh": "^2.0.35-alpha",
     "@xuhaojun/react-swipeable-views": "^0.12.9",
     "@xuhaojun/slate-suggestions": "^0.4.1",

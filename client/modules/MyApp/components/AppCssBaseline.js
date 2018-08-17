@@ -1,6 +1,6 @@
 import React from "react";
-import { withStyles } from "material-ui-next/styles";
-import MuiCssBaseline from "material-ui-next/CssBaseline";
+import { withStyles } from "@material-ui/core/styles";
+import MuiCssBaseline from "@material-ui/core/CssBaseline";
 
 const styles = {
   "@global": {

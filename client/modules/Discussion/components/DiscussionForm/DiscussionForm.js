@@ -4,10 +4,11 @@ import { shouldComponentUpdate } from "react-immutable-render-mixin";
 import { Set } from "immutable";
 import _ from "lodash";
 
-import TextField from "material-ui-next/TextField";
-import Button from "material-ui-next/Button";
-import Menu, { MenuItem } from "material-ui-next/Menu";
-import ArrowDropDown from "material-ui-icons-next/ArrowDropDown";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 
 import Editor, { emptyContent } from "../../../../components/Slate/Editor";
 

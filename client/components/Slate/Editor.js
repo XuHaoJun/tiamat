@@ -24,7 +24,7 @@ import {
   getEventTransfer,
   getEventRange
 } from "slate-react";
-import Portal from "material-ui-next/Portal";
+import Portal from "@material-ui/core/Portal";
 
 import { addImageRequest } from "../../modules/Image/ImageActions";
 import { addError } from "../../modules/Error/ErrorActions";

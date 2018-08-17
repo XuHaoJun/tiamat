@@ -1,14 +1,14 @@
 import React from "react";
 import { Map, List as ImmutableList, fromJS } from "immutable";
 
-import Button from "material-ui-next/Button";
-import { MenuList } from "material-ui-next/Menu";
+import Button from "@material-ui/core/Button";
+import MenuList from "@material-ui/core/MenuItem";
 import MenuItem from "../../../components/NestingMenuItem";
-import { ListItemText } from "material-ui-next/List";
-import Popover from "material-ui-next/Popover";
-import ClickAwayListener from "material-ui-next/utils/ClickAwayListener";
+import ListItemText from "@material-ui/core/ListItemText";
+import Popover from "@material-ui/core/Popover";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
-import ArrowDropDown from "material-ui-icons-next/KeyboardArrowDown";
+import ArrowDropDown from "@material-ui/icons/KeyboardArrowDown";
 
 const style = {
   display: "inline-block",

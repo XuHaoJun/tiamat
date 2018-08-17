@@ -5,7 +5,7 @@ import Helmet from "react-helmet";
 import { compose } from "recompose";
 import { hot } from "react-hot-loader";
 
-import Paper from "material-ui-next/Paper";
+import Paper from "@material-ui/core/Paper";
 
 import SignUpForm from "../components/SignUpForm";
 

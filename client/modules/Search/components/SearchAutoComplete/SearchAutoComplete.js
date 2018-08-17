@@ -1,10 +1,10 @@
 import React from "react";
 
 import compose from "recompose/compose";
-import { withStyles } from "material-ui-next/styles";
-import { fade } from "material-ui-next/styles/colorManipulator";
+import { withStyles } from "@material-ui/core/styles";
+import { fade } from "@material-ui/core/styles/colorManipulator";
 
-import SearchIcon from "material-ui-icons-next/Search";
+import SearchIcon from "@material-ui/icons/Search";
 
 const styles = theme => {
   const { breakpoints } = theme;

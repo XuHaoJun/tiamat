@@ -7,9 +7,11 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 
 import compose from "recompose/compose";
-import { withStyles } from "material-ui-next/styles";
+import { withStyles } from "@material-ui/core/styles";
 import List from "../../../components/List/EnhancedList";
-import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 
 import UserAvatar from "../../User/components/UserAvatar";
 

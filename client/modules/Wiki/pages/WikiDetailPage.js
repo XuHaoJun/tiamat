@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { hot } from "react-hot-loader";
 
 import compose from "recompose/compose";
-import { withStyles } from "material-ui-next/styles";
+import { withStyles } from "@material-ui/core/styles";
 import slideHeightStyle from "../../MyApp/styles/slideHeight";
 
 import CenterCircularProgress from "../../../components/CenterCircularProgress";

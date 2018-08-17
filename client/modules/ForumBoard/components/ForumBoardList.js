@@ -3,13 +3,16 @@ import { Set, is } from "immutable";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { ListItem, ListItemText, ListItemAvatar } from "material-ui-next/List";
 import List from "../../../components/List/EnhancedList";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+
 import { getForumBoards } from "../ForumBoardReducer";
 import { fetchForumBoards } from "../ForumBoardActions";
 import { shouldComponentUpdate } from "react-immutable-render-mixin";
 
-import Avatar from "material-ui-next/Avatar";
+import Avatar from "@material-ui/core/Avatar";
 import Debug from "debug";
 
 const debug = Debug("app:ForumBoardList");
