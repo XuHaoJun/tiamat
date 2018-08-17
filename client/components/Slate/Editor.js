@@ -7,10 +7,10 @@ import isUrl from "is-url";
 import editorConnectHelper from "./connect";
 import { connect, createProvider } from "react-redux";
 
-import { Block, setKeyGenerator } from "slate";
+import { Block, KeyUtils } from "slate";
 
 let n = 0;
-setKeyGenerator(() => {
+KeyUtils.setGenerator(() => {
   n += 1;
   return `${n}`;
 });

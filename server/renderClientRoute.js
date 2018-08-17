@@ -3,7 +3,7 @@
 import { Router } from "express";
 import React from "react";
 import Helmet from "react-helmet";
-import { setKeyGenerator } from "slate";
+import { KeyUtils as SlateKeyUtils } from "slate";
 import serializeJavascript from "serialize-javascript";
 import moment from "moment";
 import { renderToString, renderToStaticNodeStream } from "react-dom/server";
@@ -221,7 +221,7 @@ export async function renderClientRoute(req, res) {
   // Slate editor init.
   // fix if solve https://github.com/ianstormtaylor/slate/issues/1408.
   let n = 0;
-  setKeyGenerator(() => {
+  SlateKeyUtils.setGenerator(() => {
     n += 1;
     return `${n}`;
   });

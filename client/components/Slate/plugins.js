@@ -89,24 +89,19 @@ function createPlugins() {
   return plugins;
 }
 
-export function loadPrismPlugin() {
-  return import("slate-prism")
-    .then(module => {
-      const _PluginPrism = module.default;
-      const prismPlugin = _PluginPrism({
-        onlyIn: node => {
-          return node.type === "code_block";
-        },
-        getSyntax: () => "jsx"
-      });
-      return prismPlugin;
-    })
-    .then(prismPlugin => {
-      return Promise.all([
-        import("../../../node_modules/prismjs/themes/prism-tomorrow.css"),
-        import("prismjs/components/prism-jsx")
-      ]).then(() => prismPlugin);
-    });
+export async function loadPrismPlugin() {
+  const slatePrismModule = await import("slate-prism");
+  const prismPlugin = slatePrismModule.default({
+    onlyIn: node => {
+      return node.type === "code_block";
+    },
+    getSyntax: () => "jsx"
+  });
+  await Promise.all([
+    import("../../../node_modules/prismjs/themes/prism-tomorrow.css"),
+    import("prismjs/components/prism-jsx")
+  ]);
+  return prismPlugin;
 }
 
 export const defaultPlugins = createPlugins();
