@@ -1,4 +1,4 @@
-import { is, Set, Record } from "immutable";
+import { is, Set, List, Record } from "immutable";
 import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
 
 import {
@@ -64,7 +64,7 @@ export class User extends Record(USER_RECORD_DEFAULT) {
 }
 
 const USER_STATE_RECORD_DEFAULT = {
-  users: Set(),
+  users: List(),
   currentUserEmail: null,
   currentAccessToken: null
 };
@@ -72,7 +72,7 @@ const USER_STATE_RECORD_DEFAULT = {
 export class UserState extends Record(USER_STATE_RECORD_DEFAULT) {
   static fromJS({ users = [], currentUser, currentAccessToken } = {}) {
     const record = new UserState({
-      users: Set(users.map(User.fromJS)),
+      users: List(users.map(User.fromJS)),
       currentUser,
       currentAccessToken: currentAccessToken
         ? AccessToken.fromJS(currentAccessToken)
