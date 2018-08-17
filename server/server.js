@@ -66,7 +66,7 @@ mongoose.connection.on("connected", () => {
 });
 
 mongoose.connect(appConfig.mongoDB.url, {
-  useMongoClient: true
+  useNewUrlParser: true
 });
 
 process.on("SIGINT", () => {
