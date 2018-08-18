@@ -1,27 +1,27 @@
 /**
  * Root Component
  */
-import React from "react";
-import PropTypes from "prop-types";
-import { defaultProps, compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { defaultProps, compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
 // redux
-import { Provider as ReduxProvider } from "react-redux";
+import { Provider as ReduxProvider } from 'react-redux';
 
 // react-router
-import { ConnectedRouter } from "react-router-redux";
-import { renderRoutes } from "react-router-config";
-import routes from "./routes";
+import { ConnectedRouter } from 'react-router-redux';
+import { renderRoutes } from 'react-router-config';
+import routes from './routes';
 
-import shouldUpdateScroll from "../client/components/ScrollContainer/shouldUpdateScroll";
-import { ScrollContext as ScrollContextOri } from "react-router-scroll-4";
+import shouldUpdateScroll from '../client/components/ScrollContainer/shouldUpdateScroll';
+import { ScrollContext as ScrollContextOri } from 'react-router-scroll-4';
 
-import { SheetsRegistry, JssProvider as JssProviderOri } from "react-jss";
-import { createGenerateClassName } from "@material-ui/core/styles";
+import { SheetsRegistry, JssProvider as JssProviderOri } from 'react-jss';
+import { createGenerateClassName } from '@material-ui/core/styles';
 
-import createMemoryHistory from "history/createMemoryHistory";
-import IntlWrapper from "./modules/Intl/IntlWrapper";
+import createMemoryHistory from 'history/createMemoryHistory';
+import IntlWrapper from './modules/Intl/IntlWrapper';
 
 const ReduxProviderHoc = Component => ({ ReduxProviderProps, ...other }) => (
   <ReduxProvider {...ReduxProviderProps}>
@@ -56,10 +56,10 @@ const ScrollContextHoc = Component => ({ ScrollContextProps, ...other }) => (
 
 const defaultJssProviderProps = {
   generateClassName: createGenerateClassName(),
-  registry: new SheetsRegistry()
+  registry: new SheetsRegistry(),
 };
 const JssProvider = defaultProps({
-  ...defaultJssProviderProps
+  ...defaultJssProviderProps,
 })(JssProviderOri);
 const JssProviderHoc = Component => ({ JssProviderProps, ...other }) => (
   <JssProvider {...JssProviderProps}>
@@ -95,11 +95,11 @@ const App = props => {
 
 App.propTypes = {
   store: PropTypes.object.isRequired,
-  JssProviderProps: PropTypes.object
+  JssProviderProps: PropTypes.object,
 };
 
 App.defaultProps = {
-  JssProviderProps: null
+  JssProviderProps: null,
 };
 
 export default hot(module)(App);

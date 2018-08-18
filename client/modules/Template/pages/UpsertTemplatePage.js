@@ -1,7 +1,7 @@
-import React from "react";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import { hot } from 'react-hot-loader';
 
-import AceEditor from "../../../components/AceEditor";
+import AceEditor from '../../../components/AceEditor';
 
 class UpsertTemplatePage extends React.Component {
   render() {

@@ -1,39 +1,31 @@
-import React from "react";
-import { List, fromJS } from "immutable";
-import FlatButton from "material-ui/FlatButton";
-import {
-  EditorState,
-  RichUtils,
-  CompositeDecorator,
-  convertToRaw,
-  convertFromRaw
-} from "draft-js";
-import Editor from "draft-js-plugins-editor";
+import React from 'react';
+import { List, fromJS } from 'immutable';
+import FlatButton from 'material-ui/FlatButton';
+import { EditorState, RichUtils, CompositeDecorator, convertToRaw, convertFromRaw } from 'draft-js';
+import Editor from 'draft-js-plugins-editor';
 
-import editorStyles from "./editorStyles.css";
+import editorStyles from './editorStyles.css';
 
-require("./plugin.css");
-require("../../../node_modules/draft-js-linkify-plugin/lib/plugin.css");
-require("../../../node_modules/draft-js-inline-toolbar-plugin/lib/plugin.css");
-require("../../../node_modules/draft-js-side-toolbar-plugin/lib/plugin.css");
-require("../../../node_modules/draft-js-mention-plugin/lib/plugin.css");
+require('./plugin.css');
+require('../../../node_modules/draft-js-linkify-plugin/lib/plugin.css');
+require('../../../node_modules/draft-js-inline-toolbar-plugin/lib/plugin.css');
+require('../../../node_modules/draft-js-side-toolbar-plugin/lib/plugin.css');
+require('../../../node_modules/draft-js-mention-plugin/lib/plugin.css');
 
-import createLinkifyPlugin from "draft-js-linkify-plugin";
-import createInlineToolbarPlugin from "draft-js-inline-toolbar-plugin"; // eslint-disable-line import/no-unresolved
+import createLinkifyPlugin from 'draft-js-linkify-plugin';
+import createInlineToolbarPlugin from 'draft-js-inline-toolbar-plugin'; // eslint-disable-line import/no-unresolved
 
-import createSideToolbarPlugin from "draft-js-side-toolbar-plugin";
+import createSideToolbarPlugin from 'draft-js-side-toolbar-plugin';
 
-import mentions from "./mentions";
+import mentions from './mentions';
 
-import createBlockBreakoutPlugin from "draft-js-block-breakout-plugin";
+import createBlockBreakoutPlugin from 'draft-js-block-breakout-plugin';
 
 const blockBreakoutPlugin = createBlockBreakoutPlugin();
 
 // import createIssueSuggestionPlugin, {defaultSuggestionsFilter} from './plugin';
 
-import createMentionPlugin, {
-  defaultSuggestionsFilter
-} from "draft-js-mention-plugin";
+import createMentionPlugin, { defaultSuggestionsFilter } from 'draft-js-mention-plugin';
 
 class MentionComponent extends React.Component {
   handleMouseDown = e => {
@@ -49,7 +41,7 @@ class MentionComponent extends React.Component {
   };
 
   render() {
-    console.log("mentionComponent", this.props);
+    console.log('mentionComponent', this.props);
     return (
       <a
         contentEditable={false}
@@ -65,26 +57,23 @@ class MentionComponent extends React.Component {
 }
 
 const linkifyPlugin = createLinkifyPlugin({
-  component: props =>
+  component: props => (
     // eslint-disable-next-line no-alert, jsx-a11y/anchor-has-content
-    <a {...props} onClick={() => alert("Clicked on Link!")} />
+    <a {...props} onClick={() => alert('Clicked on Link!')} />
+  ),
 });
 
 const styles = {
   hashtag: {
-    backgroundColor: "#dce6f8"
-  }
+    backgroundColor: '#dce6f8',
+  },
 };
 
 class HashtagSpan extends React.Component {
   render() {
     // const {url} = this.props.contentState.getEntity(props.entityKey).getData()
     console.log(this.props);
-    return (
-      <span style={styles.hashtag}>
-        {this.props.children}
-      </span>
-    );
+    return <span style={styles.hashtag}>{this.props.children}</span>;
   }
 }
 
@@ -110,10 +99,13 @@ function suggestionsFilter(searchValue, suggestions, maxRow = 6) {
   const value = searchValue.toLowerCase();
   const filteredSuggestions = suggestions.filter(
     suggestion =>
-      !value || suggestion.get("name").toLowerCase().indexOf(value) > -1
+      !value ||
+      suggestion
+        .get('name')
+        .toLowerCase()
+        .indexOf(value) > -1
   );
-  const size =
-    filteredSuggestions.size < maxRow ? filteredSuggestions.size : maxRow;
+  const size = filteredSuggestions.size < maxRow ? filteredSuggestions.size : maxRow;
   return filteredSuggestions.setSize(size);
 }
 
@@ -124,8 +116,8 @@ class MyEditor extends React.Component {
     const compositeDecorator = new CompositeDecorator([
       {
         strategy: hashtagStrategy,
-        component: HashtagSpan
-      }
+        component: HashtagSpan,
+      },
     ]);
 
     const _rawContent =
@@ -135,33 +127,26 @@ class MyEditor extends React.Component {
       '.google.com", "type": "unstyled", "depth": 0, "inlineStyleRanges": [], "entityRanges": [ { "offset":' +
       ' 0, "length": 3, "key": 0 } ], "data": {} } ] }';
     const _rawContentJSON = JSON.parse(_rawContent);
-    console.log("_rawContentJSON", _rawContentJSON);
+    console.log('_rawContentJSON', _rawContentJSON);
     for (const key in _rawContentJSON.entityMap) {
-      if (
-        Object.prototype.hasOwnProperty.call(_rawContentJSON.entityMap, key)
-      ) {
+      if (Object.prototype.hasOwnProperty.call(_rawContentJSON.entityMap, key)) {
         const entity = _rawContentJSON.entityMap[key];
-        if (entity.type === "#mention" && entity.data) {
+        if (entity.type === '#mention' && entity.data) {
           entity.data = fromJS(entity.data);
         }
       }
     }
-    console.log("_rawContentJSON", _rawContentJSON);
+    console.log('_rawContentJSON', _rawContentJSON);
     const content = convertFromRaw(_rawContentJSON);
 
     const mentionPlugin = createMentionPlugin({
-      mentionTrigger: "#",
-      entityMutability: "IMMUTABLE",
-      mentionComponent: MentionComponent
+      mentionTrigger: '#',
+      entityMutability: 'IMMUTABLE',
+      mentionComponent: MentionComponent,
     });
     const inlineToolbarPlugin = createInlineToolbarPlugin();
     const sideToolbarPlugin = createSideToolbarPlugin();
-    const plugins = [
-      mentionPlugin,
-      inlineToolbarPlugin,
-      sideToolbarPlugin,
-      blockBreakoutPlugin
-    ];
+    const plugins = [mentionPlugin, inlineToolbarPlugin, sideToolbarPlugin, blockBreakoutPlugin];
     this.state = {
       editorState: EditorState.createEmpty(),
       suggestions: List(),
@@ -169,9 +154,9 @@ class MyEditor extends React.Component {
       _plugins: {
         sideToolbarPlugin,
         mentionPlugin,
-        inlineToolbarPlugin
+        inlineToolbarPlugin,
       },
-      plugins
+      plugins,
     };
   }
 
@@ -185,10 +170,10 @@ class MyEditor extends React.Component {
   };
 
   onSearchChange = ({ value }) => {
-    console.log("value", value);
+    console.log('value', value);
     if (value.length > 0) {
       this.setState({
-        suggestions: suggestionsFilter(value, mentions, 9)
+        suggestions: suggestionsFilter(value, mentions, 9),
       });
     } else {
       this.setState({ suggestions: List() });
@@ -206,22 +191,16 @@ class MyEditor extends React.Component {
   logState = () => {
     console.log(this.state.editorState.toJS());
     console.log(convertToRaw(this.state.editorState.getCurrentContent()));
-    console.log(
-      JSON.stringify(
-        convertToRaw(this.state.editorState.getCurrentContent()),
-        null,
-        2
-      )
-    );
+    console.log(JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()), null, 2));
   };
 
   handleBoldClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, "BOLD"));
+    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'BOLD'));
   };
 
   handleToggleReadMode = () => {
     this.setState({
-      readMode: !this.state.readMode
+      readMode: !this.state.readMode,
     });
   };
 

@@ -1,11 +1,11 @@
-import _compile from "./utils/compile";
-import callApi from "../../util/apiCaller";
-import { defaultRequestErrorHandler } from "../Error/ErrorActions";
+import _compile from './utils/compile';
+import callApi from '../../util/apiCaller';
+import { defaultRequestErrorHandler } from '../Error/ErrorActions';
 
-export const ADD_TEMPLATE = "ADD_TEMPLATE";
-export const ADD_TEMPLATES = "ADD_TEMPLATES";
-export const ADD_TEMPLATE_CACHES = "ADD_TEMPLATE_CACHES";
-export const CLEAR_TEMPLATE_CACHES = "CLEAR_TEMPLATE_CACHES";
+export const ADD_TEMPLATE = 'ADD_TEMPLATE';
+export const ADD_TEMPLATES = 'ADD_TEMPLATES';
+export const ADD_TEMPLATE_CACHES = 'ADD_TEMPLATE_CACHES';
+export const CLEAR_TEMPLATE_CACHES = 'CLEAR_TEMPLATE_CACHES';
 
 export function addTemplate(template, dispatch) {
   return { type: ADD_TEMPLATE, template, dispatch };
@@ -32,7 +32,7 @@ export function compile(template, { caches }) {
 
 export function fetchTemplate(moduleId, reqConfig) {
   return dispatch => {
-    return callApi(`templates${moduleId}`, "get", null, reqConfig)
+    return callApi(`templates${moduleId}`, 'get', null, reqConfig)
       .then(res => {
         dispatch(addTemplate(res.template));
         return res.template;

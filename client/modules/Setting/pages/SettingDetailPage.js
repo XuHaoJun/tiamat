@@ -1,22 +1,22 @@
-import React from "react";
-import Helmet from "react-helmet";
-import { connect } from "react-redux";
-import Loadable from "react-loadable";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import Helmet from 'react-helmet';
+import { connect } from 'react-redux';
+import Loadable from 'react-loadable';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormGroup from "@material-ui/core/FormGroup";
-import Switch from "@material-ui/core/Switch";
-import Button from "@material-ui/core/Button";
-import { SketchPicker } from "react-color";
-import screenfull from "screenfull";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Switch from '@material-ui/core/Switch';
+import Button from '@material-ui/core/Button';
+import { SketchPicker } from 'react-color';
+import screenfull from 'screenfull';
 
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
+import { setHeaderTitle } from '../../MyApp/MyAppActions';
 
 class SettingDetailPage extends React.PureComponent {
   componentWillMount() {
-    this.props.dispatch(setHeaderTitle("設定"));
+    this.props.dispatch(setHeaderTitle('設定'));
   }
 
   preloadAll = () => {
@@ -25,22 +25,22 @@ class SettingDetailPage extends React.PureComponent {
 
   state = {
     check: false,
-    isFullStreen: false
+    isFullStreen: false,
   };
 
   render() {
     const styles = {
       toggle: {
-        marginBottom: 16
+        marginBottom: 16,
       },
       container: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       },
       alignerItem: {
-        maxWidth: "50%"
-      }
+        maxWidth: '50%',
+      },
     };
     return (
       <div>
@@ -52,9 +52,7 @@ class SettingDetailPage extends React.PureComponent {
                 <Switch
                   color="primary"
                   checked={this.state.check}
-                  onChange={(event, checked) =>
-                    this.setState({ check: checked })
-                  }
+                  onChange={(event, checked) => this.setState({ check: checked })}
                 />
               }
               label="即時更新文章列表(尚未完成)"
@@ -92,6 +90,7 @@ function mapStateToProps(store, routerProps) {
   return {};
 }
 
-export default compose(hot(module), connect(mapStateToProps))(
-  SettingDetailPage
-);
+export default compose(
+  hot(module),
+  connect(mapStateToProps)
+)(SettingDetailPage);

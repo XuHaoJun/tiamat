@@ -1,25 +1,22 @@
-import React from "react";
-import { Map, List as ImmutableList, fromJS } from "immutable";
+import React from 'react';
+import { Map, List as ImmutableList, fromJS } from 'immutable';
 
-import Button from "@material-ui/core/Button";
-import MenuList from "@material-ui/core/MenuItem";
-import MenuItem from "../../../components/NestingMenuItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import Popover from "@material-ui/core/Popover";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import Button from '@material-ui/core/Button';
+import MenuList from '@material-ui/core/MenuItem';
+import MenuItem from '../../../components/NestingMenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Popover from '@material-ui/core/Popover';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
-import ArrowDropDown from "@material-ui/icons/KeyboardArrowDown";
+import ArrowDropDown from '@material-ui/icons/KeyboardArrowDown';
 
 const style = {
-  display: "inline-block",
-  margin: "16px 32px 16px 0"
+  display: 'inline-block',
+  margin: '16px 32px 16px 0',
 };
 
-export function getRootWikiGroupTreeMenuItemsHelper(
-  rootWikiGroupTree,
-  prefix = ""
-) {
-  const delimiter = ":";
+export function getRootWikiGroupTreeMenuItemsHelper(rootWikiGroupTree, prefix = '') {
+  const delimiter = ':';
   if (Map.isMap(rootWikiGroupTree)) {
     return rootWikiGroupTree.map((group, k) => {
       const value = `${prefix}${delimiter}${k}`;
@@ -56,7 +53,7 @@ class RootWikiGroupTreePopover extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      open: false
+      open: false,
     };
   }
 
@@ -71,34 +68,34 @@ class RootWikiGroupTreePopover extends React.PureComponent {
   };
 
   handleClose = reason => {
-    console.log("root close");
+    console.log('root close');
     this.setState({ open: false });
   };
 
   render() {
     const rootWikiGroupTree = fromJS({
       物品: {
-        武器: ["長劍", "斧"],
-        防具: ["重甲", "皮革"]
+        武器: ['長劍', '斧'],
+        防具: ['重甲', '皮革'],
       },
-      技能: ["戰士", "法師"],
-      "深度測試(一)": {
-        "深度測試(二)": {
-          "深度測試(三)": {
-            "深度測試(四)": {
-              "深度測試(五)": {
-                "深度測試(六)": {
-                  "深度測試(七)": {
-                    "深度測試(八)": {
-                      "深度測試(九)": ["你看到我了!"]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      技能: ['戰士', '法師'],
+      '深度測試(一)': {
+        '深度測試(二)': {
+          '深度測試(三)': {
+            '深度測試(四)': {
+              '深度測試(五)': {
+                '深度測試(六)': {
+                  '深度測試(七)': {
+                    '深度測試(八)': {
+                      '深度測試(九)': ['你看到我了!'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
     // const rootWikiGroupTree = fromJS([
     //   {
@@ -184,12 +181,12 @@ class RootWikiGroupTreePopover extends React.PureComponent {
           open={this.state.open}
           anchorEl={this.state.anchorEl}
           anchorOrigin={{
-            horizontal: "left",
-            vertical: "bottom"
+            horizontal: 'left',
+            vertical: 'bottom',
           }}
           transformOrigin={{
-            horizontal: "left",
-            vertical: "top"
+            horizontal: 'left',
+            vertical: 'top',
           }}
           onClose={this.handleClose}
         >

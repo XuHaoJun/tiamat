@@ -1,26 +1,26 @@
-import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import moment from "moment";
+import React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import moment from 'moment';
 
-import Switch from "@material-ui/core/Switch";
-import WikiIcon from "@material-ui/icons/ImportContacts";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Card from "@material-ui/core/Card";
-import CardHeader from "@material-ui/core/CardHeader";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import IconButton from "@material-ui/core/IconButton";
-import FavoriteIcon from "@material-ui/icons/Favorite";
-import ShareIcon from "@material-ui/icons/Share";
+import Switch from '@material-ui/core/Switch';
+import WikiIcon from '@material-ui/icons/ImportContacts';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import IconButton from '@material-ui/core/IconButton';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import ShareIcon from '@material-ui/icons/Share';
 
-import UserAvatar from "../../../User/components/UserAvatar";
-import Editor from "../../../../components/Slate/Editor";
+import UserAvatar from '../../../User/components/UserAvatar';
+import Editor from '../../../../components/Slate/Editor';
 
 class DiscussionNode extends React.Component {
   static defaultProps = {
     semanticReplaceMode: false,
-    semanticRules: null
+    semanticRules: null,
   };
 
   constructor(props) {
@@ -28,7 +28,7 @@ class DiscussionNode extends React.Component {
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
       semanticReplaceMode: false,
-      semanticReplaceToggled: false
+      semanticReplaceToggled: false,
     };
   }
 
@@ -56,7 +56,7 @@ class DiscussionNode extends React.Component {
     };
     this.setState(
       {
-        semanticReplaceToggled: !this.state.semanticReplaceToggled
+        semanticReplaceToggled: !this.state.semanticReplaceToggled,
       },
       afterUpdate
     );
@@ -68,7 +68,7 @@ class DiscussionNode extends React.Component {
       const timeout = setTimeout(() => {
         const { semanticReplaceMode } = this.state;
         this.setState({
-          semanticReplaceMode: !semanticReplaceMode
+          semanticReplaceMode: !semanticReplaceMode,
         });
       }, time);
       this.timeouts.push(timeout);
@@ -86,8 +86,8 @@ class DiscussionNode extends React.Component {
       ...other
     } = this.props;
     const { authorBasicInfo, createdAt, content } = discussion;
-    const displayName = authorBasicInfo ? authorBasicInfo.displayName : "Guest";
-    const indexDisplay = typeof index === "number" ? `#${index}` : index || "";
+    const displayName = authorBasicInfo ? authorBasicInfo.displayName : 'Guest';
+    const indexDisplay = typeof index === 'number' ? `#${index}` : index || '';
     const cardHeaderTitle = `${displayName} ${indexDisplay}`;
     const createdAtFromNow = moment(createdAt).fromNow();
     return (

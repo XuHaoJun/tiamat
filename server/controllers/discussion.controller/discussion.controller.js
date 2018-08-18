@@ -1,24 +1,24 @@
-import _ from "lodash";
-import mongoose from "mongoose";
-import Discussion from "../../models/discussion";
-import ForumBoard from "../../models/forumBoard";
+import _ from 'lodash';
+import mongoose from 'mongoose';
+import Discussion from '../../models/discussion';
+import ForumBoard from '../../models/forumBoard';
 
-import Ajv from "ajv";
-import rootDiscussionFormSchema from "../../../client/modules/Discussion/components/RootDiscussionForm/schema.json";
-import childDiscussionFormSchema from "../../../client/modules/Discussion/components/ChildDiscussionForm/schema.json";
-import serverRootDiscussionFormSchema from "./schemas/rootDiscussionFormSchema.json";
-import serverChildDiscussionFormSchema from "./schemas/childDiscussionFormSchema.json";
-import { loadSchema } from "../../../client/modules/JSONSchema/JSONSchemaActions";
+import Ajv from 'ajv';
+import rootDiscussionFormSchema from '../../../client/modules/Discussion/components/RootDiscussionForm/schema.json';
+import childDiscussionFormSchema from '../../../client/modules/Discussion/components/ChildDiscussionForm/schema.json';
+import serverRootDiscussionFormSchema from './schemas/rootDiscussionFormSchema.json';
+import serverChildDiscussionFormSchema from './schemas/childDiscussionFormSchema.json';
+import { loadSchema } from '../../../client/modules/JSONSchema/JSONSchemaActions';
 
 const ajv = new Ajv({
   allErrors: true,
   extendRefs: true,
   $data: true,
-  loadSchema
+  loadSchema,
 });
 
 let validateRoot = () => {
-  this.errors = [new Error("load schema fail.")];
+  this.errors = [new Error('load schema fail.')];
   return false;
 };
 
@@ -28,7 +28,7 @@ ajv.compileAsync(rootDiscussionFormSchema).then(_validate => {
 });
 
 let validateChild = () => {
-  this.errors = [new Error("load schema fail.")];
+  this.errors = [new Error('load schema fail.')];
   return false;
 };
 
@@ -47,9 +47,9 @@ function normalizeSelect(select) {
   }
   const newSelect = _.cloneDeep(select);
   _.forEach(select, (v, k) => {
-    if (v === "0") {
+    if (v === '0') {
       newSelect[k] = 0;
-    } else if (v === "1") {
+    } else if (v === '1') {
       newSelect[k] = 1;
     }
   });
@@ -60,20 +60,19 @@ export function getRootDiscussions(req, res) {
   const { forumBoardId } = req.params;
   const page = Number.parseInt(req.query.page, 10) || 1;
   const limit = Number.parseInt(req.query.limit, 10) || 10;
-  const forumBoardGroup =
-    req.query.forumBoardGroup || req.query.group || undefined;
-  const sort = req.query.sort || "-updatedAt";
+  const forumBoardGroup = req.query.forumBoardGroup || req.query.group || undefined;
+  const sort = req.query.sort || '-updatedAt';
   const reqQuery = req.query;
   const select = normalizeSelect(reqQuery.select) || {};
-  const sortWays = ["-updatedAt"];
+  const sortWays = ['-updatedAt'];
   if (!sortWays.some(s => s === sort) || page <= 0 || limit > 30) {
     res.status(403).send({ errmsg: `unknown sort ${sort}` });
   } else {
     const query = {
       isRoot: true,
-      forumBoard: forumBoardId
+      forumBoard: forumBoardId,
     };
-    if (forumBoardGroup && forumBoardGroup !== "_all") {
+    if (forumBoardGroup && forumBoardGroup !== '_all') {
       query.forumBoardGroup = forumBoardGroup;
     }
     Discussion.paginate(
@@ -82,7 +81,7 @@ export function getRootDiscussions(req, res) {
         page,
         limit,
         sort,
-        select
+        select,
       },
       (err, result) => {
         if (err) {
@@ -98,7 +97,7 @@ export function getRootDiscussions(req, res) {
 export function addDiscussion(req, res) {
   const form = req.body.discussion;
   if (!form) {
-    res.status(403).send(new Error("Discussion form is required."));
+    res.status(403).send(new Error('Discussion form is required.'));
     return;
   }
   let validate;
@@ -120,12 +119,12 @@ export function addDiscussion(req, res) {
       .select({ _id: 1, groups: 1 })
       .then(forumBoard => {
         let { _id, groups } = forumBoard;
-        _id = _id ? _id.toString() : "";
+        _id = _id ? _id.toString() : '';
         groups = groups || [];
         const { forumBoardGroup } = form;
         const validServer = validateServerRoot({
           forumBoard: _.omitBy({ _id, groups }, _.isEmpty),
-          forumBoardGroup
+          forumBoardGroup,
         });
         if (!validServer) {
           return Promise.reject(validateServerRoot.errors);
@@ -138,11 +137,11 @@ export function addDiscussion(req, res) {
       .select({ _id: 1 })
       .then(parentDiscussion => {
         let { _id } = parentDiscussion;
-        _id = _id ? _id.toString() : "";
+        _id = _id ? _id.toString() : '';
         const validServer = validateServerChild({
           parentDiscussion: {
-            _id
-          }
+            _id,
+          },
         });
         if (!validServer) {
           return Promise.reject(validateServerChild.errors);
@@ -159,14 +158,14 @@ export function addDiscussion(req, res) {
       const props = {
         ...form,
         author,
-        authorBasicInfo
+        authorBasicInfo,
       };
       const newDiscussion = new Discussion(props);
       return newDiscussion.save().then(saved => {
-        const io = req.app.get("io");
+        const io = req.app.get('io');
         const nsp = `/forumBoards/${saved.forumBoard}/discussions`;
         const socket = io.of(nsp);
-        socket.emit("addDiscussion", saved);
+        socket.emit('addDiscussion', saved);
         res.json({ discussion: saved });
         return saved;
       });
@@ -178,67 +177,67 @@ export function addDiscussion(req, res) {
 }
 
 const testSchema = {
-  type: "object",
+  type: 'object',
   minProperties: 1,
   maxProperties: 5,
   additionalProperties: false,
   properties: {
     _id: {
-      type: "object",
+      type: 'object',
       minProperties: 1,
       maxProperties: 1,
       additionalProperties: false,
       properties: {
         $ne: {
-          type: "string"
-        }
-      }
+          type: 'string',
+        },
+      },
     },
     forumBoardGroup: {
-      type: "string"
+      type: 'string',
     },
     isRoot: {
-      type: "boolean"
+      type: 'boolean',
     },
     forumBoard: {
-      type: "string"
+      type: 'string',
     },
     updatedAt: {
-      type: "object",
+      type: 'object',
       minProperties: 1,
       maxProperties: 1,
       additionalProperties: false,
       properties: {
         $gt: {
-          format: "date-time"
+          format: 'date-time',
         },
         $gte: {
-          format: "date-time"
+          format: 'date-time',
         },
         $lt: {
-          format: "date-time"
+          format: 'date-time',
         },
         $lte: {
-          format: "date-time"
-        }
-      }
-    }
-  }
+          format: 'date-time',
+        },
+      },
+    },
+  },
 };
 
 const sortSchema = {
-  type: "object",
+  type: 'object',
   additionalProperties: false,
   minProperties: 1,
   maxProperties: 1,
   properties: {
     createdAt: {
-      enum: [1, -1]
+      enum: [1, -1],
     },
     updatedAt: {
-      enum: [1, -1]
-    }
-  }
+      enum: [1, -1],
+    },
+  },
 };
 
 const ajvNormal = new Ajv();
@@ -251,13 +250,13 @@ function normalizeQuery(query) {
   const q = _.cloneDeep(query);
   if (_.isObject(q.test)) {
     if (_.isString(q.test.isRoot)) {
-      q.test.isRoot = q.test.isRoot === "true";
+      q.test.isRoot = q.test.isRoot === 'true';
     }
-    if (_.isObject(q._id) && typeof q._id.$not === "string") {
+    if (_.isObject(q._id) && typeof q._id.$not === 'string') {
       q._id.$not = mongoose.mongo.ObjectId(q._id.$not);
     }
   }
-  if (_.isObject(q.sort) && typeof q.sort.updatedAt === "string") {
+  if (_.isObject(q.sort) && typeof q.sort.updatedAt === 'string') {
     q.sort.updatedAt = Number.parseInt(q.sort.updatedAt, 10);
   }
   if (_.isObject(q.select)) {
@@ -284,7 +283,7 @@ export function getDiscussionByTest(req, res) {
           return;
         }
         if (discussions.length === 0) {
-          res.status(404).send("Not Found");
+          res.status(404).send('Not Found');
         } else {
           res.json({ discussion: discussions[0] });
         }
@@ -309,17 +308,17 @@ export function getDiscussionById(req, res) {
 export function getChildDiscussions(req, res) {
   const { id: parentDiscussionId } = req.params;
   if (!parentDiscussionId) {
-    res.status(403).send(new Error("must have parentDiscussionId"));
+    res.status(403).send(new Error('must have parentDiscussionId'));
     return;
   }
   const { withParent = false } = req.query;
   const select = normalizeSelect(req.query.select) || {};
   const queryBase = {
-    parentDiscussion: parentDiscussionId
+    parentDiscussion: parentDiscussionId,
   };
   const withParentQuery = withParent
     ? {
-        _id: parentDiscussionId
+        _id: parentDiscussionId,
       }
     : {};
   Discussion.find()
@@ -340,13 +339,13 @@ export function getChildDiscussions(req, res) {
 export function getDiscussions(req, res) {
   const { parentDiscussionId } = req.query;
   if (!parentDiscussionId) {
-    res.status(403).send(new Error("must have parentDiscussionId"));
+    res.status(403).send(new Error('must have parentDiscussionId'));
     return;
   }
   const reqQuery = req.query;
   const select = normalizeSelect(reqQuery.select) || {};
   const query = {
-    parentDiscussion: parentDiscussionId
+    parentDiscussion: parentDiscussionId,
   };
   Discussion.find(query)
     .select(select)
@@ -362,12 +361,12 @@ export function getDiscussions(req, res) {
 export function getDiscussionsWithChild(req, res) {
   Discussion.findOne({ _id: req.params.id })
     .populate({
-      path: "childDiscussions",
+      path: 'childDiscussions',
       options: {
         sort: {
-          updatedAt: -1
-        }
-      }
+          updatedAt: -1,
+        },
+      },
     })
     .exec((err, discussion) => {
       if (err) {

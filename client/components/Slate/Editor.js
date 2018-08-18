@@ -1,13 +1,13 @@
-import React from "react";
-import _ from "lodash";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { is, Map, List } from "immutable";
-import isUrl from "is-url";
+import React from 'react';
+import _ from 'lodash';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { is, Map, List } from 'immutable';
+import isUrl from 'is-url';
 
-import editorConnectHelper from "./connect";
-import { connect, createProvider } from "react-redux";
+import editorConnectHelper from './connect';
+import { connect, createProvider } from 'react-redux';
 
-import { Block, KeyUtils } from "slate";
+import { Block, KeyUtils } from 'slate';
 
 let n = 0;
 KeyUtils.setGenerator(() => {
@@ -15,82 +15,78 @@ KeyUtils.setGenerator(() => {
   return `${n}`;
 });
 
-import Debug from "debug";
+import Debug from 'debug';
 // FIXME
 // Input is wonky on Android devices
 // https://github.com/ianstormtaylor/slate/issues/725
-import {
-  Editor as SlateEditor,
-  getEventTransfer,
-  getEventRange
-} from "slate-react";
-import Portal from "@material-ui/core/Portal";
+import { Editor as SlateEditor, getEventTransfer, getEventRange } from 'slate-react';
+import Portal from '@material-ui/core/Portal';
 
-import { addImageRequest } from "../../modules/Image/ImageActions";
-import { addError } from "../../modules/Error/ErrorActions";
+import { addImageRequest } from '../../modules/Image/ImageActions';
+import { addError } from '../../modules/Error/ErrorActions';
 
-import schema from "./schema";
-import htmlSerializer from "./htmlSerializer";
-import { loadPrismPlugin, defaultPlugins } from "./plugins";
-import semanticReplace from "./utils/semanticReplace";
-import normalizeHref from "./utils/normailzeHref";
-import AddImageDialog from "./components/AddImageDialog";
-import AddWikiPartDialog from "./components/AddWikiPartDialog";
-import Div from "./components/Div";
-import configureStore, { getStoreKey } from "./store";
-import { CHANGE_LOCAL_EDITOR } from "./EditorActions";
-import emptyContent from "./emptyContent";
-import serialize from "./serialize";
-import { connectEditorHelper as templateConnectEditorHelper } from "./components/Template";
-import "./plugin.css";
+import schema from './schema';
+import htmlSerializer from './htmlSerializer';
+import { loadPrismPlugin, defaultPlugins } from './plugins';
+import semanticReplace from './utils/semanticReplace';
+import normalizeHref from './utils/normailzeHref';
+import AddImageDialog from './components/AddImageDialog';
+import AddWikiPartDialog from './components/AddWikiPartDialog';
+import Div from './components/Div';
+import configureStore, { getStoreKey } from './store';
+import { CHANGE_LOCAL_EDITOR } from './EditorActions';
+import emptyContent from './emptyContent';
+import serialize from './serialize';
+import { connectEditorHelper as templateConnectEditorHelper } from './components/Template';
+import './plugin.css';
 
-const debug = Debug("app:editor");
+const debug = Debug('app:editor');
 
-const DEFAULT_NODE = "paragraph";
+const DEFAULT_NODE = 'paragraph';
 
 export const getStyles = () => {
   const styles = {
     editorContainer: {
-      boxSizing: "border-box",
-      border: "1px solid #ddd",
-      cursor: "text",
+      boxSizing: 'border-box',
+      border: '1px solid #ddd',
+      cursor: 'text',
       padding: 10,
-      borderRadius: "2px",
-      marginBottom: "2em",
-      boxShadow: "inset 0px 1px 8px -3px #ABABAB",
-      background: "#fefefe"
+      borderRadius: '2px',
+      marginBottom: '2em',
+      boxShadow: 'inset 0px 1px 8px -3px #ABABAB',
+      background: '#fefefe',
     },
     editorFullScreenContainer: {
-      cursor: "text",
-      background: "#fefefe",
+      cursor: 'text',
+      background: '#fefefe',
       padding: 10,
-      boxShadow: "inset 0px 1px 8px -3px #ABABAB",
-      position: "fixed",
+      boxShadow: 'inset 0px 1px 8px -3px #ABABAB',
+      position: 'fixed',
       top: 0,
       left: 0,
       zIndex: 1101,
-      overflow: "auto",
-      maxHeight: "calc(100vh - 100px)"
+      overflow: 'auto',
+      maxHeight: 'calc(100vh - 100px)',
     },
     editor: {
       minHeight: 250,
       maxHeight: 250,
-      overflow: "auto"
+      overflow: 'auto',
     },
     editorFullScreen: {
-      minHeight: "calc(100vh - 100px)",
-      maxHeight: "calc(100vh - 100px)",
-      width: "calc(100vw - 20px)",
-      overflow: "auto"
-    }
+      minHeight: 'calc(100vh - 100px)',
+      maxHeight: 'calc(100vh - 100px)',
+      width: 'calc(100vw - 20px)',
+      overflow: 'auto',
+    },
   };
   return styles;
 };
 
 function semanticRulesToSuggestions(semanticRules) {
   return semanticRules.map(rule => {
-    const key = rule.get("name");
-    const value = rule.get("href");
+    const key = rule.get('name');
+    const value = rule.get('href');
     const suggestion = key;
     return { key, value, suggestion };
   });
@@ -107,10 +103,10 @@ class Editor extends React.Component {
     readOnly: false,
     rawContent: emptyContent,
     defaultValue: null,
-    schemaType: "",
+    schemaType: '',
     sendAddImage: null,
-    targetKind: "rootWiki",
-    rootWiki: null
+    targetKind: 'rootWiki',
+    rootWiki: null,
   };
 
   constructor(props) {
@@ -128,9 +124,7 @@ class Editor extends React.Component {
     if (semanticReplaceMode) {
       state = semanticReplace(state, props.semanticRules).value;
     }
-    const suggestions = semanticRules
-      ? semanticRulesToSuggestions(semanticRules)
-      : List();
+    const suggestions = semanticRules ? semanticRulesToSuggestions(semanticRules) : List();
     const { id, key } = this.props;
     const storeKey = getStoreKey({ id, key });
     this.storeKey = storeKey;
@@ -138,9 +132,9 @@ class Editor extends React.Component {
       initialState: {
         enableTemplatePreview: false,
         compiled: false,
-        storeKey
+        storeKey,
       },
-      reducer: this.reduxReducer
+      reducer: this.reduxReducer,
     });
     this.connect = editorConnectHelper(storeKey);
     this.Provider = createProvider(storeKey);
@@ -154,16 +148,16 @@ class Editor extends React.Component {
       readOnly,
       addImageDialogOpen: false,
       addWikiPartDialog: false,
-      softKeyboardIsOpen: false
+      softKeyboardIsOpen: false,
     };
   }
 
   componentDidMount() {
-    if (typeof window === "object") {
+    if (typeof window === 'object') {
       this.mobileKeyboardIsOpened = false;
       this.lastWidth = window.innerWidth;
       this.lastHeight = window.innerHeight;
-      window.addEventListener("resize", this.onWindowResize);
+      window.addEventListener('resize', this.onWindowResize);
       if (this.props.enableCodeHighlight) {
         this.loadCodeHighlightPlugin();
       }
@@ -188,11 +182,9 @@ class Editor extends React.Component {
       if (nextProps.semanticReplaceMode) {
         nextState = Object.assign(nextState, {
           state: semanticReplace(
-            typeof nextState.state !== "undefined"
-              ? nextState.state
-              : this.state.state,
+            typeof nextState.state !== 'undefined' ? nextState.state : this.state.state,
             nextProps.semanticRules
-          ).value
+          ).value,
         });
       }
     }
@@ -212,8 +204,8 @@ class Editor extends React.Component {
   }
 
   componentWillUnmount() {
-    if (typeof window === "object") {
-      window.removeEventListener("resize", this.onWindowResize);
+    if (typeof window === 'object') {
+      window.removeEventListener('resize', this.onWindowResize);
     }
   }
 
@@ -262,31 +254,31 @@ class Editor extends React.Component {
     if (hasLinks) {
       state = state
         .transform()
-        .unwrapInline("link")
+        .unwrapInline('link')
         .apply();
     } else if (state.isExpanded) {
-      const href = window.prompt("Enter the URL of the link:");
-      debug("onClickLink", "data.text", href);
+      const href = window.prompt('Enter the URL of the link:');
+      debug('onClickLink', 'data.text', href);
       const inlineProps = {
-        type: "link",
+        type: 'link',
         data: {
-          href: normalizeHref(href)
-        }
+          href: normalizeHref(href),
+        },
       };
-      debug("onClickLink", "href", inlineProps.data.href);
+      debug('onClickLink', 'href', inlineProps.data.href);
       state = state
         .transform()
         .wrapInline(inlineProps)
         .collapseToStartOfNextText()
         .apply();
     } else {
-      const href = window.prompt("Enter the URL of the link:");
-      const text = window.prompt("Enter the text for the link:");
+      const href = window.prompt('Enter the URL of the link:');
+      const text = window.prompt('Enter the text for the link:');
       const inlineProps = {
-        type: "link",
+        type: 'link',
         data: {
-          href
-        }
+          href,
+        },
       };
       if (!href || !text) {
         return;
@@ -307,7 +299,7 @@ class Editor extends React.Component {
   onChange = change => {
     this.setState(
       {
-        state: change.value
+        state: change.value,
       },
       () => {
         if (this.props.onChangeContent) {
@@ -318,18 +310,14 @@ class Editor extends React.Component {
   };
 
   onInsertTable = () => {
-    alert("table plugin broken.");
+    alert('table plugin broken.');
     const { state, tablePlugin } = this.state;
-    this.onChange(
-      tablePlugin.transforms.insertTable(state.transform()).apply()
-    );
+    this.onChange(tablePlugin.transforms.insertTable(state.transform()).apply());
   };
 
   onInsertColumn = () => {
     const { state, tablePlugin } = this.state;
-    this.onChange(
-      tablePlugin.transforms.insertColumn(state.transform()).apply()
-    );
+    this.onChange(tablePlugin.transforms.insertColumn(state.transform()).apply());
   };
 
   onInsertRow = () => {
@@ -339,9 +327,7 @@ class Editor extends React.Component {
 
   onRemoveColumn = () => {
     const { state, tablePlugin } = this.state;
-    this.onChange(
-      tablePlugin.transforms.removeColumn(state.transform()).apply()
-    );
+    this.onChange(tablePlugin.transforms.removeColumn(state.transform()).apply());
   };
 
   onRemoveRow = () => {
@@ -351,53 +337,46 @@ class Editor extends React.Component {
 
   onRemoveTable = () => {
     const { state, tablePlugin } = this.state;
-    this.onChange(
-      tablePlugin.transforms.removeTable(state.transform()).apply()
-    );
+    this.onChange(tablePlugin.transforms.removeTable(state.transform()).apply());
   };
 
   onSetAlign = (event, align) => {
     const { state, tablePlugin } = this.state;
-    this.onChange(
-      tablePlugin.transforms.setColumnAlign(state.transform(), align).apply()
-    );
+    this.onChange(tablePlugin.transforms.setColumnAlign(state.transform(), align).apply());
   };
 
   onKeyDown = (event, change) => {
     if (event.isMod) {
-      let mark = "";
+      let mark = '';
       switch (event.key) {
-        case "b":
-          mark = "bold";
+        case 'b':
+          mark = 'bold';
           break;
-        case "i":
-          mark = "italic";
+        case 'i':
+          mark = 'italic';
           break;
-        case "u":
-          mark = "underlined";
+        case 'u':
+          mark = 'underlined';
           break;
-        case "`":
-          mark = "code";
+        case '`':
+          mark = 'code';
           break;
         default:
-          mark = "";
+          mark = '';
       }
-      if (mark !== "") {
+      if (mark !== '') {
         event.preventDefault();
         change.toggleMark(mark).apply();
         return true;
       }
     } else {
-      if (event.key === "Enter") {
-        const breakoutTypes = ["heading-one", "heading-two"];
-        const isBreakoutType = breakoutTypes.some(
-          type => change.value.startBlock.type === type
-        );
+      if (event.key === 'Enter') {
+        const breakoutTypes = ['heading-one', 'heading-two'];
+        const isBreakoutType = breakoutTypes.some(type => change.value.startBlock.type === type);
         if (isBreakoutType) {
           const { selection } = change.value;
           const isEnd =
-            selection.isCollapsed &&
-            selection.anchorOffset === change.value.startBlock.text.length;
+            selection.isCollapsed && selection.anchorOffset === change.value.startBlock.text.length;
           if (isEnd) {
             event.preventDefault();
             change.splitBlock().setBlock(DEFAULT_NODE);
@@ -429,73 +408,71 @@ class Editor extends React.Component {
     const transform = state.change();
     const { document } = state;
     // Handle everything but list buttons.
-    if (type !== "bulleted-list" && type !== "numbered-list") {
+    if (type !== 'bulleted-list' && type !== 'numbered-list') {
       const isActive = this.hasBlock(type);
-      const isList = this.hasBlock("list-item");
-      const isTableCell = this.hasBlock("table_cell");
-      const isLink = this.hasBlock("link");
+      const isList = this.hasBlock('list-item');
+      const isTableCell = this.hasBlock('table_cell');
+      const isLink = this.hasBlock('link');
       if (isList) {
         transform
           .setBlock(isActive ? DEFAULT_NODE : type)
-          .unwrapBlock("bulleted-list")
-          .unwrapBlock("numbered-list");
+          .unwrapBlock('bulleted-list')
+          .unwrapBlock('numbered-list');
       } else if (isTableCell) {
         transform.insertNodeByKey(
-          state.blocks.get(0).get("key"),
+          state.blocks.get(0).get('key'),
           1,
           Block.create({
-            type: isActive ? DEFAULT_NODE : type
+            type: isActive ? DEFAULT_NODE : type,
           })
         );
       } else if (isLink) {
         return this.onClickLink(e);
-      } else if (type === "wiki-part") {
+      } else if (type === 'wiki-part') {
         this.setState({ addWikiPartDialog: true });
         return undefined;
-      } else if (type === "image") {
+      } else if (type === 'image') {
         this.setState({ addImageDialogOpen: true });
         return undefined;
-      } else if (type === "template") {
+      } else if (type === 'template') {
         const numTemplates = document.filterDescendants(node => {
-          return node.type === "template";
+          return node.type === 'template';
         }).size;
         // TODO
         // generate random string for name like uuid?.
         const name = `Template${numTemplates}`;
         transform.insertInline({
           isVoid: true,
-          type: "template",
+          type: 'template',
           data: {
             template: {
               rootWiki: this.props.rootWiki,
               createdAt: Date.now(),
               updatedAt: Date.now(),
               name,
-              code: ""
-            }
-          }
+              code: '',
+            },
+          },
         });
       } else {
         transform.setBlock(isActive ? DEFAULT_NODE : type);
       }
     } else {
-      const isList = this.hasBlock("list-item");
+      const isList = this.hasBlock('list-item');
       const isType = state.blocks.some(block => {
         return !!document.getClosest(block.key, parent => parent.type === type);
       });
       if (isList && isType) {
         transform
           .setBlock(DEFAULT_NODE)
-          .unwrapBlock("bulleted-list")
-          .unwrapBlock("numbered-list");
+          .unwrapBlock('bulleted-list')
+          .unwrapBlock('numbered-list');
       } else if (isList) {
         transform
-          .unwrapBlock(
-            type === "bulleted-list" ? "numbered-list" : "bulleted-list"
-          )
+          .unwrapBlock(type === 'bulleted-list' ? 'numbered-list' : 'bulleted-list')
           .wrapBlock(type);
       } else {
-        transform.setBlock("list-item").wrapBlock(type);
+        transform.setBlock('list-item').wrapBlock(type);
       }
     }
     this.onChange(transform);
@@ -508,10 +485,10 @@ class Editor extends React.Component {
       const transfer = getEventTransfer(event);
       const { type } = transfer;
       switch (type) {
-        case "files":
+        case 'files':
           this.onDropOrPasteFiles(event, change, editor);
           break;
-        case "node":
+        case 'node':
           this.onDropNode(event, change, editor);
           break;
         default:
@@ -538,15 +515,12 @@ class Editor extends React.Component {
     const onLoadFile = () => {
       const reader = new FileReader();
       const dataUrl = reader.result;
-      const dataUrlWithoutHeading = dataUrl.replace(
-        /^data:image\/(.+);base64,/,
-        ""
-      );
+      const dataUrlWithoutHeading = dataUrl.replace(/^data:image\/(.+);base64,/, '');
       const form = {
-        type: "base64",
+        type: 'base64',
         image: dataUrlWithoutHeading,
         sourceType,
-        sourceId
+        sourceId,
       };
       if (this.props.sendAddImage) {
         this.props.sendAddImage(form).then(image => {
@@ -563,10 +537,10 @@ class Editor extends React.Component {
     const { files } = transfer;
     for (const file of files) {
       const reader = new FileReader();
-      const [type] = file.type.split("/");
-      if (type === "image") {
+      const [type] = file.type.split('/');
+      if (type === 'image') {
         // TODO componentWillUnmount reader.removeEventListener(onLoadFile)
-        reader.addEventListener("load", onLoadFile);
+        reader.addEventListener('load', onLoadFile);
         reader.readAsDataURL(file);
       }
     }
@@ -578,26 +552,26 @@ class Editor extends React.Component {
     if (transfer.isShift) {
       return undefined;
     } else {
-      if (transfer.type === "html") {
+      if (transfer.type === 'html') {
         const { document } = htmlSerializer.deserialize(transfer.html);
         change.insertFragment(document);
         return true;
-      } else if (transfer.type === "files") {
+      } else if (transfer.type === 'files') {
         return this.onDropOrPasteFiles(event, change);
       } else if (isUrl(transfer.text)) {
         if (state.isCollapsed) {
           const transform = state.transform();
           if (this.hasLinks()) {
-            transform.unwrapInline("link");
+            transform.unwrapInline('link');
           }
           const href = normalizeHref(transfer.text);
-          debug("data.text", transfer.text);
-          debug("onPaste", "href", href);
+          debug('data.text', transfer.text);
+          debug('onPaste', 'href', href);
           const linkProp = {
-            type: "link",
+            type: 'link',
             data: {
-              href
-            }
+              href,
+            },
           };
           return transform
             .wrapInline(linkProp)
@@ -645,17 +619,17 @@ class Editor extends React.Component {
 
   toggleReadOnly = () => {
     this.setState({
-      readOnly: !this.state.readOnly
+      readOnly: !this.state.readOnly,
     });
   };
 
   insertImage = (change, src) => {
     const imageProp = {
-      type: "image",
+      type: 'image',
       isVoid: true,
       data: {
-        src
-      }
+        src,
+      },
     };
     const imageBlock = Block.create(imageProp);
     return change.insertBlock(imageBlock);
@@ -666,34 +640,27 @@ class Editor extends React.Component {
     this.setState(nextState);
   };
 
-  toggleSemanticReplaceHelper = (
-    _state,
-    _semanticReplaceMode,
-    _semanticRules
-  ) => {
+  toggleSemanticReplaceHelper = (_state, _semanticReplaceMode, _semanticRules) => {
     let { state, semanticReplaceMode, semanticRules } = this.state;
-    state = typeof _state !== "undefined" ? _state : state;
+    state = typeof _state !== 'undefined' ? _state : state;
     semanticReplaceMode =
-      typeof _semanticReplaceMode !== "undefined"
-        ? _semanticReplaceMode
-        : semanticReplaceMode;
-    semanticRules =
-      typeof _semanticRules !== "undefined" ? _semanticRules : semanticRules;
+      typeof _semanticReplaceMode !== 'undefined' ? _semanticReplaceMode : semanticReplaceMode;
+    semanticRules = typeof _semanticRules !== 'undefined' ? _semanticRules : semanticRules;
     if (!semanticReplaceMode) {
       return {
         state: semanticReplace(state, semanticRules).value,
-        semanticReplaceMode: !semanticReplaceMode
+        semanticReplaceMode: !semanticReplaceMode,
       };
     }
     return {
       state: serialize(this.props.rawContent),
-      semanticReplaceMode: !semanticReplaceMode
+      semanticReplaceMode: !semanticReplaceMode,
     };
   };
 
   hasLinks = () => {
     const { state } = this.state;
-    return state.inlines.some(inline => inline.type === "link");
+    return state.inlines.some(inline => inline.type === 'link');
   };
 
   shouldFullScreen = () => {
@@ -705,20 +672,20 @@ class Editor extends React.Component {
 
   handleToggleReadOnly = () => {
     this.setState({
-      readOnly: !this.state.readOnly
+      readOnly: !this.state.readOnly,
     });
   };
 
   logState = () => {
     const content = JSON.stringify(this.state.state.toJSON(), null, 2);
-    debug("logState", content);
+    debug('logState', content);
   };
 
   handleAddImageDialogClose = (e, reason) => {
     const nextState = {};
     nextState.addImageDialogOpen = false;
     const { state } = this.state;
-    if (reason.action === "submit") {
+    if (reason.action === 'submit') {
       const image = reason.payload;
       nextState.state = this.insertImage(state.change(), image.url).value;
     } else {
@@ -738,7 +705,7 @@ class Editor extends React.Component {
   };
 
   handleOpen = () => {
-    debug("open");
+    debug('open');
   };
 
   renderBlockButton = (type, icon) => {
@@ -746,19 +713,15 @@ class Editor extends React.Component {
     const onMouseDown = e => this.onClickBlock(e, type);
     const styles = {
       container: {
-        color: isActive ? "black" : "#ccc",
-        cursor: "pointer"
+        color: isActive ? 'black' : '#ccc',
+        cursor: 'pointer',
       },
       icon: {
-        fontSize: "30px"
-      }
+        fontSize: '30px',
+      },
     };
     return (
-      <span
-        style={styles.container}
-        onMouseDown={onMouseDown}
-        data-active={isActive}
-      >
+      <span style={styles.container} onMouseDown={onMouseDown} data-active={isActive}>
         <span style={styles.icon} className="material-icons">
           {icon}
         </span>
@@ -771,12 +734,12 @@ class Editor extends React.Component {
     const onMouseDown = e => this.onClickMark(e, type);
     const styles = {
       container: {
-        color: isActive ? "black" : "#ccc",
-        cursor: "pointer"
+        color: isActive ? 'black' : '#ccc',
+        cursor: 'pointer',
       },
       icon: {
-        fontSize: "30px"
-      }
+        fontSize: '30px',
+      },
     };
     return (
       <span
@@ -797,35 +760,35 @@ class Editor extends React.Component {
     let style;
     if (this.shouldFullScreen()) {
       style = {
-        position: "fixed",
+        position: 'fixed',
         bottom: 0,
         left: 0,
         zIndex: 1102,
-        maxWidth: "100vw",
-        overflow: "auto"
+        maxWidth: '100vw',
+        overflow: 'auto',
       };
     } else {
       style = {
-        maxWidth: "100vw",
-        overflow: "auto"
+        maxWidth: '100vw',
+        overflow: 'auto',
       };
     }
     return (
       <div>
         <div className="menu toolbar-menu" style={style}>
-          {this.renderBlockButton("heading-one", "looks_one")}
-          {this.renderBlockButton("heading-two", "looks_two")}
-          {this.renderBlockButton("wiki-part", "import_contacts")}
-          {this.renderMarkButton("bold", "format_bold")}
-          {this.renderBlockButton("image", "image")}
-          {this.renderBlockButton("link", "link")}
-          {this.renderBlockButton("numbered-list", "format_list_numbered")}
-          {this.renderBlockButton("bulleted-list", "format_list_bulleted")}
+          {this.renderBlockButton('heading-one', 'looks_one')}
+          {this.renderBlockButton('heading-two', 'looks_two')}
+          {this.renderBlockButton('wiki-part', 'import_contacts')}
+          {this.renderMarkButton('bold', 'format_bold')}
+          {this.renderBlockButton('image', 'image')}
+          {this.renderBlockButton('link', 'link')}
+          {this.renderBlockButton('numbered-list', 'format_list_numbered')}
+          {this.renderBlockButton('bulleted-list', 'format_list_bulleted')}
           {/* {this.renderBlockButton("block-quote", "format_quote")} */}
-          {this.renderMarkButton("italic", "format_italic")}
-          {this.renderMarkButton("underlined", "format_underlined")}
+          {this.renderMarkButton('italic', 'format_italic')}
+          {this.renderMarkButton('underlined', 'format_underlined')}
           {/* {this.renderBlockButton("code_block", "code")} */}
-          {this.renderBlockButton("template", "extension")}
+          {this.renderBlockButton('template', 'extension')}
         </div>
         <AddImageDialog
           open={this.state.addImageDialogOpen}
@@ -846,15 +809,9 @@ class Editor extends React.Component {
         <button onClick={this.onRemoveRow}>Remove Row</button>
         <button onClick={this.onRemoveTable}>Remove Table</button>
         <br />
-        <button onClick={e => this.onSetAlign(e, "left")}>
-          Set align left
-        </button>
-        <button onClick={e => this.onSetAlign(e, "center")}>
-          Set align center
-        </button>
-        <button onClick={e => this.onSetAlign(e, "right")}>
-          Set align right
-        </button>
+        <button onClick={e => this.onSetAlign(e, 'left')}>Set align left</button>
+        <button onClick={e => this.onSetAlign(e, 'center')}>Set align center</button>
+        <button onClick={e => this.onSetAlign(e, 'right')}>Set align right</button>
       </div>
     );
   };
@@ -873,7 +830,7 @@ class Editor extends React.Component {
     if (!Element) {
       return undefined;
     } else {
-      if (node.type === "template") {
+      if (node.type === 'template') {
         const Template = templateConnectEditorHelper(this.connect, Element);
         return <Template {...props} />;
       }
@@ -925,10 +882,7 @@ class Editor extends React.Component {
           readOnly={readOnly}
         />
         {readOnly ? null : (
-          <SuggestionPortal
-            state={this.state.state}
-            suggestions={this.state.suggestions.toJS()}
-          />
+          <SuggestionPortal state={this.state.state} suggestions={this.state.suggestions.toJS()} />
         )}
       </div>
     );
@@ -951,9 +905,8 @@ class Editor extends React.Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    sendAddImage: (form, reqConfig) =>
-      dispatch(addImageRequest(form, reqConfig)),
-    onError: err => dispatch(addError(err))
+    sendAddImage: (form, reqConfig) => dispatch(addImageRequest(form, reqConfig)),
+    onError: err => dispatch(addError(err)),
   };
 }
 
@@ -961,9 +914,14 @@ function mapStateToProps(store, props) {
   return {};
 }
 
-export default connect(mapStateToProps, mapDispatchToProps, null, {
-  withRef: true
-})(Editor);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  null,
+  {
+    withRef: true,
+  }
+)(Editor);
 
 const EditorWithoutConnect = Editor;
 

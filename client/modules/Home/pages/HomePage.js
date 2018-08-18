@@ -1,46 +1,46 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { hot } from 'react-hot-loader';
 
-import { replace } from "react-router-redux";
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import slideHeightStyle from "../../MyApp/styles/slideHeight";
+import { replace } from 'react-router-redux';
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import slideHeightStyle from '../../MyApp/styles/slideHeight';
 import HomeTabs, {
   HOME_SLIDE,
   SLIDE_COUNT,
   getSlideIndexEnAlias,
-  getSlideIndexFromEnAlias
-} from "../components/HomeTabs";
+  getSlideIndexFromEnAlias,
+} from '../components/HomeTabs';
 
-import { setHeaderTitle, setCurrentPage } from "../../MyApp/MyAppActions";
-import { fetchForumBoards } from "../../ForumBoard/ForumBoardActions";
+import { setHeaderTitle, setCurrentPage } from '../../MyApp/MyAppActions';
+import { fetchForumBoards } from '../../ForumBoard/ForumBoardActions';
 
 export const styles = theme => {
   return {
     slideHeight: slideHeightStyle(theme, {
       withTab: true,
-      withAppBar: true
+      withAppBar: true,
     }).slideHeight,
     slideHeightWithoutAppBar: slideHeightStyle(theme, {
       withTab: true,
-      withAppBar: false
-    }).slideHeight
+      withAppBar: false,
+    }).slideHeight,
   };
 };
 
 class HomePage extends React.Component {
   static propTypes = {
-    title: PropTypes.string
+    title: PropTypes.string,
   };
 
   static defaultProps = {
-    title: "Tiamat"
+    title: 'Tiamat',
   };
 
-  static PAGE_NAME = "HomePage";
+  static PAGE_NAME = 'HomePage';
 
   static getInitialAction() {
     return dispatch => {
@@ -76,7 +76,7 @@ class HomePage extends React.Component {
     if (this.timeout) clearTimeout(this.timeout);
     if (slideIndex === HOME_SLIDE) {
       this.timeout = setTimeout(() => {
-        this.props.dispatch(replace("/"));
+        this.props.dispatch(replace('/'));
       }, 100);
     } else {
       this.timeout = setTimeout(() => {
@@ -130,12 +130,15 @@ function mapDispatchToProps(dispatch) {
       const action = HomePage.getInitialAction();
       return dispatch(action);
     },
-    dispatch
+    dispatch,
   };
 }
 
 export default compose(
   hot(module),
-  withStyles(styles, { name: "HomePage" }),
-  connect(mapStateToProps, mapDispatchToProps)
+  withStyles(styles, { name: 'HomePage' }),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(HomePage);

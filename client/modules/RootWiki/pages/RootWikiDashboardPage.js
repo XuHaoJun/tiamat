@@ -1,13 +1,13 @@
-import React from "react";
-import Helmet from "react-helmet";
-import { connect } from "react-redux";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import Helmet from 'react-helmet';
+import { connect } from 'react-redux';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
-import RootWikiTabs from "../components/RootWikiTabs";
+import RootWikiTabs from '../components/RootWikiTabs';
 
-import { fetchRootWikiById } from "../RootWikiActions";
-import { getRootWiki } from "../RootWikiReducer";
+import { fetchRootWikiById } from '../RootWikiActions';
+import { getRootWiki } from '../RootWikiReducer';
 
 class RootWikiDashboardPage extends React.Component {
   static getInitialAction({ routerProps }) {
@@ -35,12 +35,12 @@ class RootWikiDashboardPage extends React.Component {
 
   render() {
     const { rootWiki } = this.props;
-    const title = rootWiki.get("name");
+    const title = rootWiki.get('name');
     const meta = [
       {
-        name: "description",
-        content: `Tiamat | ${title}`
-      }
+        name: 'description',
+        content: `Tiamat | ${title}`,
+      },
     ];
     return (
       <div>
@@ -62,11 +62,14 @@ function mapDispatchToProps(dispatch) {
     fetchComponentData() {
       const action = RootWikiDashboardPage.getInitialAction();
       return dispatch(action);
-    }
+    },
   };
 }
 
 export default compose(
   hot(module),
-  connect(mapStateToProps, mapDispatchToProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(RootWikiDashboardPage);

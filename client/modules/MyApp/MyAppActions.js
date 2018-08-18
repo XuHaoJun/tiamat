@@ -1,5 +1,5 @@
 // Export Actions
-export const prefix = "@TIAMAT/MYAPP/";
+export const prefix = '@TIAMAT/MYAPP/';
 
 export const SET_NETWORK_STATUS = `${prefix}SET_NETWORK_STATUS`;
 export function setNetworkStatus(networkStatus) {

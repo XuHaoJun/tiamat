@@ -1,12 +1,12 @@
-import Discussion from "../models/discussion";
-import bob from "elastic-builder";
+import Discussion from '../models/discussion';
+import bob from 'elastic-builder';
 
 export function search(req, res) {
-  res.json("not imple");
+  res.json('not imple');
 }
 
 export function searchForumBoards(req, res) {
-  res.json("not imple");
+  res.json('not imple');
 }
 
 export function searchDiscussions(req, res) {
@@ -17,19 +17,19 @@ export function searchDiscussions(req, res) {
   const from = (page - 1) * limit;
   const size = limit;
   if (page > 100) {
-    res.status(403).json("incorrect from");
+    res.status(403).json('incorrect from');
     return;
   }
   if (limit > 20) {
-    res.status(403).json("incorrect size");
+    res.status(403).json('incorrect size');
     return;
   }
-  if (minScore === "0") {
+  if (minScore === '0') {
     minScore = 0;
   } else {
     minScore = parseInt(minScore, 10) || 0.00000001;
   }
-  if (highlight === "" || highlight === "true") {
+  if (highlight === '' || highlight === 'true') {
     highlight = true;
   } else {
     highlight = false;
@@ -41,7 +41,7 @@ export function searchDiscussions(req, res) {
   if (highlight) {
     requestBody.highlight(
       (() => {
-        const h = bob.highlight(["title", "content"]);
+        const h = bob.highlight(['title', 'content']);
         if (q && !title) {
           h.requireFieldMatch(false);
         }
@@ -53,52 +53,46 @@ export function searchDiscussions(req, res) {
   requestBody.query(functinoScoreQuery);
   functinoScoreQuery.functions([
     bob
-      .fieldValueFactorFunction("votes")
-      .modifier("log2p")
+      .fieldValueFactorFunction('votes')
+      .modifier('log2p')
       .factor(1.5)
       .missing(0),
     bob
-      .fieldValueFactorFunction("childrenDiscussionCount")
-      .modifier("log2p")
+      .fieldValueFactorFunction('childrenDiscussionCount')
+      .modifier('log2p')
       .factor(1.1)
       .missing(0),
     bob
-      .decayScoreFunction("gauss", "repliedAt")
-      .offset("1d")
-      .scale("7d")
+      .decayScoreFunction('gauss', 'repliedAt')
+      .offset('1d')
+      .scale('7d'),
   ]);
   functinoScoreQuery.minScore(minScore);
   functinoScoreQuery.query(
     (() => {
       const boolQuery = bob.boolQuery();
       if (q) {
-        boolQuery.should(bob.queryStringQuery(q || ""));
+        boolQuery.should(bob.queryStringQuery(q || ''));
       }
       if (title) {
-        boolQuery.should(bob.matchQuery("title", title));
+        boolQuery.should(bob.matchQuery('title', title));
       }
       boolQuery.filter(
         (() => {
           const filter = bob.boolQuery();
           if (forumBoardId) {
-            filter.must(bob.termQuery("forumBoard", forumBoardId));
+            filter.must(bob.termQuery('forumBoard', forumBoardId));
           }
-          if (
-            parentDiscussionId === "$exists:true" ||
-            parentDiscussionId === "true"
-          ) {
-            filter.must(bob.existsQuery("parentDiscussion"));
+          if (parentDiscussionId === '$exists:true' || parentDiscussionId === 'true') {
+            filter.must(bob.existsQuery('parentDiscussion'));
           } else if (
-            parentDiscussionId === "$exists:false" ||
-            parentDiscussionId === "null" ||
-            parentDiscussionId === "false"
+            parentDiscussionId === '$exists:false' ||
+            parentDiscussionId === 'null' ||
+            parentDiscussionId === 'false'
           ) {
-            filter.mustNot(bob.existsQuery("parentDiscussion"));
-          } else if (
-            typeof parentDiscussionId === "string" &&
-            parentDiscussionId !== ""
-          ) {
-            filter.must(bob.termQUery("parentDiscussion", parentDiscussionId));
+            filter.mustNot(bob.existsQuery('parentDiscussion'));
+          } else if (typeof parentDiscussionId === 'string' && parentDiscussionId !== '') {
+            filter.must(bob.termQUery('parentDiscussion', parentDiscussionId));
           }
           return filter;
         })()
@@ -118,5 +112,5 @@ export function searchDiscussions(req, res) {
 export function countDiscussions(req, res) {}
 
 export function searchWikis(req, res) {
-  res.json("not imple");
+  res.json('not imple');
 }

@@ -1,14 +1,14 @@
-import { LOCATION_CHANGE } from "react-router-redux";
+import { LOCATION_CHANGE } from 'react-router-redux';
 
-export const SET_HISTORY_STATE = "SET_HISTORY";
-export const SET_RAW_HISTORY = "SET_RAW_HISTORY";
-export const SET_HISTORY_CURSOR = "SET_HISTORY_CURSOR";
-export const CLEAR_HISTORY_BY_CURSOR = "CLEAR_HISTORY_BY_CURSOR";
+export const SET_HISTORY_STATE = 'SET_HISTORY';
+export const SET_RAW_HISTORY = 'SET_RAW_HISTORY';
+export const SET_HISTORY_CURSOR = 'SET_HISTORY_CURSOR';
+export const CLEAR_HISTORY_BY_CURSOR = 'CLEAR_HISTORY_BY_CURSOR';
 
 // FIXME
 // don't use window.history.
 export function dirtyPushState(location) {
-  if (typeof window !== "undefined" && window.history) {
+  if (typeof window !== 'undefined' && window.history) {
     window.history.pushState(location.state, null, location.pathname);
   }
 }

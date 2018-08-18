@@ -1,16 +1,16 @@
-import React from "react";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import React from 'react';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const CenterCircularProgress = () => {
   const styles = {
     container: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "100%",
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%',
       padding: 20,
-      margin: 0
-    }
+      margin: 0,
+    },
   };
   return (
     <div style={styles.container}>

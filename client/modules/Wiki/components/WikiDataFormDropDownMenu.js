@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 class WikiDataFormDropDownMenu extends React.Component {
   constructor(props) {
@@ -19,7 +19,7 @@ class WikiDataFormDropDownMenu extends React.Component {
         value={this.state.value}
         onChange={this.handleChange}
         inputProps={{
-          name: "value"
+          name: 'value',
         }}
       >
         <MenuItem value={1}>資料格式(尚未完成)</MenuItem>

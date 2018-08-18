@@ -1,5 +1,5 @@
-import React from "react";
-import AceEditor from "../../../components/AceEditor";
+import React from 'react';
+import AceEditor from '../../../components/AceEditor';
 
 class TemplateForm extends React.Component {
   render() {

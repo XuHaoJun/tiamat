@@ -1,17 +1,17 @@
-import Loadable from "react-loadable";
-import Loading from "../../components/CenterCircularProgress";
+import Loadable from 'react-loadable';
+import Loading from '../../components/CenterCircularProgress';
 
 const HomePage = Loadable({
-  loader: () => import(/* webpackChunkName: "HomePage" */ "./pages/HomePage"),
-  loading: Loading
+  loader: () => import(/* webpackChunkName: "HomePage" */ './pages/HomePage'),
+  loading: Loading,
 });
 
 const routes = [
   {
-    path: "/",
+    path: '/',
     exact: true,
-    component: HomePage
-  }
+    component: HomePage,
+  },
 ];
 
 export default routes;

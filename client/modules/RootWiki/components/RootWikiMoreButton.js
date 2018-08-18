@@ -1,14 +1,14 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import Button from "@material-ui/core/Button";
-import MoreVertIcon from "@material-ui/icons/FormatListBulleted";
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Button from '@material-ui/core/Button';
+import MoreVertIcon from '@material-ui/icons/FormatListBulleted';
 
 class RootWikiMoreButton extends React.Component {
   state = {
-    anchorEl: null
+    anchorEl: null,
   };
 
   handleClick = event => {
@@ -28,7 +28,7 @@ class RootWikiMoreButton extends React.Component {
           variant="fab"
           aria-label="More"
           {...ButtonProps}
-          aria-owns={anchorEl ? "long-menu" : null}
+          aria-owns={anchorEl ? 'long-menu' : null}
           aria-haspopup="true"
           onClick={this.handleClick}
         >
@@ -41,22 +41,13 @@ class RootWikiMoreButton extends React.Component {
           onClose={this.handleClose}
           {...MenuProps}
         >
-          <MenuItem
-            component={Link}
-            to={`/rootWikis/${rootWikiId}/dashboard?slideIndex=edit`}
-          >
+          <MenuItem component={Link} to={`/rootWikis/${rootWikiId}/dashboard?slideIndex=edit`}>
             Edit
           </MenuItem>
-          <MenuItem
-            component={Link}
-            to={`/create/rootWikis/${rootWikiId}/wikiDataForm`}
-          >
+          <MenuItem component={Link} to={`/create/rootWikis/${rootWikiId}/wikiDataForm`}>
             Add WikiDataForm
           </MenuItem>
-          <MenuItem
-            component={Link}
-            to={`/create/rootWikis/${rootWikiId}/template`}
-          >
+          <MenuItem component={Link} to={`/create/rootWikis/${rootWikiId}/template`}>
             Add Template
           </MenuItem>
           <MenuItem component={Link} to={`/rootWikis/${rootWikiId}/dashboard`}>

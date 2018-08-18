@@ -1,20 +1,20 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import _ from "lodash";
-import Ajv from "ajv";
-import { Link } from "react-router-dom";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import _ from 'lodash';
+import Ajv from 'ajv';
+import { Link } from 'react-router-dom';
 
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
 
-import { push } from "react-router-redux";
-import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";
-import { logInRequest } from "../../UserActions";
+import { push } from 'react-router-redux';
+import { getOauth2Client } from '../../../Oauth2Client/Oauth2ClientReducer';
+import { logInRequest } from '../../UserActions';
 
-import ajvExtends from "../../utils/ajvExtends";
-import logInFormschema from "./schema.json";
+import ajvExtends from '../../utils/ajvExtends';
+import logInFormschema from './schema.json';
 
 const ajv = ajvExtends(new Ajv({ allErrors: true }));
 
@@ -25,16 +25,16 @@ class LogInForm extends React.Component {
     initEmail: PropTypes.string,
     initPassword: PropTypes.string,
     onClickSignUpButton: PropTypes.func,
-    login: PropTypes.func
+    login: PropTypes.func,
     // loginByFacebook: PropTypes.func,
     // loginByGoogle: PropTypes.func
   };
 
   static defaultProps = {
-    initEmail: "",
-    initPassword: "",
+    initEmail: '',
+    initPassword: '',
     onClickSignUpButton: undefined,
-    login: undefined
+    login: undefined,
     // loginByFacebook: undefined,
     // loginByGoogle: undefine
   };
@@ -44,16 +44,13 @@ class LogInForm extends React.Component {
     const { initEmail, initPassword } = props;
     const textFieldDefault = {
       email: initEmail,
-      password: initPassword
+      password: initPassword,
     };
     this.textFieldDefault = textFieldDefault;
-    const textFieldErrorDefault = Object.keys(textFieldDefault).reduce(
-      (result, fieldName) => {
-        const errorFieldName = this.getErrorFieldName(`${fieldName}Error`);
-        return Object.assign(result, { [errorFieldName]: "" });
-      },
-      {}
-    );
+    const textFieldErrorDefault = Object.keys(textFieldDefault).reduce((result, fieldName) => {
+      const errorFieldName = this.getErrorFieldName(`${fieldName}Error`);
+      return Object.assign(result, { [errorFieldName]: '' });
+    }, {});
     this.textFieldErrorDefault = textFieldErrorDefault;
     this.state = Object.assign({}, textFieldDefault, textFieldErrorDefault);
   }
@@ -63,12 +60,9 @@ class LogInForm extends React.Component {
   };
 
   getForm = () => {
-    const form = Object.keys(this.textFieldDefault).reduce(
-      (result, fieldName) => {
-        return Object.assign(result, { [fieldName]: this.state[fieldName] });
-      },
-      {}
-    );
+    const form = Object.keys(this.textFieldDefault).reduce((result, fieldName) => {
+      return Object.assign(result, { [fieldName]: this.state[fieldName] });
+    }, {});
     return form;
   };
 
@@ -118,7 +112,7 @@ class LogInForm extends React.Component {
     const valid = validate(this.getForm());
     valid
       .then(() => {
-        this.setState({ [errorFieldName]: "" });
+        this.setState({ [errorFieldName]: '' });
       })
       .catch(ajvError => {
         if (!(ajvError instanceof Ajv.ValidationError)) throw ajvError;
@@ -129,7 +123,7 @@ class LogInForm extends React.Component {
         if (found) {
           this.setState({ [errorFieldName]: found.message });
         } else {
-          this.setState({ [errorFieldName]: "" });
+          this.setState({ [errorFieldName]: '' });
         }
       });
   };
@@ -141,27 +135,25 @@ class LogInForm extends React.Component {
   handleChange = (fieldName, event) => {
     const v = event.target.value;
     this.setState({ [fieldName]: v }, () => {
-      if (v.length < 5 && fieldName === "email") {
+      if (v.length < 5 && fieldName === 'email') {
         return;
       }
       const errorFieldName = this.getErrorFieldName(fieldName);
       const valid = validate(this.getForm());
       valid
         .then(() => {
-          this.setState({ [errorFieldName]: "" });
+          this.setState({ [errorFieldName]: '' });
         })
         .catch(ajvError => {
           if (!(ajvError instanceof Ajv.ValidationError)) throw ajvError;
           const found = _.find(ajvError.errors, err => {
             const matchedFieldName = err.dataPath.substring(1); // remove dot
-            return (
-              matchedFieldName === fieldName && err.keyword !== "emailExists"
-            );
+            return matchedFieldName === fieldName && err.keyword !== 'emailExists';
           });
           if (found) {
             this.setState({ [errorFieldName]: found.message });
           } else {
-            this.setState({ [errorFieldName]: "" });
+            this.setState({ [errorFieldName]: '' });
           }
         });
     });
@@ -177,8 +169,8 @@ class LogInForm extends React.Component {
             id="loginForm-email-text-field"
             type="email"
             label="電子郵件"
-            onChange={e => this.handleChange("email", e)}
-            onBlur={e => this.handleBlur("email", e)}
+            onChange={e => this.handleChange('email', e)}
+            onBlur={e => this.handleBlur('email', e)}
             value={this.state.email}
             helperText={this.state.emailError}
             autoCorrect="off"
@@ -192,7 +184,7 @@ class LogInForm extends React.Component {
             id="loginForm-password-text-field"
             type="password"
             label="密碼"
-            onChange={e => this.handleChange("password", e)}
+            onChange={e => this.handleChange('password', e)}
             value={this.state.password}
             helperText={this.state.passwordError}
             autoCorrect="off"
@@ -205,7 +197,7 @@ class LogInForm extends React.Component {
             style={{
               width: 256,
               marginTop: 20,
-              marginBottom: 20
+              marginBottom: 20,
             }}
             type="submit"
             color="primary"
@@ -223,7 +215,7 @@ class LogInForm extends React.Component {
           <Button
             style={{
               width: 256,
-              marginTop: 20
+              marginTop: 20,
             }}
           >
             使用 Facebook 登入(尚未完成)
@@ -232,7 +224,7 @@ class LogInForm extends React.Component {
           <Button
             style={{
               width: 256,
-              marginTop: 20
+              marginTop: 20,
             }}
           >
             使用 Google 登入(尚未完成)
@@ -251,9 +243,9 @@ export default connect(
   dispatch => {
     return {
       onClickSignUpButton() {
-        dispatch(push("/signup"));
+        dispatch(push('/signup'));
       },
-      dispatch
+      dispatch,
     };
   },
   // FIXME
@@ -265,10 +257,10 @@ export default connect(
       login(form) {
         const { email, password } = form;
         return dispatch(logInRequest({ oauth2Client, email, password }));
-      }
+      },
     };
   },
   {
-    withRef: true
+    withRef: true,
   }
 )(LogInForm);

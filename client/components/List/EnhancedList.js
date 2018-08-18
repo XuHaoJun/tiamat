@@ -1,40 +1,37 @@
-import React from "react";
-import PropTypes from "prop-types";
-import ReactDOM from "react-dom";
-import _throttle from "lodash/throttle";
+import React from 'react';
+import PropTypes from 'prop-types';
+import ReactDOM from 'react-dom';
+import _throttle from 'lodash/throttle';
 
-import ScrollContainerHoc from "../ScrollContainer/ScrollContainerHoc";
+import ScrollContainerHoc from '../ScrollContainer/ScrollContainerHoc';
 
-import PullRefresh, { Indicator } from "@xuhaojun/react-pullrefresh";
+import PullRefresh, { Indicator } from '@xuhaojun/react-pullrefresh';
 
-import Portal from "@material-ui/core/Portal";
+import Portal from '@material-ui/core/Portal';
 
-import FlipMove from "react-flip-move";
+import FlipMove from 'react-flip-move';
 
-import CircularProgress from "@material-ui/core/CircularProgress";
-import RefreshIcon from "@material-ui/icons/Refresh";
-import LazyLoad from "react-lazyload";
+import CircularProgress from '@material-ui/core/CircularProgress';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import LazyLoad from 'react-lazyload';
 
-import compose from "recompose/compose";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
+import compose from 'recompose/compose';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 
-import { connect } from "react-redux";
-import { getIsFirstRender } from "../../modules/MyApp/MyAppReducer";
+import { connect } from 'react-redux';
+import { getIsFirstRender } from '../../modules/MyApp/MyAppReducer';
 
 function hasPropType(Component, name) {
   const ctype = typeof Component;
-  if (ctype === "string") {
+  if (ctype === 'string') {
     return false;
   }
-  if (ctype !== "function" || typeof name !== "string") {
-    throw new Error("hasPropType require Component or name");
+  if (ctype !== 'function' || typeof name !== 'string') {
+    throw new Error('hasPropType require Component or name');
   } else {
-    if (
-      typeof Component.propTypes === "object" &&
-      Component.propTypes !== null
-    ) {
+    if (typeof Component.propTypes === 'object' && Component.propTypes !== null) {
       return Object.prototype.hasOwnProperty.call(Component.propTypes, name);
     } else {
       return false;
@@ -59,13 +56,13 @@ function PullRefreshHoc(Component) {
   return class _PullRefreshHoc extends React.Component {
     static propTypes = {
       ...Component.propTypes,
-      onRequestMore: PropTypes.func
+      onRequestMore: PropTypes.func,
     };
 
     handleRefresh = () => {
       if (this.props.onRequestMore) {
-        const reason = "pullRefresh";
-        const event = { reason, direction: "top" };
+        const reason = 'pullRefresh';
+        const event = { reason, direction: 'top' };
         return this.props.onRequestMore(event, reason);
       } else {
         return Promise.resolve(null);
@@ -74,7 +71,7 @@ function PullRefreshHoc(Component) {
 
     render() {
       const { pullRefreshProps, children, ...other } = this.props;
-      if (!hasPropType(Component, "onRequestMore")) {
+      if (!hasPropType(Component, 'onRequestMore')) {
         delete other.onRequestMore;
       }
       const _pullRefreshProps = {
@@ -83,9 +80,9 @@ function PullRefreshHoc(Component) {
         IndicatorComponent: PortalIndicator,
         disableMouse: true,
         zIndex: 9999,
-        color: "#3F51B5",
+        color: '#3F51B5',
         ...pullRefreshProps,
-        component: Component
+        component: Component,
       };
       return (
         <PullRefresh pullRefreshProps={_pullRefreshProps} {...other}>
@@ -108,11 +105,11 @@ function FlipMoveHoc(Component) {
   return class _FlipMoveHoc extends React.Component {
     static propTypes = {
       ...Component.propTypes,
-      flipMoveProps: PropTypes.object
+      flipMoveProps: PropTypes.object,
     };
 
     static defaultProps = {
-      flipMoveProps: {}
+      flipMoveProps: {},
     };
 
     render() {
@@ -137,13 +134,13 @@ function FlipMoveHoc(Component) {
 class LoadingListItemBase extends React.Component {
   static defaultProps = {
     enableMountRequestMore: true,
-    throttle: 250
+    throttle: 250,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: false
+      loading: false,
     };
     this.handleRequestMore = _throttle(this._handleRequestMore, props.throttle);
   }
@@ -155,11 +152,7 @@ class LoadingListItemBase extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (
-      this.props.type !== nextProps.type &&
-      !this.state.loading &&
-      !nextProps.isFirstRender
-    ) {
+    if (this.props.type !== nextProps.type && !this.state.loading && !nextProps.isFirstRender) {
       this.handleRequestMore();
     }
   }
@@ -171,8 +164,8 @@ class LoadingListItemBase extends React.Component {
   _handleRequestMore = () => {
     if (this.props.onRequestMore) {
       this.setState({ loading: true }, () => {
-        const reason = "lazyLoad";
-        const event = { reason, direction: "bottom" };
+        const reason = 'lazyLoad';
+        const event = { reason, direction: 'bottom' };
         const p = this.props.onRequestMore(event, reason);
         if (p.then && p.finally) {
           p.finally(() => {
@@ -217,16 +210,16 @@ function BottomLazyLoadHoc(Component) {
     static propTypes = {
       ...Component.propTypes,
       onRequestMore: PropTypes.func,
-      bottomLazyLoadProps: PropTypes.object
+      bottomLazyLoadProps: PropTypes.object,
     };
 
     static defaultProps = {
-      bottomLazyLoadProps: {}
+      bottomLazyLoadProps: {},
     };
 
     render() {
       const { children, bottomLazyLoadProps, ...other } = this.props;
-      if (!hasPropType(Component, "onRequestMore")) {
+      if (!hasPropType(Component, 'onRequestMore')) {
         delete other.onRequestMore;
       }
       const { onRequestMore } = this.props;
@@ -270,5 +263,5 @@ export {
   ScrollContainerHoc,
   FlipMoveHoc,
   BottomLazyLoadHoc,
-  PullRefreshHoc
+  PullRefreshHoc,
 };

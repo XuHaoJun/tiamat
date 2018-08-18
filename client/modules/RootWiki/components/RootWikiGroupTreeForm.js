@@ -1,6 +1,6 @@
-import React from "react";
-import { fromJS } from "immutable";
-import Loadable from "react-loadable";
+import React from 'react';
+import { fromJS } from 'immutable';
+import Loadable from 'react-loadable';
 
 function Loading() {
   return <div>loading...</div>;
@@ -10,21 +10,21 @@ function Loading() {
 // SortableTree can't work with server-side so that show loading only.
 const SortableTree = Loadable({
   loader: () => {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return Promise.resolve(Loading);
     } else {
-      return import(/* webpackChunkName: "SortableTree" */ "../../../components/SortableTree");
+      return import(/* webpackChunkName: "SortableTree" */ '../../../components/SortableTree');
     }
   },
-  loading: Loading
+  loading: Loading,
 });
 
 function getStyles() {
   const styles = {
     treeContainer: {
-      minHeight: "calc(100vh - 64px)",
-      maxHeight: "calc(100vh - 64px)"
-    }
+      minHeight: 'calc(100vh - 64px)',
+      maxHeight: 'calc(100vh - 64px)',
+    },
   };
   return styles;
 }
@@ -34,74 +34,74 @@ class RootWikiGroupTreeForm extends React.Component {
     super(props);
     const rootWikiGroupTree = fromJS([
       {
-        title: "物品",
+        title: '物品',
         children: [
           {
-            title: "武器",
+            title: '武器',
             children: [
               {
-                title: "長劍"
+                title: '長劍',
               },
               {
-                title: "斧"
-              }
-            ]
+                title: '斧',
+              },
+            ],
           },
           {
-            title: "防具",
+            title: '防具',
             children: [
               {
-                title: "重甲"
+                title: '重甲',
               },
               {
-                title: "皮甲"
-              }
-            ]
-          }
-        ]
+                title: '皮甲',
+              },
+            ],
+          },
+        ],
       },
       {
-        title: "卡片",
+        title: '卡片',
         children: [
           {
-            title: "獵人"
+            title: '獵人',
           },
           {
-            title: "盜賊"
-          }
-        ]
+            title: '盜賊',
+          },
+        ],
       },
       {
-        title: "深度測試(一)",
+        title: '深度測試(一)',
         children: [
           {
-            title: "深度測試(二)",
+            title: '深度測試(二)',
             children: [
               {
-                title: "深度測試(三)",
+                title: '深度測試(三)',
                 children: [
                   {
-                    title: "深度測試(四)",
+                    title: '深度測試(四)',
                     children: [
                       {
-                        title: "深度測試(五)",
+                        title: '深度測試(五)',
                         children: [
                           {
-                            title: "你看見我了!"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
+                            title: '你看見我了!',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ]).toJS();
     this.state = {
-      rootWikiGroupTree
+      rootWikiGroupTree,
     };
   }
 

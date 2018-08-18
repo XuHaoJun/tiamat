@@ -1,21 +1,21 @@
-import React from "react";
-import { Set } from "immutable";
+import React from 'react';
+import { Set } from 'immutable';
 
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 class AddWikiPartDialog extends React.Component {
   static defaultProps = {
     open: false,
     rootWikiGroupTree: null,
     onRequestClose: () => {},
-    wikis: Set()
+    wikis: Set(),
   };
 
-  state = { open: false, title: "haha" };
+  state = { open: false, title: 'haha' };
 
   render() {
     const { open } = this.props;

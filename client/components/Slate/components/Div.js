@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 class Div extends React.PureComponent {
   render() {

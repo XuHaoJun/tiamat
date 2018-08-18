@@ -1,67 +1,57 @@
 /**
  * Client entry point
  */
-import Debug from "debug";
-import React from "react";
-import { hydrate } from "react-dom";
-import { fromJS } from "immutable";
-import { calculateResponsiveState } from "redux-responsive";
-import Loadable from "react-loadable";
-import moment from "moment";
+import Debug from 'debug';
+import React from 'react';
+import { hydrate } from 'react-dom';
+import { fromJS } from 'immutable';
+import { calculateResponsiveState } from 'redux-responsive';
+import Loadable from 'react-loadable';
+import moment from 'moment';
 
-import { matchRoutes } from "react-router-config";
-import routes from "./routes";
+import { matchRoutes } from 'react-router-config';
+import routes from './routes';
 
-import {
-  loadDBAdapter,
-  connectDB,
-  initWithStore,
-  initAccessToken
-} from "./localdb";
+import { loadDBAdapter, connectDB, initWithStore, initAccessToken } from './localdb';
 
-import App from "./App";
-import { configureStore } from "./store";
-import { setSocketIO } from "./modules/Socket/SocketActions";
-import { setUserAgent } from "./modules/UserAgent/UserAgentActions";
-import { getUserAgent } from "./modules/UserAgent/UserAgentReducer";
-import googleAnalyticsConfig from "../server/configs/googleAnalytics";
-import { calculateResponsiveStateByUserAgent } from "./modules/Browser/BrowserActions";
-import {
-  setIsFirstRender,
-  setDBisInitialized
-} from "./modules/MyApp/MyAppActions";
-import { defaultInitialState as defaultHistoryInitialState } from "./modules/History/HistoryReducer";
+import App from './App';
+import { configureStore } from './store';
+import { setSocketIO } from './modules/Socket/SocketActions';
+import { setUserAgent } from './modules/UserAgent/UserAgentActions';
+import { getUserAgent } from './modules/UserAgent/UserAgentReducer';
+import googleAnalyticsConfig from '../server/configs/googleAnalytics';
+import { calculateResponsiveStateByUserAgent } from './modules/Browser/BrowserActions';
+import { setIsFirstRender, setDBisInitialized } from './modules/MyApp/MyAppActions';
+import { defaultInitialState as defaultHistoryInitialState } from './modules/History/HistoryReducer';
 
-import { MyAppState } from "./modules/MyApp/MyAppReducer";
-import { UserState } from "./modules/User/UserReducer";
-import { RootWikiState } from "./modules/RootWiki/RootWikiReducer";
-import { WikiState } from "./modules/Wiki/WikiReducer";
-import { DiscussionState } from "./modules/Discussion/DiscussionReducer";
-import { ForumBoardState } from "./modules/ForumBoard/ForumBoardReducer";
+import { MyAppState } from './modules/MyApp/MyAppReducer';
+import { UserState } from './modules/User/UserReducer';
+import { RootWikiState } from './modules/RootWiki/RootWikiReducer';
+import { WikiState } from './modules/Wiki/WikiReducer';
+import { DiscussionState } from './modules/Discussion/DiscussionReducer';
+import { ForumBoardState } from './modules/ForumBoard/ForumBoardReducer';
 
-const debug = Debug("app:main");
+const debug = Debug('app:main');
 
 function initDebug() {
   if (window.localStorage) {
     if (process.env.DEBUG) {
-      localStorage.setItem("debug", process.env.DEBUG);
+      localStorage.setItem('debug', process.env.DEBUG);
       debug(`init env DEBUG: ${process.env.DEBUG}`);
     } else {
-      localStorage.removeItem("debug");
+      localStorage.removeItem('debug');
     }
   }
 }
 
 function initAnalytics() {
   const { code } = googleAnalyticsConfig;
-  if (process.env.NODE_ENV === "production" && Boolean(code)) {
-    Debug("app:googleAnalytics")(`googleAnalytics code: ${code}`);
-    return import(/* webpackChunkName: "react-ga" */ "react-ga").then(
-      module => {
-        const ReactGA = module.default;
-        ReactGA.initialize(code);
-      }
-    );
+  if (process.env.NODE_ENV === 'production' && Boolean(code)) {
+    Debug('app:googleAnalytics')(`googleAnalytics code: ${code}`);
+    return import(/* webpackChunkName: "react-ga" */ 'react-ga').then(module => {
+      const ReactGA = module.default;
+      ReactGA.initialize(code);
+    });
   } else {
     return Promise.resolve(null);
   }
@@ -73,7 +63,7 @@ function defaultBrowserUserAgent(state) {
     if (process.browser) {
       return window.navigator.userAgent;
     } else {
-      return "Node.js/6.8.0 (OS X Yosemite; x64)";
+      return 'Node.js/6.8.0 (OS X Yosemite; x64)';
     }
   } else {
     return userAgent;
@@ -94,12 +84,12 @@ function decodeInitialState(obj = {}) {
     semanticRules: fromJS(obj.semanticRules),
     sockets: fromJS(obj.sockets),
     search: fromJS(obj.search),
-    template: fromJS(obj.template)
+    template: fromJS(obj.template),
   };
 }
 
 function isLoadableComponent(component) {
-  return typeof component === "function" && component.preload;
+  return typeof component === 'function' && component.preload;
 }
 
 async function loadInitialPage() {
@@ -131,7 +121,7 @@ function hydrateAsync(component, dom) {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === 'development') {
     initDebug();
   }
 
@@ -151,17 +141,17 @@ async function main() {
   const userAgent = defaultBrowserUserAgent(store.getState());
   store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
 
-  const mountElementId = "root";
+  const mountElementId = 'root';
   const mountApp = document.getElementById(mountElementId);
   debug(`mount application element id: ${mountElementId}`);
 
   await loadInitialPagePromise;
 
-  debug("first hydrate start");
+  debug('first hydrate start');
 
   await hydrateAsync(<App store={store} />, mountApp);
 
-  debug("first hydrate end");
+  debug('first hydrate end');
 
   const loadingDBLibPromise = loadDBAdapter();
 
@@ -186,12 +176,12 @@ async function main() {
 
   const initAnalyticsPromise = initAnalytics();
 
-  const io = await import(/* webpackChunkName: "socket.io-client" */ "socket.io-client");
+  const io = await import(/* webpackChunkName: "socket.io-client" */ 'socket.io-client');
   store.dispatch(setSocketIO(io));
 
   await initAnalyticsPromise;
 
-  debug("Application ready!");
+  debug('Application ready!');
 
   return { store, mountApp };
 }

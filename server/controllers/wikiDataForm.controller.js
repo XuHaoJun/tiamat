@@ -1,9 +1,9 @@
-import WikiDataForm from "../models/wikiDataForm";
+import WikiDataForm from '../models/wikiDataForm';
 
 export function getWikiDataForms(req, res) {
   const { rootWikiId } = req.query;
   if (!rootWikiId) {
-    res.status(403).send(new Error("rootWikiId is required"));
+    res.status(403).send(new Error('rootWikiId is required'));
     return;
   }
   WikiDataForm.find({ rootWiki: rootWikiId })

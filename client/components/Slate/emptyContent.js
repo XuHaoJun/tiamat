@@ -1,5 +1,5 @@
-import { Value } from "slate";
-import emptyContnetJSON from "./emptyContent.json";
+import { Value } from 'slate';
+import emptyContnetJSON from './emptyContent.json';
 
 const value = Value.fromJS(emptyContnetJSON);
 

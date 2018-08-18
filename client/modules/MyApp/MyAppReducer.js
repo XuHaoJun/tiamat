@@ -1,5 +1,5 @@
-import { Record } from "immutable";
-import createTheme from "./styles/createTheme";
+import { Record } from 'immutable';
+import createTheme from './styles/createTheme';
 
 // Import Actions
 import {
@@ -8,40 +8,40 @@ import {
   UPDATE_APP_BAR_SEND_BUTTON_PROPS,
   SET_DB_IS_INITIALIZED,
   SET_IS_FIRST_RENDER,
-  SET_CURRENT_PAGE
-} from "./MyAppActions";
+  SET_CURRENT_PAGE,
+} from './MyAppActions';
 
 export function getNetworkStatus() {
   if (process.browser) {
-    return window.navigator.onLine ? "online" : "offline";
+    return window.navigator.onLine ? 'online' : 'offline';
   } else {
-    return "online";
+    return 'online';
   }
 }
 
 const DB = Record({
-  isInitialized: false
+  isInitialized: false,
 });
 
 const HeaderProps = Record({
-  title: "Tiamat"
+  title: 'Tiamat',
 });
 
 const SendButtonProps = Record({
   show: false,
   loading: false,
-  onClick: undefined
+  onClick: undefined,
 });
 
 class UI extends Record({
   header: new HeaderProps(),
-  sendButtonProps: new SendButtonProps()
+  sendButtonProps: new SendButtonProps(),
 }) {
   constructor(args = {}) {
     const record = super({
       ...args,
       header: new HeaderProps(args.header),
-      sendButtonProps: new SendButtonProps(args.sendButtonProps)
+      sendButtonProps: new SendButtonProps(args.sendButtonProps),
     });
     return record;
   }
@@ -52,7 +52,7 @@ const MyAppStateBase = Record({
   isFirstRender: true,
   networkStatus: getNetworkStatus(),
   db: new DB(),
-  ui: new UI()
+  ui: new UI(),
 });
 
 export class MyAppState extends MyAppStateBase {
@@ -60,7 +60,7 @@ export class MyAppState extends MyAppStateBase {
     const record = new MyAppState({
       ...obj,
       db: new DB(obj.db),
-      ui: new UI(obj.ui)
+      ui: new UI(obj.ui),
     });
     return record;
   }
@@ -72,21 +72,21 @@ const AppReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_NETWORK_STATUS: {
       const { networkStatus } = action;
-      return state.set("networkStatus", networkStatus);
+      return state.set('networkStatus', networkStatus);
     }
 
     case SET_CURRENT_PAGE: {
       const { page } = action;
-      return state.set("currentPage", page);
+      return state.set('currentPage', page);
     }
 
     case SET_IS_FIRST_RENDER: {
       const { isFirstRender } = action;
-      return state.set("isFirstRender", isFirstRender);
+      return state.set('isFirstRender', isFirstRender);
     }
 
     case SET_HEADER_TITLE: {
-      return state.setIn(["ui", "header", "title"], action.headerTitle);
+      return state.setIn(['ui', 'header', 'title'], action.headerTitle);
     }
 
     case UPDATE_APP_BAR_SEND_BUTTON_PROPS: {
@@ -94,7 +94,7 @@ const AppReducer = (state = initialState, action) => {
       for (const key in action.props) {
         if ({}.hasOwnProperty.call(action.props, key)) {
           const prop = action.props[key];
-          newState = newState.setIn(["ui", "sendButtonProps", key], prop);
+          newState = newState.setIn(['ui', 'sendButtonProps', key], prop);
         }
       }
       return newState;
@@ -103,7 +103,7 @@ const AppReducer = (state = initialState, action) => {
     // may be add a DB module?
     case SET_DB_IS_INITIALIZED: {
       const { isInitialized } = action;
-      return state.setIn(["db", "isInitialized"], isInitialized);
+      return state.setIn(['db', 'isInitialized'], isInitialized);
     }
 
     default:
@@ -114,21 +114,20 @@ const AppReducer = (state = initialState, action) => {
 /* Selectors */
 
 // ui Selectors
-export const getUI = state => state.app.get("ui");
+export const getUI = state => state.app.get('ui');
 
 export const getTheme = state => {
-  const networkStatus = state.app.get("networkStatus");
+  const networkStatus = state.app.get('networkStatus');
   return createTheme({ networkStatus });
 };
 
 // other Selectors
 
-export const getDBisInitialized = state =>
-  state.app.getIn(["db", "isInitialized"]);
+export const getDBisInitialized = state => state.app.getIn(['db', 'isInitialized']);
 
-export const getIsFirstRender = state => state.app.get("isFirstRender");
+export const getIsFirstRender = state => state.app.get('isFirstRender');
 
-export const getCurrentPage = state => state.app.get("currentPage");
+export const getCurrentPage = state => state.app.get('currentPage');
 
 // Export Reducer
 export default AppReducer;

@@ -1,7 +1,7 @@
-import React from "react";
-import { connect } from "react-redux";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
 class SearchHomePage extends React.Component {
   render() {
@@ -13,4 +13,7 @@ function mapStateToProps(store, routerProps) {
   return {};
 }
 
-export default compose(hot(module), connect(mapStateToProps))(SearchHomePage);
+export default compose(
+  hot(module),
+  connect(mapStateToProps)
+)(SearchHomePage);

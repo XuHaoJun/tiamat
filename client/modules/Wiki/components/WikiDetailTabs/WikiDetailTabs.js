@@ -1,31 +1,31 @@
-import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { connect } from "react-redux";
-import Loadable from "react-loadable";
+import React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { connect } from 'react-redux';
+import Loadable from 'react-loadable';
 
-import Tabs from "../../../../components/Tabs";
-import Tab from "@material-ui/core/Tab";
+import Tabs from '../../../../components/Tabs';
+import Tab from '@material-ui/core/Tab';
 
-import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
-import { getWiki } from "../../WikiReducer";
-import { getRootWiki } from "../../../RootWiki/RootWikiReducer";
-import CenterCircularProgress from "../../../../components/CenterCircularProgress";
-import { emptyContent } from "../../../../components/Slate/Editor";
-import WikiContent from "../../components/WikiContent";
-import WikiForm from "../WikiForm";
+import EnhancedSwipeableViews from '../../../../components/EnhancedSwipableViews';
+import { getWiki } from '../../WikiReducer';
+import { getRootWiki } from '../../../RootWiki/RootWikiReducer';
+import CenterCircularProgress from '../../../../components/CenterCircularProgress';
+import { emptyContent } from '../../../../components/Slate/Editor';
+import WikiContent from '../../components/WikiContent';
+import WikiForm from '../WikiForm';
 
 const Loading = () => <div>Loading...</div>;
 
 const WikiDataForm = Loadable({
   loader: () => {
     // render Loading on server-side
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return Promise.resolve(Loading);
     } else {
-      return import(/* webpackChunkName: "WikiDataForm" */ "../WikiDataForm");
+      return import(/* webpackChunkName: "WikiDataForm" */ '../WikiDataForm');
     }
   },
-  loading: Loading
+  loading: Loading,
 });
 
 export const WIKI_CONTENT_SLIDE = 0;
@@ -39,7 +39,7 @@ class WikiDetailTabs extends React.Component {
     wikiId: null,
     wiki: null,
     slideIndex: WIKI_CONTENT_SLIDE,
-    scrollKey: ""
+    scrollKey: '',
   };
 
   constructor(props) {
@@ -47,7 +47,7 @@ class WikiDetailTabs extends React.Component {
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     const { slideIndex } = props;
     this.state = {
-      slideIndex
+      slideIndex,
     };
   }
 
@@ -65,13 +65,13 @@ class WikiDetailTabs extends React.Component {
 
   handleChange = (event, value) => {
     this.setState({
-      slideIndex: value
+      slideIndex: value,
     });
   };
 
   handleChangeIndex = value => {
     this.setState({
-      slideIndex: value
+      slideIndex: value,
     });
   };
 
@@ -82,22 +82,22 @@ class WikiDetailTabs extends React.Component {
     }
     const { id } = this.props;
     const { slideIndex } = this.state;
-    const name = wiki ? wiki.get("name") : "";
-    const content = wiki ? wiki.get("content") : emptyContent;
-    const rootWikiId = wiki.get("rootWiki");
-    const rootWikiGroupTree = wiki.get("rootWikiGroupTree");
+    const name = wiki ? wiki.get('name') : '';
+    const content = wiki ? wiki.get('content') : emptyContent;
+    const rootWikiId = wiki.get('rootWiki');
+    const rootWikiGroupTree = wiki.get('rootWikiGroupTree');
     const wikiProps = {
       name,
       rootWikiId,
       content,
-      rootWikiGroupTree
+      rootWikiGroupTree,
     };
     const wikiContentProps = {
-      ...wikiProps
+      ...wikiProps,
     };
     const wikiFormProps = {
       ...wikiProps,
-      nameReadOnly: true
+      nameReadOnly: true,
     };
     return (
       <div>

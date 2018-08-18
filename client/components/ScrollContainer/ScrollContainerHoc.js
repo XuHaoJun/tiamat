@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import ScrollContainer from "./ScrollContainer";
+import ScrollContainer from './ScrollContainer';
 
 export default function ScrollContainerHoc(Component) {
   return class _ScrollContainerHoc extends React.Component {
@@ -8,7 +8,7 @@ export default function ScrollContainerHoc(Component) {
 
     render() {
       const { id } = this.props;
-      if (typeof id === "string" && id !== "") {
+      if (typeof id === 'string' && id !== '') {
         return (
           <ScrollContainer scrollKey={id}>
             <Component {...this.props} />

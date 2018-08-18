@@ -1,11 +1,11 @@
-import qs from "qs";
-import callApi from "../../util/apiCaller";
-import { defaultRequestCatchHandler } from "../Error/ErrorActions";
+import qs from 'qs';
+import callApi from '../../util/apiCaller';
+import { defaultRequestCatchHandler } from '../Error/ErrorActions';
 
 // Export Constants
-export const ADD_WIKI = "ADD_WIKI";
-export const ADD_WIKIS = "ADD_WIKIS";
-export const SET_UI_WIKI_FORM = "SET_UI_WIKI_FORM";
+export const ADD_WIKI = 'ADD_WIKI';
+export const ADD_WIKIS = 'ADD_WIKIS';
+export const SET_UI_WIKI_FORM = 'SET_UI_WIKI_FORM';
 
 // Export Actions
 export function addWiki(wiki) {
@@ -48,8 +48,8 @@ export function fetchWikis(
   {
     page = 1,
     limit = 10,
-    sort = "-updatedAt",
-    rootWikiGroupTree: rootWikiGroupTreeInput = "all"
+    sort = '-updatedAt',
+    rootWikiGroupTree: rootWikiGroupTreeInput = 'all',
   } = {},
   reqConfig = {}
 ) {
@@ -59,7 +59,7 @@ export function fetchWikis(
   const query = qs.stringify({ page, limit, sort, rootWikiGroupTree });
   const url = `rootWikis/${rootWikiId}/wikis?${query}`;
   return dispatch => {
-    return callApi(url, "get", null, reqConfig)
+    return callApi(url, 'get', null, reqConfig)
       .then(data => {
         dispatch(addWikis(data.wikis));
         return data.wikis;
@@ -70,7 +70,7 @@ export function fetchWikis(
 
 export function addWikiRequest(wiki) {
   return dispatch => {
-    return callApi("wikis", "post", { wiki })
+    return callApi('wikis', 'post', { wiki })
       .then(res => {
         dispatch(addWiki(res.wiki));
         return res.wiki;

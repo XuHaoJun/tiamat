@@ -1,8 +1,8 @@
-import * as React from "react";
+import * as React from 'react';
 
-import MuiMenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu/Menu";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import MuiMenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu/Menu';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 
 class NestingMenu extends React.Component {
   setAnchorRef = el => {
@@ -17,15 +17,12 @@ class NestingMenu extends React.Component {
       <React.Fragment>
         <ArrowDropDown
           style={{
-            float: "right",
-            transform: "rotate(-90deg)",
-            marginLeft: "auto"
+            float: 'right',
+            transform: 'rotate(-90deg)',
+            marginLeft: 'auto',
           }}
         />
-        <div
-          ref={this.setAnchorRef}
-          style={{ position: "absolute", right: 0 }}
-        />
+        <div ref={this.setAnchorRef} style={{ position: 'absolute', right: 0 }} />
         {open ? (
           <Menu open={open} anchorEl={this.anchor} onClose={this.props.onClose}>
             {/* {React.Children.map(menuItems, menuItem => {
@@ -46,17 +43,17 @@ class NestingMenu extends React.Component {
 
 export default class NestingMenuItem extends React.Component {
   state = {
-    open: false
+    open: false,
   };
 
   handleClick = event => {
     if (this.props.menuItems) {
       this.setState({
-        open: true
+        open: true,
       });
     } else {
       this.setState({
-        open: false
+        open: false,
       });
     }
   };

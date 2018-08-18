@@ -1,8 +1,8 @@
-import React from "react";
-import Helmet from "react-helmet";
-import WikiDataFormForm from "../components/WikiDataFormForm";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import Helmet from 'react-helmet';
+import WikiDataFormForm from '../components/WikiDataFormForm';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
 class UpsertWikiDataFormPage extends React.Component {
   render() {

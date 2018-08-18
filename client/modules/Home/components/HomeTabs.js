@@ -1,12 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
-import _reduce from "lodash/reduce";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import React from 'react';
+import PropTypes from 'prop-types';
+import _reduce from 'lodash/reduce';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
 
-import Tabs, { Tab } from "../../../components/Tabs";
+import Tabs, { Tab } from '../../../components/Tabs';
 
-import ForumBoardList from "../../ForumBoard/components/ForumBoardList";
-import EnhancedSwipeableViews from "../../../components/EnhancedSwipableViews";
+import ForumBoardList from '../../ForumBoard/components/ForumBoardList';
+import EnhancedSwipeableViews from '../../../components/EnhancedSwipableViews';
 
 export const HOME_SLIDE = 0;
 export const WHAT_HOT_SLIDE = 1;
@@ -14,9 +14,9 @@ export const WIKI_SLIDE = 2;
 export const SLIDE_COUNT = 3;
 
 const _slideIndexEnMapping = {
-  [HOME_SLIDE]: "home",
-  [WHAT_HOT_SLIDE]: "what_hot",
-  [WIKI_SLIDE]: "wiki"
+  [HOME_SLIDE]: 'home',
+  [WHAT_HOT_SLIDE]: 'what_hot',
+  [WIKI_SLIDE]: 'wiki',
 };
 
 const _slideIndexEnReverseMapping = _reduce(
@@ -40,22 +40,22 @@ export const getSlideIndexFromEnAlias = enAlias => {
 class HomeTabs extends React.Component {
   static propTypes = {
     slideContainerStyle: PropTypes.object,
-    forumBoardListProps: PropTypes.object
+    forumBoardListProps: PropTypes.object,
   };
 
   static defaultProps = {
     slideIndex: 0, // eslint-disable-line
     slideContainerStyle: {
-      height: "100%"
+      height: '100%',
     },
-    forumBoardListProps: {}
+    forumBoardListProps: {},
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
-      slideIndex: props.slideIndex
+      slideIndex: props.slideIndex,
     };
   }
 
@@ -99,10 +99,7 @@ class HomeTabs extends React.Component {
           onTransitionEnd={this.handleTransitionEnd}
         >
           <div>首頁，放推薦內容(尚未完成)</div>
-          <ForumBoardList
-            id={id ? `${id}/ForumBoardList` : null}
-            {...forumBoardListProps}
-          />
+          <ForumBoardList id={id ? `${id}/ForumBoardList` : null} {...forumBoardListProps} />
           <div>維基特色條目(尚未完成)</div>
         </EnhancedSwipeableViews>
       </div>

@@ -1,14 +1,14 @@
-import qs from "qs";
-import callApi from "../../util/apiCaller";
-import { defaultRequestErrorHandler } from "../Error/ErrorActions";
+import qs from 'qs';
+import callApi from '../../util/apiCaller';
+import { defaultRequestErrorHandler } from '../Error/ErrorActions';
 
-export const ADD_USER = "ADD_USER";
-export const ADD_USERS = "ADD_USERS";
-export const SET_CURRENT_USER_EMAIL = "SET_CURRENT_USER_EMAIL";
-export const REMOVE_CURRENT_USER = "REMOVE_CURRENT_USER";
-export const SET_CURRENT_ACCESS_TOKEN = "SET_CURRENT_ACCESS_TOKEN";
-export const REMOVE_CURRENT_ACCESS_TOKEN = "REMOVE_CURRENT_ACCESS_TOEKN";
-export const USER_LOGOUT = "USER_LOGOUT";
+export const ADD_USER = 'ADD_USER';
+export const ADD_USERS = 'ADD_USERS';
+export const SET_CURRENT_USER_EMAIL = 'SET_CURRENT_USER_EMAIL';
+export const REMOVE_CURRENT_USER = 'REMOVE_CURRENT_USER';
+export const SET_CURRENT_ACCESS_TOKEN = 'SET_CURRENT_ACCESS_TOKEN';
+export const REMOVE_CURRENT_ACCESS_TOKEN = 'REMOVE_CURRENT_ACCESS_TOEKN';
+export const USER_LOGOUT = 'USER_LOGOUT';
 
 export function addUser(user) {
   return { type: ADD_USER, user };
@@ -36,12 +36,7 @@ export function setCurrentAccessToken(currentAccessToken) {
 
 export function fetchValidateUser({ emailExists }, reqConfig = {}) {
   const form = { emailExists };
-  return callApi(
-    `validates/user?${qs.stringify(form)}`,
-    "get",
-    null,
-    reqConfig
-  );
+  return callApi(`validates/user?${qs.stringify(form)}`, 'get', null, reqConfig);
 }
 
 export function fetchAccessToken(
@@ -51,13 +46,13 @@ export function fetchAccessToken(
   const form = {
     username: email || username,
     password,
-    scope: scope || "all",
-    grant_type: "password",
-    client_id: clientId || oauth2Client.get("_id"),
-    client_secret: clientSecret || oauth2Client.get("secret")
+    scope: scope || 'all',
+    grant_type: 'password',
+    client_id: clientId || oauth2Client.get('_id'),
+    client_secret: clientSecret || oauth2Client.get('secret'),
   };
   return dispatch => {
-    return callApi("oauth2/token", "post", form, reqConfig)
+    return callApi('oauth2/token', 'post', form, reqConfig)
       .then(res => {
         dispatch(setCurrentAccessToken(res));
         return res;
@@ -69,14 +64,14 @@ export function fetchAccessToken(
 // may be rename it?
 function getToken(accessToken) {
   let token;
-  if (typeof accessToken === "string") {
+  if (typeof accessToken === 'string') {
     token = accessToken;
   } else if (accessToken.token) {
     token = accessToken.token; // eslint-disable-line
   } else if (accessToken.access_token) {
     token = accessToken.access_token; // eslint-disable-line
   } else if (accessToken.get) {
-    token = accessToken.get("token");
+    token = accessToken.get('token');
   }
   return token;
 }
@@ -84,7 +79,7 @@ function getToken(accessToken) {
 export function fetchCurrentUser(accessToken = {}) {
   const token = getToken(accessToken);
   const q = {
-    access_token: token
+    access_token: token,
   };
   return dispatch => {
     return callApi(`currentUser?${qs.stringify(q)}`)
@@ -101,8 +96,8 @@ export function fetchCurrentUser(accessToken = {}) {
 
 export function logInRequest({ email, password, oauth2Client } = {}) {
   return dispatch => {
-    return dispatch(fetchAccessToken({ email, password, oauth2Client })).then(
-      accessToken => dispatch(fetchCurrentUser(accessToken))
+    return dispatch(fetchAccessToken({ email, password, oauth2Client })).then(accessToken =>
+      dispatch(fetchCurrentUser(accessToken))
     );
   };
 }
@@ -110,7 +105,7 @@ export function logInRequest({ email, password, oauth2Client } = {}) {
 export function logOutRequest(accessToken) {
   const token = getToken(accessToken);
   return dispatch => {
-    return callApi(`oauth2/tokens/${token}`, "delete")
+    return callApi(`oauth2/tokens/${token}`, 'delete')
       .then(() => {
         // TODO
         // use batchActions?
@@ -124,7 +119,7 @@ export function logOutRequest(accessToken) {
 export function fetchtUser(id, accessToken) {
   const token = getToken(accessToken);
   const q = {
-    access_token: token
+    access_token: token,
   };
   return dispatch => {
     return callApi(`users/${id}?${qs.stringify(q)}`)
@@ -139,7 +134,7 @@ export function fetchtUser(id, accessToken) {
 
 export function addUserRequest(user) {
   return dispatch => {
-    return callApi("users", "post", { user })
+    return callApi('users', 'post', { user })
       .then(res => {
         dispatch(addUser(res.user));
         return res.user;

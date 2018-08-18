@@ -1,4 +1,4 @@
-import User from "../models/user";
+import User from '../models/user';
 
 /**
  * Validate signup form
@@ -15,7 +15,7 @@ export function validateUser(req, res) {
       if (user) {
         res.json(true);
       } else {
-        res.status(403).send(new Error("duplicate email"));
+        res.status(403).send(new Error('duplicate email'));
       }
     })
     .catch(err => {
@@ -34,12 +34,12 @@ export function validateUser(req, res) {
 export function getUser(req, res) {
   const { id } = req.params;
   const reqUser = req.user;
-  const defaultScope = "public_profile";
+  const defaultScope = 'public_profile';
   let scope;
   if (req.authInfo) {
     scope = req.authInfo.scope || defaultScope;
   } else if (reqUser._id.toString() === id) {
-    scope = "all";
+    scope = 'all';
   } else {
     scope = defaultScope;
   }

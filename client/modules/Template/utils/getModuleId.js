@@ -1,6 +1,6 @@
 function getModuleId(template) {
   if (!template) {
-    throw new Error("getModuleId require template param.");
+    throw new Error('getModuleId require template param.');
   }
   // TODO
   // get by targetKind "rootWiki" or ??

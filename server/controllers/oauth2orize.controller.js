@@ -1,11 +1,11 @@
-import oauth2orize from "oauth2orize";
-import Client from "../models/oauth2Client";
-import AuthorizationCode from "../models/oauth2AuthorizationCode";
+import oauth2orize from 'oauth2orize';
+import Client from '../models/oauth2Client';
+import AuthorizationCode from '../models/oauth2AuthorizationCode';
 import AccessToken, {
   defaultExpiresDuration,
-  defaultRefreshExpiresDuration
-} from "../models/oauth2AccessToken";
-import User from "../models/user";
+  defaultRefreshExpiresDuration,
+} from '../models/oauth2AccessToken';
+import User from '../models/user';
 
 const server = oauth2orize.createServer();
 
@@ -15,7 +15,7 @@ server.grant(
       redirectURI,
       client: client._id,
       user: user._id,
-      scope: ares.scope
+      scope: ares.scope,
     };
     const ac = new AuthorizationCode(props);
     ac.save(err => {
@@ -32,7 +32,7 @@ server.grant(
     const { scope } = ares;
     const props = {
       user,
-      scope
+      scope,
     };
     const token = AccessToken.create(client, props);
     return token.save(atErr => {
@@ -47,8 +47,8 @@ server.grant(
 server.exchange(
   oauth2orize.exchange.code((clientForm, codeString, redirectURI, done) => {
     AuthorizationCode.findOne({ code: codeString })
-      .populate("user")
-      .populate("client")
+      .populate('user')
+      .populate('client')
       .exec()
       .then(code => {
         if (clientForm.id !== code.client._id.toString()) {
@@ -60,7 +60,7 @@ server.exchange(
         const { user, client, scope } = code;
         const props = {
           user,
-          scope
+          scope,
         };
         const token = AccessToken.create(client, props);
         return token.save(atErr => {
@@ -77,48 +77,46 @@ server.exchange(
 );
 
 server.exchange(
-  oauth2orize.exchange.password(
-    async (reqClient, email, password, scope, done) => {
-      // TODO
-      // validate by scope
-      try {
-        const [user, client] = await Promise.all([
-          User.findOne({ email }).exec(),
-          Client.findOne({
-            _id: reqClient._id,
-            secret: reqClient.secret
-          }).exec()
-        ]);
-        if (!user || !client) {
-          return done(null, false);
+  oauth2orize.exchange.password(async (reqClient, email, password, scope, done) => {
+    // TODO
+    // validate by scope
+    try {
+      const [user, client] = await Promise.all([
+        User.findOne({ email }).exec(),
+        Client.findOne({
+          _id: reqClient._id,
+          secret: reqClient.secret,
+        }).exec(),
+      ]);
+      if (!user || !client) {
+        return done(null, false);
+      } else {
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+          return done(null, false, {
+            message: 'Invalid email or password.',
+          });
         } else {
-          const isMatch = await user.comparePassword(password);
-          if (!isMatch) {
-            return done(null, false, {
-              message: "Invalid email or password."
-            });
-          } else {
-            const props = {
-              user,
-              scope
-            };
-            const token = AccessToken.create(client, props);
-            const saved = await token.save();
-            return done(null, saved.token, {
-              refresh_token: saved.refreshToken,
-              expires_in: defaultExpiresDuration.asSeconds(),
-              refresh_expires_in: defaultRefreshExpiresDuration.asSeconds()
-            });
-          }
+          const props = {
+            user,
+            scope,
+          };
+          const token = AccessToken.create(client, props);
+          const saved = await token.save();
+          return done(null, saved.token, {
+            refresh_token: saved.refreshToken,
+            expires_in: defaultExpiresDuration.asSeconds(),
+            refresh_expires_in: defaultRefreshExpiresDuration.asSeconds(),
+          });
         }
-      } catch (err) {
-        // TODO
-        // should handle comparePassword err or mongo err
-        // throw other err
-        return done(err);
       }
+    } catch (err) {
+      // TODO
+      // should handle comparePassword err or mongo err
+      // throw other err
+      return done(err);
     }
-  )
+  })
 );
 
 server.exchange(
@@ -164,18 +162,18 @@ function deleteToken(req, res) {
     });
 }
 
-import login from "connect-ensure-login";
+import login from 'connect-ensure-login';
 
 const decision = [login.ensureLoggedIn(), server.decision()];
 
-import passport from "passport";
+import passport from 'passport';
 
 const token = [
-  passport.authenticate(["clientBasic", "oauth2-client-password"], {
-    session: false
+  passport.authenticate(['clientBasic', 'oauth2-client-password'], {
+    session: false,
   }),
   server.token(),
-  server.errorHandler()
+  server.errorHandler(),
 ];
 
 const addToken = token;

@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import isEmail from "validator/lib/isEmail";
-import _ from "lodash";
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import isEmail from 'validator/lib/isEmail';
+import _ from 'lodash';
 
 const Schema = mongoose.Schema;
 
@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       index: {
-        unique: true
+        unique: true,
       },
       lowercase: true,
       required: true,
@@ -18,8 +18,8 @@ const userSchema = new mongoose.Schema(
       maxLength: 30,
       validate: {
         validator: v => isEmail(v),
-        message: "{VALUE} is not a valid email!"
-      }
+        message: '{VALUE} is not a valid email!',
+      },
     },
     password: { type: String, required: true, minLength: 4, maxLength: 50 },
     displayName: { type: String },
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
       location: { type: String },
       birthday: { type: Date },
       website: { type: String },
-      picture: { type: String }
+      picture: { type: String },
     },
     passports: {
       type: [
@@ -43,16 +43,16 @@ const userSchema = new mongoose.Schema(
           providerName: {
             type: String,
             required: true,
-            enum: ["facebook", "google"]
+            enum: ['facebook', 'google'],
           },
           thirdUserId: { type: String, required: true },
-          profile: {}
-        }
+          profile: {},
+        },
       ],
-      default: []
+      default: [],
     },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
   },
   {
     toJSON: {
@@ -63,29 +63,29 @@ const userSchema = new mongoose.Schema(
           ret.displayName = displayName;
         }
         return ret;
-      }
-    }
+      },
+    },
   }
 );
 
-userSchema.virtual("discussions", {
-  ref: "Discussion",
-  localField: "_id",
-  foreignField: "author",
-  justOne: false
+userSchema.virtual('discussions', {
+  ref: 'Discussion',
+  localField: '_id',
+  foreignField: 'author',
+  justOne: false,
 });
 
-userSchema.virtual("messages", {
-  ref: "Message",
-  localField: "_id",
-  foreignField: "author",
-  justOne: false
+userSchema.virtual('messages', {
+  ref: 'Message',
+  localField: '_id',
+  foreignField: 'author',
+  justOne: false,
 });
 
 userSchema.index({ email: 1, isActive: 1 });
 
-userSchema.pre("save", function(next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password')) return next();
   bcrypt.genSalt(10, (err, salt) => {
     if (err) return next(err);
     bcrypt.hash(this.password, salt, (err, hash) => {
@@ -106,11 +106,11 @@ function getDisplayName(ret, options = {}) {
   if (ret.diaplayName) {
     return ret.diaplayName;
   }
-  const lang = options.lang || "zh";
-  let displayName = "";
+  const lang = options.lang || 'zh';
+  let displayName = '';
   if (ret.profile) {
     const { zhName, firstName, lastName } = ret.profile;
-    if (lang === "zh") {
+    if (lang === 'zh') {
       if (!displayName && firstName && lastName) {
         displayName = `${lastName}${firstName}`;
       }
@@ -125,7 +125,7 @@ function getDisplayName(ret, options = {}) {
     }
   }
   if (ret.email && !displayName) {
-    displayName = ret.email.substring(0, ret.email.indexOf("@"));
+    displayName = ret.email.substring(0, ret.email.indexOf('@'));
   }
   return displayName;
 }
@@ -141,13 +141,13 @@ userSchema.methods.getBasicInfo = function(options) {
     displayName = this.getDisplayName(options);
   }
   if (!_id) {
-    throw new Error("getBasicInfo require _id filed");
+    throw new Error('getBasicInfo require _id filed');
   }
   const basicInfo = _.omitBy(
     {
       _id,
       avatarURL,
-      displayName
+      displayName,
     },
     _.isEmpty
   );
@@ -156,7 +156,7 @@ userSchema.methods.getBasicInfo = function(options) {
 
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
   if (!this.password) {
-    throw new Error("comparePassword require password filed");
+    throw new Error('comparePassword require password filed');
   }
   return new Promise((resolve, reject) => {
     bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
@@ -170,4 +170,4 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
   });
 };
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model('User', userSchema);

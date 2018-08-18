@@ -1,6 +1,6 @@
 export default {
-  locale: "zh-tw",
+  locale: 'zh-tw',
   messages: {
-    siteTitle: "Tiamat"
-  }
+    siteTitle: 'Tiamat',
+  },
 };

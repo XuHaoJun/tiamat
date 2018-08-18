@@ -43,8 +43,19 @@
           "enum": ["block", "inline"]
         },
         "type": {
-          "enum": ["paragraph", "image", "mention", "link", "heading", "code", "quote", "list-item",
-            "bulleted-list", "numbered-list", "heading-one", "heading-two"
+          "enum": [
+            "paragraph",
+            "image",
+            "mention",
+            "link",
+            "heading",
+            "code",
+            "quote",
+            "list-item",
+            "bulleted-list",
+            "numbered-list",
+            "heading-one",
+            "heading-two"
           ]
         },
         "isVoid": {
@@ -90,15 +101,17 @@
         },
         "marks": {
           "type": "array",
-          "items": [{
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": ["bold", "code", "italic", "underlined"]
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["bold", "code", "italic", "underlined"]
+                }
               }
             }
-          }]
+          ]
         }
       }
     }

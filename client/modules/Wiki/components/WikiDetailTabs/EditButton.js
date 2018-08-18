@@ -1,22 +1,22 @@
-import * as React from "react";
-import PropTypes from "prop-types";
+import * as React from 'react';
+import PropTypes from 'prop-types';
 
-import Portal from "@material-ui/core/Portal";
-import CreateIcon from "@material-ui/icons/Create";
-import Button from "@material-ui/core/Button";
+import Portal from '@material-ui/core/Portal';
+import CreateIcon from '@material-ui/icons/Create';
+import Button from '@material-ui/core/Button';
 
 class EditButton extends React.Component {
   static propTypes = {
     isOpened: PropTypes.bool,
     href: PropTypes.string,
-    onClick: PropTypes.func
+    onClick: PropTypes.func,
   };
 
   static defaultProps = {
     isOpened: true,
-    iconType: "create",
-    href: "",
-    onClick: () => {}
+    iconType: 'create',
+    href: '',
+    onClick: () => {},
   };
 
   onClick = e => {
@@ -27,30 +27,16 @@ class EditButton extends React.Component {
   };
 
   render() {
-    const {
-      style,
-      isOpened,
-      iconType,
-      href,
-      onTouchTap,
-      onClick,
-      ...other
-    } = this.props;
+    const { style, isOpened, iconType, href, onTouchTap, onClick, ...other } = this.props;
     const _style = {
-      position: "fixed",
+      position: 'fixed',
       bottom: 20,
-      right: 20
+      right: 20,
     };
     const finalStyle = Object.assign(_style, style || {});
     return (
       <Portal>
-        <Button
-          {...other}
-          variant="fab"
-          style={finalStyle}
-          href={href}
-          onClick={this.onClick}
-        >
+        <Button {...other} variant="fab" style={finalStyle} href={href} onClick={this.onClick}>
           <CreateIcon />
         </Button>
       </Portal>

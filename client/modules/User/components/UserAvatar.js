@@ -1,9 +1,9 @@
-import React from "react";
-import randomColor from "randomcolor";
-import LazyLoad from "react-lazyload";
+import React from 'react';
+import randomColor from 'randomcolor';
+import LazyLoad from 'react-lazyload';
 
-import Avatar from "@material-ui/core/Avatar";
-import GuestPersonIcon from "@material-ui/icons/Person";
+import Avatar from '@material-ui/core/Avatar';
+import GuestPersonIcon from '@material-ui/icons/Person';
 
 function getTextOrSrcOrIcon(user) {
   if (user) {
@@ -12,14 +12,14 @@ function getTextOrSrcOrIcon(user) {
       return { src: avatarURL };
     } else if (displayName) {
       let text;
-      const chineseRegExp = new RegExp("^[\u4E00-\uFA29]*$");
+      const chineseRegExp = new RegExp('^[\u4E00-\uFA29]*$');
       if (chineseRegExp.test(displayName.substring(0, 2))) {
         text = displayName.substring(0, 2);
       } else {
         text = displayName.substring(0, 1);
       }
       return {
-        text
+        text,
       };
     } else {
       return { icon: <GuestPersonIcon /> };
@@ -51,8 +51,8 @@ const UserAvatar = props => {
   } else if (text) {
     const { _id } = user;
     const backgroundColor = randomColor({
-      luminosity: "dark",
-      seed: _id || text
+      luminosity: 'dark',
+      seed: _id || text,
     });
     const style = { backgroundColor, ...props.style };
     return (
@@ -69,7 +69,7 @@ const UserAvatar = props => {
 
 UserAvatar.defaultProps = {
   user: null,
-  enableLazyLoad: true
+  enableLazyLoad: true,
 };
 
 export default UserAvatar;

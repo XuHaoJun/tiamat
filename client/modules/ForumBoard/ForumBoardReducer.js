@@ -1,9 +1,5 @@
-import { fromJS, Set, List, Record } from "immutable";
-import {
-  ADD_FORUM_BOARDS,
-  ADD_FORUM_BOARD,
-  CLEAR_FORUM_BOARDS
-} from "./ForumBoardActions";
+import { fromJS, Set, List, Record } from 'immutable';
+import { ADD_FORUM_BOARDS, ADD_FORUM_BOARD, CLEAR_FORUM_BOARDS } from './ForumBoardActions';
 
 const FORUM_BOARD_RECORD_DEFAULT = {
   _id: null,
@@ -13,7 +9,7 @@ const FORUM_BOARD_RECORD_DEFAULT = {
   groups: List(),
   category: null,
   createdAt: null,
-  updatedAt: null
+  updatedAt: null,
 };
 
 export class ForumBoard extends Record(FORUM_BOARD_RECORD_DEFAULT) {
@@ -22,7 +18,7 @@ export class ForumBoard extends Record(FORUM_BOARD_RECORD_DEFAULT) {
       ...obj,
       groups: List(obj.groups),
       createdAt: new Date(obj.createdAt),
-      updatedAt: new Date(obj.updatedAt)
+      updatedAt: new Date(obj.updatedAt),
     });
     return record;
   }
@@ -30,14 +26,14 @@ export class ForumBoard extends Record(FORUM_BOARD_RECORD_DEFAULT) {
 
 const FORUM_BOARD_STATE_RECORD_DEFAULT = {
   ui: fromJS({}),
-  data: Set()
+  data: Set(),
 };
 
 export class ForumBoardState extends Record(FORUM_BOARD_STATE_RECORD_DEFAULT) {
   static fromJS({ ui, data = [] } = {}) {
     const record = new ForumBoardState({
       ui: fromJS(ui),
-      data: Set(data.map(ForumBoard.fromJS))
+      data: Set(data.map(ForumBoard.fromJS)),
     });
     return record;
   }
@@ -57,10 +53,10 @@ const ForumBoardReducer = (state = initialState, action) => {
         .groupBy(x => x._id)
         .map(xs => xs.maxBy(x => x.updatedAt.getTime()))
         .toSet();
-      return state.set("data", nextData);
+      return state.set('data', nextData);
 
     case CLEAR_FORUM_BOARDS:
-      return state.set("data", Set());
+      return state.set('data', Set());
 
     default:
       return state;
@@ -69,13 +65,12 @@ const ForumBoardReducer = (state = initialState, action) => {
 
 export const getForumBoards = state => state.forumBoards.data;
 
-export const getForumBoardById = (state, _id) =>
-  getForumBoards(state).find(x => x._id === _id);
+export const getForumBoardById = (state, _id) => getForumBoards(state).find(x => x._id === _id);
 
 export const getForumBoard = getForumBoardById;
 
 export const DiscussionSelector = {
-  findById: getForumBoardById
+  findById: getForumBoardById,
 };
 
 // Export Reducer

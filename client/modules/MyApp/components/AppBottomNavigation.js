@@ -1,42 +1,42 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import BottomNavigation from "@material-ui/core/BottomNavigation";
-import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import BottomNavigation from '@material-ui/core/BottomNavigation';
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 
-import WhatsHotIcon from "@material-ui/icons/Whatshot";
-import ActionHomeIcon from "@material-ui/icons/Home";
-import ChatIcon from "@material-ui/icons/Chat";
-import SubscriptionIcon from "@material-ui/icons/RssFeed";
+import WhatsHotIcon from '@material-ui/icons/Whatshot';
+import ActionHomeIcon from '@material-ui/icons/Home';
+import ChatIcon from '@material-ui/icons/Chat';
+import SubscriptionIcon from '@material-ui/icons/RssFeed';
 
 const styles = theme => {
   const { breakpoints } = theme;
   return {
     root: {
-      width: "100%",
-      position: "fixed",
+      width: '100%',
+      position: 'fixed',
       bottom: 0,
       left: 0,
       zIndex: 100,
-      display: "block",
-      [`${breakpoints.up("sm")}`]: {
-        display: "none"
-      }
-    }
+      display: 'block',
+      [`${breakpoints.up('sm')}`]: {
+        display: 'none',
+      },
+    },
   };
 };
 
 class AppBottomNavigation extends React.Component {
   static propTypes = {
     classes: PropTypes.object.isRequired,
-    selectedIndex: PropTypes.string
+    selectedIndex: PropTypes.string,
   };
 
   static defaultProps = {
-    selectedIndex: "/"
+    selectedIndex: '/',
   };
 
   handleChange = (event, nextIndex) => {
@@ -49,16 +49,8 @@ class AppBottomNavigation extends React.Component {
     const { classes, selectedIndex } = this.props;
     return (
       <div className={classes.root}>
-        <BottomNavigation
-          value={selectedIndex}
-          onChange={this.handleChange}
-          showLabels
-        >
-          <BottomNavigationAction
-            value="/"
-            label="首頁"
-            icon={<ActionHomeIcon />}
-          />
+        <BottomNavigation value={selectedIndex} onChange={this.handleChange} showLabels>
+          <BottomNavigationAction value="/" label="首頁" icon={<ActionHomeIcon />} />
           <BottomNavigationAction
             value="/whatsHotDiscussions"
             label="熱門話題"
@@ -69,23 +61,16 @@ class AppBottomNavigation extends React.Component {
             label="訂閱內容"
             icon={<SubscriptionIcon />}
           />
-          <BottomNavigationAction
-            value="/chatRooms"
-            label="聊天室"
-            icon={<ChatIcon />}
-          />
+          <BottomNavigationAction value="/chatRooms" label="聊天室" icon={<ChatIcon />} />
         </BottomNavigation>
       </div>
     );
   }
 }
 
-import {
-  setHistoryCursor,
-  clearHistoryByCursor
-} from "../../History/HistoryActions";
-import { getCursor, getStackByCursor } from "../../History/HistoryReducer";
-import { push } from "react-router-redux";
+import { setHistoryCursor, clearHistoryByCursor } from '../../History/HistoryActions';
+import { getCursor, getStackByCursor } from '../../History/HistoryReducer';
+import { push } from 'react-router-redux';
 
 function mapStateToProps(state) {
   const selectedIndex = getCursor(state);
@@ -96,14 +81,13 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    dispatch
+    dispatch,
   };
 }
 
 function mergeProps(stateProps, dispatchProps, ownProps) {
   const { _history, ...otherStateProps } = stateProps;
-  const _getStackByCursor = cursor =>
-    getStackByCursor({ history: _history }, cursor);
+  const _getStackByCursor = cursor => getStackByCursor({ history: _history }, cursor);
   const { dispatch } = dispatchProps;
   const onSelect = (event, nextIndex, currentIndex) => {
     if (nextIndex === currentIndex) {
@@ -138,11 +122,15 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     }
   };
   return Object.assign({}, ownProps, otherStateProps, dispatchProps, {
-    onSelect
+    onSelect,
   });
 }
 
 export default compose(
   withStyles(styles),
-  connect(mapStateToProps, mapDispatchToProps, mergeProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps
+  )
 )(AppBottomNavigation);

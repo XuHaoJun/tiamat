@@ -1,37 +1,37 @@
-import React from "react";
-import PropTypes from "prop-types";
-import SwipeableViews from "react-swipeable-views";
-import { connect } from "react-redux";
-import { getIsFirstRender } from "../modules/MyApp/MyAppReducer";
+import React from 'react';
+import PropTypes from 'prop-types';
+import SwipeableViews from 'react-swipeable-views';
+import { connect } from 'react-redux';
+import { getIsFirstRender } from '../modules/MyApp/MyAppReducer';
 
 class EnhancedSwipableViews extends React.Component {
   static propTypes = {
     disableOnDrawerStart: PropTypes.bool,
     resistance: PropTypes.bool,
     scrollKey: PropTypes.string,
-    scrollBehaviorShouldUpdateScroll: PropTypes.func
+    scrollBehaviorShouldUpdateScroll: PropTypes.func,
   };
 
   static defaultProps = {
     disableOnDrawerStart: true,
-    resistance: true
+    resistance: true,
   };
 
   static contextTypes = {
-    scrollBehavior: PropTypes.object
+    scrollBehavior: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
     this.scrollKey = props.id;
     this.state = {
-      disabled: false
+      disabled: false,
     };
   }
 
   componentDidMount() {
-    document.body.addEventListener("touchstart", this.onBodyTouchStart);
-    document.body.addEventListener("touchend", this.onBodyTouchEnd);
+    document.body.addEventListener('touchstart', this.onBodyTouchStart);
+    document.body.addEventListener('touchend', this.onBodyTouchEnd);
     this._scrollSpy();
   }
 
@@ -48,8 +48,8 @@ class EnhancedSwipableViews extends React.Component {
   }
 
   componentWillUnmount() {
-    document.body.removeEventListener("touchstart", this.onBodyTouchStart);
-    document.body.removeEventListener("touchend", this.onBodyTouchEnd);
+    document.body.removeEventListener('touchstart', this.onBodyTouchStart);
+    document.body.removeEventListener('touchend', this.onBodyTouchEnd);
     if (this._scrollKeys) {
       this._scrollKeys.forEach(scrollKey => {
         this.context.scrollBehavior.unregisterElement(scrollKey);
@@ -105,8 +105,7 @@ class EnhancedSwipableViews extends React.Component {
         this._scrollKeys.push(_scrollKey);
         const targetScrollElement = activeNode;
         let { scrollBehaviorShouldUpdateScroll } = this.props;
-        scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior
-          .shouldUpdateScroll;
+        scrollBehaviorShouldUpdateScroll = this.context.scrollBehavior.shouldUpdateScroll;
         try {
           this.context.scrollBehavior.registerElement(
             _scrollKey,

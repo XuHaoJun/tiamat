@@ -1,23 +1,23 @@
-import test from "ava";
-import { reducerTest } from "redux-ava";
-import intlReducer from "../IntlReducer";
-import { switchLanguage } from "../IntlActions";
-import { localizationData, enabledLanguages } from "../../../../Intl/setup";
+import test from 'ava';
+import { reducerTest } from 'redux-ava';
+import intlReducer from '../IntlReducer';
+import { switchLanguage } from '../IntlActions';
+import { localizationData, enabledLanguages } from '../../../../Intl/setup';
 
 test(
-  "action for SWITCH_LANGUAGE is working",
+  'action for SWITCH_LANGUAGE is working',
   reducerTest(
     intlReducer,
     {
-      locale: "en",
+      locale: 'en',
       enabledLanguages,
-      ...localizationData.en
+      ...localizationData.en,
     },
-    switchLanguage("fr"),
+    switchLanguage('fr'),
     {
-      locale: "fr",
+      locale: 'fr',
       enabledLanguages,
-      ...localizationData.fr
+      ...localizationData.fr,
     }
   )
 );

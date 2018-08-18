@@ -1,22 +1,19 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
-import RootWikiForm from "../components/RootWikiForm";
+import RootWikiForm from '../components/RootWikiForm';
 
-import { replace } from "react-router-redux";
-import {
-  setHeaderTitle,
-  updateSendButtonProps
-} from "../../MyApp/MyAppActions";
-import { addRootWikiRequest } from "../RootWikiActions";
+import { replace } from 'react-router-redux';
+import { setHeaderTitle, updateSendButtonProps } from '../../MyApp/MyAppActions';
+import { addRootWikiRequest } from '../RootWikiActions';
 
 class CreateRootWikiPage extends React.PureComponent {
   static defaultProps = {
-    title: "建立主維基"
+    title: '建立主維基',
   };
 
   componentWillMount() {
@@ -32,7 +29,7 @@ class CreateRootWikiPage extends React.PureComponent {
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onClick: null
+          onClick: null,
         })
       );
     }
@@ -43,9 +40,7 @@ class CreateRootWikiPage extends React.PureComponent {
       const form = this.formComponent.getForm();
       const { forumBoardId } = this.props;
       this.props.dispatch(dispatch => {
-        return Promise.resolve(
-          dispatch(updateSendButtonProps({ loading: true }))
-        )
+        return Promise.resolve(dispatch(updateSendButtonProps({ loading: true })))
           .then(() => dispatch(addRootWikiRequest(form)))
           .then(rootWikiJSON => {
             dispatch(updateSendButtonProps({ loading: false }));
@@ -53,9 +48,7 @@ class CreateRootWikiPage extends React.PureComponent {
           })
           .then(rootWikiJSON => {
             this.props.dispatch(
-              replace(
-                `/forumBoards/${forumBoardId}/rootWikis/${rootWikiJSON._id}`
-              )
+              replace(`/forumBoards/${forumBoardId}/rootWikis/${rootWikiJSON._id}`)
             );
             return rootWikiJSON;
           })
@@ -71,13 +64,13 @@ class CreateRootWikiPage extends React.PureComponent {
     const metaDescription = title;
     const meta = [
       {
-        name: "description",
-        content: metaDescription
-      }
+        name: 'description',
+        content: metaDescription,
+      },
     ];
     const { forumBoardId } = this.props;
     const style = {
-      paddingTop: 30
+      paddingTop: 30,
     };
     return (
       <div>
@@ -99,6 +92,7 @@ function mapStateToProps(state, routerProps) {
   return { forumBoardId };
 }
 
-export default compose(hot(module), connect(mapStateToProps))(
-  CreateRootWikiPage
-);
+export default compose(
+  hot(module),
+  connect(mapStateToProps)
+)(CreateRootWikiPage);

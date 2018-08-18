@@ -1,17 +1,17 @@
-import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
 
-import TextField from "@material-ui/core/TextField";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import Button from "@material-ui/core/Button";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import TextField from '@material-ui/core/TextField';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Button from '@material-ui/core/Button';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 
 export function getStyles() {
   return {
     form: {
-      marginBottom: 20
-    }
+      marginBottom: 20,
+    },
   };
 }
 
@@ -20,9 +20,9 @@ class CreateForumBoardForm extends React.Component {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
-      type: "",
-      typePlaceholder: "遊戲類型",
-      name: ""
+      type: '',
+      typePlaceholder: '遊戲類型',
+      name: '',
     };
   }
 
@@ -66,33 +66,33 @@ class CreateForumBoardForm extends React.Component {
             }}
           >
             <MenuItem
-              selected={type === "角色扮演"}
+              selected={type === '角色扮演'}
               onClick={() => {
                 this.setState({
                   anchorEl: null,
-                  type: "角色扮演"
+                  type: '角色扮演',
                 });
               }}
             >
               角色扮演
             </MenuItem>
             <MenuItem
-              selected={type === "動作"}
+              selected={type === '動作'}
               onClick={() => {
                 this.setState({
                   anchorEl: null,
-                  type: "動作"
+                  type: '動作',
                 });
               }}
             >
               動作
             </MenuItem>
             <MenuItem
-              selected={type === "射擊"}
+              selected={type === '射擊'}
               onClick={() => {
                 this.setState({
                   anchorEl: null,
-                  type: "射擊"
+                  type: '射擊',
                 });
               }}
             >

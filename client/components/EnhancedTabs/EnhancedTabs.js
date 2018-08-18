@@ -1,5 +1,5 @@
-import React, { Children, isValidElement, cloneElement } from "react";
-import { Tabs } from "material-ui/Tabs";
+import React, { Children, isValidElement, cloneElement } from 'react';
+import { Tabs } from 'material-ui/Tabs';
 
 class EnhancedTabs extends React.Component {
   componentWillUnmount() {}
@@ -8,7 +8,7 @@ class EnhancedTabs extends React.Component {
     const tabs = [];
     Children.forEach(props.children, tab => {
       if (isValidElement(tab)) {
-        console.log("tab", tab);
+        console.log('tab', tab);
         tabs.push(cloneElement(tab));
       }
     });

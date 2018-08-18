@@ -1,29 +1,29 @@
-import { fromJS } from "immutable";
-import memoize from "fast-memoize";
-import createFastMemoizeDefaultOptions from "../../../util/createFastMemoizeDefaultOptions";
-import { Range } from "slate";
-import Debug from "debug";
+import { fromJS } from 'immutable';
+import memoize from 'fast-memoize';
+import createFastMemoizeDefaultOptions from '../../../util/createFastMemoizeDefaultOptions';
+import { Range } from 'slate';
+import Debug from 'debug';
 
-const debug = Debug("app:editor:semanticReplace");
+const debug = Debug('app:editor:semanticReplace');
 
 export const exampleSemanticRules = fromJS([
   {
-    name: "背刺",
-    href: "",
+    name: '背刺',
+    href: '',
     data: {
-      rootWikiId: "59169e05e36ec344308fafbb",
-      wikiId: "5916ad94e36ec344308fafc0"
+      rootWikiId: '59169e05e36ec344308fafbb',
+      wikiId: '5916ad94e36ec344308fafc0',
     },
     getHref: (rule, node) => {
-      const data = rule.get("data");
-      const wikiId = data.get("wikiId");
+      const data = rule.get('data');
+      const wikiId = data.get('wikiId');
       return `/wikis/${wikiId}`;
-    }
-  }
+    },
+  },
 ]);
 
 function semanticReplace(value, semanticRules) {
-  debug("start", value, semanticRules);
+  debug('start', value, semanticRules);
   const change = value.change();
   const { document } = value;
   const startNode = document;
@@ -32,20 +32,20 @@ function semanticReplace(value, semanticRules) {
   }
   const calcedParentKeys = [];
   startNode.filterDescendants(node => {
-    if (node.object !== "text") {
+    if (node.object !== 'text') {
       return;
     }
     let parent = startNode.getParent(node.key);
     const calced = calcedParentKeys.lastIndexOf(parent.key) > -1;
-    if (calced || !parent || (parent && parent.type === "link")) {
+    if (calced || !parent || (parent && parent.type === 'link')) {
       return;
     }
     semanticRules.forEach(rule => {
-      const name = rule.get("name");
-      const getHref = rule.get("getHref");
-      const href = rule.get("href") ? rule.get("href") : getHref(rule, node);
+      const name = rule.get('name');
+      const getHref = rule.get('getHref');
+      const href = rule.get('href') ? rule.get('href') : getHref(rule, node);
       const nameLength = name.length;
-      const re = new RegExp(name, "gm");
+      const re = new RegExp(name, 'gm');
       let found = false;
       let match = re.exec(parent.text);
       found = match !== null;
@@ -54,10 +54,10 @@ function semanticReplace(value, semanticRules) {
         let selection;
         let seleProps;
         const inlineLinkProps = {
-          type: "link",
+          type: 'link',
           data: {
-            href
-          }
+            href,
+          },
         };
         while (match !== null) {
           let anchorKey = node.key;
@@ -68,7 +68,7 @@ function semanticReplace(value, semanticRules) {
           const textComponent = parent.getTextAtOffset(focusOffset);
           anchorKey = textComponent.key;
           focusKey = anchorKey;
-          const tmpReg = new RegExp(name, "gm");
+          const tmpReg = new RegExp(name, 'gm');
           const tmpMatch = tmpReg.exec(textComponent.text);
           if (tmpMatch) {
             anchorOffset = tmpMatch.index;
@@ -77,7 +77,7 @@ function semanticReplace(value, semanticRules) {
               anchorKey,
               anchorOffset,
               focusKey,
-              focusOffset
+              focusOffset,
             };
             selection = Range.create(seleProps);
             change.wrapInlineAtRange(selection, inlineLinkProps);
@@ -88,7 +88,7 @@ function semanticReplace(value, semanticRules) {
       }
     });
   });
-  debug("end", change);
+  debug('end', change);
   return change;
 }
 

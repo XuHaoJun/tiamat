@@ -1,19 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
 
-import {
-  setHeaderTitle,
-  updateSendButtonProps
-} from "../../MyApp/MyAppActions";
-import CreateForumBoardForm from "../components/CreateForumBoardForm";
-import { addForumBoardRequest } from "../ForumBoardActions";
-import { push } from "react-router-redux";
+import { setHeaderTitle, updateSendButtonProps } from '../../MyApp/MyAppActions';
+import CreateForumBoardForm from '../components/CreateForumBoardForm';
+import { addForumBoardRequest } from '../ForumBoardActions';
+import { push } from 'react-router-redux';
 
 class CreateForumBoardPage extends React.PureComponent {
   static defaultProps = {
-    title: "建立看板"
+    title: '建立看板',
   };
 
   componentWillMount() {
@@ -29,7 +26,7 @@ class CreateForumBoardPage extends React.PureComponent {
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onClick: null
+          onClick: null,
         })
       );
     }
@@ -42,18 +39,14 @@ class CreateForumBoardPage extends React.PureComponent {
         return;
       }
       this.props.dispatch(dispatch => {
-        return Promise.resolve(
-          dispatch(updateSendButtonProps({ loading: true }))
-        )
+        return Promise.resolve(dispatch(updateSendButtonProps({ loading: true })))
           .then(() => dispatch(addForumBoardRequest(form)))
           .then(forumBoardJSON => {
             dispatch(updateSendButtonProps({ loading: false }));
             return forumBoardJSON;
           })
           .then(forumBoardJSON => {
-            this.props.dispatch(
-              push(`/forumBoards/${forumBoardJSON._id}/rootDiscussions`)
-            );
+            this.props.dispatch(push(`/forumBoards/${forumBoardJSON._id}/rootDiscussions`));
           })
           .catch(() => dispatch(updateSendButtonProps({ loading: false })));
       });
@@ -65,9 +58,9 @@ class CreateForumBoardPage extends React.PureComponent {
     const metaDescription = title;
     const meta = [
       {
-        name: "description",
-        content: metaDescription
-      }
+        name: 'description',
+        content: metaDescription,
+      },
     ];
     return (
       <React.Fragment>

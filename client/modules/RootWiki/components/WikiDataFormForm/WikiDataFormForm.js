@@ -1,24 +1,24 @@
-import React from "react";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import React from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
-import { Container, Col, Row } from "react-grid-system";
+import { Container, Col, Row } from 'react-grid-system';
 
-import exampleData from "../../../Wiki/components/WikiDataForm/HearthStoneSchema.json";
-import WikiDataForm from "../../../Wiki/components/WikiDataForm";
-import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
-import validate from "./validate";
-import AceEditorOri from "../../../../components/AceEditor";
+import exampleData from '../../../Wiki/components/WikiDataForm/HearthStoneSchema.json';
+import WikiDataForm from '../../../Wiki/components/WikiDataForm';
+import EnhancedSwipeableViews from '../../../../components/EnhancedSwipableViews';
+import validate from './validate';
+import AceEditorOri from '../../../../components/AceEditor';
 
 const AceEditor = props => {
   const defaultProps = {
-    mode: "json",
-    theme: "github",
+    mode: 'json',
+    theme: 'github',
     tabSize: 2,
     highlightActiveLine: true,
     showLineNumbers: true,
     enableLiveAutocompletion: true,
-    showGutter: true
+    showGutter: true,
   };
   const finalProps = Object.assign(defaultProps, props);
   return <AceEditorOri {...finalProps} />;
@@ -27,24 +27,24 @@ const AceEditor = props => {
 class WikiDataFormForm extends React.PureComponent {
   static propTypes = {
     enablePreview: PropTypes.bool,
-    previewShowKind: PropTypes.oneOf(["grid", "tabs"]),
+    previewShowKind: PropTypes.oneOf(['grid', 'tabs']),
     defaultWikiDataForm: PropTypes.object,
-    onRequestSubmit: PropTypes.func
+    onRequestSubmit: PropTypes.func,
   };
 
   static defaultProps = {
     enablePreview: true,
-    previewShowKind: "grid",
+    previewShowKind: 'grid',
     defaultWikiDataForm: undefined,
-    onRequestSubmit: undefined
+    onRequestSubmit: undefined,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      name: "",
+      name: '',
       jsonSchemaValue: JSON.stringify(exampleData.schema, null, 2),
-      uiSchemaValue: JSON.stringify(exampleData.uiSchema, null, 2)
+      uiSchemaValue: JSON.stringify(exampleData.uiSchema, null, 2),
     };
     const { defaultWikiDataForm } = props;
     if (defaultWikiDataForm) {
@@ -63,7 +63,7 @@ class WikiDataFormForm extends React.PureComponent {
       const wikiDataForm = {
         name,
         jsonSchema,
-        uiSchema
+        uiSchema,
       };
       return wikiDataForm;
     } catch (error) {
@@ -132,7 +132,7 @@ class WikiDataFormForm extends React.PureComponent {
   render() {
     const { enablePreview, previewShowKind } = this.props;
     if (enablePreview) {
-      if (previewShowKind === "grid") {
+      if (previewShowKind === 'grid') {
         return (
           <div>
             <Container fluid={true}>
@@ -147,7 +147,7 @@ class WikiDataFormForm extends React.PureComponent {
             </Container>
           </div>
         );
-      } else if (previewShowKind === "tabs") {
+      } else if (previewShowKind === 'tabs') {
         return (
           <div>
             {this.renderForm()}
@@ -185,9 +185,9 @@ export default connect(
     if (!previewShowKind) {
       const { browser } = state;
       if (browser.lessThan.medium) {
-        previewShowKind = "tabs";
+        previewShowKind = 'tabs';
       } else {
-        previewShowKind = "grid";
+        previewShowKind = 'grid';
       }
     }
     return { previewShowKind };

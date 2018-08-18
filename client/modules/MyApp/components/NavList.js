@@ -1,86 +1,82 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { connect } from "react-redux";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { connect } from 'react-redux';
 
-import { Link, Route } from "react-router-dom";
+import { Link, Route } from 'react-router-dom';
 
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
-import List from "@material-ui/core/List";
-import MuiListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import List from '@material-ui/core/List';
+import MuiListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
-import WhatsHotIcon from "@material-ui/icons/Whatshot";
-import ActionHomeIcon from "@material-ui/icons/Home";
-import ChatIcon from "@material-ui/icons/Chat";
-import SubscriptionIcon from "@material-ui/icons/RssFeed";
-import HelpIcon from "@material-ui/icons/Help";
-import SettingsIcon from "@material-ui/icons/Settings";
-import AddIcon from "@material-ui/icons/Add";
+import WhatsHotIcon from '@material-ui/icons/Whatshot';
+import ActionHomeIcon from '@material-ui/icons/Home';
+import ChatIcon from '@material-ui/icons/Chat';
+import SubscriptionIcon from '@material-ui/icons/RssFeed';
+import HelpIcon from '@material-ui/icons/Help';
+import SettingsIcon from '@material-ui/icons/Settings';
+import AddIcon from '@material-ui/icons/Add';
 
-import { getCurrentUser } from "../../User/UserReducer";
-import logOutRequestComposeEvent from "../../User/composes/logOutRequestComposeEvent";
-import UserAvatar from "../../User/components/UserAvatar";
+import { getCurrentUser } from '../../User/UserReducer';
+import logOutRequestComposeEvent from '../../User/composes/logOutRequestComposeEvent';
+import UserAvatar from '../../User/components/UserAvatar';
 
-const LogOutListItem = logOutRequestComposeEvent(MuiListItem, "onClick");
+const LogOutListItem = logOutRequestComposeEvent(MuiListItem, 'onClick');
 
 const userPanelStyles = muiTheme => {
   return {
     root: {
       background: muiTheme.palette.primary.light,
-      width: "100%",
-      maxWidth: "100%",
+      width: '100%',
+      maxWidth: '100%',
       height: 150,
       padding: 20,
-      boxSizing: "border-box"
+      boxSizing: 'border-box',
     },
     whiteText: {
-      color: muiTheme.palette.primary.contrastText
-    }
+      color: muiTheme.palette.primary.contrastText,
+    },
   };
 };
 
-const UserPanel = withStyles(userPanelStyles)(
-  ({ user, classes, onClickLoginButton }) => {
-    return (
-      <div className={classes.root}>
-        <UserAvatar user={user} />
-        <div className={classes.whiteText}>
-          {user ? user.get("displayName") : "Guest"}
-        </div>
-        <div
-          style={{
-            marginTop: 10
-          }}
-        >
-          {!user ? (
-            <Button
-              variant="raised"
-              color="primary"
-              component={Link}
-              to="/login"
-              onClick={onClickLoginButton}
-            >
-              登入
-            </Button>
-          ) : null}
-        </div>
+const UserPanel = withStyles(userPanelStyles)(({ user, classes, onClickLoginButton }) => {
+  return (
+    <div className={classes.root}>
+      <UserAvatar user={user} />
+      <div className={classes.whiteText}>{user ? user.get('displayName') : 'Guest'}</div>
+      <div
+        style={{
+          marginTop: 10,
+        }}
+      >
+        {!user ? (
+          <Button
+            variant="raised"
+            color="primary"
+            component={Link}
+            to="/login"
+            onClick={onClickLoginButton}
+          >
+            登入
+          </Button>
+        ) : null}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 const selectedListItemStyles = theme => {
   return {
     root: {
       backgroundColor: theme.palette.divider,
-      "&:hover": {
-        backgroundColor: theme.palette.divider
-      }
-    }
+      '&:hover': {
+        backgroundColor: theme.palette.divider,
+      },
+    },
   };
 };
 
@@ -116,7 +112,7 @@ const ListItem = connect(
 class NavList extends React.Component {
   static propTypes = {
     onChangeDrawer: PropTypes.func,
-    user: PropTypes.object
+    user: PropTypes.object,
   };
 
   constructor(props) {
@@ -126,7 +122,7 @@ class NavList extends React.Component {
 
   closeNavDrawer = e => {
     if (this.props.onChangeDrawer) {
-      const reason = "navListItemClick";
+      const reason = 'navListItemClick';
       const open = false;
       this.props.onChangeDrawer(e, reason, open);
     }
@@ -143,113 +139,58 @@ class NavList extends React.Component {
           </React.Fragment>
         ) : null}
         <List style={{ paddingTop: 0 }}>
-          <ListItem
-            button
-            component={Link}
-            to="/"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <ActionHomeIcon />
             </ListItemIcon>
             <ListItemText inset primary="首頁" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/whatsHotDiscussions"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/whatsHotDiscussions" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <WhatsHotIcon />
             </ListItemIcon>
             <ListItemText primary="熱門話題" />
           </ListItem>
           <Divider />
-          <ListItem
-            button
-            component={Link}
-            to="/subscriptions"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/subscriptions" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <SubscriptionIcon />
             </ListItemIcon>
             <ListItemText primary="訂閱內容" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/subscriptions/1"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/subscriptions/1" onClick={this.closeNavDrawer}>
             <ListItemText inset primary="訂閱內容近期更新01" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/subscriptions/2"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/subscriptions/2" onClick={this.closeNavDrawer}>
             <ListItemText inset primary="訂閱內容近期更新02" />
           </ListItem>
           <Divider />
-          <ListItem
-            button
-            component={Link}
-            to="/chatRooms"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/chatRooms" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <ChatIcon />
             </ListItemIcon>
             <ListItemText primary="聊天室" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/chatRooms/1"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/chatRooms/1" onClick={this.closeNavDrawer}>
             <ListItemText inset primary="聊天室近期更新01" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/chatRooms/2"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/chatRooms/2" onClick={this.closeNavDrawer}>
             <ListItemText inset primary="聊天室近期更新02" />
           </ListItem>
           <Divider />
-          <ListItem
-            button
-            component={Link}
-            to="/create/forumBoard"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/create/forumBoard" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <AddIcon />
             </ListItemIcon>
             <ListItemText primary="建立看板" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/about"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/about" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <HelpIcon />
             </ListItemIcon>
             <ListItemText primary="說明" />
           </ListItem>
-          <ListItem
-            button
-            component={Link}
-            to="/settings"
-            onClick={this.closeNavDrawer}
-          >
+          <ListItem button component={Link} to="/settings" onClick={this.closeNavDrawer}>
             <ListItemIcon>
               <SettingsIcon />
             </ListItemIcon>

@@ -1,21 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
 
-import TextField from "@material-ui/core/TextField";
+import TextField from '@material-ui/core/TextField';
 
-import Editor from "../../../components/Slate";
-import RootWikiGroupTreePopover from "../../RootWiki/components/RootWikiGroupTreePopover";
-import WikiDataFormDropDownMenu from "./WikiDataFormDropDownMenu";
+import Editor from '../../../components/Slate';
+import RootWikiGroupTreePopover from '../../RootWiki/components/RootWikiGroupTreePopover';
+import WikiDataFormDropDownMenu from './WikiDataFormDropDownMenu';
 
 export function getStyles() {
   const styles = {
     editorStyleContainer: {
-      marginTop: 20
+      marginTop: 20,
     },
     name: {
-      margin: 5
-    }
+      margin: 5,
+    },
   };
   return styles;
 }
@@ -27,13 +27,13 @@ class WikiForm extends React.Component {
     content: PropTypes.object,
     rootWikiGroupTree: PropTypes.object,
     nameReadOnly: PropTypes.bool,
-    editorEnableAutoFullScreen: PropTypes.bool
+    editorEnableAutoFullScreen: PropTypes.bool,
   };
 
   static defaultProps = {
-    name: "",
+    name: '',
     nameReadOnly: false,
-    editorEnableAutoFullScreen: true
+    editorEnableAutoFullScreen: true,
   };
 
   constructor(props) {
@@ -41,7 +41,7 @@ class WikiForm extends React.Component {
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     const { name } = props;
     this.state = {
-      name
+      name,
     };
   }
 
@@ -69,22 +69,14 @@ class WikiForm extends React.Component {
 
   render() {
     const { name, content, rootWikiGroupTree } = this.props;
-    const {
-      nameReadOnly,
-      editorEnableAutoFullScreen,
-      onChangeContent
-    } = this.props;
+    const { nameReadOnly, editorEnableAutoFullScreen, onChangeContent } = this.props;
     const styles = getStyles();
     return (
       <div>
         {nameReadOnly ? (
           <h1 style={styles.name}>{name}</h1>
         ) : (
-          <TextField
-            label="您的維基名稱"
-            value={this.state.name}
-            onChange={this.onNameChange}
-          />
+          <TextField label="您的維基名稱" value={this.state.name} onChange={this.onNameChange} />
         )}
         <RootWikiGroupTreePopover rootWikiGroupTree={rootWikiGroupTree} />
         <WikiDataFormDropDownMenu />

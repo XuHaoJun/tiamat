@@ -1,6 +1,6 @@
-import { Map } from "immutable";
-import { Value } from "slate";
-import emptyContent from "./emptyContent";
+import { Map } from 'immutable';
+import { Value } from 'slate';
+import emptyContent from './emptyContent';
 
 const serialize = content => {
   if (Value.isValue(content)) {

@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import mongoosePaginate from "mongoose-paginate";
+import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate';
 
 const Schema = mongoose.Schema;
 
@@ -15,18 +15,18 @@ const wikiSchema = new Schema(
     isNickName: { type: Boolean, default: false },
     rootWiki: {
       type: Schema.Types.ObjectId,
-      ref: "RootWiki",
-      required: true
+      ref: 'RootWiki',
+      required: true,
     },
 
-    wikiDataForm: { type: Schema.Types.ObjectId, ref: "WikiDataForm", index: true },
+    wikiDataForm: { type: Schema.Types.ObjectId, ref: 'WikiDataForm', index: true },
     data: { type: Object },
 
     rootWikiGroupTree: { type: Schema.Types.Mixed },
     tags: { type: [String], default: [], index: true },
     popularityCounter: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
   },
   { toJSON: { virtuals: true } }
 );
@@ -54,4 +54,4 @@ wikiSchema.index({ tags: 1, rootWiki: 1 });
 
 wikiSchema.plugin(mongoosePaginate);
 
-export default mongoose.model("Wiki", wikiSchema);
+export default mongoose.model('Wiki', wikiSchema);

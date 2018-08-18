@@ -1,7 +1,7 @@
-import MobileDetect from "mobile-detect";
-import { matchRoutes } from "react-router-config";
+import MobileDetect from 'mobile-detect';
+import { matchRoutes } from 'react-router-config';
 
-import routes from "../../routes";
+import routes from '../../routes';
 
 function isSameRoute(prevPathname, currentPathname) {
   const prevBranch = matchRoutes(routes[0].routes, prevPathname);
@@ -18,12 +18,9 @@ function isSameRoute(prevPathname, currentPathname) {
 
 export default function shouldUpdateScroll(prevRouterProps, routerProps) {
   if (prevRouterProps) {
-    return !isSameRoute(
-      prevRouterProps.location.pathname,
-      routerProps.location.pathname
-    );
+    return !isSameRoute(prevRouterProps.location.pathname, routerProps.location.pathname);
   } else {
-    const userAgent = navigator ? navigator.userAgent : "";
+    const userAgent = navigator ? navigator.userAgent : '';
     if (userAgent) {
       const mobileDetect = new MobileDetect(userAgent);
       if (mobileDetect.mobile()) {

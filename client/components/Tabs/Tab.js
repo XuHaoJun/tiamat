@@ -1,15 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import Tab from "@material-ui/core/Tab";
+import Tab from '@material-ui/core/Tab';
 
 class EnhancedTab extends React.Component {
   static propTypes = {
-    enableMouseOverTrigger: PropTypes.bool
+    enableMouseOverTrigger: PropTypes.bool,
   };
 
   static defaultProps = {
-    enableMouseOverTrigger: true
+    enableMouseOverTrigger: true,
   };
 
   componentWillUnmount() {

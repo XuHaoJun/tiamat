@@ -1,14 +1,11 @@
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 
-import { getCurrentAccessToken } from "../UserReducer";
-import { logOutRequest } from "../UserActions";
+import { getCurrentAccessToken } from '../UserReducer';
+import { logOutRequest } from '../UserActions';
 
-export default function logOutRequestComposeEvent(
-  WrappedComponent,
-  _eventNames = []
-) {
+export default function logOutRequestComposeEvent(WrappedComponent, _eventNames = []) {
   let eventNames = _eventNames;
-  if (typeof eventNames === "string") {
+  if (typeof eventNames === 'string') {
     eventNames = [eventNames];
   }
   if (!eventNames || eventNames.length === 0) {
@@ -36,7 +33,7 @@ export default function logOutRequestComposeEvent(
       }
       return {
         ...ownProps,
-        ...injectedEvents
+        ...injectedEvents,
       };
     }
   )(WrappedComponent);

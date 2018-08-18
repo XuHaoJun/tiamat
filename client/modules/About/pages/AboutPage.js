@@ -1,18 +1,18 @@
-import React from "react";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { hot } from "react-hot-loader";
-import { compose } from "recompose";
+import React from 'react';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { hot } from 'react-hot-loader';
+import { compose } from 'recompose';
 
-import FacebookProvider, { Comments } from "react-facebook";
+import FacebookProvider, { Comments } from 'react-facebook';
 
-import { getOauth2Client } from "../../Oauth2Client/Oauth2ClientReducer";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
+import { getOauth2Client } from '../../Oauth2Client/Oauth2ClientReducer';
+import { setHeaderTitle } from '../../MyApp/MyAppActions';
 
 class AboutPage extends React.Component {
   static defaultProps = {
-    title: "說明",
-    facebookOauth2Client: null
+    title: '說明',
+    facebookOauth2Client: null,
   };
 
   static getInitialAction() {
@@ -37,9 +37,7 @@ class AboutPage extends React.Component {
 
   render() {
     const { title, facebookOauth2Client } = this.props;
-    const facebookClientID = facebookOauth2Client
-      ? facebookOauth2Client.clientID
-      : "";
+    const facebookClientID = facebookOauth2Client ? facebookOauth2Client.clientID : '';
     return (
       <div>
         <Helmet title={title} />
@@ -56,7 +54,7 @@ class AboutPage extends React.Component {
 }
 
 function mapStateToProps(state) {
-  const facebookOauth2Client = getOauth2Client(state, "facebook");
+  const facebookOauth2Client = getOauth2Client(state, 'facebook');
   return { facebookOauth2Client };
 }
 
@@ -65,11 +63,14 @@ function mapDispatchToProps(dispatch) {
     fetchComponentData() {
       const action = AboutPage.getInitialAction();
       return dispatch(action);
-    }
+    },
   };
 }
 
 export default compose(
   hot(module),
-  connect(mapStateToProps, mapDispatchToProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(AboutPage);

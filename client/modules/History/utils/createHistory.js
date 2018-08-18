@@ -1,9 +1,9 @@
-import createBrowserHistoryOri from "history/createBrowserHistory";
-import createMemoryHistoryOri from "history/createMemoryHistory";
-import qs from "qs";
+import createBrowserHistoryOri from 'history/createBrowserHistory';
+import createMemoryHistoryOri from 'history/createMemoryHistory';
+import qs from 'qs';
 
 async function logPageView(location) {
-  const ReactGA = await import(/* webpackChunkName: "react-ga" */ "react-ga");
+  const ReactGA = await import(/* webpackChunkName: "react-ga" */ 'react-ga');
   ReactGA.set({ page: location.pathname });
   ReactGA.pageview(location.pathname);
 }
@@ -12,7 +12,7 @@ function injectQuery(location) {
   if (!location.query) {
     const { search } = location;
     let query;
-    if (typeof search === "string" && search[0] === "?" && search.length > 1) {
+    if (typeof search === 'string' && search[0] === '?' && search.length > 1) {
       query = qs.parse(search.substr(1), { depth: 5 });
     } else {
       query = {};
@@ -23,7 +23,7 @@ function injectQuery(location) {
 
 function handleChangeLocation(location) {
   injectQuery(location);
-  if (process.browser && process.env.NODE_ENV === "production") {
+  if (process.browser && process.env.NODE_ENV === 'production') {
     logPageView(location);
   }
 }
@@ -35,24 +35,24 @@ function inject(history) {
 }
 
 const defaultOptions = {
-  type: "auto",
+  type: 'auto',
   browserHistoryOptions: {},
   memoryHistoryOptions: {
-    initialEntries: ["/"]
-  }
+    initialEntries: ['/'],
+  },
 };
 
 function createHistory(opts = defaultOptions) {
   const options = { ...defaultOptions, ...opts };
   const { type, browserHistoryOptions, memoryHistoryOptions } = options;
   let history;
-  if (type === "auto") {
+  if (type === 'auto') {
     history = process.browser
       ? createBrowserHistoryOri(browserHistoryOptions)
       : createMemoryHistoryOri(memoryHistoryOptions);
-  } else if (type === "memory") {
+  } else if (type === 'memory') {
     history = createMemoryHistoryOri(memoryHistoryOptions);
-  } else if (type === "browser") {
+  } else if (type === 'browser') {
     history = createBrowserHistoryOri(browserHistoryOptions);
   } else {
     history = createMemoryHistoryOri(memoryHistoryOptions);
@@ -62,7 +62,7 @@ function createHistory(opts = defaultOptions) {
 }
 
 function createMemoryHistory(options = {}) {
-  return createHistory({ type: "memory", memoryHistoryOptions: options });
+  return createHistory({ type: 'memory', memoryHistoryOptions: options });
 }
 
 export { createHistory as default, createMemoryHistory };

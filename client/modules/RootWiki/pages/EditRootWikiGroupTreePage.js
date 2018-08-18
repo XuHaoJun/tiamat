@@ -1,27 +1,24 @@
-import React from "react";
-import { fromJS } from "immutable";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import {
-  setHeaderTitle,
-  updateSendButtonProps
-} from "../../MyApp/MyAppActions";
-import TouchBackend from "react-dnd-touch-backend";
-import HTML5Backend from "react-dnd-html5-backend";
-import MultiBackend, { TouchTransition } from "react-dnd-multi-backend";
-import { DragDropContext } from "react-dnd";
-import { getUserAgent } from "../../UserAgent/UserAgentReducer";
-import MobileDetect from "mobile-detect";
-import memoize from "fast-memoize";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import { fromJS } from 'immutable';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { setHeaderTitle, updateSendButtonProps } from '../../MyApp/MyAppActions';
+import TouchBackend from 'react-dnd-touch-backend';
+import HTML5Backend from 'react-dnd-html5-backend';
+import MultiBackend, { TouchTransition } from 'react-dnd-multi-backend';
+import { DragDropContext } from 'react-dnd';
+import { getUserAgent } from '../../UserAgent/UserAgentReducer';
+import MobileDetect from 'mobile-detect';
+import memoize from 'fast-memoize';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
 function getStyles() {
   const styles = {
     treeContainer: {
-      height: "calc(100vh - 64px)"
-    }
+      height: 'calc(100vh - 64px)',
+    },
   };
   return styles;
 }
@@ -30,82 +27,82 @@ function rootWikiGroupTreeToSortableTree() {}
 
 class CreateRootWikiPage extends React.PureComponent {
   static defaultProps = {
-    title: "編輯維基分類"
+    title: '編輯維基分類',
   };
 
   constructor(props) {
     super(props);
     const rootWikiGroupTree = fromJS([
       {
-        title: "物品",
+        title: '物品',
         children: [
           {
-            title: "武器",
+            title: '武器',
             children: [
               {
-                title: "長劍"
+                title: '長劍',
               },
               {
-                title: "斧"
-              }
-            ]
+                title: '斧',
+              },
+            ],
           },
           {
-            title: "防具",
+            title: '防具',
             children: [
               {
-                title: "重甲"
+                title: '重甲',
               },
               {
-                title: "皮甲"
-              }
-            ]
-          }
-        ]
+                title: '皮甲',
+              },
+            ],
+          },
+        ],
       },
       {
-        title: "卡片",
+        title: '卡片',
         children: [
           {
-            title: "獵人"
+            title: '獵人',
           },
           {
-            title: "盜賊"
-          }
-        ]
+            title: '盜賊',
+          },
+        ],
       },
       {
-        title: "深度測試(一)",
+        title: '深度測試(一)',
         children: [
           {
-            title: "深度測試(二)",
+            title: '深度測試(二)',
             children: [
               {
-                title: "深度測試(三)",
+                title: '深度測試(三)',
                 children: [
                   {
-                    title: "深度測試(四)",
+                    title: '深度測試(四)',
                     children: [
                       {
-                        title: "深度測試(五)",
+                        title: '深度測試(五)',
                         children: [
                           {
-                            name: "你看見我了!"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
+                            name: '你看見我了!',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ]).toJS();
     this.state = {
       rootWikiGroupTree,
-      isFirstRender: true
+      isFirstRender: true,
     };
     const getMobileDetect = memoize(userAgent => {
       return new MobileDetect(userAgent);
@@ -133,7 +130,7 @@ class CreateRootWikiPage extends React.PureComponent {
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onClick: null
+          onClick: null,
         })
       );
     }
@@ -146,19 +143,19 @@ class CreateRootWikiPage extends React.PureComponent {
       const HTML5toTouch = {
         backends: [
           {
-            backend: HTML5Backend
+            backend: HTML5Backend,
           },
           {
             backend: TouchBackend({
               enableMouseEvents: true,
-              delayTouchStart: 10
+              delayTouchStart: 10,
             }), // Note that you can call your backends with options
             preview: true,
-            transition: TouchTransition
-          }
-        ]
+            transition: TouchTransition,
+          },
+        ],
       };
-      const SortableTreeWithoutDndContext = require("react-sortable-tree")
+      const SortableTreeWithoutDndContext = require('react-sortable-tree')
         .SortableTreeWithoutDndContext; // eslint-disable-line global-require
       this.SortableTree = DragDropContext(MultiBackend(HTML5toTouch))(
         SortableTreeWithoutDndContext
@@ -175,14 +172,14 @@ class CreateRootWikiPage extends React.PureComponent {
     const metaDescription = title;
     const meta = [
       {
-        name: "description",
-        content: metaDescription
-      }
+        name: 'description',
+        content: metaDescription,
+      },
     ];
     if (
       this.state.isFirstRender ||
-      typeof document === "undefined" ||
-      typeof window === "undefined"
+      typeof document === 'undefined' ||
+      typeof window === 'undefined'
     ) {
       return null;
     }
@@ -210,10 +207,11 @@ function mapStateToProps(state, routerProps) {
   return {
     browser: state.browser,
     forumBoardId,
-    userAgent: getUserAgent(state)
+    userAgent: getUserAgent(state),
   };
 }
 
-export default compose(hot(module), connect(mapStateToProps))(
-  CreateRootWikiPage
-);
+export default compose(
+  hot(module),
+  connect(mapStateToProps)
+)(CreateRootWikiPage);

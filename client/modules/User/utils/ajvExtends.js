@@ -1,11 +1,11 @@
-import { fetchValidateUser } from "../UserActions";
+import { fetchValidateUser } from '../UserActions';
 
 function checkEmailExists(schema, data) {
   let email = data;
   let shouldExists = schema;
-  if (typeof schema === "boolean") {
+  if (typeof schema === 'boolean') {
     shouldExists = schema;
-  } else if (typeof schema === "string") {
+  } else if (typeof schema === 'string') {
     shouldExists = true;
     email = schema;
   } else {
@@ -29,13 +29,13 @@ function checkEmailExists(schema, data) {
 }
 
 function ajvExtends(ajv) {
-  ajv.addKeyword("emailExists", {
+  ajv.addKeyword('emailExists', {
     async: true,
-    type: "string",
+    type: 'string',
     validate: checkEmailExists,
     metaSchema: {
-      type: ["boolean", "string"]
-    }
+      type: ['boolean', 'string'],
+    },
   });
   return ajv;
 }

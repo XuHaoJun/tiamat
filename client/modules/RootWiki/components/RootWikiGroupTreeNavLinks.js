@@ -1,10 +1,10 @@
-import React from "react";
-import { List, Map } from "immutable";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Link } from "react-router-dom";
-import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
-import getRootWikiHref from "../utils/getRootWikiHref";
-import getWikisHref from "../utils/getWikisHref";
+import React from 'react';
+import { List, Map } from 'immutable';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { Link } from 'react-router-dom';
+import pathToRootWikiGroupTree from '../utils/pathToRootWikiGroupTree';
+import getRootWikiHref from '../utils/getRootWikiHref';
+import getWikisHref from '../utils/getWikisHref';
 
 function rootWikiGroupTreeToNavLinksHelper(
   rootWikiGroupTree,
@@ -15,8 +15,8 @@ function rootWikiGroupTreeToNavLinksHelper(
   depth = 0
 ) {
   if (Map.isMap(rootWikiGroupTree)) {
-    const name = rootWikiGroupTree.get("name");
-    const children = rootWikiGroupTree.get("children");
+    const name = rootWikiGroupTree.get('name');
+    const children = rootWikiGroupTree.get('children');
     const nextPath = path.concat(name);
     const href = getHrefFunc(pathToRootWikiGroupTree(nextPath));
     const link = Map({ name, href });
@@ -36,34 +36,24 @@ function rootWikiGroupTreeToNavLinksHelper(
     }
   } else if (List.isList(rootWikiGroupTree)) {
     rootWikiGroupTree.map(node => {
-      return rootWikiGroupTreeToNavLinksHelper(
-        node,
-        getHrefFunc,
-        path,
-        links,
-        leaves,
-        depth
-      );
+      return rootWikiGroupTreeToNavLinksHelper(node, getHrefFunc, path, links, leaves, depth);
     });
     return List(leaves);
   }
   return undefined;
 }
 
-function rootWikiGroupTreeToNavLinks(
-  rootWikiGroupTree,
-  getHrefFunc = () => ""
-) {
+function rootWikiGroupTreeToNavLinks(rootWikiGroupTree, getHrefFunc = () => '') {
   return rootWikiGroupTreeToNavLinksHelper(rootWikiGroupTree, getHrefFunc);
 }
 
 const delimeterStyle = {
   marginLeft: 5,
-  marginRight: 5
+  marginRight: 5,
 };
 
 const Delimeter = props => {
-  const delimeter = props.delimeter || ">";
+  const delimeter = props.delimeter || '>';
   return (
     <span style={delimeterStyle} {...props}>
       {delimeter}
@@ -73,10 +63,10 @@ const Delimeter = props => {
 
 class RootWikiGroupTreeNavLinks extends React.Component {
   static defaultProps = {
-    rootWikiId: "",
+    rootWikiId: '',
     rootStyle: {},
     navLinkStyle: {},
-    rootWikiGroupTree: null
+    rootWikiGroupTree: null,
   };
 
   constructor(props) {
@@ -98,20 +88,17 @@ class RootWikiGroupTreeNavLinks extends React.Component {
   render() {
     const { rootWikiGroupTree } = this.props;
     if (!rootWikiGroupTree) {
-      const href = this.getWikisHref("null");
+      const href = this.getWikisHref('null');
       return <Link to={href}>未分類</Link>;
     }
-    const navLinks = rootWikiGroupTreeToNavLinks(
-      rootWikiGroupTree,
-      this.getWikisHref
-    );
+    const navLinks = rootWikiGroupTreeToNavLinks(rootWikiGroupTree, this.getWikisHref);
     return (
       <span>
         {navLinks
           .map((line, lineIndex) => {
             const lineDOM = line.map((node, index, array) => {
-              const href = node.get("href");
-              const name = node.get("name");
+              const href = node.get('href');
+              const name = node.get('name');
               const key = `${lineIndex}/${href}`;
               const link = (
                 <Link to={href} key={key}>

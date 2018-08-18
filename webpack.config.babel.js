@@ -1,29 +1,29 @@
-const cssnext = require("postcss-cssnext");
-const postcssFocus = require("postcss-focus");
-const postcssReporter = require("postcss-reporter");
-const nodeExternals = require("webpack-node-externals");
+const cssnext = require('postcss-cssnext');
+const postcssFocus = require('postcss-focus');
+const postcssReporter = require('postcss-reporter');
+const nodeExternals = require('webpack-node-externals');
 
-let cssModulesIdentName = "[name]__[local]__[hash:base64:5]";
-if (process.env.NODE_ENV === "production") {
-  cssModulesIdentName = "[hash:base64]";
+let cssModulesIdentName = '[name]__[local]__[hash:base64:5]';
+if (process.env.NODE_ENV === 'production') {
+  cssModulesIdentName = '[hash:base64]';
 }
 
 module.exports = {
   output: {
-    publicPath: "/",
-    libraryTarget: "commonjs2"
+    publicPath: '/',
+    libraryTarget: 'commonjs2',
   },
 
   externals: [nodeExternals({ whitelist: [/^webpack\/hot\/poll/] })],
-  
+
   node: {
     __filename: true,
-    __dirname: true
+    __dirname: true,
   },
 
   resolve: {
-    extensions: [".js", ".jsx"],
-    modules: ["client", "node_modules"]
+    extensions: ['.js', '.jsx'],
+    modules: ['client', 'node_modules'],
   },
   module: {
     rules: [
@@ -31,60 +31,60 @@ module.exports = {
         test: /\.css$/,
         include: [/node_modules/, /plugin\.css/],
         use: [
-          { loader: "style-loader" },
+          { loader: 'style-loader' },
           {
-            loader: "css-loader",
+            loader: 'css-loader',
             options: {
-              localIdentName: "[local]",
+              localIdentName: '[local]',
               modules: true,
               importLoaders: 1,
-              sourceMap: true
-            }
-          }
-        ]
+              sourceMap: true,
+            },
+          },
+        ],
       },
       {
         test: /\.gz$/,
-        enforce: "pre",
-        use: "gzip-loader"
+        enforce: 'pre',
+        use: 'gzip-loader',
       },
       {
         test: /\.css$/,
         exclude: [/node_modules/, /plugin\.css$/],
         use: [
-          { loader: "style-loader" },
+          { loader: 'style-loader' },
           {
-            loader: "css-loader",
+            loader: 'css-loader',
             options: {
               localIdentName: cssModulesIdentName,
               modules: true,
               importLoaders: 1,
-              sourceMap: true
-            }
+              sourceMap: true,
+            },
           },
           {
-            loader: "postcss-loader",
+            loader: 'postcss-loader',
             options: {
               plugins: () => [
                 postcssFocus(),
                 cssnext({
-                  browsers: ["last 2 versions", "IE > 10"]
+                  browsers: ['last 2 versions', 'IE > 10'],
                 }),
                 postcssReporter({
-                  clearMessages: true
-                })
-              ]
-            }
-          }
-        ]
+                  clearMessages: true,
+                }),
+              ],
+            },
+          },
+        ],
       },
       {
         test: /\.jpe?g$|\.gif$|\.png$/i,
-        loader: "url-loader",
+        loader: 'url-loader',
         options: {
-          limit: 10000
-        }
-      }
-    ]
-  }
+          limit: 10000,
+        },
+      },
+    ],
+  },
 };

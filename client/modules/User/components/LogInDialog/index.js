@@ -1,7 +1,4 @@
-import LoginDialog from "./LoginDialog";
-import makeLoginDialogable from "./makeLoginDialogable"
+import LoginDialog from './LoginDialog';
+import makeLoginDialogable from './makeLoginDialogable';
 
-export {
-  LoginDialog as default,
-  makeLoginDialogable
-};
+export { LoginDialog as default, makeLoginDialogable };

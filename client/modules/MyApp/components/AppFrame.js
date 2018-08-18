@@ -1,24 +1,24 @@
-import React from "react";
-import Helmet from "react-helmet";
-import { connect } from "react-redux";
+import React from 'react';
+import Helmet from 'react-helmet';
+import { connect } from 'react-redux';
 
-import { MuiThemeProvider } from "@material-ui/core/styles";
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
-import AppCssBaseline from "./AppCssBaseline";
-import AppHeader from "./AppHeader";
-import AppMain from "./AppMain";
-import AppNavDrawer from "./AppNavDrawer";
-import AppBottomNavigation from "./AppBottomNavigation";
-import ErrorSnackbar from "../../Error/components/ErrorSnackbar";
+import AppCssBaseline from './AppCssBaseline';
+import AppHeader from './AppHeader';
+import AppMain from './AppMain';
+import AppNavDrawer from './AppNavDrawer';
+import AppBottomNavigation from './AppBottomNavigation';
+import ErrorSnackbar from '../../Error/components/ErrorSnackbar';
 
-import { getTheme } from "../MyAppReducer";
+import { getTheme } from '../MyAppReducer';
 
 class AppFrame extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       drawerOpen: false,
-      sheetsManager: new Map()
+      sheetsManager: new Map(),
     };
   }
 
@@ -31,9 +31,9 @@ class AppFrame extends React.Component {
   };
 
   handleChangeDrawer = (e, reason, drawerOpen) => {
-    if (reason === "backdropClick") {
+    if (reason === 'backdropClick') {
       this.setState({ drawerOpen });
-    } else if (reason === "navListItemClick") {
+    } else if (reason === 'navListItemClick') {
       if (this.props.browser.lessThan.medium) {
         this.setState({ drawerOpen });
       }
@@ -51,18 +51,12 @@ class AppFrame extends React.Component {
             href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i"
             rel="stylesheet"
           />
-          <link
-            href="https://fonts.googleapis.com/icon?family=Material+Icons"
-            rel="stylesheet"
-          />
+          <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         </Helmet>
         <MuiThemeProvider theme={theme} sheetsManager={sheetsManager}>
           <AppCssBaseline />
           <AppHeader onMenuButtonClick={this.handleMenuButtonClick} />
-          <AppNavDrawer
-            open={drawerOpen}
-            onChangeDrawer={this.handleChangeDrawer}
-          />
+          <AppNavDrawer open={drawerOpen} onChangeDrawer={this.handleChangeDrawer} />
           <AppMain drawerOpen={drawerOpen}>{children}</AppMain>
           <AppBottomNavigation />
           <ErrorSnackbar />

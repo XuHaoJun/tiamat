@@ -1,9 +1,9 @@
-import { SET_OAUTH2_CLIENT } from "./Oauth2ClientActions";
-import { fromJS } from "immutable";
+import { SET_OAUTH2_CLIENT } from './Oauth2ClientActions';
+import { fromJS } from 'immutable';
 
 const initialState = fromJS({
   app: null,
-  facebook: null
+  facebook: null,
 });
 
 const Oauth2ClientReducer = (state = initialState, action) => {
@@ -19,7 +19,7 @@ const Oauth2ClientReducer = (state = initialState, action) => {
 /* Selectors */
 
 // Get userAgent
-export const getOauth2Client = (state, source = "app") => {
+export const getOauth2Client = (state, source = 'app') => {
   return state.oauth2Client.get(source);
 };
 

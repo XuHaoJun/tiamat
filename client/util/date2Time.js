@@ -1,8 +1,8 @@
-import memoize from "fast-memoize";
-import createFastMemoizeDefaultOptions from "./createFastMemoizeDefaultOptions";
+import memoize from 'fast-memoize';
+import createFastMemoizeDefaultOptions from './createFastMemoizeDefaultOptions';
 
 function isDate(str) {
-  return Object.prototype.toString.call(new Date(str)) === "[object Date]";
+  return Object.prototype.toString.call(new Date(str)) === '[object Date]';
 }
 
 export function date2Time(date) {

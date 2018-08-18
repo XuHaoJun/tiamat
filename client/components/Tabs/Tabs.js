@@ -1,8 +1,8 @@
-import React from "react";
-import { connect } from "react-redux";
+import React from 'react';
+import { connect } from 'react-redux';
 
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
 
 const ReponsiveTabs = props => {
   const { browser, AppBarProps, ...other } = props;
@@ -17,8 +17,8 @@ const ReponsiveTabs = props => {
       <AppBar position="static" elevation={0} color="default" {...AppBarProps}>
         <Tabs
           {...other}
-          indicatorColor={other.indicatorColor || "primary"}
-          textColor={other.textColor || "primary"}
+          indicatorColor={other.indicatorColor || 'primary'}
+          textColor={other.textColor || 'primary'}
         />
       </AppBar>
     );
@@ -34,4 +34,7 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ReponsiveTabs);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ReponsiveTabs);

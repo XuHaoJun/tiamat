@@ -1,6 +1,6 @@
-import { fromJS, Set, Record } from "immutable";
-import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
-import { ADD_ROOT_WIKI } from "./RootWikiActions";
+import { fromJS, Set, Record } from 'immutable';
+import defaultSameIdElesMax from '../../util/defaultSameIdElesMax';
+import { ADD_ROOT_WIKI } from './RootWikiActions';
 
 const ROOT_WIKI_RECORD_DEFAULT = {
   _id: null,
@@ -10,7 +10,7 @@ const ROOT_WIKI_RECORD_DEFAULT = {
   forumBoard: null,
   popularityCounter: 0,
   createdAt: null,
-  updatedAt: null
+  updatedAt: null,
 };
 
 export class RootWiki extends Record(ROOT_WIKI_RECORD_DEFAULT) {
@@ -20,7 +20,7 @@ export class RootWiki extends Record(ROOT_WIKI_RECORD_DEFAULT) {
       content: fromJS(obj.content),
       groupTree: fromJS(obj.groupTree),
       createdAt: new Date(obj.createdAt),
-      updatedAt: new Date(obj.updatedAt)
+      updatedAt: new Date(obj.updatedAt),
     });
     return record;
   }
@@ -29,18 +29,18 @@ export class RootWiki extends Record(ROOT_WIKI_RECORD_DEFAULT) {
 const ROOT_WIKI_STATE_RECORD_DEFAULT = {
   ui: fromJS({
     form: {
-      name: "",
-      content: null
-    }
+      name: '',
+      content: null,
+    },
   }),
-  data: new Set()
+  data: new Set(),
 };
 
 export class RootWikiState extends Record(ROOT_WIKI_STATE_RECORD_DEFAULT) {
   static fromJS({ ui, data = [] } = {}) {
     const record = new RootWikiState({
       ui: fromJS(ui),
-      data: Set(data.map(RootWiki.fromJS))
+      data: Set(data.map(RootWiki.fromJS)),
     });
     return record;
   }
@@ -58,7 +58,7 @@ const RootWikiReducer = (state = initialState, action) => {
         .groupBy(ele => ele._id)
         .map(defaultSameIdElesMax)
         .toSet();
-      return state.set("data", data);
+      return state.set('data', data);
 
     default:
       return state;
@@ -68,10 +68,10 @@ const RootWikiReducer = (state = initialState, action) => {
 /* Selectors */
 
 // Get all posts
-export const getUI = state => state.rootWikis.get("ui");
+export const getUI = state => state.rootWikis.get('ui');
 
 export const getRootWiki = (state, _id) =>
-  state.rootWikis.get("data").find(v => v.get("_id") === _id);
+  state.rootWikis.get('data').find(v => v.get('_id') === _id);
 
 export const getRootWikiById = getRootWiki;
 

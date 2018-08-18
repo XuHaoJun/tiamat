@@ -1,104 +1,142 @@
 {
-  "nodes": [{
+  "nodes": [
+    {
       "kind": "block",
       "type": "heading-one",
-      "nodes": [{
-        "kind": "text",
-        "ranges": [{
-          "text": "Slate + Table Edition"
-        }]
-      }]
+      "nodes": [
+        {
+          "kind": "text",
+          "ranges": [
+            {
+              "text": "Slate + Table Edition"
+            }
+          ]
+        }
+      ]
     },
     {
       "kind": "block",
       "type": "table",
-      "nodes": [{
+      "nodes": [
+        {
           "kind": "block",
           "type": "table_row",
-          "nodes": [{
+          "nodes": [
+            {
               "kind": "block",
               "type": "table_cell",
-              "nodes": [{
+              "nodes": [
+                {
                   "kind": "text",
-                  "ranges": [{
-                    "text": "Col 1"
-                  }]
+                  "ranges": [
+                    {
+                      "text": "Col 1"
+                    }
+                  ]
                 },
                 {
                   "kind": "block",
                   "type": "table",
-                  "nodes": [{
+                  "nodes": [
+                    {
                       "kind": "block",
                       "type": "table_row",
-                      "nodes": [{
+                      "nodes": [
+                        {
                           "kind": "block",
                           "type": "table_cell",
-                          "nodes": [{
-                            "kind": "text",
-                            "ranges": [{
-                              "text": "Col 1"
-                            }]
-                          }]
+                          "nodes": [
+                            {
+                              "kind": "text",
+                              "ranges": [
+                                {
+                                  "text": "Col 1"
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "kind": "block",
                           "type": "table_cell",
-                          "nodes": [{
-                            "kind": "text",
-                            "ranges": [{
-                              "text": "Col 2"
-                            }]
-                          }]
+                          "nodes": [
+                            {
+                              "kind": "text",
+                              "ranges": [
+                                {
+                                  "text": "Col 2"
+                                }
+                              ]
+                            }
+                          ]
                         }
                       ]
                     },
                     {
                       "kind": "block",
                       "type": "table_row",
-                      "nodes": [{
+                      "nodes": [
+                        {
                           "kind": "block",
                           "type": "table_cell",
-                          "nodes": [{
-                            "kind": "text",
-                            "ranges": [{
-                              "text": "Cell 1,1"
-                            }]
-                          }]
+                          "nodes": [
+                            {
+                              "kind": "text",
+                              "ranges": [
+                                {
+                                  "text": "Cell 1,1"
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "kind": "block",
                           "type": "table_cell",
-                          "nodes": [{
-                            "kind": "text",
-                            "ranges": [{
-                              "text": "Cell 1,2"
-                            }]
-                          }]
+                          "nodes": [
+                            {
+                              "kind": "text",
+                              "ranges": [
+                                {
+                                  "text": "Cell 1,2"
+                                }
+                              ]
+                            }
+                          ]
                         }
                       ]
                     },
                     {
                       "kind": "block",
                       "type": "table_row",
-                      "nodes": [{
+                      "nodes": [
+                        {
                           "kind": "block",
                           "type": "table_cell",
-                          "nodes": [{
-                            "kind": "text",
-                            "ranges": [{
-                              "text": "Cell 2,1"
-                            }]
-                          }]
+                          "nodes": [
+                            {
+                              "kind": "text",
+                              "ranges": [
+                                {
+                                  "text": "Cell 2,1"
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "kind": "block",
                           "type": "table_cell",
-                          "nodes": [{
-                            "kind": "text",
-                            "ranges": [{
-                              "text": "Cell 2,2"
-                            }]
-                          }]
+                          "nodes": [
+                            {
+                              "kind": "text",
+                              "ranges": [
+                                {
+                                  "text": "Cell 2,2"
+                                }
+                              ]
+                            }
+                          ]
                         }
                       ]
                     }
@@ -109,70 +147,94 @@
             {
               "kind": "block",
               "type": "table_cell",
-              "nodes": [{
-                "data": {},
-                "kind": "block",
-                "isVoid": false,
-                "type": "heading-one",
-                "nodes": [{
+              "nodes": [
+                {
+                  "data": {},
+                  "kind": "block",
+                  "isVoid": false,
+                  "type": "heading-one",
+                  "nodes": [
+                    {
+                      "kind": "text",
+                      "ranges": [
+                        {
+                          "kind": "range",
+                          "text": "heading-one",
+                          "marks": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "block",
+          "type": "table_row",
+          "nodes": [
+            {
+              "kind": "block",
+              "type": "table_cell",
+              "nodes": [
+                {
                   "kind": "text",
-                  "ranges": [{
-                    "kind": "range",
-                    "text": "heading-one",
-                    "marks": []
-                  }]
-                }]
-              }]
+                  "ranges": [
+                    {
+                      "text": "Cell 1,1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "block",
+              "type": "table_cell",
+              "nodes": [
+                {
+                  "kind": "text",
+                  "ranges": [
+                    {
+                      "text": "Cell 1,2"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
         {
           "kind": "block",
           "type": "table_row",
-          "nodes": [{
+          "nodes": [
+            {
               "kind": "block",
               "type": "table_cell",
-              "nodes": [{
-                "kind": "text",
-                "ranges": [{
-                  "text": "Cell 1,1"
-                }]
-              }]
+              "nodes": [
+                {
+                  "kind": "text",
+                  "ranges": [
+                    {
+                      "text": "Cell 2,1"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "kind": "block",
               "type": "table_cell",
-              "nodes": [{
-                "kind": "text",
-                "ranges": [{
-                  "text": "Cell 1,2"
-                }]
-              }]
-            }
-          ]
-        },
-        {
-          "kind": "block",
-          "type": "table_row",
-          "nodes": [{
-              "kind": "block",
-              "type": "table_cell",
-              "nodes": [{
-                "kind": "text",
-                "ranges": [{
-                  "text": "Cell 2,1"
-                }]
-              }]
-            },
-            {
-              "kind": "block",
-              "type": "table_cell",
-              "nodes": [{
-                "kind": "text",
-                "ranges": [{
-                  "text": "Cell 2,2"
-                }]
-              }]
+              "nodes": [
+                {
+                  "kind": "text",
+                  "ranges": [
+                    {
+                      "text": "Cell 2,2"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -181,12 +243,16 @@
     {
       "kind": "block",
       "type": "paragraph",
-      "nodes": [{
-        "kind": "text",
-        "ranges": [{
-          "text": "Use Tab and Shift+Tab to move from cell to cells. Press Enter to go to next row. Press Up/Down to navigate the rows."
-        }]
-      }]
+      "nodes": [
+        {
+          "kind": "text",
+          "ranges": [
+            {
+              "text": "Use Tab and Shift+Tab to move from cell to cells. Press Enter to go to next row. Press Up/Down to navigate the rows."
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -1,16 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Set } from "immutable";
-import _ from "lodash";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { Set } from 'immutable';
+import _ from 'lodash';
 
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 
-import Editor, { emptyContent } from "../../../../components/Slate/Editor";
+import Editor, { emptyContent } from '../../../../components/Slate/Editor';
 
 class DiscussionForm extends React.Component {
   static propTypes = {
@@ -21,29 +21,27 @@ class DiscussionForm extends React.Component {
     initForm: PropTypes.object,
     semanticRules: PropTypes.object,
     onChange: PropTypes.func,
-    isRoot: PropTypes.bool
+    isRoot: PropTypes.bool,
   };
 
   static defaultProps = {
-    forumBoardId: "",
-    forumBoardGroup: "",
-    parentDiscussionId: "",
+    forumBoardId: '',
+    forumBoardGroup: '',
+    parentDiscussionId: '',
     forumBoard: undefined,
     initForm: undefined,
     semanticRules: Set(),
     isRoot: false,
-    onChange: () => {}
+    onChange: () => {},
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
-      title: "",
-      forumBoardGroup: props.forumBoard
-        ? props.forumBoard.get("groups").get(0)
-        : "",
-      content: emptyContent
+      title: '',
+      forumBoardGroup: props.forumBoard ? props.forumBoard.get('groups').get(0) : '',
+      content: emptyContent,
     };
     if (props.forumBoardGroup) {
       this.state.forumBoardGroup = props.forumBoardGroup;
@@ -72,13 +70,13 @@ class DiscussionForm extends React.Component {
         forumBoard: forumBoardId,
         content,
         isRoot,
-        forumBoardGroup
+        forumBoardGroup,
       };
     } else {
       form = {
         parentDiscussion: parentDiscussionId,
         content,
-        isRoot
+        isRoot,
       };
     }
     return form;
@@ -123,8 +121,8 @@ class DiscussionForm extends React.Component {
   render() {
     const styles = {
       editorContainer: {
-        marginTop: 20
-      }
+        marginTop: 20,
+      },
     };
     const { semanticRules, forumBoard, isRoot } = this.props;
     const { title, content, forumBoardGroup } = this.state;
@@ -134,7 +132,7 @@ class DiscussionForm extends React.Component {
           <TextField
             id="titleTextField"
             style={{
-              marginLeft: 24
+              marginLeft: 24,
             }}
             label="標題"
             value={title}
@@ -159,14 +157,14 @@ class DiscussionForm extends React.Component {
                   this.setState({ anchorEl: null });
                 }}
               >
-                {forumBoard.get("groups").map(group => {
+                {forumBoard.get('groups').map(group => {
                   const selected = group === forumBoardGroup;
                   return (
                     <MenuItem
                       onClick={() => {
                         this.setState({
                           anchorEl: null,
-                          forumBoardGroup: group
+                          forumBoardGroup: group,
                         });
                       }}
                       key={group}

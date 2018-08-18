@@ -1,24 +1,24 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import Button from "@material-ui/core/Button";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@material-ui/core/Button';
 
-import TemplateForm from "./TemplateForm";
+import TemplateForm from './TemplateForm';
 
 class TemplateFormDialog extends React.Component {
   static propTypes = {
     open: PropTypes.bool,
     onRequestClose: PropTypes.func,
-    templateProps: PropTypes.object
+    templateProps: PropTypes.object,
   };
 
   static defaultProps = {
     open: false,
     onRequestClose: undefined,
-    templateProps: undefined
+    templateProps: undefined,
   };
 
   setFormRef = form => {
@@ -57,9 +57,9 @@ class TemplateFormDialog extends React.Component {
         <DialogContent>
           <div
             style={{
-              height: "100%",
-              display: "flex",
-              justifyContent: "center"
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
             }}
           >
             <TemplateForm ref={this.setFormRef} {...templateProps} />
@@ -67,12 +67,7 @@ class TemplateFormDialog extends React.Component {
         </DialogContent>
         <DialogActions>
           <Button label="取消" onClick={this.handleClose} />,
-          <Button
-            label="儲存"
-            color="primary"
-            focusRipple={true}
-            onClick={this.handleLogin}
-          />
+          <Button label="儲存" color="primary" focusRipple={true} onClick={this.handleLogin} />
         </DialogActions>
       </Dialog>
     );

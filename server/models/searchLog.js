@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
 const searchLogSchema = new Schema({
-  query: { type: "String", required: true, index: { unique: true } },
-  count: { type: "Number", required: true, default: 1 }
+  query: { type: 'String', required: true, index: { unique: true } },
+  count: { type: 'Number', required: true, default: 1 },
 });
 
-export default mongoose.model("SearchLog", searchLogSchema);
+export default mongoose.model('SearchLog', searchLogSchema);

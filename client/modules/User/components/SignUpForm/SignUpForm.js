@@ -1,50 +1,46 @@
-import React from "react";
-import PropTypes from "prop-types";
-import _ from "lodash";
-import { connect } from "react-redux";
-import isEmail from "validator/lib/isEmail";
-import isBoolean from "lodash/isBoolean";
-import isPromise from "is-promise";
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'lodash';
+import { connect } from 'react-redux';
+import isEmail from 'validator/lib/isEmail';
+import isBoolean from 'lodash/isBoolean';
+import isPromise from 'is-promise';
 
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 
-import { getOauth2Client } from "../../../Oauth2Client/Oauth2ClientReducer";
-import {
-  addUserRequest,
-  fetchValidateUser,
-  logInRequest
-} from "../../UserActions";
+import { getOauth2Client } from '../../../Oauth2Client/Oauth2ClientReducer';
+import { addUserRequest, fetchValidateUser, logInRequest } from '../../UserActions';
 
 class SignUpForm extends React.PureComponent {
   static propTypes = {
     onSubmit: PropTypes.func,
-    validateEmail: PropTypes.func
+    validateEmail: PropTypes.func,
   };
 
   static defaultProps = {
     onSubmit: () => {},
-    validateEmail: () => Promise.resolve(true)
+    validateEmail: () => Promise.resolve(true),
   };
 
   constructor(props) {
     super(props);
     const { validateEmail } = props;
     this.state = {
-      email: "",
-      password: "",
-      confirmPassword: "",
+      email: '',
+      password: '',
+      confirmPassword: '',
       progressing: false,
       errors: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-      }
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      },
     };
     this._fields = _.filter(Object.keys(this.state), field => {
-      if (field === "errors" || field === "progressing") {
+      if (field === 'errors' || field === 'progressing') {
         return false;
       } else {
         return true;
@@ -53,11 +49,11 @@ class SignUpForm extends React.PureComponent {
     this._schema = {
       firstName: {
         required: true,
-        maxLength: 50
+        maxLength: 50,
       },
       lastName: {
         required: true,
-        maxLength: 50
+        maxLength: 50,
       },
       email: {
         required: true,
@@ -69,23 +65,23 @@ class SignUpForm extends React.PureComponent {
               validator: v => {
                 return isEmail(v);
               },
-              message: "格式錯誤"
+              message: '格式錯誤',
             },
             {
               event: {
                 onChange: false,
-                onBlur: true
+                onBlur: true,
               },
               validator: validateEmail,
-              message: "這個電子郵件已有人使用"
-            }
-          ]
-        }
+              message: '這個電子郵件已有人使用',
+            },
+          ],
+        },
       },
       password: {
         required: true,
         minLength: 4,
-        maxLength: 50
+        maxLength: 50,
       },
       confirmPassword: {
         required: true,
@@ -95,9 +91,9 @@ class SignUpForm extends React.PureComponent {
           validator: v => {
             return v === this.state.password;
           },
-          message: "密碼不相同"
-        }
-      }
+          message: '密碼不相同',
+        },
+      },
     };
   }
 
@@ -105,13 +101,13 @@ class SignUpForm extends React.PureComponent {
     const { email, password } = this.state;
     return {
       email,
-      password
+      password,
     };
   };
 
   getErrorText = fieldName => {
     const error = this.validate(fieldName, this.state[fieldName]);
-    return error ? error.message : "";
+    return error ? error.message : '';
   };
 
   setNextErrorState = (fieldName, v, eventName) => {
@@ -132,22 +128,22 @@ class SignUpForm extends React.PureComponent {
       nextState.errors[fieldName] = result.message;
     } else {
       nextState.errors = this.state.errors;
-      nextState.errors[fieldName] = "";
+      nextState.errors[fieldName] = '';
     }
     this.setState(nextState);
   };
 
-  validate = (fieldName, v, eventName = "onChange") => {
+  validate = (fieldName, v, eventName = 'onChange') => {
     this._validate(this._schema, fieldName, v, eventName);
   };
 
-  _validate = (schema, fieldName, v, eventName = "onChange") => {
+  _validate = (schema, fieldName, v, eventName = 'onChange') => {
     const field = schema[fieldName];
-    if (typeof field === "undefined") {
-      return { message: "undefined" };
+    if (typeof field === 'undefined') {
+      return { message: 'undefined' };
     }
-    if (field.required && v === "") {
-      return { message: "這裡必須填入資料" };
+    if (field.required && v === '') {
+      return { message: '這裡必須填入資料' };
     } else if (field.minLength && v.length < field.minLength) {
       return { message: `需要${field.minLength}個字元` };
     } else if (field.maxLength && v.length > field.maxLength) {
@@ -158,8 +154,7 @@ class SignUpForm extends React.PureComponent {
       }
       if (field.validate.validators) {
         for (const validator of field.validate.validators) {
-          const isDisableEvent =
-            validator.event && validator.event[eventName] === false;
+          const isDisableEvent = validator.event && validator.event[eventName] === false;
           if (!isDisableEvent) {
             const result = validator.validator(v);
             if (isBoolean(result) && !result) {
@@ -177,12 +172,12 @@ class SignUpForm extends React.PureComponent {
   };
 
   handleBlur = fieldName => {
-    this.setNextErrorState(fieldName, this.state.email, "onBlur");
+    this.setNextErrorState(fieldName, this.state.email, 'onBlur');
   };
 
   handleChange = (fieldName, e) => {
     const v = e.target.value;
-    this.setNextErrorState(fieldName, v, "onChange");
+    this.setNextErrorState(fieldName, v, 'onChange');
   };
 
   hasErrorField = () => {
@@ -213,13 +208,11 @@ class SignUpForm extends React.PureComponent {
         const form = this.getForm();
         const p = this.props.onSubmit(e, form);
         if (p.then) {
-          p
-            .then(progressing => {
-              this.setState({ progressing: !!progressing });
-            })
-            .catch(err => {
-              this.setState({ progressing: false });
-            });
+          p.then(progressing => {
+            this.setState({ progressing: !!progressing });
+          }).catch(err => {
+            this.setState({ progressing: false });
+          });
         }
       } else {
         setTimeout(() => {
@@ -243,8 +236,8 @@ class SignUpForm extends React.PureComponent {
             id="sign-up-form-email"
             label="電子郵件"
             value={this.state.email}
-            onBlur={this.handleBlur.bind(this, "email")}
-            onChange={this.handleChange.bind(this, "email")}
+            onBlur={this.handleBlur.bind(this, 'email')}
+            onChange={this.handleChange.bind(this, 'email')}
             helperText={this.state.errors.email}
           />
           <br />
@@ -256,7 +249,7 @@ class SignUpForm extends React.PureComponent {
             id="sign-up-form-password"
             type="password"
             value={this.state.password}
-            onChange={this.handleChange.bind(this, "password")}
+            onChange={this.handleChange.bind(this, 'password')}
             helperText={this.state.errors.password}
           />
           <br />
@@ -265,7 +258,7 @@ class SignUpForm extends React.PureComponent {
             id="sign-up-form-confirm-password"
             type="password"
             value={this.state.confirmPassword}
-            onChange={this.handleChange.bind(this, "confirmPassword")}
+            onChange={this.handleChange.bind(this, 'confirmPassword')}
             helperText={this.state.errors.confirmPassword}
           />
           <br />
@@ -277,7 +270,7 @@ class SignUpForm extends React.PureComponent {
             style={{
               width: 256,
               marginTop: 50,
-              marginBottom: 20
+              marginBottom: 20,
             }}
           >
             註冊
@@ -299,7 +292,7 @@ function mapStateToProps(state, props) {
   }
   return {
     oauth2Client, // for fetchAccessToken after signup success
-    validateEmail: email => fetchValidateUser({ emailExists: email })
+    validateEmail: email => fetchValidateUser({ emailExists: email }),
   };
 }
 
@@ -322,7 +315,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
             return dispatch(logInRequest({ email, password, oauth2Client }));
           })
           .catch(err => {
-            if (err.message === "Request failed with status code 403") {
+            if (err.message === 'Request failed with status code 403') {
               const businessError = err.response.data;
               const { code, errmsg } = businessError;
               // handle duplicate key
@@ -339,8 +332,12 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
             }
           });
       }
-    }
+    },
   };
 }
 
-export default connect(mapStateToProps, null, mergeProps)(SignUpForm);
+export default connect(
+  mapStateToProps,
+  null,
+  mergeProps
+)(SignUpForm);

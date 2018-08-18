@@ -1,31 +1,31 @@
-import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import PropTypes from "prop-types";
-import compose from "recompose/compose";
-import { connect } from "react-redux";
-import { goBack, replace, push } from "react-router-redux";
-import { Link } from "react-router-dom";
-import { matchPath } from "react-router";
-import { Motion, spring } from "react-motion";
+import React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import PropTypes from 'prop-types';
+import compose from 'recompose/compose';
+import { connect } from 'react-redux';
+import { goBack, replace, push } from 'react-router-redux';
+import { Link } from 'react-router-dom';
+import { matchPath } from 'react-router';
+import { Motion, spring } from 'react-motion';
 
-import { withStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import SearchVerIcon from "@material-ui/icons/Search";
-import BackspaceIcon from "@material-ui/icons/KeyboardBackspace";
-import MenuIcon from "@material-ui/icons/Menu";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { withStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import SearchVerIcon from '@material-ui/icons/Search';
+import BackspaceIcon from '@material-ui/icons/KeyboardBackspace';
+import MenuIcon from '@material-ui/icons/Menu';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import CurrentUserIconMenu from "../../User/components/CurrentUserIconMenu";
-import SendButton from "./SendButton";
-import SearchAutoComplete from "../../Search/components/SearchAutoComplete";
-import makeLogInDialogable from "../../User/components/LogInDialog/makeLogInDialogable";
+import CurrentUserIconMenu from '../../User/components/CurrentUserIconMenu';
+import SendButton from './SendButton';
+import SearchAutoComplete from '../../Search/components/SearchAutoComplete';
+import makeLogInDialogable from '../../User/components/LogInDialog/makeLogInDialogable';
 
-import { getUI, getIsFirstRender } from "../MyAppReducer";
-import { getIsLoggedIn } from "../../User/UserReducer";
+import { getUI, getIsFirstRender } from '../MyAppReducer';
+import { getIsLoggedIn } from '../../User/UserReducer';
 
 const LogInButton = makeLogInDialogable(Button);
 
@@ -40,13 +40,13 @@ const SearchButton = props => {
 const LeftElementMotionHoc = Component => props => {
   const { initDeg, ...other } = props;
   const defaultStyle = {
-    deg: initDeg || 45
+    deg: initDeg || 45,
   };
   const style = {
     deg: spring(0, {
       stiffness: 222,
-      damping: 30
-    })
+      damping: 30,
+    }),
   };
   return (
     <Motion defaultStyle={defaultStyle} style={style}>
@@ -54,7 +54,7 @@ const LeftElementMotionHoc = Component => props => {
         return (
           <Component
             style={{
-              transform: `rotate(${deg}deg)`
+              transform: `rotate(${deg}deg)`,
             }}
             {...other}
           />
@@ -89,44 +89,40 @@ const MenuButton = props => {
 
 const styles = {
   flex: {
-    flex: 1
+    flex: 1,
   },
   menuButton: {
     marginLeft: -12,
-    marginRight: 20
-  }
+    marginRight: 20,
+  },
 };
 
 class AppHeader extends React.Component {
   static propTypes = {
     classes: PropTypes.object.isRequired,
-    onMenuButtonClick: PropTypes.func
+    onMenuButtonClick: PropTypes.func,
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
-    let defaultQuery = "";
+    let defaultQuery = '';
     if (this.isInSearchPage()) {
       defaultQuery = props.searchQuery;
     }
     this.state = {
-      textValue: defaultQuery || "",
-      textFieldFocused: false
+      textValue: defaultQuery || '',
+      textFieldFocused: false,
     };
   }
 
   componentDidUpdate() {
-    if (
-      !this.isInSearchPage() &&
-      this.state.textValue !== "" &&
-      !this.state.textFieldFocused
-    ) {
-      this.setState({ textValue: "" });
+    if (!this.isInSearchPage() && this.state.textValue !== '' && !this.state.textFieldFocused) {
+      this.setState({ textValue: '' });
     }
     if (this.isInSearchPage() && this.state.textFieldFocused === false) {
       const query = this.props.searchQuery;
-      if (this.state.textValue === "" && query) {
+      if (this.state.textValue === '' && query) {
         this.setState({ textValue: query });
       }
     }
@@ -150,7 +146,7 @@ class AppHeader extends React.Component {
 
   _fetchSearchResults = v => {
     const noSendRegex = /[\\/ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ]/g;
-    const query = v.replace(noSendRegex, "");
+    const query = v.replace(noSendRegex, '');
     this.setState({ textValue: query });
     if (query) {
       // it will trigger search page and query it.
@@ -175,7 +171,7 @@ class AppHeader extends React.Component {
   handleTextChange = event => {
     const v = event.target.value;
     this.setState({ textValue: v });
-    if (v === "" && !this.state.textFieldFocused) {
+    if (v === '' && !this.state.textFieldFocused) {
       // this.props.dispatch(clientInitSearchResults());
     }
   };
@@ -184,7 +180,7 @@ class AppHeader extends React.Component {
   // use getCurrentPage() ?
   isInSearchPage = () => {
     const { pathname } = this.props;
-    return Boolean(matchPath(pathname, { path: "/search" }));
+    return Boolean(matchPath(pathname, { path: '/search' }));
   };
 
   handleRequestChangeNavDrawer = open => {
@@ -204,15 +200,15 @@ class AppHeader extends React.Component {
       // TODO
       // use getCurrentPage() ?
       const paths = [
-        "/discussions",
-        "/rootWikis/:rootWikiId/wikis/:wikiName",
-        "/search",
-        "/create",
-        "/update",
-        "/edit",
-        "/setting",
-        "/settings",
-        "/about"
+        '/discussions',
+        '/rootWikis/:rootWikiId/wikis/:wikiName',
+        '/search',
+        '/create',
+        '/update',
+        '/edit',
+        '/setting',
+        '/settings',
+        '/about',
       ];
       return paths.some(path => {
         return Boolean(matchPath(pathname, { path }));
@@ -240,11 +236,7 @@ class AppHeader extends React.Component {
         );
       } else {
         return (
-          <MenuButton
-            aria-label="Menu"
-            onClick={this.handleMenuButtonClick}
-            {...buttonProps}
-          />
+          <MenuButton aria-label="Menu" onClick={this.handleMenuButtonClick} {...buttonProps} />
         );
       }
     }
@@ -252,7 +244,7 @@ class AppHeader extends React.Component {
 
   RightIconButton = buttonProps => {
     const { pathname } = this.props;
-    const enableSendButtonRules = ["/create", "/update"];
+    const enableSendButtonRules = ['/create', '/update'];
     const enableSendButton = enableSendButtonRules.some(path =>
       Boolean(matchPath(pathname, { path }))
     );
@@ -300,11 +292,7 @@ class AppHeader extends React.Component {
           <Toolbar>
             <LeftIconButton className={classes.menuButton} color="inherit" />
             {this.showTitle() ? (
-              <Typography
-                variant="title"
-                color="inherit"
-                className={classes.flex}
-              >
+              <Typography variant="title" color="inherit" className={classes.flex}>
                 {title}
               </Typography>
             ) : null}
@@ -329,14 +317,14 @@ export default compose(
       const isFirstRender = getIsFirstRender(state);
       const { pathname, query: searchQuery } = state.routing.location;
       const ui = getUI(state);
-      const title = ui.getIn(["header", "title"]);
+      const title = ui.getIn(['header', 'title']);
       return {
         browser,
         isLoggedIn,
         pathname,
         searchQuery,
         isFirstRender,
-        title
+        title,
       };
     },
     dispatch => {

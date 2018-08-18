@@ -5,18 +5,18 @@
  * English-locale intl context around them.
  */
 
-import React from "react";
-import { IntlProvider, intlShape } from "react-intl";
-import { mount, shallow } from "enzyme";
+import React from 'react';
+import { IntlProvider, intlShape } from 'react-intl';
+import { mount, shallow } from 'enzyme';
 
 // You can pass your messages to the IntlProvider. Optional: remove if unneeded.
-const messages = require("../../Intl/localizationData/en");
+const messages = require('../../Intl/localizationData/en');
 
 // Create the IntlProvider to retrieve context for wrapping around.
 const intlProvider = new IntlProvider(
   {
-    locale: "en",
-    messages
+    locale: 'en',
+    messages,
   },
   {}
 );
@@ -32,18 +32,18 @@ const nodeWithIntlProp = node => {
 export const shallowWithIntl = node => {
   return shallow(nodeWithIntlProp(node), {
     context: {
-      intl
-    }
+      intl,
+    },
   });
 };
 
 export const mountWithIntl = node => {
   return mount(nodeWithIntlProp(node), {
     context: {
-      intl
+      intl,
     },
     childContextTypes: {
-      intl: intlShape
-    }
+      intl: intlShape,
+    },
   });
 };

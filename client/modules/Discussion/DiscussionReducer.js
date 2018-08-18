@@ -1,43 +1,43 @@
-import { fromJS, Set, Record, is } from "immutable";
-import memoize from "fast-memoize";
-import createFastMemoizeDefaultOptions from "../../util/createFastMemoizeDefaultOptions";
+import { fromJS, Set, Record, is } from 'immutable';
+import memoize from 'fast-memoize';
+import createFastMemoizeDefaultOptions from '../../util/createFastMemoizeDefaultOptions';
 
-import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
-import { connectDB } from "../../localdb";
+import defaultSameIdElesMax from '../../util/defaultSameIdElesMax';
+import { connectDB } from '../../localdb';
 import {
   ADD_DISCUSSIONS,
   ADD_DISCUSSION,
   CLEAR_DISCUSSIONS,
   SET_DISCUSSIONS_UI,
-  SET_UPSERT_DISCUSSION_PAGE_FORM
-} from "./DiscussionActions";
+  SET_UPSERT_DISCUSSION_PAGE_FORM,
+} from './DiscussionActions';
 
 const UserBasicInfo = Record({
-  _id: "",
-  displayName: "",
-  avatarURL: ""
+  _id: '',
+  displayName: '',
+  avatarURL: '',
 });
 
 const DISCUSSION_RECORD_DEFAULT = {
-  _id: "",
+  _id: '',
   title: null,
-  author: "",
+  author: '',
   authorBasicInfo: null,
   lastChildComments: null,
   lastChildCommentCount: 0,
   content: null,
   isRoot: false,
-  parentDiscussion: "",
-  replayTo: "",
+  parentDiscussion: '',
+  replayTo: '',
   childDiscussionCount: 0,
   forumBoardGroup: null,
   tags: Set(),
-  forumBoard: "",
+  forumBoard: '',
   titleUpdatedAt: new Date(),
   repliedAt: new Date(),
   contentUpdatedAt: new Date(),
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 const DiscussionRecord = Record(DISCUSSION_RECORD_DEFAULT);
@@ -45,9 +45,7 @@ const DiscussionRecord = Record(DISCUSSION_RECORD_DEFAULT);
 export class Discussion extends DiscussionRecord {
   static fromJS(obj = {}) {
     const content = obj.content ? fromJS(obj.content) : null;
-    const authorBasicInfo = obj.authorBasicInfo
-      ? new UserBasicInfo(obj.authorBasicInfo)
-      : null;
+    const authorBasicInfo = obj.authorBasicInfo ? new UserBasicInfo(obj.authorBasicInfo) : null;
     return new Discussion({
       ...obj,
       content,
@@ -57,7 +55,7 @@ export class Discussion extends DiscussionRecord {
       repliedAt: new Date(obj.repliedAt),
       contentUpdatedAt: new Date(obj.contentUpdatedAt),
       createdAt: new Date(obj.createdAt),
-      updatedAt: new Date(obj.updatedAt)
+      updatedAt: new Date(obj.updatedAt),
     });
   }
 }
@@ -66,13 +64,13 @@ const DEFAULT_UI = {
   CreateRootDiscussionPage: {
     forms: {
       // ${forumBoardId}: {   title: '',   content: null  }
-    }
-  }
+    },
+  },
 };
 
 const DISCUSSION_STATE_RECORD_DEFAULT = {
   ui: fromJS(DEFAULT_UI),
-  data: Set()
+  data: Set(),
 };
 
 const DiscussionStateRecord = Record(DISCUSSION_STATE_RECORD_DEFAULT);
@@ -82,7 +80,7 @@ export class DiscussionState extends DiscussionStateRecord {
     const { ui = DEFAULT_UI, data = [] } = obj;
     const record = new DiscussionState({
       ui: fromJS(ui),
-      data: Set(data.map(Discussion.fromJS))
+      data: Set(data.map(Discussion.fromJS)),
     });
     return record;
   }
@@ -95,39 +93,37 @@ const DiscussionReducer = (state = initialState, action) => {
     case ADD_DISCUSSION:
     case ADD_DISCUSSIONS:
       const xs = state.data;
-      const dataInput = action.discussion
-        ? [action.discussion]
-        : action.discussions;
+      const dataInput = action.discussion ? [action.discussion] : action.discussions;
       const newXs = DiscussionState.fromJS({ data: dataInput }).data;
       const unionXs = xs.union(newXs);
       const nextXs = !is(unionXs, xs)
         ? unionXs
-          .groupBy(x => x._id)
-          .map(defaultSameIdElesMax)
-          .toSet()
+            .groupBy(x => x._id)
+            .map(defaultSameIdElesMax)
+            .toSet()
         : unionXs;
-      return state.set("data", nextXs);
+      return state.set('data', nextXs);
 
     case CLEAR_DISCUSSIONS:
-      return state.set("data", Set());
+      return state.set('data', Set());
 
     case SET_UPSERT_DISCUSSION_PAGE_FORM: {
       const { forumBoardId, form } = action;
       const nextUiState = state.ui.setIn(
-        ["UpsertDiscussionPage", "forms", forumBoardId],
+        ['UpsertDiscussionPage', 'forms', forumBoardId],
         fromJS(form)
       );
-      const nextState = state.set("ui", nextUiState);
+      const nextState = state.set('ui', nextUiState);
       const db = connectDB();
       if (db) {
-        db.setItem("discussion:ui", nextState.get("ui").toJS());
+        db.setItem('discussion:ui', nextState.get('ui').toJS());
       }
       return nextState;
     }
 
     case SET_DISCUSSIONS_UI:
       // const nextUI = state.get("ui")action.ui;
-      return state.set("ui", fromJS(action.ui));
+      return state.set('ui', fromJS(action.ui));
 
     default:
       return state;
@@ -146,9 +142,7 @@ export const getDiscussionsByForumBoard = (state, forumBoardId) => {
 const _getRootDiscussions = memoize((discussions, fourmBoardGroup) => {
   return discussions.filter(x => {
     const inGroup =
-      fourmBoardGroup && fourmBoardGroup !== "_all"
-        ? x.forumBoardGroup === fourmBoardGroup
-        : true;
+      fourmBoardGroup && fourmBoardGroup !== '_all' ? x.forumBoardGroup === fourmBoardGroup : true;
     return x.isRoot && inGroup;
   });
 }, createFastMemoizeDefaultOptions({ size: 1 }));
@@ -211,8 +205,8 @@ export const getChildDiscussions = (state, parentDiscussionId) => {
 export const getDiscussionByDirection = (
   state,
   parentDiscussion,
-  direction = "next",
-  orderPropName = "updatedAt"
+  direction = 'next',
+  orderPropName = 'updatedAt'
 ) => {
   const discussions = getDiscussions(state);
   const found = discussions
@@ -224,14 +218,12 @@ export const getDiscussionByDirection = (
       );
     })
     .sortBy(x => {
-      return direction === "next" ? -1 * x[orderPropName] : x[orderPropName];
+      return direction === 'next' ? -1 * x[orderPropName] : x[orderPropName];
     })
     .find(x => {
       const orderProp = x[orderPropName];
       const parentOrderProp = parentDiscussion[orderPropName];
-      return direction === "next"
-        ? orderProp <= parentOrderProp
-        : orderProp >= parentOrderProp;
+      return direction === 'next' ? orderProp <= parentOrderProp : orderProp >= parentOrderProp;
     });
   return found;
 };

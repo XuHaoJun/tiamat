@@ -1,6 +1,6 @@
 const appOauth2Client = {
-  name: "Tiamat",
-  jwtSecret: "YourjwtSecret"
+  name: 'Tiamat',
+  jwtSecret: 'YourjwtSecret',
 };
 
 export default appOauth2Client;

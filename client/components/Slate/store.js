@@ -1,6 +1,6 @@
-import { createStore } from "redux";
+import { createStore } from 'redux';
 
-export const PREFIX_STORE_KEY = "slate-editor";
+export const PREFIX_STORE_KEY = 'slate-editor';
 
 let editorIdCounter = 0;
 

@@ -1,81 +1,66 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { Set } from "immutable";
-import debounce from "lodash/debounce";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { Set } from 'immutable';
+import debounce from 'lodash/debounce';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
-import { push, replace } from "react-router-redux";
-import {
-  setHeaderTitle,
-  updateSendButtonProps
-} from "../../MyApp/MyAppActions";
-import { getDBisInitialized } from "../../MyApp/MyAppReducer";
+import { push, replace } from 'react-router-redux';
+import { setHeaderTitle, updateSendButtonProps } from '../../MyApp/MyAppActions';
+import { getDBisInitialized } from '../../MyApp/MyAppReducer';
 import {
   setUpsertDiscussionPageForm,
   addDiscussionRequest,
-  fetchDiscussionById
-} from "../DiscussionActions";
-import { getDiscussionById, getUI } from "../DiscussionReducer";
-import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
-import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
-import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
-import { getSemanticRules } from "../../SemanticRule/SemanticRuleReducer";
-import {
-  getIsLoggedIn,
-  getCurrentAccessToken,
-  getCurrentUser
-} from "../../User/UserReducer";
+  fetchDiscussionById,
+} from '../DiscussionActions';
+import { getDiscussionById, getUI } from '../DiscussionReducer';
+import { getForumBoardById } from '../../ForumBoard/ForumBoardReducer';
+import { fetchForumBoardById } from '../../ForumBoard/ForumBoardActions';
+import { fetchSemanticRules } from '../../SemanticRule/SemanticRuleActions';
+import { getSemanticRules } from '../../SemanticRule/SemanticRuleReducer';
+import { getIsLoggedIn, getCurrentAccessToken, getCurrentUser } from '../../User/UserReducer';
 
-import RootDiscussionForm from "../components/RootDiscussionForm";
-import ChildDiscussionForm from "../components/ChildDiscussionForm";
+import RootDiscussionForm from '../components/RootDiscussionForm';
+import ChildDiscussionForm from '../components/ChildDiscussionForm';
 
-const CREATE_ACTION = "create";
-const UPDATE_ACTION = "update";
+const CREATE_ACTION = 'create';
+const UPDATE_ACTION = 'update';
 const ACTIONS = [CREATE_ACTION, UPDATE_ACTION];
 
 function getHeaderTitle(routerProps, state = {}) {
-  const {
-    forumBoardId,
-    parentDiscussionId,
-    discussionId
-  } = routerProps.match.params;
+  const { forumBoardId, parentDiscussionId, discussionId } = routerProps.match.params;
   if (forumBoardId) {
     const forumBoard = getForumBoardById(state, forumBoardId);
     if (forumBoard) {
-      return `建立文章 - ${forumBoard.get("name")}`;
+      return `建立文章 - ${forumBoard.get('name')}`;
     } else {
-      return "建立文章";
+      return '建立文章';
     }
   } else if (parentDiscussionId) {
     const parentDiscussion = getDiscussionById(state, parentDiscussionId);
     if (parentDiscussion) {
-      return `RE:${parentDiscussion.get("title")}`;
+      return `RE:${parentDiscussion.get('title')}`;
     } else {
-      return "回覆文章";
+      return '回覆文章';
     }
   } else if (discussionId) {
-    return "編輯文章";
+    return '編輯文章';
   } else {
-    return "建立文章";
+    return '建立文章';
   }
 }
 
 function getForumBoardId(routerProps, state) {
-  const {
-    parentDiscussionId,
-    discussionId,
-    forumBoardId
-  } = routerProps.match.params;
+  const { parentDiscussionId, discussionId, forumBoardId } = routerProps.match.params;
   if (forumBoardId) {
     return forumBoardId;
   } else if (parentDiscussionId || discussionId) {
     const id = parentDiscussionId || discussionId;
     const discussion = getDiscussionById(state, id);
     if (discussion) {
-      return discussion.get("forumBoard");
+      return discussion.get('forumBoard');
     } else {
       return null;
     }
@@ -89,28 +74,18 @@ function getForumBoardId(routerProps, state) {
 class UpsertRootDiscussionPage extends React.Component {
   static propTypes = {
     actionType: PropTypes.oneOf(ACTIONS).isRequired,
-    targetKind: PropTypes.oneOf([
-      "rootDiscussion",
-      "discussion",
-      "childDiscussion"
-    ]).isRequired
+    targetKind: PropTypes.oneOf(['rootDiscussion', 'discussion', 'childDiscussion']).isRequired,
   };
 
   static getInitialAction({ routerProps }, { tryMore } = { tryMore: false }) {
     return async (dispatch, getState) => {
       dispatch(setHeaderTitle(getHeaderTitle(routerProps, getState())));
       const fetchByRouterProps = () => {
-        const {
-          parentDiscussionId,
-          discussionId,
-          forumBoardId
-        } = routerProps.match.params;
+        const { parentDiscussionId, discussionId, forumBoardId } = routerProps.match.params;
         return Promise.all([
-          parentDiscussionId
-            ? dispatch(fetchDiscussionById(parentDiscussionId))
-            : null,
+          parentDiscussionId ? dispatch(fetchDiscussionById(parentDiscussionId)) : null,
           discussionId ? dispatch(fetchDiscussionById(discussionId)) : null,
-          forumBoardId ? dispatch(fetchForumBoardById(forumBoardId)) : null
+          forumBoardId ? dispatch(fetchForumBoardById(forumBoardId)) : null,
         ]);
       };
       await fetchByRouterProps();
@@ -121,13 +96,13 @@ class UpsertRootDiscussionPage extends React.Component {
       dispatch(setHeaderTitle(getHeaderTitle(routerProps, getState())));
       if (tryMore) {
         const forumBoard = getForumBoardById(getState(), forumBoardId);
-        const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+        const rootWikiId = forumBoard ? forumBoard.get('rootWiki') : '';
         if (rootWikiId) {
           const scope = [
             {
-              type: "wiki",
-              rootWikiId
-            }
+              type: 'wiki',
+              rootWikiId,
+            },
           ];
           return dispatch(fetchSemanticRules(scope));
         }
@@ -143,10 +118,7 @@ class UpsertRootDiscussionPage extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { dbIsInitialized } = nextProps;
-    if (
-      this.props.location.pathname !== nextProps.location.pathname &&
-      dbIsInitialized
-    ) {
+    if (this.props.location.pathname !== nextProps.location.pathname && dbIsInitialized) {
       this.fetchComponentData(nextProps);
     }
     this.ensureLoggedIn(nextProps);
@@ -158,7 +130,7 @@ class UpsertRootDiscussionPage extends React.Component {
     this.saveToLocalDB();
     this.props.dispatch(
       updateSendButtonProps({
-        onClick: undefined
+        onClick: undefined,
       })
     );
   }
@@ -171,7 +143,7 @@ class UpsertRootDiscussionPage extends React.Component {
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onClick: undefined
+          onClick: undefined,
         })
       );
     }
@@ -222,9 +194,7 @@ class UpsertRootDiscussionPage extends React.Component {
         // TODO
         // imple it.
         if (forumBoardId) {
-          this.props.dispatch(
-            setUpsertDiscussionPageForm(forumBoardId, formData)
-          );
+          this.props.dispatch(setUpsertDiscussionPageForm(forumBoardId, formData));
         }
       }
     }
@@ -242,7 +212,7 @@ class UpsertRootDiscussionPage extends React.Component {
       forumBoardId,
       forumBoard,
       parentDiscussionId,
-      parentDiscussion
+      parentDiscussion,
     } = props;
     if (!discussion) {
       if (discussionId) {
@@ -259,15 +229,15 @@ class UpsertRootDiscussionPage extends React.Component {
         dispatch(fetchForumBoardById(forumBoardId));
       }
     } else {
-      const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+      const rootWikiId = forumBoard ? forumBoard.get('rootWiki') : '';
       const { semanticRules } = props;
       if (rootWikiId) {
         if (semanticRules.count() === 0) {
           const scope = [
             {
-              type: "wiki",
-              rootWikiId
-            }
+              type: 'wiki',
+              rootWikiId,
+            },
           ];
           dispatch(fetchSemanticRules(scope));
         }
@@ -290,7 +260,7 @@ class UpsertRootDiscussionPage extends React.Component {
       if (!isLoggedIn) {
         // TODO
         // show login required?
-        this.props.dispatch(push("/login"));
+        this.props.dispatch(push('/login'));
         return undefined;
       }
       const { forumBoardId, parentDiscussionId, accessToken } = this.props;
@@ -301,9 +271,7 @@ class UpsertRootDiscussionPage extends React.Component {
         backUrl = `/rootDiscussions/${parentDiscussionId}`;
       }
       return this.props.dispatch(dispatch => {
-        return Promise.resolve(
-          dispatch(updateSendButtonProps({ loading: true }))
-        )
+        return Promise.resolve(dispatch(updateSendButtonProps({ loading: true })))
           .then(() => dispatch(addDiscussionRequest(discussion, accessToken)))
           .then(() => dispatch(updateSendButtonProps({ loading: false })))
           .then(() => {
@@ -331,23 +299,23 @@ class UpsertRootDiscussionPage extends React.Component {
       initForm,
       parentDiscussionId,
       actionType,
-      targetKind
+      targetKind,
     } = this.props;
-    const rootWikiId = forumBoard ? forumBoard.get("rootWiki") : "";
+    const rootWikiId = forumBoard ? forumBoard.get('rootWiki') : '';
     // TODO
     // optimize.
     let { semanticRules } = this.props;
     if (semanticRules) {
       semanticRules = rootWikiId
         ? semanticRules
-            .filter(ele => ele.get("rootWikiId") === rootWikiId)
-            .sortBy(ele => ele.get("name").length)
+            .filter(ele => ele.get('rootWikiId') === rootWikiId)
+            .sortBy(ele => ele.get('name').length)
         : semanticRules;
     } else {
       semanticRules = Set();
     }
     let form;
-    if (targetKind === "childDiscussion") {
+    if (targetKind === 'childDiscussion') {
       if (actionType === CREATE_ACTION) {
         form = (
           <ChildDiscussionForm
@@ -359,12 +327,9 @@ class UpsertRootDiscussionPage extends React.Component {
           />
         );
       } else {
-        form = (
-          <div
-          >{`targetKind ${targetKind} only support ${CREATE_ACTION} actionType`}</div>
-        );
+        form = <div>{`targetKind ${targetKind} only support ${CREATE_ACTION} actionType`}</div>;
       }
-    } else if (targetKind === "rootDiscussion") {
+    } else if (targetKind === 'rootDiscussion') {
       if (actionType === CREATE_ACTION) {
         form = (
           <RootDiscussionForm
@@ -379,28 +344,25 @@ class UpsertRootDiscussionPage extends React.Component {
           />
         );
       } else {
-        form = (
-          <div
-          >{`targetKind ${targetKind} only support ${CREATE_ACTION} actionType`}</div>
-        );
+        form = <div>{`targetKind ${targetKind} only support ${CREATE_ACTION} actionType`}</div>;
       }
-    } else if (targetKind === "discussion") {
+    } else if (targetKind === 'discussion') {
       if (actionType === UPDATE_ACTION) {
         const { discussion } = this.props;
         if (discussion) {
-          if (discussion.get("isRoot")) {
+          if (discussion.get('isRoot')) {
             const { title, content } = discussion;
             const _initForm = {
               title,
               content,
-              forumBoardGroup: discussion.get("forumBoardGroup")
+              forumBoardGroup: discussion.get('forumBoardGroup'),
             };
             form = (
               <RootDiscussionForm
                 ref={this.setFormRef}
                 actionType={actionType}
-                forumBoardId={discussion.get("forumBoard")}
-                forumBoardGroup={discussion.get("forumBoardGroup")}
+                forumBoardId={discussion.get('forumBoard')}
+                forumBoardGroup={discussion.get('forumBoardGroup')}
                 initForm={_initForm}
                 onChange={this.handleFormChange}
                 semanticRules={semanticRules}
@@ -409,13 +371,13 @@ class UpsertRootDiscussionPage extends React.Component {
           } else {
             const { content } = discussion;
             const _initForm = {
-              content
+              content,
             };
             form = (
               <ChildDiscussionForm
                 ref={this.setFormRef}
                 actionType={actionType}
-                parentDiscussionId={discussion.get("parentDiscussion")}
+                parentDiscussionId={discussion.get('parentDiscussion')}
                 initForm={_initForm}
                 semanticRules={semanticRules}
               />
@@ -425,16 +387,10 @@ class UpsertRootDiscussionPage extends React.Component {
           form = <div>Loading...</div>;
         }
       } else {
-        form = (
-          <div
-          >{`targetKind ${targetKind} only support ${UPDATE_ACTION} actionType`}</div>
-        );
+        form = <div>{`targetKind ${targetKind} only support ${UPDATE_ACTION} actionType`}</div>;
       }
     } else {
-      form = (
-        <div
-        >{`unknown targetKind ${targetKind} or actionType ${actionType}`}</div>
-      );
+      form = <div>{`unknown targetKind ${targetKind} or actionType ${actionType}`}</div>;
     }
     return (
       <div>
@@ -450,11 +406,7 @@ function mapStateToProps(state, routerProps) {
   const { actionType, targetKind } = leafRoute;
   const dbIsInitialized = getDBisInitialized(state);
   const isLoggedIn = getIsLoggedIn(state);
-  const {
-    forumBoardId,
-    parentDiscussionId,
-    discussionId
-  } = routerProps.match.params;
+  const { forumBoardId, parentDiscussionId, discussionId } = routerProps.match.params;
   const { forumBoardGroup } = routerProps.location.query;
   const forumBoard = getForumBoardById(state, forumBoardId);
   const discussion = getDiscussionById(state, discussionId);
@@ -464,7 +416,7 @@ function mapStateToProps(state, routerProps) {
   if (parentDiscussionId) {
     initForm = null;
   } else {
-    initForm = ui.getIn(["UpsertDiscussionPage", "forms", forumBoardId]);
+    initForm = ui.getIn(['UpsertDiscussionPage', 'forms', forumBoardId]);
   }
   const semanticRules = getSemanticRules(state);
   const headerTitle = getHeaderTitle(routerProps, state);
@@ -486,7 +438,7 @@ function mapStateToProps(state, routerProps) {
     parentDiscussionId,
     parentDiscussion,
     initForm,
-    semanticRules
+    semanticRules,
   };
 }
 
@@ -494,16 +446,16 @@ function mapDispatchToProps(dispatch, routerProps) {
   return {
     dispatch,
     fetchComponentData() {
-      const action = UpsertRootDiscussionPage.getInitialAction(
-        { routerProps },
-        { tryMore: true }
-      );
+      const action = UpsertRootDiscussionPage.getInitialAction({ routerProps }, { tryMore: true });
       return dispatch(action);
-    }
+    },
   };
 }
 
 export default compose(
   hot(module),
-  connect(mapStateToProps, mapDispatchToProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(UpsertRootDiscussionPage);

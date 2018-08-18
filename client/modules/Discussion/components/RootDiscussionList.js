@@ -1,39 +1,39 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Set, Map, is, Record } from "immutable";
-import { connect } from "react-redux";
-import { shallowEqualImmutable } from "react-immutable-render-mixin";
-import moment from "moment";
-import { Link } from "react-router-dom";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Set, Map, is, Record } from 'immutable';
+import { connect } from 'react-redux';
+import { shallowEqualImmutable } from 'react-immutable-render-mixin';
+import moment from 'moment';
+import { Link } from 'react-router-dom';
 
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import List from "../../../components/List/EnhancedList";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import List from '../../../components/List/EnhancedList';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 
-import UserAvatar from "../../User/components/UserAvatar";
+import UserAvatar from '../../User/components/UserAvatar';
 
-import { DiscussionRemote } from "../DiscussionActions";
-import { getRootDiscussions } from "../DiscussionReducer";
-import { getIsFirstRender } from "../../MyApp/MyAppReducer";
+import { DiscussionRemote } from '../DiscussionActions';
+import { getRootDiscussions } from '../DiscussionReducer';
+import { getIsFirstRender } from '../../MyApp/MyAppReducer';
 
 const styles = theme => ({
   root: {
     backgroundColor: theme.palette.background.paper,
-    width: "100%",
-    height: "100%",
-    overflow: "auto"
-  }
+    width: '100%',
+    height: '100%',
+    overflow: 'auto',
+  },
 });
 
-const FORUM_BOARD_GROUP_ALL = "_all";
+const FORUM_BOARD_GROUP_ALL = '_all';
 
 const PageInfo = Record({
   forumBoardGroup: FORUM_BOARD_GROUP_ALL,
   limit: 10,
-  page: 1
+  page: 1,
 });
 
 class RootDiscussionList extends React.Component {
@@ -42,14 +42,14 @@ class RootDiscussionList extends React.Component {
     forumBoardGroup: PropTypes.string,
     dataSource: PropTypes.object,
     isFirstRender: PropTypes.bool,
-    sort: PropTypes.string
+    sort: PropTypes.string,
   };
 
   static defaultProps = {
     forumBoardGroup: FORUM_BOARD_GROUP_ALL,
     dataSource: Set(),
     isFirstRender: false,
-    sort: "-updatedAt"
+    sort: '-updatedAt',
   };
 
   constructor(props) {
@@ -57,17 +57,15 @@ class RootDiscussionList extends React.Component {
     const pageInfo = this.createPageInfo();
     const pageTable = Map().merge(pageInfo);
     this.state = {
-      pageTable
+      pageTable,
     };
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.forumBoardGroup !== nextProps.forumBoardGroup) {
-      const nextPageTable = this.state.pageTable.merge(
-        this.createPageInfo(nextProps, { page: 1 })
-      );
+      const nextPageTable = this.state.pageTable.merge(this.createPageInfo(nextProps, { page: 1 }));
       this.setState({ pageTable: nextPageTable }, () => {
-        this.handleRequestMore({ direction: "top" });
+        this.handleRequestMore({ direction: 'top' });
       });
     }
   }
@@ -84,7 +82,7 @@ class RootDiscussionList extends React.Component {
     if (!forumBoardId) {
       return Promise.resolve(null);
     }
-    const nextPage = direction === "bottom" ? page + 1 : 1;
+    const nextPage = direction === 'bottom' ? page + 1 : 1;
     const prevDataSource = this.props.dataSource;
     // TODO
     // cancel fetch when componemntWillUnmount
@@ -93,7 +91,7 @@ class RootDiscussionList extends React.Component {
         page: nextPage,
         limit,
         sort,
-        forumBoardGroup
+        forumBoardGroup,
       })
     );
     const currentDataSource = this.props.dataSource;
@@ -105,12 +103,10 @@ class RootDiscussionList extends React.Component {
       return null;
     } else {
       const currentPageTable = this.state.pageTable;
-      const nextPageInfo = currentPageTable.get(
-        pageInfo.get("forumBoardGroup")
-      );
+      const nextPageInfo = currentPageTable.get(pageInfo.get('forumBoardGroup'));
       const nextPageTable = pageTable.set(
-        nextPageInfo.get("forumBoardGroup"),
-        nextPageInfo.set("page", nextPageInfo.get("page") + 1)
+        nextPageInfo.get('forumBoardGroup'),
+        nextPageInfo.set('page', nextPageInfo.get('page') + 1)
       );
       this.setState({ pageTable: nextPageTable });
       return null;
@@ -126,30 +122,28 @@ class RootDiscussionList extends React.Component {
       [forumBoardGroup]: new PageInfo({
         forumBoardGroup,
         limit,
-        page
-      })
+        page,
+      }),
     });
   };
 
   sortBy = payload => {
-    return -1 * new Date(payload.get("updatedAt")).getTime();
+    return -1 * new Date(payload.get('updatedAt')).getTime();
   };
 
   listItemHref = payload => {
-    return `/discussions/${payload.get("_id")}`;
+    return `/discussions/${payload.get('_id')}`;
   };
 
   listItemSecondaryText = discussion => {
     const { isFirstRender } = this.props;
     const fromNowTime = isFirstRender
-      ? moment(discussion.get("updatedAt")).format("ll")
-      : moment(discussion.get("updatedAt")).fromNow();
-    const descendantCount = discussion.get("descendantCount") || 0;
-    const Delimeter = () => <span style={{ margin: "0 4px" }}>•</span>;
-    const authorBasicInfo = discussion.get("authorBasicInfo");
-    const displayName = authorBasicInfo
-      ? authorBasicInfo.get("displayName")
-      : "Guest";
+      ? moment(discussion.get('updatedAt')).format('ll')
+      : moment(discussion.get('updatedAt')).fromNow();
+    const descendantCount = discussion.get('descendantCount') || 0;
+    const Delimeter = () => <span style={{ margin: '0 4px' }}>•</span>;
+    const authorBasicInfo = discussion.get('authorBasicInfo');
+    const displayName = authorBasicInfo ? authorBasicInfo.get('displayName') : 'Guest';
     return (
       <span>
         {displayName}
@@ -163,7 +157,7 @@ class RootDiscussionList extends React.Component {
   };
 
   listItemLeftAvatar = discussion => {
-    const authorBasicInfo = discussion.get("authorBasicInfo");
+    const authorBasicInfo = discussion.get('authorBasicInfo');
     return <UserAvatar user={authorBasicInfo} />;
   };
 
@@ -219,7 +213,7 @@ export default compose(
     },
     null,
     {
-      areStatePropsEqual: shallowEqualImmutable
+      areStatePropsEqual: shallowEqualImmutable,
     }
   )
 )(RootDiscussionList);

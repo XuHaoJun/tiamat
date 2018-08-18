@@ -1,14 +1,14 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
 
-import Tabs from "../../../../components/Tabs";
-import Tab from "@material-ui/core/Tab";
+import Tabs from '../../../../components/Tabs';
+import Tab from '@material-ui/core/Tab';
 
-import EnhancedSwipeableViews from "../../../../components/EnhancedSwipableViews";
-import WikiDataFormList from "./WikiDataFormList";
-import RootWikiDetail from "../RootWikiDetail";
-import RootWikiForm from "../RootWikiForm";
+import EnhancedSwipeableViews from '../../../../components/EnhancedSwipableViews';
+import WikiDataFormList from './WikiDataFormList';
+import RootWikiDetail from '../RootWikiDetail';
+import RootWikiForm from '../RootWikiForm';
 
 export const ROOT_WIKI_CONTENT_SLIDE = 0;
 export const ROOT_WIKI_EDIT_SLIDE = 1;
@@ -17,11 +17,11 @@ export const ROOT_WIKI_HISTORY = 3;
 
 class RootWikiTabs extends React.Component {
   static propTypes = {
-    rootWiki: PropTypes.object
+    rootWiki: PropTypes.object,
   };
 
   static defaultProps = {
-    rootWiki: null
+    rootWiki: null,
   };
 
   constructor(props) {
@@ -29,7 +29,7 @@ class RootWikiTabs extends React.Component {
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     const { slideIndex } = props;
     this.state = {
-      slideIndex
+      slideIndex,
     };
   }
 
@@ -63,10 +63,7 @@ class RootWikiTabs extends React.Component {
           <Tab label="表單管理" value={WIKI_DATA_FORMS_SLIDE} />
           <Tab label="歷史紀錄" value={ROOT_WIKI_HISTORY} />
         </Tabs>
-        <EnhancedSwipeableViews
-          index={slideIndex}
-          onChangeIndex={this.handleChangeIndex}
-        >
+        <EnhancedSwipeableViews index={slideIndex} onChangeIndex={this.handleChangeIndex}>
           <RootWikiDetail rootWiki={rootWiki} />
           <RootWikiForm actionType="update" defaultRootWiki={rootWiki} />
           <WikiDataFormList wikiDataForms={wikiDataForms} />

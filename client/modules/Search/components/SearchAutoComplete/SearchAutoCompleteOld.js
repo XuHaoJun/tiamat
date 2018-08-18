@@ -1,28 +1,28 @@
-import { List } from "immutable";
-import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import AutoComplete from "material-ui/AutoComplete";
-import MenuItem from "material-ui/MenuItem";
-import { connect } from "react-redux";
-import { fetchSearchResult } from "../../SearchActions";
-import { getLastSearchResult } from "../../SearchReducer";
-import cssStyles from "./SearchAutoComplete.css";
+import { List } from 'immutable';
+import React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import AutoComplete from 'material-ui/AutoComplete';
+import MenuItem from 'material-ui/MenuItem';
+import { connect } from 'react-redux';
+import { fetchSearchResult } from '../../SearchActions';
+import { getLastSearchResult } from '../../SearchReducer';
+import cssStyles from './SearchAutoComplete.css';
 
 class SearchAutoComplete extends React.Component {
   static defaultProps = {
     hits: List(),
-    target: "discussions",
-    queryField: "title",
+    target: 'discussions',
+    queryField: 'title',
     queryOptions: {},
     onUpdateInput: () => {},
-    onSubmit: () => {}
+    onSubmit: () => {},
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
     this.state = {
-      searchText: ""
+      searchText: '',
     };
   }
 
@@ -30,10 +30,10 @@ class SearchAutoComplete extends React.Component {
     const { queryField, queryOptions } = this.props;
     const _queryOptions = {
       [queryField]: searchText,
-      highlight: true
+      highlight: true,
     };
     const { target } = this.props;
-    if (target === "discussions") {
+    if (target === 'discussions') {
       _queryOptions.parentDiscussionId = null;
     }
     return Object.assign({}, _queryOptions, queryOptions);
@@ -44,7 +44,7 @@ class SearchAutoComplete extends React.Component {
     const queryOptions = this.getQueryOptions(searchText);
     this.setState(
       {
-        searchText
+        searchText,
       },
       () => {
         this.props.onUpdateInput(searchText, target, queryOptions);
@@ -53,14 +53,14 @@ class SearchAutoComplete extends React.Component {
   };
 
   handleNewRequest = ({ text, hit }) => {
-    if (text !== "") {
+    if (text !== '') {
       // TODO goto search home
     }
-    this.setState({ searchText: "" });
+    this.setState({ searchText: '' });
   };
 
   handleKeyPress = e => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       // Goto search home page
       this.props.onSubmit(e);
@@ -71,17 +71,17 @@ class SearchAutoComplete extends React.Component {
     const { queryField, hits } = this.props;
     const { searchText } = this.state;
     const dataSource = (() => {
-      if (searchText === "") {
+      if (searchText === '') {
         return [];
       } else {
         return hits
           .map(hit => {
-            const text = hit.getIn(["_source", queryField]);
-            const highlightedText = hit.getIn(["highlight", queryField, 0]);
+            const text = hit.getIn(['_source', queryField]);
+            const highlightedText = hit.getIn(['highlight', queryField, 0]);
             const primaryText = (() => {
               if (highlightedText) {
                 const dangerouslySetInnerHTML = {
-                  __html: highlightedText
+                  __html: highlightedText,
                 };
                 return (
                   <span
@@ -101,8 +101,8 @@ class SearchAutoComplete extends React.Component {
     })();
     const styles = {
       input: {
-        color: this.props.muiTheme.appBar.textColor
-      }
+        color: this.props.muiTheme.appBar.textColor,
+      },
     };
     return (
       <AutoComplete
@@ -131,7 +131,7 @@ function mapStateToProps(store) {
       return lastSearchResult
         .valueSeq()
         .map(searchResult => {
-          return searchResult.getIn(["hits", "hits"]);
+          return searchResult.getIn(['hits', 'hits']);
         })
         .flatten(1);
     } else {
@@ -144,11 +144,14 @@ function mapStateToProps(store) {
 function mapDispatchToProps(dispatch) {
   return {
     onUpdateInput: (searchText, target, queryOptions) => {
-      if (searchText !== "") {
+      if (searchText !== '') {
         dispatch(fetchSearchResult(target, queryOptions));
       }
-    }
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SearchAutoComplete);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SearchAutoComplete);

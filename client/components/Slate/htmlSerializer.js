@@ -1,9 +1,9 @@
-import Html from "slate-html-serializer";
-import { Editor, getEventTransfer } from "slate-react";
-import { State } from "slate";
+import Html from 'slate-html-serializer';
+import { Editor, getEventTransfer } from 'slate-react';
+import { State } from 'slate';
 
-import React from "react";
-import initialState from "./emptyContent.json";
+import React from 'react';
+import initialState from './emptyContent.json';
 
 /**
  * Tags to blocks.
@@ -12,19 +12,19 @@ import initialState from "./emptyContent.json";
  */
 
 const BLOCK_TAGS = {
-  p: "paragraph",
-  li: "list-item",
-  ul: "bulleted-list",
-  ol: "numbered-list",
-  blockquote: "quote",
-  pre: "code",
-  h1: "heading-one",
-  h2: "heading-two",
-  h3: "heading-three",
-  h4: "heading-four",
-  h5: "heading-five",
-  h6: "heading-six",
-  img: "image"
+  p: 'paragraph',
+  li: 'list-item',
+  ul: 'bulleted-list',
+  ol: 'numbered-list',
+  blockquote: 'quote',
+  pre: 'code',
+  h1: 'heading-one',
+  h2: 'heading-two',
+  h3: 'heading-three',
+  h4: 'heading-four',
+  h5: 'heading-five',
+  h6: 'heading-six',
+  img: 'image',
 };
 
 /**
@@ -34,11 +34,11 @@ const BLOCK_TAGS = {
  */
 
 const MARK_TAGS = {
-  strong: "bold",
-  em: "italic",
-  u: "underline",
-  s: "strikethrough",
-  code: "code"
+  strong: 'bold',
+  em: 'italic',
+  u: 'underline',
+  s: 'strikethrough',
+  code: 'code',
 };
 
 /**
@@ -53,71 +53,69 @@ const RULES = [
       const block = BLOCK_TAGS[el.tagName.toLowerCase()];
       if (!block) return;
       return {
-        kind: "block",
+        kind: 'block',
         type: block,
-        nodes: next(el.childNodes)
+        nodes: next(el.childNodes),
       };
-    }
+    },
   },
   {
     deserialize(el, next) {
       const mark = MARK_TAGS[el.tagName.toLowerCase()];
       if (!mark) return;
       return {
-        kind: "mark",
+        kind: 'mark',
         type: mark,
-        nodes: next(el.childNodes)
+        nodes: next(el.childNodes),
       };
-    }
+    },
   },
   {
     // Special case for code blocks, which need to grab the nested childNodes.
     deserialize(el, next) {
-      if (el.tagName.toLowerCase() != "pre") return;
+      if (el.tagName.toLowerCase() != 'pre') return;
       const code = el.childNodes[0];
       const childNodes =
-        code && code.tagName.toLowerCase() == "code"
-          ? code.childNodes
-          : el.childNodes;
+        code && code.tagName.toLowerCase() == 'code' ? code.childNodes : el.childNodes;
 
       return {
-        kind: "block",
-        type: "code",
-        nodes: next(childNodes)
+        kind: 'block',
+        type: 'code',
+        nodes: next(childNodes),
       };
-    }
+    },
   },
   {
     // Special case for links, to grab their href.
     deserialize(el, next) {
-      if (el.tagName.toLowerCase() != "a") return;
+      if (el.tagName.toLowerCase() != 'a') return;
       return {
-        kind: "inline",
-        type: "link",
+        kind: 'inline',
+        type: 'link',
         nodes: next(el.childNodes),
         data: {
-          href: el.getAttribute("href")
-        }
+          href: el.getAttribute('href'),
+        },
       };
-    }
+    },
   },
   {
     // Special case for images, to grab their src.
     deserialize(el, next) {
-      if (el.tagName.toLowerCase() !== "img") return;
+      if (el.tagName.toLowerCase() !== 'img') return;
       return {
-        kind: "block",
-        type: "image",
+        kind: 'block',
+        type: 'image',
         isVoid: true,
         nodes: next(el.childNodes),
         data: {
-          width: el.getAttribute("width"),
-          height: el.getAttribute("height"),
-          src: el.getAttribute("src")
-        }
+          width: el.getAttribute('width'),
+          height: el.getAttribute('height'),
+          src: el.getAttribute('src'),
+        },
       };
-    }
-  }
+    },
+  },
 ];
 
 /**

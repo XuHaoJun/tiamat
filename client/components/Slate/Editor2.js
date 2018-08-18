@@ -1,11 +1,5 @@
-import React from "react";
-import {
-  SlateEditor,
-  SlateToolbar,
-  SlateContent,
-  BoldPlugin,
-  BoldButton
-} from "slate-editor";
+import React from 'react';
+import { SlateEditor, SlateToolbar, SlateContent, BoldPlugin, BoldButton } from 'slate-editor';
 
 const plugins = [BoldPlugin()];
 

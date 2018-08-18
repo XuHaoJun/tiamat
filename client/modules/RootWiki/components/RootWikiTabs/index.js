@@ -1,3 +1,3 @@
-import RootWikiTabs from "./RootWikiTabs";
+import RootWikiTabs from './RootWikiTabs';
 
 export default RootWikiTabs;

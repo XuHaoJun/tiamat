@@ -1,87 +1,77 @@
-import React from "react";
-import qs from "qs";
-import { fromJS } from "immutable";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import qs from 'qs';
+import { fromJS } from 'immutable';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { hot } from 'react-hot-loader';
 
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import slideHeightStyle from "../../MyApp/styles/slideHeight";
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import slideHeightStyle from '../../MyApp/styles/slideHeight';
 
 import MixedMainTabs, {
   ROOT_DISCUSSIONS_SLIDE,
-  ROOT_WIKI_OR_WIKI_SLIDE
-} from "../components/MixedMainTabs";
+  ROOT_WIKI_OR_WIKI_SLIDE,
+} from '../components/MixedMainTabs';
 
 /* Actions and Selectors */
-import { replace } from "react-router-redux";
-import { fetchWikis } from "../../Wiki/WikiActions";
-import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
-import { getRootWiki } from "../../RootWiki/RootWikiReducer";
+import { replace } from 'react-router-redux';
+import { fetchWikis } from '../../Wiki/WikiActions';
+import { fetchRootWikiById } from '../../RootWiki/RootWikiActions';
+import { getRootWiki } from '../../RootWiki/RootWikiReducer';
 
-import { fetchForumBoardById } from "../../ForumBoard/ForumBoardActions";
-import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
+import { fetchForumBoardById } from '../../ForumBoard/ForumBoardActions';
+import { getForumBoardById } from '../../ForumBoard/ForumBoardReducer';
 
-import { DiscussionRemote } from "../../Discussion/DiscussionActions";
+import { DiscussionRemote } from '../../Discussion/DiscussionActions';
 
-import { getCurrentAccessToken } from "../../User/UserReducer";
+import { getCurrentAccessToken } from '../../User/UserReducer';
 
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
-import { getDBisInitialized } from "../../MyApp/MyAppReducer";
+import { setHeaderTitle } from '../../MyApp/MyAppActions';
+import { getDBisInitialized } from '../../MyApp/MyAppReducer';
 
 export const styles = theme => {
   return {
     slideHeight: slideHeightStyle(theme, {
       withTab: true,
-      withAppBar: true
+      withAppBar: true,
     }).slideHeight,
     slideHeightWithoutAppBar: slideHeightStyle(theme, {
       withTab: true,
-      withAppBar: false
-    }).slideHeight
+      withAppBar: false,
+    }).slideHeight,
   };
 };
 
 function normalizeRouterProps(routerProps) {
-  const {
-    forumBoardGroup,
-    rootWikiGroupTree: rootWikiGroupTreeInput
-  } = routerProps.location.query;
+  const { forumBoardGroup, rootWikiGroupTree: rootWikiGroupTreeInput } = routerProps.location.query;
   const rootWikiGroupTree = fromJS(rootWikiGroupTreeInput);
   const leafRoute = routerProps.route;
   const { targetKind } = leafRoute;
   const { forumBoardId, rootWikiId } = routerProps.match.params;
   const slideIndex =
-    targetKind === "rootDiscussions"
-      ? ROOT_DISCUSSIONS_SLIDE
-      : ROOT_WIKI_OR_WIKI_SLIDE;
+    targetKind === 'rootDiscussions' ? ROOT_DISCUSSIONS_SLIDE : ROOT_WIKI_OR_WIKI_SLIDE;
   return {
     forumBoardId,
     rootWikiId,
     forumBoardGroup,
     rootWikiGroupTree,
     targetKind,
-    slideIndex
+    slideIndex,
   };
 }
 
 class MixedMainPage extends React.Component {
-  static getInitialAction(
-    { routerProps: routerPropsInput },
-    { tryMore } = { tryMore: false }
-  ) {
+  static getInitialAction({ routerProps: routerPropsInput }, { tryMore } = { tryMore: false }) {
     const routerProps = normalizeRouterProps(routerPropsInput);
     return async (dispatch, getState) => {
       const _setHeaderTitle = state => {
         const { forumBoardId, rootWikiId } = routerProps;
-        const forumBoard = forumBoardId
-          ? getForumBoardById(state, forumBoardId)
-          : null;
+        const forumBoard = forumBoardId ? getForumBoardById(state, forumBoardId) : null;
         const rootWiki = rootWikiId ? getRootWiki(state, rootWikiId) : null;
-        const fName = forumBoard ? forumBoard.get("name") : "";
-        const rName = rootWiki ? rootWiki.get("name") : "";
-        const title = fName || rName || "Loading...";
+        const fName = forumBoard ? forumBoard.get('name') : '';
+        const rName = rootWiki ? rootWiki.get('name') : '';
+        const title = fName || rName || 'Loading...';
         return setHeaderTitle(title);
       };
       // set default title before fetch.
@@ -90,28 +80,27 @@ class MixedMainPage extends React.Component {
       const { targetKind } = routerProps;
       await (() => {
         switch (targetKind) {
-          case "rootDiscussions": {
+          case 'rootDiscussions': {
             const { forumBoardId, forumBoardGroup } = routerProps;
             return Promise.all(
               [
                 fetchForumBoardById(forumBoardId),
                 DiscussionRemote.getRootDiscussions(forumBoardId, {
                   forumBoardGroup,
-                  select: { content: 0 }
-                })
+                  select: { content: 0 },
+                }),
               ].map(dispatch)
             );
           }
-          case "wikis": {
+          case 'wikis': {
             const { rootWikiId, rootWikiGroupTree } = routerProps;
             return Promise.all(
-              [
-                fetchRootWikiById(rootWikiId),
-                fetchWikis(rootWikiId, { rootWikiGroupTree })
-              ].map(dispatch)
+              [fetchRootWikiById(rootWikiId), fetchWikis(rootWikiId, { rootWikiGroupTree })].map(
+                dispatch
+              )
             );
           }
-          case "rootWiki": {
+          case 'rootWiki': {
             const { rootWikiId } = routerProps;
             return dispatch(fetchRootWikiById(rootWikiId));
           }
@@ -125,17 +114,13 @@ class MixedMainPage extends React.Component {
       // tryMore
       if (tryMore) {
         const { forumBoardId, rootWikiId } = routerProps;
-        const forumBoard = forumBoardId
-          ? getForumBoardById(getState(), forumBoardId)
-          : null;
-        const rootWiki = rootWikiId
-          ? getRootWiki(getState(), rootWikiId)
-          : null;
-        if (forumBoard && forumBoard.get("rootWiki") && !rootWiki) {
-          await dispatch(fetchRootWikiById(forumBoard.get("rootWiki")));
+        const forumBoard = forumBoardId ? getForumBoardById(getState(), forumBoardId) : null;
+        const rootWiki = rootWikiId ? getRootWiki(getState(), rootWikiId) : null;
+        if (forumBoard && forumBoard.get('rootWiki') && !rootWiki) {
+          await dispatch(fetchRootWikiById(forumBoard.get('rootWiki')));
         }
-        if (rootWiki && rootWiki.get("forumBoard") && !forumBoard) {
-          await dispatch(fetchForumBoardById(rootWiki.get("forumBoard")));
+        if (rootWiki && rootWiki.get('forumBoard') && !forumBoard) {
+          await dispatch(fetchForumBoardById(rootWiki.get('forumBoard')));
         }
       }
     };
@@ -144,9 +129,9 @@ class MixedMainPage extends React.Component {
   constructor(props) {
     super(props);
     this.oldProps = {
-      [props.targetKind]: props
+      [props.targetKind]: props,
     };
-    this.rootOrWikisSlideKind = "rootWiki";
+    this.rootOrWikisSlideKind = 'rootWiki';
     this.setRootOrWikisSlideKind(props.targetKind);
   }
 
@@ -169,7 +154,7 @@ class MixedMainPage extends React.Component {
   }
 
   setRootOrWikisSlideKind = targetKind => {
-    if (targetKind === "wikis" || targetKind === "rootWiki") {
+    if (targetKind === 'wikis' || targetKind === 'rootWiki') {
       this.rootOrWikisSlideKind = targetKind;
     }
   };
@@ -186,29 +171,27 @@ class MixedMainPage extends React.Component {
     if (slideIndex === ROOT_DISCUSSIONS_SLIDE) {
       const { forumBoardId } = this.props;
       const { forumBoardGroup } =
-        this.props.targetKind !== "rootDiscussions"
+        this.props.targetKind !== 'rootDiscussions'
           ? this.oldProps.rootDiscussions || this.props
           : this.props;
       const pathname = `/forumBoards/${forumBoardId}/rootDiscussions`;
       const search = forumBoardGroup
         ? `?forumBoardGroup=${encodeURIComponent(forumBoardGroup)}`
-        : "";
+        : '';
       const url = `${pathname}${search}`;
       if (forumBoardId) {
         this.props.dispatch(replace(url));
       }
     } else if (slideIndex === ROOT_WIKI_OR_WIKI_SLIDE) {
-      if (this.rootOrWikisSlideKind === "wikis") {
+      if (this.rootOrWikisSlideKind === 'wikis') {
         const { rootWikiId } = this.props;
         const { rootWikiGroupTree } =
-          this.props.targetKind !== "wikis"
-            ? this.oldProps.wikis || this.props
-            : this.props;
+          this.props.targetKind !== 'wikis' ? this.oldProps.wikis || this.props : this.props;
         const query = qs.stringify({
           rootWikiGroupTree:
             rootWikiGroupTree && rootWikiGroupTree.toJS
               ? rootWikiGroupTree.toJS()
-              : rootWikiGroupTree
+              : rootWikiGroupTree,
         });
         const url = `/rootWikis/${rootWikiId}/wikis?${query}`;
         if (rootWikiId) {
@@ -216,9 +199,7 @@ class MixedMainPage extends React.Component {
         }
       } else {
         const { rootWikiId } =
-          this.props.targetKind !== "rootWiki"
-            ? this.oldProps.rootWiki || this.props
-            : this.props;
+          this.props.targetKind !== 'rootWiki' ? this.oldProps.rootWiki || this.props : this.props;
         if (rootWikiId) {
           const url = `/rootWikis/${rootWikiId}`;
           this.props.dispatch(replace(url));
@@ -232,29 +213,20 @@ class MixedMainPage extends React.Component {
   };
 
   render() {
-    const metaDescription = "Tiamat | Game forum and wiki.";
+    const metaDescription = 'Tiamat | Game forum and wiki.';
     const meta = [
       {
-        name: "description",
-        content: metaDescription
-      }
+        name: 'description',
+        content: metaDescription,
+      },
     ];
-    const {
-      title,
-      targetKind,
-      forumBoardId,
-      forumBoard,
-      rootWikiId,
-      rootWiki
-    } = this.props;
+    const { title, targetKind, forumBoardId, forumBoard, rootWikiId, rootWiki } = this.props;
     const { forumBoardGroup } =
-      this.props.targetKind !== "rootDiscussions"
+      this.props.targetKind !== 'rootDiscussions'
         ? this.oldProps.rootDiscussions || this.props
         : this.props;
     const { rootWikiGroupTree } =
-      this.props.targetKind !== "wikis"
-        ? this.oldProps.wikis || this.props
-        : this.props;
+      this.props.targetKind !== 'wikis' ? this.oldProps.wikis || this.props : this.props;
     return (
       <React.Fragment>
         <Helmet title={title} meta={meta} />
@@ -295,8 +267,8 @@ function mapStateToProps(state, routerProps) {
   if (!forumBoard) {
     forumBoard = getForumBoardById(state, forumBoardId);
   }
-  const forumBoardName = forumBoard ? forumBoard.name : "";
-  const rootWikiName = rootWiki ? rootWiki.name : "";
+  const forumBoardName = forumBoard ? forumBoard.name : '';
+  const rootWikiName = rootWiki ? rootWiki.name : '';
   const title = rootWikiName || forumBoardName;
   const dbIsInitialized = getDBisInitialized(state);
   return {
@@ -311,20 +283,17 @@ function mapStateToProps(state, routerProps) {
     forumBoardGroup,
     rootWikiId,
     rootWiki,
-    rootWikiGroupTree
+    rootWikiGroupTree,
   };
 }
 
 function mapDispatchToProps(dispatch, routerProps) {
   return {
     fetchComponentData(options = {}) {
-      const action = MixedMainPage.getInitialAction(
-        { routerProps },
-        { tryMore: true, ...options }
-      );
+      const action = MixedMainPage.getInitialAction({ routerProps }, { tryMore: true, ...options });
       return dispatch(action);
     },
-    dispatch
+    dispatch,
   };
 }
 
@@ -336,5 +305,9 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
 export default compose(
   hot(module),
   withStyles(styles),
-  connect(mapStateToProps, mapDispatchToProps, mergeProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps
+  )
 )(MixedMainPage);

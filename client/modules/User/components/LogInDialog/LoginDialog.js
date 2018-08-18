@@ -1,23 +1,23 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import Button from "@material-ui/core/Button";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@material-ui/core/Button';
 
-import LogInForm from "../LogInForm";
+import LogInForm from '../LogInForm';
 
 class LoginDialog extends React.Component {
   static propTypes = {
     open: PropTypes.bool,
     onRequestClose: PropTypes.func,
-    loginFormProps: PropTypes.object
+    loginFormProps: PropTypes.object,
   };
 
   static defaultProps = {
     open: false,
-    loginFormProps: {}
+    loginFormProps: {},
   };
 
   setFormRef = form => {
@@ -55,9 +55,9 @@ class LoginDialog extends React.Component {
         <DialogContent>
           <div
             style={{
-              height: "100%",
-              display: "flex",
-              justifyContent: "center"
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
             }}
           >
             <LogInForm ref={this.setFormRef} {...loginFormProps} />
@@ -67,11 +67,7 @@ class LoginDialog extends React.Component {
           <Button color="primary" onClick={this.handleClose}>
             取消
           </Button>
-          <Button
-            color="primary"
-            keyboardFocused={true}
-            onClick={this.handleLogin}
-          >
+          <Button color="primary" keyboardFocused={true} onClick={this.handleLogin}>
             登入
           </Button>
         </DialogActions>

@@ -1,17 +1,17 @@
-import React from "react";
-import { connect } from "react-redux";
-import LazyLoad from "react-lazyload";
-import MobileDetect from "mobile-detect";
-import { getUserAgent } from "../../modules/UserAgent/UserAgentReducer";
-import Loading from "./Loading";
+import React from 'react';
+import { connect } from 'react-redux';
+import LazyLoad from 'react-lazyload';
+import MobileDetect from 'mobile-detect';
+import { getUserAgent } from '../../modules/UserAgent/UserAgentReducer';
+import Loading from './Loading';
 
 export function getStyles() {
   const styles = {
     img: {
-      visibility: "visible",
+      visibility: 'visible',
       opacity: 1,
-      transition: "visibility 0s linear 0s,opacity .4s 0s"
-    }
+      transition: 'visibility 0s linear 0s,opacity .4s 0s',
+    },
   };
   return styles;
 }
@@ -19,10 +19,10 @@ export function getStyles() {
 class Img extends React.PureComponent {
   static defaultProps = {
     style: {},
-    src: "",
-    alt: "",
+    src: '',
+    alt: '',
     size: 60,
-    userAgent: ""
+    userAgent: '',
   };
 
   renderImg = () => {
@@ -35,7 +35,7 @@ class Img extends React.PureComponent {
   render() {
     const { size, userAgent } = this.props;
     const mobileDetect = new MobileDetect(userAgent);
-    if (mobileDetect.is("bot")) {
+    if (mobileDetect.is('bot')) {
       return this.renderImg();
     } else {
       const placeholder = <Loading size={size} />;

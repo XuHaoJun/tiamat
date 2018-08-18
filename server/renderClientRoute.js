@@ -1,39 +1,38 @@
 /* eslint-disable react/no-danger */
 
-import { Router } from "express";
-import React from "react";
-import Helmet from "react-helmet";
-import { KeyUtils as SlateKeyUtils } from "slate";
-import serializeJavascript from "serialize-javascript";
-import moment from "moment";
-import { renderToString, renderToStaticNodeStream } from "react-dom/server";
-import { matchRoutes } from "react-router-config";
+import { Router } from 'express';
+import React from 'react';
+import Helmet from 'react-helmet';
+import { KeyUtils as SlateKeyUtils } from 'slate';
+import serializeJavascript from 'serialize-javascript';
+import moment from 'moment';
+import { renderToString, renderToStaticNodeStream } from 'react-dom/server';
+import { matchRoutes } from 'react-router-config';
 
-import { createGenerateClassName } from "@material-ui/core/styles";
-import { SheetsRegistry } from "react-jss";
+import { createGenerateClassName } from '@material-ui/core/styles';
+import { SheetsRegistry } from 'react-jss';
 
-import ClientApp from "../client/App";
-import clientRoutes from "../client/routes";
-import { createMemoryHistory } from "../client/modules/History/utils/createHistory";
-import { setRawHistory } from "../client/modules/History/HistoryActions";
-import { createInitialState as createHistoryInitialState } from "../client/modules/History/HistoryReducer";
-import { setUserAgent } from "../client/modules/UserAgent/UserAgentActions";
-import { setOauth2Client } from "../client/modules/Oauth2Client/Oauth2ClientActions";
-import googleAnalyticsConfig from "./configs/googleAnalytics";
-import { configureStore } from "../client/store";
-import { calculateResponsiveStateByUserAgent } from "../client/modules/Browser/BrowserActions";
+import ClientApp from '../client/App';
+import clientRoutes from '../client/routes';
+import { createMemoryHistory } from '../client/modules/History/utils/createHistory';
+import { setRawHistory } from '../client/modules/History/HistoryActions';
+import { createInitialState as createHistoryInitialState } from '../client/modules/History/HistoryReducer';
+import { setUserAgent } from '../client/modules/UserAgent/UserAgentActions';
+import { setOauth2Client } from '../client/modules/Oauth2Client/Oauth2ClientActions';
+import googleAnalyticsConfig from './configs/googleAnalytics';
+import { configureStore } from '../client/store';
+import { calculateResponsiveStateByUserAgent } from '../client/modules/Browser/BrowserActions';
 
-import { fetchComponentData } from "./util/fetchData";
+import { fetchComponentData } from './util/fetchData';
 
-import appConfig from "./configs";
+import appConfig from './configs';
 
-import Oauth2Client from "./models/oauth2Client";
+import Oauth2Client from './models/oauth2Client';
 
 let _assetsManifestCache;
 function getAssetsManifest() {
   if (!_assetsManifestCache) {
-    _assetsManifestCache =
-      process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
+    _assetsManifestCache = process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
   }
   return _assetsManifestCache;
 }
@@ -42,8 +41,7 @@ let _chunkManifestCache;
 function getChunkManifest() {
   if (!_chunkManifestCache) {
     _chunkManifestCache =
-      process.env.webpackChunkAssets &&
-      JSON.parse(process.env.webpackChunkAssets);
+      process.env.webpackChunkAssets && JSON.parse(process.env.webpackChunkAssets);
   }
   return _chunkManifestCache;
 }
@@ -82,7 +80,7 @@ const ForceHttpsScript = () => {
 function safeStringify(json) {
   // use serializeJavascript for prevent XSS attack, don't remove it.
   const string = serializeJavascript(json, {
-    isJSON: true
+    isJSON: true,
   });
   return string;
 }
@@ -104,13 +102,8 @@ const ClientStateScript = ({ state }) => {
 const ClientInitialScripts = ({ state }) => {
   const assetsManifest = getAssetsManifest();
   const vendorSrc =
-    process.env.NODE_ENV === "production"
-      ? assetsManifest["/vendor.js"]
-      : "/vendor.js";
-  const appSrc =
-    process.env.NODE_ENV === "production"
-      ? assetsManifest["/app.js"]
-      : "/app.js";
+    process.env.NODE_ENV === 'production' ? assetsManifest['/vendor.js'] : '/vendor.js';
+  const appSrc = process.env.NODE_ENV === 'production' ? assetsManifest['/app.js'] : '/app.js';
   return (
     <React.Fragment>
       <script src={vendorSrc} />
@@ -123,29 +116,29 @@ const ClientInitialScripts = ({ state }) => {
 async function createStoreByRequest(req) {
   // use req.url for initial history.
   const rawHistory = createMemoryHistory({
-    initialEntries: [decodeURI(req.url)]
+    initialEntries: [decodeURI(req.url)],
   });
 
   const store = configureStore({
-    history: createHistoryInitialState({ rawHistory })
+    history: createHistoryInitialState({ rawHistory }),
   });
 
   store.dispatch(setRawHistory(rawHistory));
 
   // get userAgent from server side.
-  const userAgent = req.headers["user-agent"];
+  const userAgent = req.headers['user-agent'];
   store.dispatch(setUserAgent(userAgent));
 
   // get oauth2Client for current render client.
   const oauth2Client = await Oauth2Client.getAppClient();
-  store.dispatch(setOauth2Client(oauth2Client, "app"));
+  store.dispatch(setOauth2Client(oauth2Client, 'app'));
 
   // guess browser size by userAgent.
   store.dispatch(calculateResponsiveStateByUserAgent(userAgent));
 
   const { clientID: facebookClientID } = appConfig.oauth2.facebook;
   if (facebookClientID) {
-    store.dispatch(setOauth2Client({ facebookClientID }, "facebook"));
+    store.dispatch(setOauth2Client({ facebookClientID }, 'facebook'));
   }
 
   const branch = matchRoutes(clientRoutes, decodeURI(req.path));
@@ -161,13 +154,13 @@ async function createStoreByRequest(req) {
         pathname: match.path,
         // may be use req.query convert to search string?
         search: req._parsedOriginalUrl.search,
-        query: req.query
+        query: req.query,
       };
       routerProps.location = location; // eslint-disable-line
       return fetchComponentData({
         store,
         component,
-        routerProps
+        routerProps,
       });
     })
   );
@@ -185,21 +178,18 @@ const Head = ({ jssSheets, helmet }) => {
       {helmet.title.toComponent()}
       {helmet.meta.toComponent()}
       {helmet.link.toComponent()}
-      {process.env.NODE_ENV === "production" && assetsManifest["/app.css"] ? (
-        <link rel="stylesheet" href={assetsManifest["/app.css"]} />
+      {process.env.NODE_ENV === 'production' && assetsManifest['/app.css'] ? (
+        <link rel="stylesheet" href={assetsManifest['/app.css']} />
       ) : null}
-      <style
-        id="jss-server-side"
-        dangerouslySetInnerHTML={{ __html: jssSheets }}
-      />
-      {process.env.NODE_ENV === "production" &&
-        googleAnalyticsConfig["google-site-verification"] ? (
-          <meta
-            name="google-site-verification"
-            content={googleAnalyticsConfig["google-site-verification"]}
-          />
-        ) : null}
-      {process.env.NODE_ENV === "production" ? (
+      <style id="jss-server-side" dangerouslySetInnerHTML={{ __html: jssSheets }} />
+      {process.env.NODE_ENV === 'production' &&
+      googleAnalyticsConfig['google-site-verification'] ? (
+        <meta
+          name="google-site-verification"
+          content={googleAnalyticsConfig['google-site-verification']}
+        />
+      ) : null}
+      {process.env.NODE_ENV === 'production' ? (
         <React.Fragment>
           <ServiceWorkerScript />
           <ForceHttpsScript />
@@ -228,10 +218,9 @@ export async function renderClientRoute(req, res) {
 
   const sheetsRegistry = new SheetsRegistry();
   const generateClassName = createGenerateClassName();
-  const clientAppEle = <ClientApp
-    store={store}
-    JssProviderProps={{ registry: sheetsRegistry, generateClassName }}
-  />;
+  const clientAppEle = (
+    <ClientApp store={store} JssProviderProps={{ registry: sheetsRegistry, generateClassName }} />
+  );
   const clientAppHTML = renderToString(clientAppEle);
 
   const helmet = Helmet.renderStatic();
@@ -243,24 +232,26 @@ export async function renderClientRoute(req, res) {
 
   const jssSheets = sheetsRegistry.toString();
 
-  const htmlEle = <html lang={req.lang} {...htmlAttrs}>
-    <Head jssSheets={jssSheets} helmet={helmet} />
-    <body {...bodyAttrs}>
-      <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
-      <ClientInitialScripts state={pureState} />
-    </body>
-  </html>;
+  const htmlEle = (
+    <html lang={req.lang} {...htmlAttrs}>
+      <Head jssSheets={jssSheets} helmet={helmet} />
+      <body {...bodyAttrs}>
+        <div id="root" dangerouslySetInnerHTML={{ __html: clientAppHTML }} />
+        <ClientInitialScripts state={pureState} />
+      </body>
+    </html>
+  );
   const htmlStream = renderToStaticNodeStream(htmlEle);
 
-  res.set("Content-Type", "text/html").status(200);
-  res.write("<!doctype html>");
+  res.set('Content-Type', 'text/html').status(200);
+  res.write('<!doctype html>');
   htmlStream.pipe(res);
 
   return new Promise((resolve, reject) => {
-    htmlStream.on("end", () => {
+    htmlStream.on('end', () => {
       resolve();
     });
-    htmlStream.on("error", err => {
+    htmlStream.on('error', err => {
       reject(err);
     });
   });
@@ -272,6 +263,6 @@ const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-router.get("*", asyncMiddleware(renderClientRoute));
+router.get('*', asyncMiddleware(renderClientRoute));
 
 export default router;

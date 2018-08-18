@@ -1,16 +1,16 @@
-import React from "react";
-import RaisedButton from "material-ui/RaisedButton";
-import Popover from "material-ui/Popover";
-import Menu from "material-ui/Menu";
-import MenuItem from "material-ui/MenuItem";
-import Paper from "material-ui/Paper";
+import React from 'react';
+import RaisedButton from 'material-ui/RaisedButton';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/MenuItem';
+import Paper from 'material-ui/Paper';
 
 export default class PopoverExampleSimple extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      open: false
+      open: false,
     };
   }
 
@@ -38,19 +38,19 @@ export default class PopoverExampleSimple extends React.Component {
           open={this.state.open}
           anchorEl={this.state.anchorEl}
           anchorOrigin={{
-            horizontal: "left",
-            vertical: "bottom"
+            horizontal: 'left',
+            vertical: 'bottom',
           }}
           targetOrigin={{
-            horizontal: "left",
-            vertical: "top"
+            horizontal: 'left',
+            vertical: 'top',
           }}
           onRequestClose={this.handleRequestClose}
         >
           <Paper
             style={{
               width: 250,
-              height: 100
+              height: 100,
             }}
             onMouseOut={this.handleRequestClose}
             onMouseEnter={this.handleTouchTap}

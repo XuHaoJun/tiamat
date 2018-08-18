@@ -1,24 +1,24 @@
-import React from "react";
+import React from 'react';
 
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 class Loading extends React.PureComponent {
   render() {
     const { size } = this.props;
     const styles = {
       container: {
-        border: "1px #ccc solid",
-        background: "#eee",
+        border: '1px #ccc solid',
+        background: '#eee',
         width: size * 1.5,
         height: size * 1.5,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       },
       progress: {
-        margin: "auto",
-        width: "40%"
-      }
+        margin: 'auto',
+        width: '40%',
+      },
     };
     return (
       <div style={styles.container}>

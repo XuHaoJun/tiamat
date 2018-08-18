@@ -1,19 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import compose from "recompose/compose";
-import { connect } from "react-redux";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import compose from 'recompose/compose';
+import { connect } from 'react-redux';
 
-import classNames from "classnames";
-import {
-  withStyles,
-  MuiThemeProvider,
-  createMuiTheme
-} from "@material-ui/core/styles";
-import Drawer from "@material-ui/core/Drawer";
-import Paper from "@material-ui/core/Paper";
+import classNames from 'classnames';
+import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import Paper from '@material-ui/core/Paper';
 
-import NavList from "./NavList";
+import NavList from './NavList';
 
 export const drawerWidth = 256;
 
@@ -23,50 +19,50 @@ const styles = theme => {
   const { breakpoints } = theme;
   return {
     drawerInner: {
-      height: "100%",
+      height: '100%',
       width: drawerWidth,
       maxWidth: drawerWidth,
-      overflowX: "hidden"
+      overflowX: 'hidden',
     },
     drawerPaperBase: {
       backgroundColor: theme.palette.background.default,
-      userSelect: "none",
+      userSelect: 'none',
       maxWidth: drawerWidth,
-      overflowX: "hidden",
-      [`${breakpoints.up("sm")}`]: {
-        height: "calc(100vh - 64px)",
-        top: 64
-      }
+      overflowX: 'hidden',
+      [`${breakpoints.up('sm')}`]: {
+        height: 'calc(100vh - 64px)',
+        top: 64,
+      },
     },
     drawerPaperClose: {
-      [`${breakpoints.up("sm")}`]: {
+      [`${breakpoints.up('sm')}`]: {
         width: miniDrawerWidth,
-        overflowX: "hidden",
-        transition: theme.transitions.create("width", {
+        overflowX: 'hidden',
+        transition: theme.transitions.create('width', {
           easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen
-        })
-      }
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+      },
     },
     drawerPaperOpen: {
-      [`${breakpoints.up("sm")}`]: {
+      [`${breakpoints.up('sm')}`]: {
         width: drawerWidth,
-        transition: theme.transitions.create("width", {
+        transition: theme.transitions.create('width', {
           easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen
-        })
-      }
-    }
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+      },
+    },
   };
 };
 
 const forceDarkTheme = outerTheme => {
-  if (outerTheme.palette.type !== "dark") {
-    const darkTheme = createMuiTheme({ palette: { type: "dark" } });
+  if (outerTheme.palette.type !== 'dark') {
+    const darkTheme = createMuiTheme({ palette: { type: 'dark' } });
     return {
       ...outerTheme,
       palette: darkTheme.palette,
-      typography: darkTheme.typography
+      typography: darkTheme.typography,
     };
   } else {
     return outerTheme;
@@ -80,7 +76,7 @@ const DarkThemeProvider = props => {
 class AppNavDrawer extends React.Component {
   static propTypes = {
     open: PropTypes.bool.isRequired,
-    onChangeDrawer: PropTypes.func
+    onChangeDrawer: PropTypes.func,
   };
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -96,26 +92,24 @@ class AppNavDrawer extends React.Component {
 
   render() {
     const { open, onChangeDrawer, browser, classes } = this.props;
-    const ThemeProvider = browser.greaterThan.small
-      ? DarkThemeProvider
-      : React.Fragment;
+    const ThemeProvider = browser.greaterThan.small ? DarkThemeProvider : React.Fragment;
     return (
       <Drawer
         elevation={browser.greaterThan.small ? 0 : 16}
         open={open}
         onClose={this.handleClose}
-        variant={browser.greaterThan.small ? "permanent" : "temporary"}
+        variant={browser.greaterThan.small ? 'permanent' : 'temporary'}
         classes={{
           paper: classNames(
             classes.drawerPaperBase,
             open ? classes.drawerPaperOpen : classes.drawerPaperClose
-          )
+          ),
         }}
         // swipeAreaWidth={30}
       >
         <div className={classes.drawerInner}>
           <ThemeProvider>
-            <Paper style={{ width: "100%", height: "100%" }}>
+            <Paper style={{ width: '100%', height: '100%' }}>
               <NavList onChangeDrawer={onChangeDrawer} />
             </Paper>
           </ThemeProvider>

@@ -1,42 +1,42 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { compose } from "recompose";
-import { hot } from "react-hot-loader";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { compose } from 'recompose';
+import { hot } from 'react-hot-loader';
 
-import Paper from "@material-ui/core/Paper";
+import Paper from '@material-ui/core/Paper';
 
-import LogInForm from "../components/LogInForm";
+import LogInForm from '../components/LogInForm';
 
-import { replace } from "react-router-redux";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
-import { getIsLoggedIn } from "../UserReducer";
+import { replace } from 'react-router-redux';
+import { setHeaderTitle } from '../../MyApp/MyAppActions';
+import { getIsLoggedIn } from '../UserReducer';
 
 const styles = {
   paper: {
-    textAlign: "center",
-    verticalAlign: "middle",
+    textAlign: 'center',
+    verticalAlign: 'middle',
     width: 500,
-    margin: "auto"
+    margin: 'auto',
   },
   loginForm: {
-    padding: 15
+    padding: 15,
   },
   loginFormWithMedium: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  }
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 };
 
 class UserLoginPage extends Component {
   static propTypes = {
-    isLoggedIn: PropTypes.bool.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
   };
 
   static getInitialAction() {
-    return setHeaderTitle("登入");
+    return setHeaderTitle('登入');
   }
 
   componentDidMount() {
@@ -55,7 +55,7 @@ class UserLoginPage extends Component {
   goBackIfLoggedIn = () => {
     const { isLoggedIn } = this.props;
     if (isLoggedIn) {
-      const from = this.props.location.query.from || "/";
+      const from = this.props.location.query.from || '/';
       this.props.dispatch(replace(from));
     }
   };
@@ -73,9 +73,7 @@ class UserLoginPage extends Component {
   };
 
   render() {
-    const content = this.props.browser.lessThan.medium
-      ? this.renderMobile()
-      : this.renderDesktop();
+    const content = this.props.browser.lessThan.medium ? this.renderMobile() : this.renderDesktop();
     return (
       <div>
         <Helmet title="登入" />
@@ -92,4 +90,7 @@ function mapStateToProps(state, routerProps) {
   return { isLoggedIn, browser, location };
 }
 
-export default compose(hot(module), connect(mapStateToProps))(UserLoginPage);
+export default compose(
+  hot(module),
+  connect(mapStateToProps)
+)(UserLoginPage);

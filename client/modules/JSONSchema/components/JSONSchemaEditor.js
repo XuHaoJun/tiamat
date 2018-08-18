@@ -1,71 +1,71 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 const schema = {
-  type: "object",
-  required: ["keywordType"],
+  type: 'object',
+  required: ['keywordType'],
   properties: {
     keywordType: {
-      type: "string",
-      enum: ["number", "string", "boolean", "array", "object", "allOf", "oneOf"]
-    }
+      type: 'string',
+      enum: ['number', 'string', 'boolean', 'array', 'object', 'allOf', 'oneOf'],
+    },
   },
   dependencies: {
     keywordType: {
       oneOf: [
         // number
         {
-          required: ["type"],
+          required: ['type'],
           properties: {
             keywordType: {
-              enum: ["number"]
+              enum: ['number'],
             },
             type: {
-              type: "string",
-              enum: ["number"]
+              type: 'string',
+              enum: ['number'],
             },
             minimum: {
-              type: "number"
+              type: 'number',
             },
             maximum: {
-              type: "number"
-            }
-          }
+              type: 'number',
+            },
+          },
         },
         // string
         {
-          required: ["type"],
+          required: ['type'],
           properties: {
             keywordType: {
-              enum: ["string"]
+              enum: ['string'],
             },
             type: {
-              type: "string",
-              enum: ["string"]
+              type: 'string',
+              enum: ['string'],
             },
             minLength: {
-              type: "number"
+              type: 'number',
             },
             maxLength: {
-              type: "number"
-            }
-          }
+              type: 'number',
+            },
+          },
         },
         // boolean
         {
-          required: ["type"],
+          required: ['type'],
           properties: {
             keywordType: {
-              enum: ["boolean"]
+              enum: ['boolean'],
             },
             type: {
-              type: "boolean",
-              enum: ["boolean"]
-            }
-          }
-        }
-      ]
-    }
-  }
+              type: 'boolean',
+              enum: ['boolean'],
+            },
+          },
+        },
+      ],
+    },
+  },
 };
 
 class JSONSchemaEditor extends Component {

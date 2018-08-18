@@ -1,7 +1,7 @@
-import { SET_USER_AGENT } from "./UserAgentActions";
+import { SET_USER_AGENT } from './UserAgentActions';
 
 const initialState = {
-  data: ""
+  data: '',
 };
 
 const UserAgentReducer = (state = initialState, action) => {

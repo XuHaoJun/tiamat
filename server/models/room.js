@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
@@ -10,18 +10,18 @@ const roomSchema = new Schema(
     //  /discussions/:discussionId
     //  /rooms/:roomId
     namespace: { type: String, isRequired: true, index: { unique: true } },
-    users: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
   },
   { toJSON: { virtuals: true } }
 );
 
-roomSchema.virtual("messages", {
-  ref: "Message",
-  localField: "namespace",
-  foreignField: "namespace",
-  justOne: false
+roomSchema.virtual('messages', {
+  ref: 'Message',
+  localField: 'namespace',
+  foreignField: 'namespace',
+  justOne: false,
 });
 
-export default mongoose.model("Room", roomSchema);
+export default mongoose.model('Room', roomSchema);

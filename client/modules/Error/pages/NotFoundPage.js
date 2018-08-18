@@ -1,7 +1,7 @@
-import React from "react";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import { hot } from 'react-hot-loader';
 
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 class NotFoundPage extends React.PureComponent {
   render() {

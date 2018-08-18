@@ -1,13 +1,12 @@
-import { enabledLanguages, localizationData } from "../../../Intl/setup";
-import { SWITCH_LANGUAGE } from "./IntlActions";
+import { enabledLanguages, localizationData } from '../../../Intl/setup';
+import { SWITCH_LANGUAGE } from './IntlActions';
 
-const initLocale =
-  (global.navigator && global.navigator.language) || "zh-tw" || "en";
+const initLocale = (global.navigator && global.navigator.language) || 'zh-tw' || 'en';
 
 const initialState = {
   locale: initLocale,
   enabledLanguages,
-  ...(localizationData[initLocale] || {})
+  ...(localizationData[initLocale] || {}),
 };
 
 const IntlReducer = (state = initialState, action) => {
@@ -16,7 +15,7 @@ const IntlReducer = (state = initialState, action) => {
       const { type, ...actionWithoutType } = action; // eslint-disable-line
       return {
         ...state,
-        ...actionWithoutType
+        ...actionWithoutType,
       };
     }
 

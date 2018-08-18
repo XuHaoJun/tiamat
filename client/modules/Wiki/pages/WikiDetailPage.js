@@ -1,29 +1,29 @@
-import React from "react";
-import Helmet from "react-helmet";
-import { connect } from "react-redux";
-import { hot } from "react-hot-loader";
+import React from 'react';
+import Helmet from 'react-helmet';
+import { connect } from 'react-redux';
+import { hot } from 'react-hot-loader';
 
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import slideHeightStyle from "../../MyApp/styles/slideHeight";
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import slideHeightStyle from '../../MyApp/styles/slideHeight';
 
-import CenterCircularProgress from "../../../components/CenterCircularProgress";
+import CenterCircularProgress from '../../../components/CenterCircularProgress';
 import WikiDetailTabs, {
   WIKI_CONTENT_SLIDE,
-  WIKI_HITSTORY_SLIDE
-} from "../components/WikiDetailTabs/WikiDetailTabs";
+  WIKI_HITSTORY_SLIDE,
+} from '../components/WikiDetailTabs/WikiDetailTabs';
 
-import { fetchWikiByRouterProps } from "../WikiActions";
-import { fetchRootWikiById } from "../../RootWiki/RootWikiActions";
-import { getWikiByRouterProps } from "../WikiReducer";
-import { getRootWiki } from "../../RootWiki/RootWikiReducer";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
+import { fetchWikiByRouterProps } from '../WikiActions';
+import { fetchRootWikiById } from '../../RootWiki/RootWikiActions';
+import { getWikiByRouterProps } from '../WikiReducer';
+import { getRootWiki } from '../../RootWiki/RootWikiReducer';
+import { setHeaderTitle } from '../../MyApp/MyAppActions';
 
 function getTitle({ rootWiki }) {
   if (rootWiki) {
-    return rootWiki.get("name");
+    return rootWiki.get('name');
   } else {
-    return "Loading...";
+    return 'Loading...';
   }
 }
 
@@ -31,12 +31,12 @@ export const styles = theme => {
   return {
     slideHeight: slideHeightStyle(theme, {
       withTab: true,
-      withAppBar: true
+      withAppBar: true,
     }).slideHeight,
     slideHeightWithoutAppBar: slideHeightStyle(theme, {
       withTab: true,
-      withAppBar: false
-    }).slideHeight
+      withAppBar: false,
+    }).slideHeight,
   };
 };
 
@@ -85,7 +85,7 @@ class WikiDetailPage extends React.Component {
     if (!wiki) {
       return <CenterCircularProgress />;
     }
-    const name = wiki ? wiki.get("name") : "Loading...";
+    const name = wiki ? wiki.get('name') : 'Loading...';
     const title = getTitle(this.props);
     const helmetTitle = `${name} - ${title}`;
     return (
@@ -109,7 +109,7 @@ function mapStateToProps(state, routerProps) {
   let { rootWikiId } = routerProps.match.params;
   if (!rootWikiId) {
     if (wiki) {
-      rootWikiId = wiki.get("rootWiki");
+      rootWikiId = wiki.get('rootWiki');
     }
   }
   const rootWiki = getRootWiki(state, rootWikiId);
@@ -120,7 +120,7 @@ function mapStateToProps(state, routerProps) {
     wikiName,
     wiki,
     rootWikiId,
-    rootWiki
+    rootWiki,
   };
 }
 
@@ -129,12 +129,15 @@ function mapDispatchToProps(dispatch, routerProps) {
     fetchComponentData() {
       const action = WikiDetailPage.getInitialAction({ routerProps });
       return dispatch(action);
-    }
+    },
   };
 }
 
 export default compose(
   hot(module),
   withStyles(styles),
-  connect(mapStateToProps, mapDispatchToProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(WikiDetailPage);

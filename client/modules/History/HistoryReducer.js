@@ -1,27 +1,27 @@
-import _findIndex from "lodash/findIndex";
-import { LOCATION_CHANGE } from "react-router-redux";
+import _findIndex from 'lodash/findIndex';
+import { LOCATION_CHANGE } from 'react-router-redux';
 
-import { connectDB } from "../../localdb";
+import { connectDB } from '../../localdb';
 
-import createHistory from "./utils/createHistory";
+import createHistory from './utils/createHistory';
 
 import {
   SET_HISTORY_STATE,
   SET_RAW_HISTORY,
   SET_HISTORY_CURSOR,
-  CLEAR_HISTORY_BY_CURSOR
-} from "./HistoryActions";
+  CLEAR_HISTORY_BY_CURSOR,
+} from './HistoryActions';
 
 export const defaultInitialState = {
-  prevCursor: "/",
-  cursor: "/",
+  prevCursor: '/',
+  cursor: '/',
   stacks: {
-    "/": []
+    '/': [],
   },
   popedStacks: {
-    "/": []
+    '/': [],
   },
-  rawHistory: createHistory()
+  rawHistory: createHistory(),
 };
 
 export function createInitialState(state = defaultInitialState) {
@@ -37,7 +37,7 @@ const initialState = createInitialState();
 function save(db, state) {
   if (db) {
     const { rawHistory, ...other } = state;
-    return db.setItem("history", other);
+    return db.setItem('history', other);
   } else {
     return null;
   }
@@ -58,11 +58,7 @@ function eqByKey(l1, l2) {
 }
 
 function equal(l1, l2) {
-  return (
-    l1.pathname === l2.pathname &&
-    l1.search === l2.search &&
-    l1.hash === l2.hash
-  );
+  return l1.pathname === l2.pathname && l1.search === l2.search && l1.hash === l2.hash;
 }
 
 function limitStack(stack) {
@@ -100,7 +96,7 @@ const _HistoryReducer = (state = initialState, action) => {
       switch (location.action) {
         // TODO
         // let push support forward for change cursor.
-        case "PUSH": {
+        case 'PUSH': {
           const { cursor, stacks } = state;
           const stack = stacks[cursor] || [];
           const index = _findIndex(stack, l => {
@@ -116,11 +112,11 @@ const _HistoryReducer = (state = initialState, action) => {
           const nextStacks = stacks;
           const nextState = {
             ...state,
-            stacks: nextStacks
+            stacks: nextStacks,
           };
           return nextState;
         }
-        case "REPLACE": {
+        case 'REPLACE': {
           const { cursor, stacks } = state;
           const stack = stacks[cursor];
           if (stack && stack.length > 0) {
@@ -140,7 +136,7 @@ const _HistoryReducer = (state = initialState, action) => {
         }
         // TODO
         // refactor it.
-        case "POP": {
+        case 'POP': {
           const { cursor, stacks, popedStacks } = state;
           let nextCursor = cursor;
           let changed = false;

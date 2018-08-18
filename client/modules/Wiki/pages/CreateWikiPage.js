@@ -1,18 +1,15 @@
-import React from "react";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import WikiForm from "../components/WikiForm";
+import React from 'react';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import WikiForm from '../components/WikiForm';
 
-import { goBack } from "react-router-redux";
-import {
-  setHeaderTitle,
-  updateSendButtonProps
-} from "../../MyApp/MyAppActions";
-import { addWikiRequest } from "../WikiActions";
+import { goBack } from 'react-router-redux';
+import { setHeaderTitle, updateSendButtonProps } from '../../MyApp/MyAppActions';
+import { addWikiRequest } from '../WikiActions';
 
 class CreateWikiPage extends React.Component {
   static defaultProps = {
-    title: "建立維基"
+    title: '建立維基',
   };
 
   componentWillMount() {
@@ -28,7 +25,7 @@ class CreateWikiPage extends React.Component {
     } else {
       this.props.dispatch(
         updateSendButtonProps({
-          onClick: () => { }
+          onClick: () => {},
         })
       );
     }
@@ -38,9 +35,7 @@ class CreateWikiPage extends React.Component {
     if (this.formComponent) {
       const form = this.formComponent.getForm();
       this.props.dispatch(dispatch => {
-        return Promise.resolve(
-          dispatch(updateSendButtonProps({ loading: true }))
-        )
+        return Promise.resolve(dispatch(updateSendButtonProps({ loading: true })))
           .then(() => dispatch(addWikiRequest(form)))
           .then(() => dispatch(updateSendButtonProps({ loading: false })))
           .then(() => dispatch(goBack()))
@@ -54,9 +49,9 @@ class CreateWikiPage extends React.Component {
     const metaDescription = title;
     const meta = [
       {
-        name: "description",
-        content: metaDescription
-      }
+        name: 'description',
+        content: metaDescription,
+      },
     ];
     return (
       <div>

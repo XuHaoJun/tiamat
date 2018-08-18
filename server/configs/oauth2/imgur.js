@@ -1,6 +1,6 @@
 const imgurClient = {
-  clientID: "",
-  clientSecret: ""
+  clientID: '',
+  clientSecret: '',
 };
 
 export default imgurClient;

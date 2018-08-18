@@ -1,23 +1,23 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
-import Immutable, { Map, OrderedSet } from "immutable";
-import { List, ListItem, makeSelectable } from "material-ui/List";
-import MaterialDivider from "material-ui/Divider";
-import CircularProgress from "material-ui/CircularProgress";
-import LazyLoad from "react-lazyload";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import FlipMove from "@xuhaojun/react-flip-move";
-import PullRefresh from "@xuhaojun/react-pullrefresh";
-import Portal from "../Portal";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+import Immutable, { Map, OrderedSet } from 'immutable';
+import { List, ListItem, makeSelectable } from 'material-ui/List';
+import MaterialDivider from 'material-ui/Divider';
+import CircularProgress from 'material-ui/CircularProgress';
+import LazyLoad from 'react-lazyload';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import FlipMove from '@xuhaojun/react-flip-move';
+import PullRefresh from '@xuhaojun/react-pullrefresh';
+import Portal from '../Portal';
 import NextList, {
   ListItem as NextListItem,
-  ListItemText as NextListItemText
-} from "@material-ui/core/List";
+  ListItemText as NextListItemText,
+} from '@material-ui/core/List';
 
-import Debug from "debug";
+import Debug from 'debug';
 
-const debug = Debug("app:CommonList");
+const debug = Debug('app:CommonList');
 
 // FlipMove need non-stateless compoent,
 // but material-ui divider is stateless functional component.
@@ -33,7 +33,7 @@ function wrapState(ComposedComponent) {
   return class SelectableList_ extends React.Component {
     static propTypes = {
       children: PropTypes.node.isRequired,
-      defaultValue: PropTypes.any.isRequired
+      defaultValue: PropTypes.any.isRequired,
     };
 
     componentWillMount() {
@@ -46,10 +46,7 @@ function wrapState(ComposedComponent) {
 
     render() {
       return (
-        <ComposedComponent
-          value={this.state.selectedIndex}
-          onChange={this.handleRequestChange}
-        >
+        <ComposedComponent value={this.state.selectedIndex} onChange={this.handleRequestChange}>
           {this.props.children}
         </ComposedComponent>
       );
@@ -64,8 +61,8 @@ export class DefaultCircularProgress extends React.PureComponent {
     size: 32,
     thickness: 6,
     style: {
-      margin: 0
-    }
+      margin: 0,
+    },
   };
 
   render() {
@@ -80,17 +77,17 @@ export class DefaultCircularProgress extends React.PureComponent {
 export class LoadingListItem extends ListItem {
   static propTypes = {
     onRequestLoadMore: PropTypes.func,
-    direction: PropTypes.oneOf(["bottom", "top"])
+    direction: PropTypes.oneOf(['bottom', 'top']),
   };
 
   static defaultProps = {
     onRequestLoadMore: undefined,
-    direction: "bottom"
+    direction: 'bottom',
   };
 
   componentDidMount() {
     if (this.props.onRequestLoadMore) {
-      debug("componentDidMount");
+      debug('componentDidMount');
       const { direction } = this.props;
       this.props.onRequestLoadMore(direction, this);
     }
@@ -99,11 +96,11 @@ export class LoadingListItem extends ListItem {
   render() {
     const styles = {
       listItem: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderSizing: "border-box"
-      }
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderSizing: 'border-box',
+      },
     };
     return (
       <ListItem style={styles.listItem}>
@@ -115,13 +112,13 @@ export class LoadingListItem extends ListItem {
 
 export class CommonListItem extends ListItem {
   static defaultProps = {
-    href: "",
-    routerMethod: "push",
-    nestedItems: []
+    href: '',
+    routerMethod: 'push',
+    nestedItems: [],
   };
 
   static contextTypes = {
-    router: PropTypes.object
+    router: PropTypes.object,
   };
 
   constructor(props) {
@@ -177,7 +174,7 @@ class CommonList extends React.Component {
     listItemRouterMethod: PropTypes.string,
     listItemLeftAvatar: PropTypes.func,
     listItemSecondaryText: PropTypes.func,
-    listItemValue: PropTypes.func
+    listItemValue: PropTypes.func,
   };
 
   static defaultProps = {
@@ -187,28 +184,25 @@ class CommonList extends React.Component {
     enableLoadMore: true,
     enableSelectable: false,
     defaultValue: 0,
-    listItemHref: () => "",
+    listItemHref: () => '',
     listStyle: {
       // padding: 0
     },
     listItemRightIcon: () => {},
     listItemStyle: {},
-    listItemRouterMethod: "push",
+    listItemRouterMethod: 'push',
     listItemLeftAvatar: () => {},
     listItemValue: payload => {
       return Map.isMap(payload)
-        ? payload.get("_id") ||
-            payload.get("name") ||
-            payload.get("title") ||
-            payload.hashCode()
+        ? payload.get('_id') || payload.get('name') || payload.get('title') || payload.hashCode()
         : payload;
     },
-    listItemSecondaryText: () => {}
+    listItemSecondaryText: () => {},
   };
 
   static contextTypes = {
     muiTheme: PropTypes.object.isRequired,
-    router: PropTypes.object.isRequired
+    router: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -217,19 +211,15 @@ class CommonList extends React.Component {
   }
 
   getListItemKeyByPayload = payload => {
-    const _id = Map.isMap(payload)
-      ? payload.get("_id") || Math.random()
-      : Math.random();
-    const updatedAt = Map.isMap(payload) ? payload.get("updatedAt") || "" : "";
+    const _id = Map.isMap(payload) ? payload.get('_id') || Math.random() : Math.random();
+    const updatedAt = Map.isMap(payload) ? payload.get('updatedAt') || '' : '';
     return `ListItem/${_id}/${updatedAt}`;
   };
 
   getListItems(dataSource) {
     const listItems = dataSource.reduce((eles, payload, index) => {
       const dividerKey = `Divider/${index}`;
-      return eles
-        .add(this.customListItemRender(payload))
-        .add(<Divider key={dividerKey} />);
+      return eles.add(this.customListItemRender(payload)).add(<Divider key={dividerKey} />);
     }, OrderedSet());
     return listItems;
   }
@@ -238,11 +228,11 @@ class CommonList extends React.Component {
     if (this.props.customListItemRender) {
       return this.props.customListItemRender(payload, this);
     }
-    const name = Map.isMap(payload) ? payload.get("name") : payload;
-    const title = Map.isMap(payload) ? payload.get("title") : "";
+    const name = Map.isMap(payload) ? payload.get('name') : payload;
+    const title = Map.isMap(payload) ? payload.get('title') : '';
     const href = this.props.listItemHref(payload, this);
     const key = this.getListItemKeyByPayload(payload);
-    const text = title || name || "";
+    const text = title || name || '';
     const { listItemRouterMethod } = this.props;
     const leftAvatar = this.props.listItemLeftAvatar(payload, this);
     const secondaryText = this.props.listItemSecondaryText(payload, this);
@@ -270,21 +260,11 @@ class CommonList extends React.Component {
       enableSelectable,
       onRequestLoadMore,
       defaultValue,
-      listStyle
+      listStyle,
     } = this.props;
     const lazyLoadBottom = enableLoadMore ? (
-      <LazyLoad
-        key="loader"
-        offset={72}
-        height={72}
-        overflow={true}
-        unmountIfInvisible={true}
-      >
-        <LoadingListItem
-          key="loading"
-          onRequestLoadMore={onRequestLoadMore}
-          direction="bottom"
-        />
+      <LazyLoad key="loader" offset={72} height={72} overflow={true} unmountIfInvisible={true}>
+        <LoadingListItem key="loading" onRequestLoadMore={onRequestLoadMore} direction="bottom" />
       </LazyLoad>
     ) : null;
     const empty =
@@ -313,7 +293,7 @@ class CommonList extends React.Component {
     const ListComponent = enableSelectable ? SelectableList : List;
     const listProps = {
       style: listStyle,
-      defaultValue
+      defaultValue,
     };
     let list = (
       <ListComponent {...listProps}>

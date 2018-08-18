@@ -1,38 +1,33 @@
-import React from "react";
-import { connect } from "react-redux";
-import Helmet from "react-helmet";
-import { hot } from "react-hot-loader";
-import compose from "recompose/compose";
-import qs from "qs";
+import React from 'react';
+import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
+import { hot } from 'react-hot-loader';
+import compose from 'recompose/compose';
+import qs from 'qs';
 
-import DiscussionDetail from "../components/DiscussionDetail";
+import DiscussionDetail from '../components/DiscussionDetail';
 
-import { replace } from "react-router-redux";
-import { getDiscussionById } from "../DiscussionReducer";
-import { ForumBoardRemote } from "../../ForumBoard/ForumBoardActions";
-import { setHeaderTitle } from "../../MyApp/MyAppActions";
-import { fetchSemanticRules } from "../../SemanticRule/SemanticRuleActions";
-import { getForumBoardById } from "../../ForumBoard/ForumBoardReducer";
-import { DiscussionRemote } from "../DiscussionActions";
+import { replace } from 'react-router-redux';
+import { getDiscussionById } from '../DiscussionReducer';
+import { ForumBoardRemote } from '../../ForumBoard/ForumBoardActions';
+import { setHeaderTitle } from '../../MyApp/MyAppActions';
+import { fetchSemanticRules } from '../../SemanticRule/SemanticRuleActions';
+import { getForumBoardById } from '../../ForumBoard/ForumBoardReducer';
+import { DiscussionRemote } from '../DiscussionActions';
 
 class DiscussionDetailPage extends React.Component {
-  static getInitialAction(
-    { routerProps },
-    { tryMore = false } = { tryMore: false }
-  ) {
+  static getInitialAction({ routerProps }, { tryMore = false } = { tryMore: false }) {
     const { parentDiscussionId } = routerProps.match.params;
     return async (dispatch, getState) => {
       const _setHeaderTitle = state => {
         const parentDiscussion = getDiscussionById(state, parentDiscussionId);
-        const title = parentDiscussion
-          ? parentDiscussion.get("title")
-          : "Loading...";
+        const title = parentDiscussion ? parentDiscussion.get('title') : 'Loading...';
         return setHeaderTitle(title);
       };
       dispatch(_setHeaderTitle(getState()));
       await dispatch(
         DiscussionRemote.getChildDiscussions(parentDiscussionId, {
-          withParent: true
+          withParent: true,
         })
       );
       dispatch(_setHeaderTitle(getState()));
@@ -40,17 +35,17 @@ class DiscussionDetailPage extends React.Component {
         const _tryForumBoardAndRootWiki = async state => {
           const parentDiscussion = getDiscussionById(state, parentDiscussionId);
           if (parentDiscussion) {
-            const forumBoardId = parentDiscussion.get("forumBoard");
+            const forumBoardId = parentDiscussion.get('forumBoard');
             await dispatch(ForumBoardRemote.findById(forumBoardId));
             const forumBoard = getForumBoardById(getState(), forumBoardId);
             if (forumBoard) {
-              const rootWikiId = forumBoard ? forumBoard.rootWiki : "";
+              const rootWikiId = forumBoard ? forumBoard.rootWiki : '';
               if (rootWikiId) {
                 const scope = [
                   {
-                    type: "wiki",
-                    rootWikiId
-                  }
+                    type: 'wiki',
+                    rootWikiId,
+                  },
                 ];
                 await dispatch(fetchSemanticRules(scope));
               }
@@ -60,25 +55,25 @@ class DiscussionDetailPage extends React.Component {
         const _tryNextAndPrevParentDiscussion = async state => {
           const parentDiscussion = getDiscussionById(state, parentDiscussionId);
           if (parentDiscussion) {
-            const orderPropName = "updatedAt";
+            const orderPropName = 'updatedAt';
             const { isRoot } = parentDiscussion;
             const orderProp = parentDiscussion[orderPropName];
             const forumBoardId = parentDiscussion.forumBoard;
             const nextParentTest = {
               _id: {
-                $ne: parentDiscussionId
+                $ne: parentDiscussionId,
               },
               forumBoard: forumBoardId,
               isRoot,
               [orderPropName]: {
-                $lte: orderProp
-              }
+                $lte: orderProp,
+              },
             };
             const prevParentTest = {
               ...nextParentTest,
               [orderPropName]: {
-                $gte: orderProp
-              }
+                $gte: orderProp,
+              },
             };
             const select = { content: 0 };
             await Promise.all(
@@ -86,20 +81,20 @@ class DiscussionDetailPage extends React.Component {
                 DiscussionRemote.findOne(nextParentTest, {
                   select,
                   sort: {
-                    [orderPropName]: -1
-                  }
+                    [orderPropName]: -1,
+                  },
                 }),
                 DiscussionRemote.findOne(prevParentTest, {
                   select,
-                  sort: { [orderPropName]: 1 }
-                })
+                  sort: { [orderPropName]: 1 },
+                }),
               ].map(dispatch)
             );
           }
         };
         await Promise.all([
           _tryForumBoardAndRootWiki(getState()),
-          _tryNextAndPrevParentDiscussion(getState())
+          _tryNextAndPrevParentDiscussion(getState()),
         ]);
       }
     };
@@ -126,7 +121,7 @@ class DiscussionDetailPage extends React.Component {
         return title;
       }
     } else {
-      return "Loading...";
+      return 'Loading...';
     }
   };
 
@@ -143,18 +138,14 @@ class DiscussionDetailPage extends React.Component {
     if (semanticReplaceMode !== nextSemanticReplaceMode) {
       const q = qs.stringify({
         ...this.props.query,
-        semanticReplaceMode: nextSemanticReplaceMode ? true : undefined
+        semanticReplaceMode: nextSemanticReplaceMode ? true : undefined,
       });
       this.props.dispatch(replace(`/discussions/${parentDiscussionId}?${q}`));
     }
   };
 
   render() {
-    const {
-      forumBoardId,
-      parentDiscussionId,
-      semanticReplaceMode
-    } = this.props;
+    const { forumBoardId, parentDiscussionId, semanticReplaceMode } = this.props;
     const helmetTitle = this.getHelmetTitle();
     return (
       <React.Fragment>
@@ -176,13 +167,11 @@ class DiscussionDetailPage extends React.Component {
 function mapStateToProps(store, routerProps) {
   const { parentDiscussionId } = routerProps.match.params;
   let { semanticReplaceMode } = routerProps.location.query;
-  semanticReplaceMode = semanticReplaceMode === "true";
+  semanticReplaceMode = semanticReplaceMode === 'true';
   const parentDiscussion = getDiscussionById(store, parentDiscussionId);
   let { forumBoardId } = routerProps.match.params;
   if (!forumBoardId) {
-    forumBoardId = parentDiscussion
-      ? parentDiscussion.get("forumBoard")
-      : forumBoardId;
+    forumBoardId = parentDiscussion ? parentDiscussion.get('forumBoard') : forumBoardId;
   }
   const forumBoard = getForumBoardById(store, forumBoardId);
   return {
@@ -191,7 +180,7 @@ function mapStateToProps(store, routerProps) {
     parentDiscussion,
     forumBoardId,
     forumBoard,
-    semanticReplaceMode
+    semanticReplaceMode,
   };
 }
 
@@ -204,11 +193,14 @@ function mapDispatchToProps(dispatch, routerProps) {
       );
       return dispatch(action);
     },
-    dispatch
+    dispatch,
   };
 }
 
 export default compose(
   hot(module),
-  connect(mapStateToProps, mapDispatchToProps)
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(DiscussionDetailPage);

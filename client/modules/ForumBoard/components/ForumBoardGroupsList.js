@@ -1,27 +1,27 @@
-import React from "react";
-import { connect } from "react-redux";
-import { List } from "immutable";
-import { shallowEqualImmutable } from "react-immutable-render-mixin";
+import React from 'react';
+import { connect } from 'react-redux';
+import { List } from 'immutable';
+import { shallowEqualImmutable } from 'react-immutable-render-mixin';
 
-import { Link } from "react-router-dom";
-import MenuItem from "@material-ui/core/MenuItem";
-import MenuList from "@material-ui/core/MenuList";
-import ListItemText from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import RightArrowIcon from "@material-ui/icons/KeyboardArrowRight";
+import { Link } from 'react-router-dom';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import ListItemText from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import RightArrowIcon from '@material-ui/icons/KeyboardArrowRight';
 
-import { getForumBoardById } from "../ForumBoardReducer";
+import { getForumBoardById } from '../ForumBoardReducer';
 
 class ForumBoardGroupsList extends React.Component {
   static defaultProps = {
     groups: List(),
-    defaultAllGroup: "全部"
+    defaultAllGroup: '全部',
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      selectedGroup: props.forumBoardGroup
+      selectedGroup: props.forumBoardGroup,
     };
   }
 
@@ -33,17 +33,14 @@ class ForumBoardGroupsList extends React.Component {
 
   listItemHref = group => {
     const { forumBoardId, defaultAllGroup } = this.props;
-    const query =
-      group !== defaultAllGroup
-        ? `?forumBoardGroup=${encodeURIComponent(group)}`
-        : "";
+    const query = group !== defaultAllGroup ? `?forumBoardGroup=${encodeURIComponent(group)}` : '';
     return `/forumBoards/${forumBoardId}/rootDiscussions${query}`;
   };
 
   sortBy = payload => {
     if (this.props.defaultAllGroup === payload) {
       return -2;
-    } else if (payload === "綜合討論") {
+    } else if (payload === '綜合討論') {
       return -1;
     }
     return 0;
@@ -65,9 +62,7 @@ class ForumBoardGroupsList extends React.Component {
     return (
       <MenuList role="menu">
         {dataSource.map(group => {
-          const selected = selectedGroup
-            ? selectedGroup === group
-            : group === defaultAllGroup;
+          const selected = selectedGroup ? selectedGroup === group : group === defaultAllGroup;
           const to = this.listItemHref(group);
           return (
             <MenuItem
@@ -97,7 +92,7 @@ function mapStateToProps(store, props) {
     forumBoardId,
     forumBoard,
     forumBoardGroup,
-    groups: forumBoard ? forumBoard.get("groups") : groups
+    groups: forumBoard ? forumBoard.get('groups') : groups,
   };
 }
 
@@ -105,6 +100,11 @@ function mapDispatchToProps() {
   return {};
 }
 
-export default connect(mapStateToProps, mapDispatchToProps, null, {
-  areStatePropsEqual: shallowEqualImmutable
-})(ForumBoardGroupsList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  null,
+  {
+    areStatePropsEqual: shallowEqualImmutable,
+  }
+)(ForumBoardGroupsList);

@@ -1,17 +1,17 @@
-import SoftBreak from "slate-soft-break";
-import SuggestionsPlugin from "@xuhaojun/slate-suggestions";
-import PluginEditTable from "slate-edit-table";
-import PluginEditList from "slate-edit-list";
+import SoftBreak from 'slate-soft-break';
+import SuggestionsPlugin from '@xuhaojun/slate-suggestions';
+import PluginEditTable from 'slate-edit-table';
+import PluginEditList from 'slate-edit-list';
 // import PluginEditCode from "slate-edit-code";
 
 function getCurrentWord(text, index, initialIndex) {
   if (index === initialIndex) {
     return {
       start: getCurrentWord(text, index - 1, initialIndex),
-      end: getCurrentWord(text, index + 1, initialIndex)
+      end: getCurrentWord(text, index + 1, initialIndex),
     };
   }
-  if (text[index] === " " || text[index] === "#" || text[index] === undefined) {
+  if (text[index] === ' ' || text[index] === '#' || text[index] === undefined) {
     return index;
   }
   if (index < initialIndex) {
@@ -26,21 +26,21 @@ function getCurrentWord(text, index, initialIndex) {
 function createPlugins() {
   const tablePlugin = PluginEditTable();
   const suggestionsPlugin = SuggestionsPlugin({
-    trigger: "#",
+    trigger: '#',
     capture: /#([\w]*)/,
     onEnter(suggestion, change) {
       const state = change.value;
       const { anchorText, anchorOffset } = state;
-      const hasLink = state.inlines.some(inline => inline.type === "link");
+      const hasLink = state.inlines.some(inline => inline.type === 'link');
       if (hasLink) {
         return undefined;
       }
       const { text } = anchorText;
       let index = {
         start: anchorOffset - 1,
-        end: anchorOffset
+        end: anchorOffset,
       };
-      if (text[anchorOffset - 1] !== "#") {
+      if (text[anchorOffset - 1] !== '#') {
         index = getCurrentWord(text, anchorOffset - 1, anchorOffset - 1);
       }
       if (!index || !suggestion) {
@@ -51,26 +51,26 @@ function createPlugins() {
         .insertText(suggestion.suggestion)
         .extend(0 - suggestion.suggestion.length)
         .wrapInline({
-          type: "link",
+          type: 'link',
           data: {
-            href: suggestion.value
-          }
+            href: suggestion.value,
+          },
         })
         .collapseToStartOfNextText()
-        .insertText(" ")
+        .insertText(' ')
         .collapseToEnd()
         .focus();
-    }
+    },
   });
 
   const softBreakPlugin = SoftBreak({
-    onlyIn: ["code"]
+    onlyIn: ['code'],
   });
 
   const listPlugin = PluginEditList({
-    types: ["bulleted-list", "numbered-list"],
-    typeItem: "list-item",
-    typeDefault: "paragraph"
+    types: ['bulleted-list', 'numbered-list'],
+    typeItem: 'list-item',
+    typeDefault: 'paragraph',
   });
 
   // const editCodePlugin = PluginEditCode({
@@ -83,23 +83,23 @@ function createPlugins() {
     suggestionsPlugin,
     softBreakPlugin,
     // tablePlugin,
-    listPlugin
+    listPlugin,
     // editCodePlugin
   };
   return plugins;
 }
 
 export async function loadPrismPlugin() {
-  const slatePrismModule = await import("slate-prism");
+  const slatePrismModule = await import('slate-prism');
   const prismPlugin = slatePrismModule.default({
     onlyIn: node => {
-      return node.type === "code_block";
+      return node.type === 'code_block';
     },
-    getSyntax: () => "jsx"
+    getSyntax: () => 'jsx',
   });
   await Promise.all([
-    import("../../../node_modules/prismjs/themes/prism-tomorrow.css"),
-    import("prismjs/components/prism-jsx")
+    import('../../../node_modules/prismjs/themes/prism-tomorrow.css'),
+    import('prismjs/components/prism-jsx'),
   ]);
   return prismPlugin;
 }

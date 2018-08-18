@@ -1,24 +1,24 @@
-import passport from "passport";
-import { BasicStrategy } from "passport-http";
-import { Strategy as ClientPasswordStrategy } from "passport-oauth2-client-password";
-import BearerStrategy from "passport-http-bearer";
-import { Strategy as FacebookStrategy } from "passport-facebook";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import passport from 'passport';
+import { BasicStrategy } from 'passport-http';
+import { Strategy as ClientPasswordStrategy } from 'passport-oauth2-client-password';
+import BearerStrategy from 'passport-http-bearer';
+import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 // import models
-import User, { genRandomPassword } from "../models/user";
-import Client from "../models/oauth2Client";
-import AccessToken from "../models/oauth2AccessToken";
+import User, { genRandomPassword } from '../models/user';
+import Client from '../models/oauth2Client';
+import AccessToken from '../models/oauth2AccessToken';
 
 // import third party oauth2 client app config
-import facebookConfig from "./oauth2/facebook";
-import googleConfig from "./oauth2/google";
+import facebookConfig from './oauth2/facebook';
+import googleConfig from './oauth2/google';
 
 function userAuth(emailOri, password, done) {
   const email = emailOri.toLowerCase();
   User.findOne(
     {
-      email
+      email,
     },
     (err, user) => {
       if (err) {
@@ -31,7 +31,7 @@ function userAuth(emailOri, password, done) {
         if (isMatch) {
           return done(null, user);
         }
-        return done(null, false, { message: "Invalid email or password." });
+        return done(null, false, { message: 'Invalid email or password.' });
       });
     }
   );
@@ -40,7 +40,7 @@ function userAuth(emailOri, password, done) {
 function clientAuth(id, secret, done) {
   Client.findOne(
     {
-      _id: id
+      _id: id,
     },
     (err, client) => {
       if (err) {
@@ -60,8 +60,8 @@ function clientAuth(id, secret, done) {
 function oauth2(providerName, accessToken, refreshToken, profile, cb) {
   const thirdUserId = profile.id;
   const query = {
-    "passports.providerName": providerName,
-    "passports.thirdUserId": thirdUserId
+    'passports.providerName': providerName,
+    'passports.thirdUserId': thirdUserId,
   };
   User.findOne(query)
     .exec()
@@ -75,9 +75,9 @@ function oauth2(providerName, accessToken, refreshToken, profile, cb) {
             {
               providerName,
               thirdUserId,
-              profile
-            }
-          ]
+              profile,
+            },
+          ],
         };
         const newUser = new User(props);
         // TODO check email duplicate.
@@ -98,31 +98,25 @@ function oauth2(providerName, accessToken, refreshToken, profile, cb) {
 
 export default function config() {
   // login by email and password
-  passport.use("basic", new BasicStrategy(userAuth));
+  passport.use('basic', new BasicStrategy(userAuth));
 
-  passport.use("clientBasic", new BasicStrategy(clientAuth));
+  passport.use('clientBasic', new BasicStrategy(clientAuth));
 
   passport.use(new ClientPasswordStrategy(clientAuth));
 
   if (facebookConfig.clientID && facebookConfig.clientSecret) {
     passport.use(
-      new FacebookStrategy(
-        facebookConfig,
-        (accessToken, refreshToken, profile, cb) => {
-          oauth2("facebook", accessToken, refreshToken, profile, cb);
-        }
-      )
+      new FacebookStrategy(facebookConfig, (accessToken, refreshToken, profile, cb) => {
+        oauth2('facebook', accessToken, refreshToken, profile, cb);
+      })
     );
   }
 
   if (googleConfig.clientID && googleConfig.clientSecret) {
     passport.use(
-      new GoogleStrategy(
-        googleConfig,
-        (accessToken, refreshToken, profile, cb) => {
-          oauth2("google", accessToken, refreshToken, profile, cb);
-        }
-      )
+      new GoogleStrategy(googleConfig, (accessToken, refreshToken, profile, cb) => {
+        oauth2('google', accessToken, refreshToken, profile, cb);
+      })
     );
   }
 
@@ -131,7 +125,7 @@ export default function config() {
   //   Token generally store in browser indexedDB(default) and it's follow same-origin policy,
   // that will protect your token from XSS attack.
   passport.use(
-    "bearer-jwt",
+    'bearer-jwt',
     new BearerStrategy((tokenString, done) => {
       AccessToken.verify(tokenString, (err, payload) => {
         if (err) {
@@ -141,7 +135,7 @@ export default function config() {
           if (!target || !sub || !scope) {
             done(null, false);
           } else {
-            if (target === "client") {
+            if (target === 'client') {
               Client.findOne({ _id: sub })
                 .exec()
                 .then(client => {
@@ -156,7 +150,7 @@ export default function config() {
                   done(er);
                   return er;
                 });
-            } else if (target === "user") {
+            } else if (target === 'user') {
               User.findById(sub)
                 .select({ password: 0 })
                 .exec()
@@ -182,13 +176,13 @@ export default function config() {
   );
 
   passport.use(
-    "bearer",
+    'bearer',
     new BearerStrategy((tokenString, done) => {
       // TODO
       // improve performance by find user or client on demand
       return AccessToken.findOne({ token: tokenString })
-        .populate("user")
-        .populate("client")
+        .populate('user')
+        .populate('client')
         .exec((err, token) => {
           if (err) {
             return done(err);

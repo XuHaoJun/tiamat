@@ -1,23 +1,22 @@
-import Loadable from "react-loadable";
-import Loading from "../../components/CenterCircularProgress";
+import Loadable from 'react-loadable';
+import Loading from '../../components/CenterCircularProgress';
 
 const SettingDetailPage = Loadable({
-  loader: () =>
-    import(/* webpackChunkName: "SettingDetailPage" */ "./pages/SettingDetailPage"),
-  loading: Loading
+  loader: () => import(/* webpackChunkName: "SettingDetailPage" */ './pages/SettingDetailPage'),
+  loading: Loading,
 });
 
 const routes = [
   {
-    path: "/settings",
+    path: '/settings',
     exact: true,
-    component: SettingDetailPage
+    component: SettingDetailPage,
   },
   {
-    path: "/setting",
+    path: '/setting',
     exact: true,
-    component: SettingDetailPage
-  }
+    component: SettingDetailPage,
+  },
 ];
 
 export default routes;

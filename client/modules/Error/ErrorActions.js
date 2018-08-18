@@ -1,5 +1,5 @@
 // Export Constants
-export const ADD_ERROR = "ADD_ERROR";
+export const ADD_ERROR = 'ADD_ERROR';
 
 export function addError(error) {
   return { type: ADD_ERROR, error };

@@ -1,31 +1,31 @@
-import React from "react";
-import { Set, is } from "immutable";
-import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Set, is } from 'immutable';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
-import List from "../../../components/List/EnhancedList";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import List from '../../../components/List/EnhancedList';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 
-import { getForumBoards } from "../ForumBoardReducer";
-import { fetchForumBoards } from "../ForumBoardActions";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
+import { getForumBoards } from '../ForumBoardReducer';
+import { fetchForumBoards } from '../ForumBoardActions';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
 
-import Avatar from "@material-ui/core/Avatar";
-import Debug from "debug";
+import Avatar from '@material-ui/core/Avatar';
+import Debug from 'debug';
 
-const debug = Debug("app:ForumBoardList");
+const debug = Debug('app:ForumBoardList');
 
 const defaultSortBy = d => {
-  return -1 * d.get("popularityCounter");
+  return -1 * d.get('popularityCounter');
 };
 
 class ForumBoardList extends React.Component {
   static defaultProps = {
     dataSource: Set(),
     sortBy: defaultSortBy,
-    style: { width: "100%", height: "100%", overflow: "auto" }
+    style: { width: '100%', height: '100%', overflow: 'auto' },
   };
 
   static getInitialAction() {
@@ -42,33 +42,29 @@ class ForumBoardList extends React.Component {
     const page = props.page || Math.floor(dataSource.count() / limit) || 1;
     this.state = {
       page,
-      limit
+      limit,
     };
   }
 
   handleRequestMore = ({ direction }) => {
-    if (direction === "top") {
+    if (direction === 'top') {
       return this.props.dispatch(ForumBoardList.getInitialAction());
     } else {
       const { page, limit, sort } = this.state;
       const nextPage = page + 1;
       const prevDataSource = this.props.dataSource;
-      debug("onRequestLoadMore start");
-      return this.props
-        .dispatch(fetchForumBoards(nextPage, limit, sort))
-        .then(() => {
-          debug("onRequestLoadMore end1");
-          const currentDataSource = this.props.dataSource;
-          const nextState = {};
-          const changed =
-            currentDataSource.count() > 0 &&
-            !is(prevDataSource, currentDataSource);
-          if (changed) {
-            nextState.page = nextPage;
-          }
-          this.setState(nextState);
-          debug("onRequestLoadMore end2");
-        });
+      debug('onRequestLoadMore start');
+      return this.props.dispatch(fetchForumBoards(nextPage, limit, sort)).then(() => {
+        debug('onRequestLoadMore end1');
+        const currentDataSource = this.props.dataSource;
+        const nextState = {};
+        const changed = currentDataSource.count() > 0 && !is(prevDataSource, currentDataSource);
+        if (changed) {
+          nextState.page = nextPage;
+        }
+        this.setState(nextState);
+        debug('onRequestLoadMore end2');
+      });
     }
   };
 
@@ -84,9 +80,9 @@ class ForumBoardList extends React.Component {
         style={this.props.style}
       >
         {dataSource.map(forumBoard => {
-          const _id = forumBoard.get("_id");
-          const name = forumBoard.get("name");
-          const popularityCounter = forumBoard.get("popularityCounter");
+          const _id = forumBoard.get('_id');
+          const name = forumBoard.get('name');
+          const popularityCounter = forumBoard.get('popularityCounter');
           const key = `ForumBoardList/${_id}`;
           const defaultAvatar = name[0];
           const primary = name;

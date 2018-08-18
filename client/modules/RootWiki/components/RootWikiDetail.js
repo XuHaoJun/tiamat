@@ -1,9 +1,9 @@
-import React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { connect } from "react-redux";
-import { getRootWiki } from "../RootWikiReducer";
+import React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { connect } from 'react-redux';
+import { getRootWiki } from '../RootWikiReducer';
 
-import Editor from "../../../components/Slate/Editor";
+import Editor from '../../../components/Slate/Editor';
 
 class RootWikiDetail extends React.Component {
   constructor(props) {
@@ -18,7 +18,7 @@ class RootWikiDetail extends React.Component {
     } else if (rootWiki === null) {
       return <div>沒有任何維基</div>;
     } else {
-      const rawContent = rootWiki ? rootWiki.get("content") : null;
+      const rawContent = rootWiki ? rootWiki.get('content') : null;
       return (
         <div>
           <Editor rawContent={rawContent} readOnly={true} />
@@ -32,7 +32,7 @@ function mapStateToProps(state, props) {
   const { rootWikiId, rootWiki } = props;
   return {
     rootWikiId,
-    rootWiki: rootWiki || getRootWiki(state, rootWikiId)
+    rootWiki: rootWiki || getRootWiki(state, rootWikiId),
   };
 }
 

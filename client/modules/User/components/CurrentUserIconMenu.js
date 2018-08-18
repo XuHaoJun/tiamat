@@ -1,26 +1,26 @@
-import React from "react";
-import { connect } from "react-redux";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { connect } from 'react-redux';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { Link } from 'react-router-dom';
 
-import IconButton from "@material-ui/core/IconButton";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
+import IconButton from '@material-ui/core/IconButton';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
-import SettingsIcon from "@material-ui/icons/Settings";
-import LogOutIcon from "@material-ui/icons/Input";
+import SettingsIcon from '@material-ui/icons/Settings';
+import LogOutIcon from '@material-ui/icons/Input';
 
-import UserAvatar from "./UserAvatar";
-import { getCurrentUser } from "../UserReducer";
+import UserAvatar from './UserAvatar';
+import { getCurrentUser } from '../UserReducer';
 
 class CurrentUserIconMenu extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = shouldComponentUpdate;
     this.state = {
-      anchorEl: null
+      anchorEl: null,
     };
   }
 
@@ -46,7 +46,7 @@ class CurrentUserIconMenu extends React.Component {
         <IconButton
           {...other}
           aria-label="CurrentUser More"
-          aria-owns={anchorEl ? "current-user-menu" : null}
+          aria-owns={anchorEl ? 'current-user-menu' : null}
           aria-haspopup="true"
           onClick={this.handleClick}
         >

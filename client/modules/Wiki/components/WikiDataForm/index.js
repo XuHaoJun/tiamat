@@ -1,3 +1,3 @@
-import WikiDataForm from "./WikiDataForm";
+import WikiDataForm from './WikiDataForm';
 
 export default WikiDataForm;

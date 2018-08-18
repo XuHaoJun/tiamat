@@ -1,12 +1,12 @@
-import Immutable from "immutable";
-import { ADD_ERROR } from "./ErrorActions";
+import Immutable from 'immutable';
+import { ADD_ERROR } from './ErrorActions';
 
 // Initial State
 const initialState = Immutable.fromJS({
   ui: {},
   data: {
-    errors: []
-  }
+    errors: [],
+  },
 });
 
 const ErrorReducer = (state = initialState, action) => {
@@ -16,8 +16,8 @@ const ErrorReducer = (state = initialState, action) => {
         return state;
       }
       const error = Immutable.fromJS(action.error);
-      const errors = state.getIn(["data", "errors"]).push(error);
-      return state.setIn(["data", "errors"], errors);
+      const errors = state.getIn(['data', 'errors']).push(error);
+      return state.setIn(['data', 'errors'], errors);
     default:
       return state;
   }
@@ -26,10 +26,9 @@ const ErrorReducer = (state = initialState, action) => {
 /* Selectors */
 
 // Get all errors
-export const getErrors = state => state.errors.getIn(["data", "errors"]);
+export const getErrors = state => state.errors.getIn(['data', 'errors']);
 
-export const getLastError = state =>
-  state.errors.getIn(["data", "errors"]).last();
+export const getLastError = state => state.errors.getIn(['data', 'errors']).last();
 
 // Export Reducer
 export default ErrorReducer;

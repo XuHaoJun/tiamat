@@ -1,15 +1,15 @@
-export const CHANGE_LOCAL_EDITOR = "CHANGE_LOCAL_EDITOR";
-export const COMPILE_TEMPLATES_LOCAL_EDITOR = "COMPILE_TEMPLATES_LOCAL_EDITOR";
+export const CHANGE_LOCAL_EDITOR = 'CHANGE_LOCAL_EDITOR';
+export const COMPILE_TEMPLATES_LOCAL_EDITOR = 'COMPILE_TEMPLATES_LOCAL_EDITOR';
 
 export function changeEditor(change) {
   return {
     type: CHANGE_LOCAL_EDITOR,
-    change
+    change,
   };
 }
 
 export function compileTemplates() {
   return {
-    type: COMPILE_TEMPLATES_LOCAL_EDITOR
+    type: COMPILE_TEMPLATES_LOCAL_EDITOR,
   };
 }

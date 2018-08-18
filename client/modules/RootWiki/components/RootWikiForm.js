@@ -1,21 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import Editor from "../../../components/Slate";
+import Editor from '../../../components/Slate';
 
 // TODO
 // validate form
 class RootWikiForm extends React.Component {
   static propTypes = {
-    actionType: PropTypes.oneOf(["create", "update"]),
+    actionType: PropTypes.oneOf(['create', 'update']),
     defaultRootWiki: PropTypes.object,
-    forumBoardId: PropTypes.string
+    forumBoardId: PropTypes.string,
   };
 
   static defaultProps = {
-    forumBoardId: "",
-    actionType: "create",
-    defaultRootWiki: undefined
+    forumBoardId: '',
+    actionType: 'create',
+    defaultRootWiki: undefined,
   };
 
   getForm = () => {
@@ -38,7 +38,7 @@ class RootWikiForm extends React.Component {
   render() {
     const { actionType } = this.props;
     let defaultValue;
-    if (actionType === "update") {
+    if (actionType === 'update') {
       const { defaultRootWiki } = this.props;
       if (defaultRootWiki) {
         const { content } = defaultRootWiki;

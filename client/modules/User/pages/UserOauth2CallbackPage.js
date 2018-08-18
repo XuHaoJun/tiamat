@@ -1,11 +1,11 @@
-import React from "react";
-import { connect } from "react-redux";
+import React from 'react';
+import { connect } from 'react-redux';
 
-import { replace } from "react-router-redux";
+import { replace } from 'react-router-redux';
 
 class UserOauth2CallbackPage extends React.Component {
   componentDidMount() {
-    this.props.dispatch(replace("/"));
+    this.props.dispatch(replace('/'));
   }
 
   shouldComponentUpdate() {

@@ -1,20 +1,20 @@
-import React from "react";
-import { connect } from "react-redux";
-import { Map } from "immutable";
+import React from 'react';
+import { connect } from 'react-redux';
+import { Map } from 'immutable';
 
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import Button from "@material-ui/core/Button";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@material-ui/core/Button';
 
-import { getModule } from "../../../../modules/Template/TemplateReducer";
-import AceEditor from "../../../AceEditor";
-import UpsertTemplateTabs from "./components/UpsertTemplateTabs";
+import { getModule } from '../../../../modules/Template/TemplateReducer';
+import AceEditor from '../../../AceEditor';
+import UpsertTemplateTabs from './components/UpsertTemplateTabs';
 
 class Template extends React.Component {
   state = {
-    code: "",
-    open: false
+    code: '',
+    open: false,
   };
 
   handleChangeCode = nextCode => {
@@ -26,17 +26,17 @@ class Template extends React.Component {
     const { editor, node } = this.props;
     const { key, data } = node;
     const oldData = data;
-    const oldTemplateData = oldData.get("template");
+    const oldTemplateData = oldData.get('template');
     if (oldTemplateData) {
       const updateTemplateData = Map({
         code: this.state.code,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       });
       const nextTemplateData = oldTemplateData.merge(updateTemplateData);
       const nextData = oldData.merge(Map({ template: nextTemplateData }));
       editor.change(change => {
         return change.setNodeByKey(key, {
-          data: nextData
+          data: nextData,
         });
       });
     } else {
@@ -62,7 +62,7 @@ class Template extends React.Component {
     // get enableTemplatePlaceholder from redux state.
     const editorReadOnly = this.props.editor.props.readOnly;
     const { module } = this.props;
-    const Component = module ? module.get("instance").default : null;
+    const Component = module ? module.get('instance').default : null;
     if (editorReadOnly && !Component) {
       return <span {...this.props.attributes}>Template Loading...</span>;
     } else if (Component) {
@@ -74,7 +74,7 @@ class Template extends React.Component {
       // });
       return (
         <span // eslint-disable-line
-          style={{ cursor: "pointer" }}
+          style={{ cursor: 'pointer' }}
           onClick={this.handleOpen}
           role="button"
           aria-label="script"
@@ -85,9 +85,9 @@ class Template extends React.Component {
             <Dialog open={this.state.open} onClose={this.handleClose}>
               <DialogContent
                 style={{
-                  height: "70vh",
-                  display: "flex",
-                  justifyContent: "center"
+                  height: '70vh',
+                  display: 'flex',
+                  justifyContent: 'center',
                 }}
               >
                 {/* <UpsertTemplateTabs/> */}
@@ -128,7 +128,7 @@ export const connectEditorHelper = (editorConnect, NextTemplate) => {
     },
     (stateProps, dispatchProps, ownProps) => {
       return Object.assign({}, stateProps, ownProps, {
-        editorDispatch: dispatchProps.dispatch
+        editorDispatch: dispatchProps.dispatch,
       });
     }
   )(NextTemplate);
@@ -137,14 +137,14 @@ export const connectEditorHelper = (editorConnect, NextTemplate) => {
 const ConnectedWithApp = connect(
   (state, props) => {
     const { node } = props;
-    const template = node.data.get("template");
+    const template = node.data.get('template');
     const module = getModule(state, template);
     return { module };
   },
   null,
   (stateProps, dispatchProps, ownProps) => {
     return Object.assign({}, stateProps, ownProps, {
-      appDispatch: dispatchProps.dispatch
+      appDispatch: dispatchProps.dispatch,
     });
   }
 )(Template);

@@ -1,6 +1,6 @@
-import { fromJS, Set, is, Record } from "immutable";
-import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
-import { ADD_WIKI, ADD_WIKIS, SET_UI_WIKI_FORM } from "./WikiActions";
+import { fromJS, Set, is, Record } from 'immutable';
+import defaultSameIdElesMax from '../../util/defaultSameIdElesMax';
+import { ADD_WIKI, ADD_WIKIS, SET_UI_WIKI_FORM } from './WikiActions';
 
 const WIKI_RECORD_DEFAULT = {
   _id: null,
@@ -14,7 +14,7 @@ const WIKI_RECORD_DEFAULT = {
   tags: new Set(),
   popularityCounter: 0,
   createdAt: null,
-  updatedAt: null
+  updatedAt: null,
 };
 
 export class Wiki extends Record(WIKI_RECORD_DEFAULT) {
@@ -27,7 +27,7 @@ export class Wiki extends Record(WIKI_RECORD_DEFAULT) {
       rootWikiGroupTree: fromJS(obj.rootWikiGroupTree),
       tags: Set(obj.tags),
       createdAt: new Date(obj.createdAt),
-      updatedAt: new Date(obj.updatedAt)
+      updatedAt: new Date(obj.updatedAt),
     });
     return record;
   }
@@ -36,18 +36,18 @@ export class Wiki extends Record(WIKI_RECORD_DEFAULT) {
 const WIKI_STATE_RECORD_DEFAULT = {
   ui: fromJS({
     form: {
-      type: "",
-      content: null
-    }
+      type: '',
+      content: null,
+    },
   }),
-  data: Set()
+  data: Set(),
 };
 
 export class WikiState extends Record(WIKI_STATE_RECORD_DEFAULT) {
   static fromJS({ ui, data = [] } = {}) {
     const record = new WikiState({
       ui: fromJS(ui),
-      data: Set(data.map(Wiki.fromJS))
+      data: Set(data.map(Wiki.fromJS)),
     });
     return record;
   }
@@ -70,10 +70,10 @@ const WikiReducer = (state = initialState, action) => {
             .map(sameIdEles => defaultSameIdElesMax(sameIdEles))
             .toSet()
         : unionData;
-      return state.set("data", nextData);
+      return state.set('data', nextData);
 
     case SET_UI_WIKI_FORM:
-      return state.setIn(["ui", "form"], fromJS(action.form));
+      return state.setIn(['ui', 'form'], fromJS(action.form));
 
     default:
       return state;
@@ -89,9 +89,7 @@ export const getWikis = state => state.wikis.data;
 export const getWiki = (state, _id, rootWikiId = null) => {
   if (rootWikiId) {
     const name = _id;
-    return getWikis(state).find(
-      x => x.name === name && x.rootWiki === rootWikiId
-    );
+    return getWikis(state).find(x => x.name === name && x.rootWiki === rootWikiId);
   } else {
     return getWikis(state).find(x => x._id === _id);
   }
@@ -100,9 +98,7 @@ export const getWiki = (state, _id, rootWikiId = null) => {
 export function getWikiByRouterProps(state, routerProps) {
   const { wikiId, wikiName } = routerProps.match.params;
   const { rootWikiId } = routerProps.match.params;
-  const wiki = rootWikiId
-    ? getWiki(state, wikiName, rootWikiId)
-    : getWiki(state, wikiId);
+  const wiki = rootWikiId ? getWiki(state, wikiName, rootWikiId) : getWiki(state, wikiId);
   return wiki;
 }
 

@@ -9,17 +9,13 @@ export default function styles(
   const bottomNavigationHeight = 56;
   return {
     slideHeight: {
-      height: `calc(100vh - ${tabHeight +
-        (withAppBar ? 56 : 0) +
-        bottomNavigationHeight}px)`,
-      [`${breakpoints.up("xs")} and (orientation: landscape)`]: {
-        height: `calc(100vh - ${tabHeight +
-          (withAppBar ? 48 : 0) +
-          bottomNavigationHeight}px)`
+      height: `calc(100vh - ${tabHeight + (withAppBar ? 56 : 0) + bottomNavigationHeight}px)`,
+      [`${breakpoints.up('xs')} and (orientation: landscape)`]: {
+        height: `calc(100vh - ${tabHeight + (withAppBar ? 48 : 0) + bottomNavigationHeight}px)`,
       },
-      [`${breakpoints.up("sm")}`]: {
-        height: `calc(100vh - ${tabHeight + (withAppBar ? 64 : 0)}px)`
-      }
-    }
+      [`${breakpoints.up('sm')}`]: {
+        height: `calc(100vh - ${tabHeight + (withAppBar ? 64 : 0)}px)`,
+      },
+    },
   };
 }

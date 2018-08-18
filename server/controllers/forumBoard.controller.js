@@ -1,4 +1,4 @@
-import ForumBoard from "../models/forumBoard";
+import ForumBoard from '../models/forumBoard';
 
 /**
  * Get all posts
@@ -9,8 +9,8 @@ import ForumBoard from "../models/forumBoard";
 export function getForumBoards(req, res) {
   const page = Number.parseInt(req.query.page, 10) || 1;
   const limit = Number.parseInt(req.query.limit, 10) || 30;
-  const sort = req.query.sort || "-popularityCounter";
-  const sortWays = ["-popularityCounter"];
+  const sort = req.query.sort || '-popularityCounter';
+  const sortWays = ['-popularityCounter'];
   if (!sortWays.some(s => s === sort) || page <= 0 || limit > 30) {
     res.status(400).send({ errmsg: `unknown sort ${sort}` });
   } else {
@@ -19,7 +19,7 @@ export function getForumBoards(req, res) {
       {
         page,
         limit,
-        sort
+        sort,
       },
       (err, result) => {
         if (err) {

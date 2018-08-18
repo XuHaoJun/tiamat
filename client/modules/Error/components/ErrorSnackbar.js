@@ -1,55 +1,55 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Map, List } from "immutable";
-import { connect } from "react-redux";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Map, List } from 'immutable';
+import { connect } from 'react-redux';
 
-import classNames from "classnames";
-import { withStyles } from "@material-ui/core/styles";
-import Snackbar from "@material-ui/core/Snackbar";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
-import { getLastError } from "../ErrorReducer";
+import { getLastError } from '../ErrorReducer';
 
 const snackbarContentStyles = {
   root: {
-    backgroundColor: "rgba(100, 0, 0, 0.87)"
-  }
+    backgroundColor: 'rgba(100, 0, 0, 0.87)',
+  },
 };
 
 const RedSnackbarBase = props => {
   const { SnackbarContentProps, ...other } = props;
   const _SnackbarContentProps = {
     className: props.classes.root,
-    ...SnackbarContentProps
+    ...SnackbarContentProps,
   };
   return <Snackbar {...other} ContentProps={_SnackbarContentProps} />;
 };
 
 RedSnackbarBase.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 const RedSnackbar = withStyles(snackbarContentStyles)(RedSnackbarBase);
 
 function getMessage(error) {
   let message;
-  if (typeof error === "string") {
+  if (typeof error === 'string') {
     message = error;
   } else if (Map.isMap(error)) {
     message =
-      error.get("message") ||
-      error.get("errmsg") ||
-      error.get("msg") ||
-      error.get("name") ||
-      error.get("error_description") ||
-      error.get("error") ||
-      "";
-    if (message && error.get("dataPath")) {
-      message = `${error.get("dataPath")} ${message}`;
+      error.get('message') ||
+      error.get('errmsg') ||
+      error.get('msg') ||
+      error.get('name') ||
+      error.get('error_description') ||
+      error.get('error') ||
+      '';
+    if (message && error.get('dataPath')) {
+      message = `${error.get('dataPath')} ${message}`;
     }
   } else {
-    message = "";
+    message = '';
   }
   return message;
 }
@@ -58,8 +58,8 @@ const closeButtonStyles = theme => {
   return {
     root: {
       width: theme.spacing.unit * 4,
-      height: theme.spacing.unit * 4
-    }
+      height: theme.spacing.unit * 4,
+    },
   };
 };
 
@@ -73,20 +73,20 @@ const CloseButtonBase = props => {
 };
 
 CloseButtonBase.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 const CloseButton = withStyles(closeButtonStyles)(CloseButtonBase);
 
 class ErrorSnackbar extends React.Component {
   static propTypes = {
-    error: PropTypes.oneOfType([PropTypes.object, PropTypes.string])
+    error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      open: false
+      open: false,
     };
   }
 
@@ -97,7 +97,7 @@ class ErrorSnackbar extends React.Component {
   }
 
   handleClose = (event, reason) => {
-    if (reason === "clickaway") {
+    if (reason === 'clickaway') {
       return;
     }
     this.setState({ open: false });
@@ -117,12 +117,7 @@ class ErrorSnackbar extends React.Component {
         autoHideDuration={6000}
         onClose={this.handleClose}
         action={[
-          <CloseButton
-            key="close"
-            aria-label="Close"
-            color="inherit"
-            onClick={this.handleClose}
-          />
+          <CloseButton key="close" aria-label="Close" color="inherit" onClick={this.handleClose} />,
         ]}
       />
     );

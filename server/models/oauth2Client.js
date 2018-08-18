@@ -1,6 +1,6 @@
-import uuid from "uuid";
-import mongoose from "mongoose";
-import oauth2AppConfig from "../configs/oauth2/app";
+import uuid from 'uuid';
+import mongoose from 'mongoose';
+import oauth2AppConfig from '../configs/oauth2/app';
 
 const Schema = mongoose.Schema;
 
@@ -9,10 +9,10 @@ const oauth2ClientSchema = new Schema({
   secret: { type: String, default: uuid.v4 },
   isOffical: { type: Boolean },
   domains: { type: [String] },
-  redirectURI: { type: String, default: "" }
+  redirectURI: { type: String, default: '' },
 });
 
-oauth2ClientSchema.index({name: 1, secret: 1});
+oauth2ClientSchema.index({ name: 1, secret: 1 });
 
 let defaultOauth2AppClient = null;
 
@@ -29,4 +29,4 @@ oauth2ClientSchema.statics.getAppClient = function() {
   });
 };
 
-export default mongoose.model("Oauth2Client", oauth2ClientSchema);
+export default mongoose.model('Oauth2Client', oauth2ClientSchema);

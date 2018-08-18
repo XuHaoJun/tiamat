@@ -1,25 +1,25 @@
-import * as React from "react";
-import { shouldComponentUpdate } from "react-immutable-render-mixin";
-import { Link } from "react-router-dom";
-import { fromJS, Map, List as ImmutableList } from "immutable";
+import * as React from 'react';
+import { shouldComponentUpdate } from 'react-immutable-render-mixin';
+import { Link } from 'react-router-dom';
+import { fromJS, Map, List as ImmutableList } from 'immutable';
 
-import { withState } from "recompose";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import Avatar from "@material-ui/core/Avatar";
-import IconButton from "@material-ui/core/IconButton";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import Collapse from "@material-ui/core/Collapse";
+import { withState } from 'recompose';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Collapse from '@material-ui/core/Collapse';
 
-import pathToRootWikiGroupTree from "../utils/pathToRootWikiGroupTree";
-import getRootWikiHref from "../utils/getRootWikiHref";
-import getWikisHref from "../utils/getWikisHref";
+import pathToRootWikiGroupTree from '../utils/pathToRootWikiGroupTree';
+import getRootWikiHref from '../utils/getRootWikiHref';
+import getWikisHref from '../utils/getWikisHref';
 
 function defaultGetHrefFunc() {
-  return "";
+  return '';
 }
 
 export function getRootWikiGroupTreeListItemsIter(
@@ -31,8 +31,8 @@ export function getRootWikiGroupTreeListItemsIter(
   base = Map()
 ) {
   if (Map.isMap(rootWikiGroupTree)) {
-    const name = rootWikiGroupTree.get("name");
-    const children = rootWikiGroupTree.get("children");
+    const name = rootWikiGroupTree.get('name');
+    const children = rootWikiGroupTree.get('children');
     const finalPath = path.concat(name);
     const nestedItems = children
       ? getRootWikiGroupTreeListItemsIter(
@@ -46,7 +46,7 @@ export function getRootWikiGroupTreeListItemsIter(
       : null;
     const href = getHrefFunc(pathToRootWikiGroupTree(finalPath));
     const value = href;
-    const enhance = withState("open", "setOpen", false);
+    const enhance = withState('open', 'setOpen', false);
     const Items = enhance(({ open, setOpen }) => {
       return (
         <React.Fragment>
@@ -64,9 +64,7 @@ export function getRootWikiGroupTreeListItemsIter(
                   setOpen(o => !o);
                 }}
               >
-                <IconButton>
-                  {open ? <ExpandLess /> : <ExpandMore />}
-                </IconButton>
+                <IconButton>{open ? <ExpandLess /> : <ExpandMore />}</IconButton>
               </ListItemSecondaryAction>
             ) : null}
           </ListItem>
@@ -112,69 +110,69 @@ export function getRootWikiGroupTreeListItems(
 
 const _rootWikiGroupTree = fromJS([
   {
-    name: "裝備",
+    name: '裝備',
     children: [
       {
-        name: "武器",
+        name: '武器',
         children: [
           {
-            name: "長劍"
+            name: '長劍',
           },
           {
-            name: "斧"
+            name: '斧',
           },
           {
-            name: "槍"
-          }
-        ]
+            name: '槍',
+          },
+        ],
       },
       {
-        name: "防具",
+        name: '防具',
         children: [
           {
-            name: "皮甲"
+            name: '皮甲',
           },
           {
-            name: "重甲"
-          }
-        ]
-      }
-    ]
+            name: '重甲',
+          },
+        ],
+      },
+    ],
   },
   {
-    name: "卡片",
+    name: '卡片',
     children: [
       {
-        name: "法師"
+        name: '法師',
       },
       {
-        name: "盜賊"
-      }
-    ]
+        name: '盜賊',
+      },
+    ],
   },
   {
-    name: "深度測試(一)",
+    name: '深度測試(一)',
     children: [
       {
-        name: "深度測試(二)",
+        name: '深度測試(二)',
         children: [
           {
-            name: "深度測試(三)",
+            name: '深度測試(三)',
             children: [
               {
-                name: "你看見我了!"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
+                name: '你看見我了!',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 ]);
 
 class RootWikiGroupTreeList extends React.Component {
   static defaultProps = {
-    baseRootWikiGroupTree: _rootWikiGroupTree
+    baseRootWikiGroupTree: _rootWikiGroupTree,
   };
 
   constructor(props) {
@@ -222,8 +220,8 @@ class RootWikiGroupTreeList extends React.Component {
             button
             component={Link}
             replace={true}
-            to={this.getWikisHref("all")}
-            value={this.getWikisHref("all")}
+            to={this.getWikisHref('all')}
+            value={this.getWikisHref('all')}
           >
             <Avatar>全</Avatar>
             <ListItemText primary="全部" />
@@ -233,8 +231,8 @@ class RootWikiGroupTreeList extends React.Component {
             button
             component={Link}
             replace={true}
-            to={this.getWikisHref("null")}
-            value={this.getWikisHref("null")}
+            to={this.getWikisHref('null')}
+            value={this.getWikisHref('null')}
           >
             <Avatar>未</Avatar>
             <ListItemText primary="未分類" />

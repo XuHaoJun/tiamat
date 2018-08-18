@@ -1,9 +1,9 @@
-import RootWiki from "../models/rootWiki";
-import Wiki from "../models/wiki";
-import dotNotationTool from "mongo-dot-notation-tool";
-import _ from "lodash";
-import car from "lodash/first";
-import cdr from "lodash/tail";
+import RootWiki from '../models/rootWiki';
+import Wiki from '../models/wiki';
+import dotNotationTool from 'mongo-dot-notation-tool';
+import _ from 'lodash';
+import car from 'lodash/first';
+import cdr from 'lodash/tail';
 
 export function getWiki(req, res) {
   const { id, name, rootWikiId } = req.params;
@@ -18,12 +18,12 @@ export function getWiki(req, res) {
     query = { name, rootWiki: rootWikiId };
   }
   Wiki.findOne(query)
-    .populate("wikiDataForm")
+    .populate('wikiDataForm')
     .exec((err, wiki) => {
       if (err) {
         res.status(403).send(err);
       } else if (!wiki) {
-        res.status(404).send("Not found.");
+        res.status(404).send('Not found.');
       } else {
         res.json({ wiki });
       }
@@ -34,15 +34,15 @@ function pathToMongoQuery(path = []) {
   if (path.length === 1) {
     return {
       $elemMatch: {
-        name: car(path)
-      }
+        name: car(path),
+      },
     };
   } else if (path.length > 1) {
     return {
       $elemMatch: {
         name: car(path),
-        children: pathToMongoQuery(cdr(path))
-      }
+        children: pathToMongoQuery(cdr(path)),
+      },
     };
   } else {
     return null;
@@ -51,17 +51,15 @@ function pathToMongoQuery(path = []) {
 
 function rootWikiGroupTreeToMongoQueryHelper(rootWikiGroupTree, path = []) {
   if (_.isPlainObject(rootWikiGroupTree)) {
-    let name = rootWikiGroupTree.name || rootWikiGroupTree["[name]"];
-    let children =
-      rootWikiGroupTree.children || rootWikiGroupTree["[children]"];
+    let name = rootWikiGroupTree.name || rootWikiGroupTree['[name]'];
+    let children = rootWikiGroupTree.children || rootWikiGroupTree['[children]'];
     if (!name && !children) {
       const flattenTree = _.values(rootWikiGroupTree)[0] || {};
       name = flattenTree.name;
       children = flattenTree.children;
     }
     if (name) {
-      const isLeaf =
-        !children || (Array.isArray(children) && children.length === 0);
+      const isLeaf = !children || (Array.isArray(children) && children.length === 0);
       if (isLeaf) {
         return pathToMongoQuery(path);
       } else {
@@ -80,14 +78,11 @@ function rootWikiGroupTreeToMongoQueryHelper(rootWikiGroupTree, path = []) {
   return null;
 }
 
-function rootWikiGroupTreeToMongoQuery(
-  rootWikiGroupTree,
-  rootField = "rootWikiGroupTree"
-) {
+function rootWikiGroupTreeToMongoQuery(rootWikiGroupTree, rootField = 'rootWikiGroupTree') {
   return {
     $or: rootWikiGroupTreeToMongoQueryHelper(rootWikiGroupTree).map(match => {
       return { [rootField]: match };
-    })
+    }),
   };
 }
 
@@ -99,11 +94,11 @@ function rootWikiGroupTreeToMongoQuery2(rootWikiGroupTree) {
       let newLeaf;
       if (Array.isArray(leaf)) {
         newLeaf = {
-          $in: leaf
+          $in: leaf,
         };
       } else {
         newLeaf = {
-          $exists: true
+          $exists: true,
         };
       }
       const newResult = Object.assign(result, { [k]: newLeaf });
@@ -119,22 +114,22 @@ export function getWikis(req, res) {
   const { rootWikiGroupTree } = reqQuery;
   const page = Number.parseInt(req.query.page, 10) || 1;
   const limit = Number.parseInt(req.query.limit, 10) || 10;
-  const sort = "-updatedAt";
+  const sort = '-updatedAt';
   if (!rootWikiId) {
-    res.status(403).send(new Error("query rootWiki must have."));
+    res.status(403).send(new Error('query rootWiki must have.'));
     return;
   }
   let query = {
-    rootWiki: rootWikiId
+    rootWiki: rootWikiId,
   };
-  if (rootWikiGroupTree === "null") {
+  if (rootWikiGroupTree === 'null') {
     query.rootWikiGroupTree = null;
-  } else if (rootWikiGroupTree && rootWikiGroupTree !== "all") {
+  } else if (rootWikiGroupTree && rootWikiGroupTree !== 'all') {
     const q = rootWikiGroupTreeToMongoQuery(rootWikiGroupTree);
     query = Object.assign(query, q);
   }
   const populate = {
-    path: "wikiDataForm"
+    path: 'wikiDataForm',
   };
   Wiki.paginate(
     query,
@@ -142,7 +137,7 @@ export function getWikis(req, res) {
       page,
       limit,
       sort,
-      populate
+      populate,
     },
     (err, result) => {
       if (err) {
@@ -160,7 +155,7 @@ export function addWiki(req, res) {
   const newWiki = new Wiki({
     name: wikiForm.name,
     content: wikiForm.content,
-    rootWiki: wikiForm.rootWikiId
+    rootWiki: wikiForm.rootWikiId,
   });
   RootWiki.findOne({ _id: rootWikiId }).exec((err1, rootWiki) => {
     if (err1) {
@@ -168,7 +163,7 @@ export function addWiki(req, res) {
       return;
     }
     if (!rootWiki) {
-      res.status(403).send("rootWiki not found");
+      res.status(403).send('rootWiki not found');
       return;
     }
     newWiki.save((err, saved) => {
