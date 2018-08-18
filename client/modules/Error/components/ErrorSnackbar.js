@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Map, List } from "immutable";
 import { connect } from "react-redux";
-import { shallowEqualImmutable } from "react-immutable-render-mixin";
 
 import classNames from "classnames";
 import { withStyles } from "@material-ui/core/styles";
@@ -24,7 +23,7 @@ const RedSnackbarBase = props => {
     className: props.classes.root,
     ...SnackbarContentProps
   };
-  return <Snackbar {...other} SnackbarContentProps={_SnackbarContentProps} />;
+  return <Snackbar {...other} ContentProps={_SnackbarContentProps} />;
 };
 
 RedSnackbarBase.propTypes = {
@@ -135,10 +134,4 @@ function mapStateToProps(store) {
   return { error };
 }
 
-function mapDispatchToProps() {
-  return {};
-}
-
-export default connect(mapStateToProps, mapDispatchToProps, null, {
-  areStatePropsEqual: shallowEqualImmutable
-})(ErrorSnackbar);
+export default connect(mapStateToProps)(ErrorSnackbar);

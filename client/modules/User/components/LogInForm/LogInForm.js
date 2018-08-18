@@ -180,7 +180,7 @@ class LogInForm extends React.Component {
             onChange={e => this.handleChange("email", e)}
             onBlur={e => this.handleBlur("email", e)}
             value={this.state.email}
-            errorText={this.state.emailError}
+            helperText={this.state.emailError}
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"
@@ -194,7 +194,7 @@ class LogInForm extends React.Component {
             label="密碼"
             onChange={e => this.handleChange("password", e)}
             value={this.state.password}
-            errorText={this.state.passwordError}
+            helperText={this.state.passwordError}
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"

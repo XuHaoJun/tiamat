@@ -1,4 +1,4 @@
-import { is, Set, List, Record } from "immutable";
+import { is, Set, Record } from "immutable";
 import defaultSameIdElesMax from "../../util/defaultSameIdElesMax";
 
 import {
@@ -64,7 +64,7 @@ export class User extends Record(USER_RECORD_DEFAULT) {
 }
 
 const USER_STATE_RECORD_DEFAULT = {
-  users: List(),
+  users: Set(),
   currentUserEmail: null,
   currentAccessToken: null
 };
@@ -72,7 +72,7 @@ const USER_STATE_RECORD_DEFAULT = {
 export class UserState extends Record(USER_STATE_RECORD_DEFAULT) {
   static fromJS({ users = [], currentUser, currentAccessToken } = {}) {
     const record = new UserState({
-      users: List(users.map(User.fromJS)),
+      users: Set(users.map(User.fromJS)),
       currentUser,
       currentAccessToken: currentAccessToken
         ? AccessToken.fromJS(currentAccessToken)
@@ -123,33 +123,33 @@ const _UserReducer = (state = initialState, action) => {
   }
 };
 
-function syncLocalDB(state) {
-  const db = connectDB();
-  if (db) {
-    if (state.currentUserEmail) {
-      db.setItem("currentUserEmail", state.currentUserEmail);
-    } else {
-      db.removeItem("currentUserEmail");
-    }
-    if (state.currentAccessToken) {
-      db.setItem("currentAccessToken", state.currentAccessToken.toJS());
-    } else {
-      db.removeItem("currentAccessToken");
-    }
-    if (state.users) {
-      db.setItem("users", state.users.toJS());
-    } else if (!state.users || state.users.count() === 0) {
-      db.removeItem("users");
-    } else {
-      db.removeItem("users");
-    }
+function syncLocalDB(db, state) {
+  if (state.currentUserEmail) {
+    db.setItem("currentUserEmail", state.currentUserEmail);
+  } else {
+    db.removeItem("currentUserEmail");
+  }
+  if (state.currentAccessToken) {
+    db.setItem("currentAccessToken", state.currentAccessToken.toJS());
+  } else {
+    db.removeItem("currentAccessToken");
+  }
+  if (state.users) {
+    db.setItem("users", state.users.toJS());
+  } else if (!state.users || state.users.count() === 0) {
+    db.removeItem("users");
+  } else {
+    db.removeItem("users");
   }
 }
 
 const UserReducer = (state = initialState, action) => {
   const nextState = _UserReducer(state, action);
   if (!is(state, nextState)) {
-    syncLocalDB(nextState);
+    const db = connectDB();
+    if (db) {
+      syncLocalDB(db, nextState);
+    }
   }
   return nextState;
 };

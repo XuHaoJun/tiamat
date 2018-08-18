@@ -245,7 +245,7 @@ class SignUpForm extends React.PureComponent {
             value={this.state.email}
             onBlur={this.handleBlur.bind(this, "email")}
             onChange={this.handleChange.bind(this, "email")}
-            errorText={this.state.errors.email}
+            helperText={this.state.errors.email}
           />
           <br />
           <TextField
@@ -257,7 +257,7 @@ class SignUpForm extends React.PureComponent {
             type="password"
             value={this.state.password}
             onChange={this.handleChange.bind(this, "password")}
-            errorText={this.state.errors.password}
+            helperText={this.state.errors.password}
           />
           <br />
           <TextField
@@ -266,7 +266,7 @@ class SignUpForm extends React.PureComponent {
             type="password"
             value={this.state.confirmPassword}
             onChange={this.handleChange.bind(this, "confirmPassword")}
-            errorText={this.state.errors.confirmPassword}
+            helperText={this.state.errors.confirmPassword}
           />
           <br />
           <Button

@@ -1,6 +1,9 @@
 import { Router } from "express";
 import forceSSL from "express-force-ssl";
 import RateLimit from "express-rate-limit";
+import mongoose from "mongoose";
+
+const { MongoError } = mongoose.mongo;
 
 const router = new Router();
 
@@ -8,20 +11,25 @@ const router = new Router();
 //   router.use(forceSSL);
 // }
 
-router.use((req, res, next) => {
+const saltedErrorSend = (req, res, next) => {
   const oldSend = res.send;
   res.send = function f(...args) {
     let data = args.shift();
-    if (data && data.name === "MongoError") {
-      data = data.toJSON();
-      if (data.op) {
-        delete data.op;
-      }
+    if (typeof data === "object" && data && data instanceof MongoError) {
+      const saltedErr = {
+        name: data.name,
+        message: data.message,
+        errmsg: data.errmsg,
+        code: data.code
+      };
+      data = saltedErr;
     }
     oldSend.apply(res, [data, ...args]);
   };
   next();
-});
+};
+
+router.use(saltedErrorSend);
 
 function skipLocalRequestLimit(req) {
   const ip =
