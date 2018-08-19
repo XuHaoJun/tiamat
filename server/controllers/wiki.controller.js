@@ -1,9 +1,10 @@
-import RootWiki from '../models/rootWiki';
-import Wiki from '../models/wiki';
 import dotNotationTool from 'mongo-dot-notation-tool';
 import _ from 'lodash';
 import car from 'lodash/first';
 import cdr from 'lodash/tail';
+
+import RootWiki from '../models/rootWiki';
+import Wiki from '../models/wiki';
 
 export function getWiki(req, res) {
   const { id, name, rootWikiId } = req.params;
@@ -55,8 +56,8 @@ function rootWikiGroupTreeToMongoQueryHelper(rootWikiGroupTree, path = []) {
     let children = rootWikiGroupTree.children || rootWikiGroupTree['[children]'];
     if (!name && !children) {
       const flattenTree = _.values(rootWikiGroupTree)[0] || {};
-      name = flattenTree.name;
-      children = flattenTree.children;
+      name = flattenTree.name; // eslint-disable-line
+      children = flattenTree.children; // eslint-disable-line
     }
     if (name) {
       const isLeaf = !children || (Array.isArray(children) && children.length === 0);
@@ -69,7 +70,7 @@ function rootWikiGroupTreeToMongoQueryHelper(rootWikiGroupTree, path = []) {
   } else if (Array.isArray(rootWikiGroupTree)) {
     return _.flatten(
       rootWikiGroupTree.map(node => {
-        const name = node.name;
+        const { name } = node;
         const q = rootWikiGroupTreeToMongoQueryHelper(node, path.concat(name));
         return q;
       })
@@ -86,27 +87,27 @@ function rootWikiGroupTreeToMongoQuery(rootWikiGroupTree, rootField = 'rootWikiG
   };
 }
 
-function rootWikiGroupTreeToMongoQuery2(rootWikiGroupTree) {
-  const encoded = dotNotationTool.encode({ rootWikiGroupTree });
-  return _.reduce(
-    encoded,
-    (result, leaf, k) => {
-      let newLeaf;
-      if (Array.isArray(leaf)) {
-        newLeaf = {
-          $in: leaf,
-        };
-      } else {
-        newLeaf = {
-          $exists: true,
-        };
-      }
-      const newResult = Object.assign(result, { [k]: newLeaf });
-      return newResult;
-    },
-    {}
-  );
-}
+// function rootWikiGroupTreeToMongoQuery2(rootWikiGroupTree) {
+//   const encoded = dotNotationTool.encode({ rootWikiGroupTree });
+//   return _.reduce(
+//     encoded,
+//     (result, leaf, k) => {
+//       let newLeaf;
+//       if (Array.isArray(leaf)) {
+//         newLeaf = {
+//           $in: leaf,
+//         };
+//       } else {
+//         newLeaf = {
+//           $exists: true,
+//         };
+//       }
+//       const newResult = Object.assign(result, { [k]: newLeaf });
+//       return newResult;
+//     },
+//     {}
+//   );
+// }
 
 export function getWikis(req, res) {
   const { rootWikiId } = req.params;
@@ -173,5 +174,36 @@ export function addWiki(req, res) {
       }
       res.json({ wiki: saved });
     });
+  });
+}
+
+// TODO
+// add user
+export function updateWiki(req, res) {
+  const _id = req.params.id;
+  const { user, wiki } = req.body;
+  const { content, data } = wiki;
+  if (!_id || (!content && !data)) {
+    res.status(403).send(new Error('incorrect format.'));
+    return;
+  }
+  const getNextUpdate = () => {
+    let nextUpdate = { updatedAt: Date.now() };
+    if (content) {
+      nextUpdate = { content, ...nextUpdate };
+    }
+    if (data) {
+      nextUpdate = { data, ...nextUpdate };
+    }
+    return nextUpdate;
+  };
+  const nextUpdate = getNextUpdate();
+  const update = { $set: nextUpdate };
+  Wiki.findByIdAndUpdate(_id, update, { upsert: false }).exec((err, updatedWiki) => {
+    if (err) {
+      res.status(403).send(err);
+    } else {
+      res.json({ wiki: updatedWiki });
+    }
   });
 }

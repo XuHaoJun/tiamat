@@ -78,3 +78,14 @@ export function addWikiRequest(wiki) {
       .catch(err => defaultRequestCatchHandler(dispatch, err));
   };
 }
+
+export function updateWikiRequest(update) {
+  return dispatch => {
+    return callApi('wikis', 'patch', update)
+      .then(body => {
+        dispatch(addWiki(body.wiki));
+        return body.wiki;
+      })
+      .catch(err => defaultRequestCatchHandler(dispatch, err));
+  };
+}
