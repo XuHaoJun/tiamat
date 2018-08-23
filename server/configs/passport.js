@@ -57,39 +57,32 @@ function clientAuth(id, secret, done) {
   );
 }
 
-function oauth2(providerName, accessToken, refreshToken, profile, cb) {
+// TODO
+// support multi passport.
+function findOrInsertUser(oauth2Info) {
+  const { providerName, accessToken, refreshToken, profile, cb } = oauth2Info;
   const thirdUserId = profile.id;
   const query = {
     'passports.providerName': providerName,
     'passports.thirdUserId': thirdUserId,
   };
-  User.findOne(query)
-    .exec()
+  const email = profile.emails[0].value.toLowerCase();
+  const oauth2Passport = {
+    providerName,
+    thirdUserId,
+    profile,
+  };
+  const userArgs = {
+    email,
+    password: genRandomPassword(),
+    passports: [oauth2Passport],
+  };
+  const newUser = new User(userArgs);
+  const update = { $setOnInsert: newUser };
+  const opts = { new: true, upsert: true };
+  return User.findOneAndUpdate(query, update, opts)
     .then(user => {
-      if (!user) {
-        const email = profile.emails[0].value.toLowerCase();
-        const props = {
-          email,
-          password: genRandomPassword(),
-          passports: [
-            {
-              providerName,
-              thirdUserId,
-              profile,
-            },
-          ],
-        };
-        const newUser = new User(props);
-        // TODO check email duplicate.
-        newUser.save(err => {
-          if (err) {
-            return cb(err, null);
-          }
-          return cb(null, newUser);
-        });
-      } else {
-        cb(null, user);
-      }
+      cb(null, user);
     })
     .catch(err => {
       cb(err, null);
@@ -107,7 +100,14 @@ export default function config() {
   if (facebookConfig.clientID && facebookConfig.clientSecret) {
     passport.use(
       new FacebookStrategy(facebookConfig, (accessToken, refreshToken, profile, cb) => {
-        oauth2('facebook', accessToken, refreshToken, profile, cb);
+        const oauth2Info = {
+          providerName: 'facebook',
+          accessToken,
+          refreshToken,
+          profile,
+          cb,
+        };
+        findOrInsertUser(oauth2Info);
       })
     );
   }
@@ -115,7 +115,14 @@ export default function config() {
   if (googleConfig.clientID && googleConfig.clientSecret) {
     passport.use(
       new GoogleStrategy(googleConfig, (accessToken, refreshToken, profile, cb) => {
-        oauth2('google', accessToken, refreshToken, profile, cb);
+        const oauth2Info = {
+          providerName: 'google',
+          accessToken,
+          refreshToken,
+          profile,
+          cb,
+        };
+        findOrInsertUser(oauth2Info);
       })
     );
   }
