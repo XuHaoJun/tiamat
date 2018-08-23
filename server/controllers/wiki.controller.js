@@ -178,7 +178,8 @@ export function addWiki(req, res) {
 }
 
 // TODO
-// add user
+// add user bind.
+// add validate.
 export function updateWiki(req, res) {
   const _id = req.params.id;
   const { user, wiki } = req.body;
@@ -199,7 +200,7 @@ export function updateWiki(req, res) {
   };
   const nextUpdate = getNextUpdate();
   const update = { $set: nextUpdate };
-  Wiki.findByIdAndUpdate(_id, update, { upsert: false }).exec((err, updatedWiki) => {
+  Wiki.findByIdAndUpdate(_id, update, { upsert: false, new: true }).exec((err, updatedWiki) => {
     if (err) {
       res.status(403).send(err);
     } else {

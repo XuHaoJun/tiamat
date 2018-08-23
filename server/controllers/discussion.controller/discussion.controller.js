@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
+import Ajv from 'ajv';
+
 import Discussion from '../../models/discussion';
 import ForumBoard from '../../models/forumBoard';
 
-import Ajv from 'ajv';
 import rootDiscussionFormSchema from '../../../client/modules/Discussion/components/RootDiscussionForm/schema.json';
 import childDiscussionFormSchema from '../../../client/modules/Discussion/components/ChildDiscussionForm/schema.json';
 import serverRootDiscussionFormSchema from './schemas/rootDiscussionFormSchema.json';
@@ -167,6 +168,10 @@ export function addDiscussion(req, res) {
         const socket = io.of(nsp);
         socket.emit('addDiscussion', saved);
         res.json({ discussion: saved });
+        const { parentDiscussion } = saved;
+        if (parentDiscussion) {
+          Discussion.update({ _id: parentDiscussion }, { $inc: { childDiscussionCount: 1 } });
+        }
         return saved;
       });
     })

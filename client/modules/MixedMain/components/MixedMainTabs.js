@@ -5,8 +5,8 @@ import Loadable from 'react-loadable';
 import { connect } from 'react-redux';
 import pure from 'recompose/pure';
 
-import Tabs from '../../../components/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Tabs from '../../../components/Tabs';
 import EnhancedSwipeableViews from '../../../components/EnhancedSwipableViews';
 
 import RootDiscussionList from '../../Discussion/components/RootDiscussionList';

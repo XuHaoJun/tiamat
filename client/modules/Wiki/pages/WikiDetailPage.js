@@ -2,6 +2,7 @@ import React from 'react';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import { hot } from 'react-hot-loader';
+import { replace } from 'react-router-redux';
 
 import compose from 'recompose/compose';
 import { withStyles } from '@material-ui/core/styles';
@@ -81,6 +82,7 @@ class WikiDetailPage extends React.Component {
   };
 
   render() {
+    const { classes } = this.props;
     const { wiki, wikiId, rootWikiId } = this.props;
     if (!wiki) {
       return <CenterCircularProgress />;
@@ -94,9 +96,10 @@ class WikiDetailPage extends React.Component {
         <WikiDetailTabs
           // ui
           id="WikiDetailPage/WikiDetailTabs"
-          slideClassName={this.props.classes.slideHeight}
+          slideClassName={classes.slideHeight}
           // data
           wikiId={wikiId}
+          wiki={wiki}
           rootWikiId={rootWikiId}
         />
       </div>

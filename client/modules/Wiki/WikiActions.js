@@ -60,9 +60,9 @@ export function fetchWikis(
   const url = `rootWikis/${rootWikiId}/wikis?${query}`;
   return dispatch => {
     return callApi(url, 'get', null, reqConfig)
-      .then(data => {
-        dispatch(addWikis(data.wikis));
-        return data.wikis;
+      .then(body => {
+        dispatch(addWikis(body.wikis));
+        return body.wikis;
       })
       .catch(err => defaultRequestCatchHandler(dispatch, err));
   };
@@ -71,17 +71,17 @@ export function fetchWikis(
 export function addWikiRequest(wiki) {
   return dispatch => {
     return callApi('wikis', 'post', { wiki })
-      .then(res => {
-        dispatch(addWiki(res.wiki));
-        return res.wiki;
+      .then(body => {
+        dispatch(addWiki(body.wiki));
+        return body.wiki;
       })
       .catch(err => defaultRequestCatchHandler(dispatch, err));
   };
 }
 
-export function updateWikiRequest(update) {
+export function updateWikiRequest(wikiId, update) {
   return dispatch => {
-    return callApi('wikis', 'patch', update)
+    return callApi(`wikis/${wikiId}`, 'patch', update)
       .then(body => {
         dispatch(addWiki(body.wiki));
         return body.wiki;

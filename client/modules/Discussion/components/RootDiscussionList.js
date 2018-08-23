@@ -8,10 +8,10 @@ import { Link } from 'react-router-dom';
 
 import compose from 'recompose/compose';
 import { withStyles } from '@material-ui/core/styles';
-import List from '../../../components/List/EnhancedList';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import List from '../../../components/List/EnhancedList';
 
 import UserAvatar from '../../User/components/UserAvatar';
 
@@ -63,7 +63,8 @@ class RootDiscussionList extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.forumBoardGroup !== nextProps.forumBoardGroup) {
-      const nextPageTable = this.state.pageTable.merge(this.createPageInfo(nextProps, { page: 1 }));
+      const { pageTable } = this.state;
+      const nextPageTable = pageTable.merge(this.createPageInfo(nextProps, { page: 1 }));
       this.setState({ pageTable: nextPageTable }, () => {
         this.handleRequestMore({ direction: 'top' });
       });
@@ -128,36 +129,36 @@ class RootDiscussionList extends React.Component {
   };
 
   sortBy = payload => {
-    return -1 * new Date(payload.get('updatedAt')).getTime();
+    return -1 * new Date(payload.updatedAt).getTime();
   };
 
   listItemHref = payload => {
-    return `/discussions/${payload.get('_id')}`;
+    return `/discussions/${payload._id}`;
   };
 
   listItemSecondaryText = discussion => {
     const { isFirstRender } = this.props;
     const fromNowTime = isFirstRender
-      ? moment(discussion.get('updatedAt')).format('ll')
-      : moment(discussion.get('updatedAt')).fromNow();
-    const descendantCount = discussion.get('descendantCount') || 0;
+      ? moment(discussion.updatedAt).format('ll')
+      : moment(discussion.updatedAt).fromNow();
+    const childDiscussionCount = discussion.childDiscussionCount || 0;
     const Delimeter = () => <span style={{ margin: '0 4px' }}>•</span>;
-    const authorBasicInfo = discussion.get('authorBasicInfo');
-    const displayName = authorBasicInfo ? authorBasicInfo.get('displayName') : 'Guest';
+    const { authorBasicInfo } = discussion;
+    const displayName = authorBasicInfo ? authorBasicInfo.displayName : 'Guest';
     return (
       <span>
         {displayName}
         <Delimeter />
         {`${fromNowTime}`}
         <Delimeter />
-        {`${descendantCount}`}
+        {`${childDiscussionCount}`}
         <span style={{ marginLeft: 4 }}>留言</span>
       </span>
     );
   };
 
   listItemLeftAvatar = discussion => {
-    const authorBasicInfo = discussion.get('authorBasicInfo');
+    const { authorBasicInfo } = discussion;
     return <UserAvatar user={authorBasicInfo} />;
   };
 

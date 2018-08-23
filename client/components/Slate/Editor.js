@@ -302,8 +302,13 @@ class Editor extends React.Component {
         state: change.value,
       },
       () => {
-        if (this.props.onChangeContent) {
-          this.props.onChangeContent(change);
+        const { onChangeContent } = this.props;
+        if (onChangeContent) {
+          onChangeContent(change);
+        }
+        const { onChange } = this.props;
+        if (onChange) {
+          onChange(change);
         }
       }
     );

@@ -15,7 +15,7 @@ import MixedMainTabs, {
 } from '../components/MixedMainTabs';
 
 /* Actions and Selectors */
-import { replace } from 'react-router-redux';
+import { replace } from 'react-router-redux'; // eslint-disable-line
 import { fetchWikis } from '../../Wiki/WikiActions';
 import { fetchRootWikiById } from '../../RootWiki/RootWikiActions';
 import { getRootWiki } from '../../RootWiki/RootWikiReducer';

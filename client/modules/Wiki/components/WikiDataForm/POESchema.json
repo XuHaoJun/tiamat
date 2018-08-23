@@ -1,147 +1,198 @@
 {
-  "definitions": {
-    "name": {
-      "enum": ["+n 全能力", "+n 力量", "+n 敏捷", "+n 智慧", "鋼鐵反射", "閃電傷害造成中毒"],
-      "default": "+n 全能力",
-      "title": "屬性詞墜",
-      "type": "string"
-    },
-    "fixed": {
-      "type": "integer",
-      "title": "數值",
-      "default": 0
-    },
-    "range": {
-      "type": "object",
-      "properties": {
-        "max": {
-          "default": 0,
-          "type": "integer"
-        },
-        "min": {
-          "default": 0,
-          "type": "integer"
-        }
+  "jsonSchema": {
+    "definitions": {
+      "name": {
+        "enum": ["+n 全能力", "+n 力量", "+n 敏捷", "+n 智慧", "鋼鐵反射", "閃電傷害造成中毒"],
+        "default": "+n 全能力",
+        "title": "屬性詞墜",
+        "type": "string"
       },
-      "required": ["min", "max"],
-      "title": "數值"
-    },
-    "value": {
-      "oneOf": [
-        {
-          "$ref": "#/definitions/fixed"
-        },
-        {
-          "$ref": "#/definitions/range"
-        }
-      ]
-    },
-    "valueType": {
-      "enum": ["fixed", "range"],
-      "enumNames": ["固定", "範圍"],
-      "title": "數值-類型",
-      "type": "string"
-    },
-    "valueTypeDependencies": {
-      "oneOf": [
-        {
-          "properties": {
-            "valueType": {
-              "enum": ["fixed"]
-            },
-            "value": {
-              "$ref": "#/definitions/fixed"
-            }
+      "fixed": {
+        "type": "integer",
+        "title": "數值",
+        "default": 0
+      },
+      "range": {
+        "type": "object",
+        "properties": {
+          "max": {
+            "default": 0,
+            "type": "integer"
           },
-          "required": ["value", "valueType"]
+          "min": {
+            "default": 0,
+            "type": "integer"
+          }
         },
-        {
-          "properties": {
-            "valueType": {
-              "enum": ["range"]
-            },
-            "value": {
-              "$ref": "#/definitions/range"
-            }
+        "required": ["min", "max"],
+        "title": "數值"
+      },
+      "value": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/fixed"
           },
-          "required": ["value", "valueType"]
-        }
-      ]
-    },
-    "nameDependencies": {
-      "oneOf": [
-        {
+          {
+            "$ref": "#/definitions/range"
+          }
+        ]
+      },
+      "valueType": {
+        "enum": ["fixed", "range"],
+        "enumNames": ["固定", "範圍"],
+        "title": "數值-類型",
+        "type": "string"
+      },
+      "valueTypeDependencies": {
+        "oneOf": [
+          {
+            "properties": {
+              "valueType": {
+                "enum": ["fixed"]
+              },
+              "value": {
+                "$ref": "#/definitions/fixed"
+              }
+            },
+            "required": ["value", "valueType"]
+          },
+          {
+            "properties": {
+              "valueType": {
+                "enum": ["range"]
+              },
+              "value": {
+                "$ref": "#/definitions/range"
+              }
+            },
+            "required": ["value", "valueType"]
+          }
+        ]
+      },
+      "nameDependencies": {
+        "oneOf": [
+          {
+            "properties": {
+              "name": {
+                "enum": ["+n 全能力", "+n 力量", "+n 敏捷", "+n 智慧"]
+              },
+              "valueType": {
+                "$ref": "#/definitions/valueType"
+              }
+            },
+            "required": ["valueType"]
+          },
+          {
+            "properties": {
+              "name": {
+                "enum": ["鋼鐵反射", "閃電傷害造成中毒"]
+              }
+            },
+            "not": {
+              "required": ["valueType", "value"]
+            }
+          }
+        ]
+      },
+      "mod": {
+        "type": "object",
+        "$typeCheck": {
           "properties": {
             "name": {
-              "enum": ["+n 全能力", "+n 力量", "+n 敏捷", "+n 智慧"]
+              "$ref": "#/definitions/name"
             },
             "valueType": {
               "$ref": "#/definitions/valueType"
+            },
+            "value": {
+              "$ref": "#/definitions/value"
             }
           },
-          "required": ["valueType"]
+          "dependencies": {},
+          "additionalProperties": false
         },
-        {
-          "properties": {
-            "name": {
-              "enum": ["鋼鐵反射", "閃電傷害造成中毒"]
-            }
-          },
-          "not": {
-            "required": ["valueType", "value"]
-          }
-        }
-      ]
-    },
-    "mod": {
-      "type": "object",
-      "$typeCheck": {
         "properties": {
           "name": {
             "$ref": "#/definitions/name"
-          },
-          "valueType": {
-            "$ref": "#/definitions/valueType"
-          },
-          "value": {
-            "$ref": "#/definitions/value"
           }
         },
-        "dependencies": {},
-        "additionalProperties": false
+        "required": ["name"],
+        "dependencies": {
+          "name": {
+            "$ref": "#/definitions/nameDependencies"
+          },
+          "valueType": {
+            "$ref": "#/definitions/valueTypeDependencies"
+          }
+        }
+      }
+    },
+    "title": "流亡黯道-裝備(基於 JSON Schema 產生)",
+    "type": "object",
+    "required": ["type"],
+    "additionalProperties": false,
+    "properties": {
+      "type": {
+        "default": "單手劍",
+        "enum": [
+          "單手劍",
+          "法杖",
+          "單手斧",
+          "單手錘",
+          "爪",
+          "雙手斧",
+          "弓",
+          "匕首",
+          "細劍",
+          "權杖",
+          "雙手劍",
+          "雙手錘",
+          "長杖"
+        ],
+        "title": "類型",
+        "type": "string"
       },
-      "properties": {
-        "name": {
-          "$ref": "#/definitions/name"
+      "atk": {
+        "title": "物理傷害",
+        "type": "object",
+        "properties": {
+          "range": {
+            "$ref": "#/definitions/range"
+          }
         }
       },
-      "required": ["name"],
-      "dependencies": {
-        "name": {
-          "$ref": "#/definitions/nameDependencies"
+      "crit": {
+        "title": "爆擊率",
+        "default": 1,
+        "type": "number"
+      },
+      "atkSpeed": {
+        "title": "每秒攻擊次數",
+        "default": 1,
+        "type": "number"
+      },
+      "mods": {
+        "items": {
+          "$ref": "#/definitions/mod"
         },
-        "valueType": {
-          "$ref": "#/definitions/valueTypeDependencies"
-        }
+        "type": "array"
       }
     }
   },
-  "title": "流亡黯道-裝備(基於 JSON Schema 產生)",
-  "type": "object",
-  "required": ["type"],
-  "additionalProperties": false,
-  "properties": {
+  "uiSchema": {
+    "ui:order": ["type", "atk", "crit", "atkSpeed", "mods", "*"],
+    "atk": {
+      "range": {
+        "ui:order": ["min", "max"]
+      }
+    },
     "mods": {
       "items": {
-        "$ref": "#/definitions/mod"
-      },
-      "type": "array"
-    },
-    "type": {
-      "default": "單手劍",
-      "enum": ["單手劍", "爪"],
-      "title": "類型",
-      "type": "string"
+        "ui:order": ["name", "valueType", "value", "*"],
+        "value": {
+          "ui:order": ["min", "max"]
+        }
+      }
     }
   }
 }
