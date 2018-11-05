@@ -188,7 +188,7 @@
     },
     "mods": {
       "items": {
-        "ui:order": ["name", "valueType", "value", "*"],
+        "ui:order": ["name", "valueType", "*"],
         "value": {
           "ui:order": ["min", "max"]
         }

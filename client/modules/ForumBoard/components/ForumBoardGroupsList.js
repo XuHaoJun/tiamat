@@ -4,9 +4,9 @@ import { List } from 'immutable';
 import { shallowEqualImmutable } from 'react-immutable-render-mixin';
 
 import { Link } from 'react-router-dom';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import ListItemText from '@material-ui/core/ListItem';
+import MuiList from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import RightArrowIcon from '@material-ui/icons/KeyboardArrowRight';
 
@@ -60,12 +60,12 @@ class ForumBoardGroupsList extends React.Component {
     const dataSource = groups.insert(0, defaultAllGroup).sortBy(this.sortBy);
     const { selectedGroup } = this.state;
     return (
-      <MenuList role="menu">
+      <MuiList>
         {dataSource.map(group => {
           const selected = selectedGroup ? selectedGroup === group : group === defaultAllGroup;
           const to = this.listItemHref(group);
           return (
-            <MenuItem
+            <ListItem
               key={group}
               component={Link}
               to={to}
@@ -77,10 +77,10 @@ class ForumBoardGroupsList extends React.Component {
               <ListItemIcon>
                 <RightArrowIcon />
               </ListItemIcon>
-            </MenuItem>
+            </ListItem>
           );
         })}
-      </MenuList>
+      </MuiList>
     );
   }
 }

@@ -11,7 +11,7 @@ import Zoom from '@material-ui/core/Zoom';
 import { ROOT_WIKI_OR_WIKI_SLIDE } from './MixedMainTabs';
 import RootWikiMoreButton from '../../RootWiki/components/RootWikiMoreButton';
 
-class ActionButton extends React.PureComponent {
+class ActionButton extends React.Component {
   static propTypes = {
     isOpen: PropTypes.bool,
     iconType: PropTypes.oneOf(['create', 'add']),

@@ -114,7 +114,7 @@ class RootWikiGroupTreeForm extends React.Component {
     const styles = getStyles();
     return (
       <div>
-        <h1>(尚未完成)</h1>
+        {/* <h1>(尚未完成)</h1> */}
         <SortableTree
           style={styles.treeContainer}
           isVirtualized={false}
