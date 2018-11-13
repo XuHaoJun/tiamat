@@ -11,7 +11,6 @@ const postcssReporter = require('postcss-reporter');
 const cssnano = require('cssnano');
 const WebpackBundleSizeAnalyzerPlugin = require('webpack-bundle-size-analyzer')
   .WebpackBundleSizeAnalyzerPlugin;
-const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 
 module.exports = {
   devtool: 'hidden-source-map',
@@ -184,7 +183,6 @@ module.exports = {
     }),
     new webpack.optimize.ModuleConcatenationPlugin(),
     new WebpackBundleSizeAnalyzerPlugin('./plain-report.txt'),
-    new ScriptExtHtmlWebpackPlugin({ module: /\.js$/ }),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(zh-tw|en)/),
     new SWPrecacheWebpackPlugin({
       cacheId: 'tiamat',
