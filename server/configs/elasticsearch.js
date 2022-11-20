@@ -1,7 +1,7 @@
-import elasticsearch from 'elasticsearch';
+// import elasticsearch from 'elasticsearch';
 
-const url = process.env.BONSAI_URL || 'http://localhost:9200';
+// const url = process.env.BONSAI_URL || 'http://localhost:9200';
 
-export default {
-  esClient: elasticsearch.Client({ host: url }),
-};
+// export default {
+//   esClient: elasticsearch.Client({ host: url }),
+// };

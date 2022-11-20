@@ -1,14 +1,46 @@
-FROM node
-MAINTAINER jaga santagostino <kandros5591@gmail.com>
+FROM node:9.11.2-alpine AS base-stage
+WORKDIR /app
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+#
+## Dependencies Stage
+FROM base-stage AS dependencies-stage
+# for node-gyp build 
+RUN apk add --no-cache build-base python2 python3
+COPY package.json yarn.lock ./
+# 只安裝 production 相關模組，並複製出來，準備給 Release Stage 使用
+RUN yarn install --frozen-lockfile --production
+RUN cp -R node_modules /production_node_modules
+# prod & dev 模組全部安裝
+RUN yarn install --frozen-lockfile
 
-COPY package.json /usr/src/app
-RUN npm install
-COPY . /usr/src/app
+# 
+## Build Stage
+FROM dependencies-stage AS build-stage
+ENV NODE_ENV=production
 
+COPY assets assets
+COPY Intl Intl
+COPY config config
+COPY server server
+COPY client client
+COPY package.json yarn.lock .babelrc .eslintignore .eslintrc .tern-project index.js mern.json webpack.config.babel.js webpack.config.prod.js webpack.config.server.js  ./
+
+RUN npm run build:all
+
+
+#
+## Release Stage 
+FROM base-stage AS release-stage
 ENV NODE_ENV production
 
+COPY --from=build-stage /app/assets assets
+COPY --from=build-stage /app/package.json package.json
+COPY --from=dependencies-stage /production_node_modules node_modules
+COPY --from=build-stage /app/index.js index.js
+COPY --from=build-stage /app/dist dist
+COPY --from=build-stage /app/build build
+
 EXPOSE 8000
-CMD ["npm", "run", "build"]
+
+CMD []
+ENTRYPOINT ["npm", "run", "start:prod"]

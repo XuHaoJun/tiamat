@@ -3,7 +3,7 @@ import server from './server';
 import oauth2 from './oauth2';
 import mongoDB from './mongoDB';
 import passport from './passport';
-import elasticsearch from './elasticsearch';
+// import elasticsearch from './elasticsearch';
 
 export default {
   googleAnalytics,
@@ -11,5 +11,5 @@ export default {
   oauth2,
   mongoDB,
   passport,
-  elasticsearch,
+  // elasticsearch,
 };
