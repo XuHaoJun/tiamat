@@ -15,57 +15,66 @@ const debug = Debug('slateMigrate');
 
 const Models = [Discussion, RootWiki, Wiki];
 
-// refactor to async await
-function migrate(Model) {
-  return Model.find({})
-    .exec()
-    .then(ms => {
-      const ps = [];
-      for (const m of ms) {
-        let change = false;
-        const { content } = m;
-        if (content) {
-          if (content.kind) {
-            delete content.kind;
-            change = true;
-          }
-          for (const { node } of new RecursiveIterator(content)) {
-            let kindName = 'kind';
-            if (semver.satisfies(semver.coerce(packageInfo.dependencies.slate), '>= 0.32.0')) {
-              if (node.kind) {
-                node.object = node.kind;
-                delete node.kind;
-                change = true;
-              }
-              kindName = 'object';
+async function migrate(Model) {
+  try {
+    const documents = await Model.find({}).exec();
+    const updatePromises = [];
+
+    for (const doc of documents) {
+      let change = false;
+      const { content } = doc;
+      
+      if (content) {
+        if (content.kind) {
+          delete content.kind;
+          change = true;
+        }
+
+        for (const { node } of new RecursiveIterator(content)) {
+          let kindName = 'kind';
+          
+          if (semver.satisfies(semver.coerce(packageInfo.dependencies.slate), '>= 0.32.0')) {
+            if (node.kind) {
+              node.object = node.kind;
+              delete node.kind;
+              change = true;
             }
-            if (semver.satisfies(semver.coerce(packageInfo.dependencies.slate), '>= 0.27.0')) {
-              if (node[kindName] === 'text' && node.ranges) {
-                debug(m._id, 'text ranges to leaves');
-                node.leaves = node.ranges;
-                delete node.ranges;
-                change = true;
-              }
-            }
+            kindName = 'object';
           }
-          if (change) {
-            const updatePromise = Model.update({ _id: m._id, __v: m.__v }, { $set: { content } })
-              .then(updatedM => {
-                if (!updatedM) {
-                  console.error(m._id, 'not found');
-                } else {
-                  console.log(m._id, 'sucess');
-                }
-              })
-              .catch(err => {
-                console.error(m._id, err);
-              });
-            ps.push(updatePromise);
+
+          if (semver.satisfies(semver.coerce(packageInfo.dependencies.slate), '>= 0.27.0')) {
+            if (node[kindName] === 'text' && node.ranges) {
+              debug(doc._id, 'text ranges to leaves');
+              node.leaves = node.ranges;
+              delete node.ranges;
+              change = true;
+            }
           }
         }
+
+        if (change) {
+          const updatePromise = Model.update({ _id: doc._id, __v: doc.__v }, { $set: { content } })
+            .then(updatedDoc => {
+              if (!updatedDoc) {
+                console.error(doc._id, 'not found');
+              } else {
+                console.log(doc._id, 'success');
+              }
+            })
+            .catch(err => {
+              console.error(doc._id, err);
+            });
+          
+          updatePromises.push(updatePromise);
+        }
       }
-      return Promise.all(ps);
-    });
+    }
+
+    await Promise.all(updatePromises);
+  } catch (err) {
+    console.error('Migration failed:', err);
+    throw err;
+  }
 }
 
 mongoose.connection.on('connected', () => {

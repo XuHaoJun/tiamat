@@ -7,40 +7,38 @@ import User from './models/user';
 
 import appOauth2ClientConfig from './configs/oauth2/app';
 
-function createDefaultOauth2Client() {
+async function createDefaultOauth2Client() {
   const oauth2ClientName = appOauth2ClientConfig.name;
-  Oauth2Client.findOne(
-    {
+  try {
+    const oauth2Client = await Oauth2Client.findOne({
       name: oauth2ClientName,
       isOffical: true,
-    },
-    (err, oauth2Client) => {
-      if (!oauth2Client) {
-        const name = oauth2ClientName;
-        const args = {
-          name,
-          isOffical: true,
-        };
-        const newOauth2Client = new Oauth2Client(args);
-        newOauth2Client.save();
-      }
+    });
+    
+    if (!oauth2Client) {
+      const args = {
+        name: oauth2ClientName,
+        isOffical: true,
+      };
+      const newOauth2Client = new Oauth2Client(args);
+      await newOauth2Client.save();
     }
-  );
+  } catch (err) {
+    console.error('Error creating default OAuth2 client:', err);
+  }
 }
 
-function createDefaultAdminUser() {
+async function createDefaultAdminUser() {
   const email = 'admin@gmail.com';
-  User.findOne(
-    {
-      email,
-    },
-    (err, user) => {
-      if (!user) {
-        const newUser = new User({ email, password: 'admin' });
-        newUser.save();
-      }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      const newUser = new User({ email, password: 'admin' });
+      await newUser.save();
     }
-  );
+  } catch (err) {
+    console.error('Error creating default admin user:', err);
+  }
 }
 
 function importForumBoard() {
@@ -120,13 +118,16 @@ function importForumBoard() {
   return ps;
 }
 
-export default function dummy() {
-  createDefaultOauth2Client();
-  createDefaultAdminUser();
-  Promise.all(importForumBoard()).then(() => {
-    const stream = ForumBoard.synchronize();
-    stream.on('error', err => {
-      console.log(err); // eslint-disable-line
-    });
-  });
+export default async function dummy() {
+  try {
+    await createDefaultOauth2Client();
+    await createDefaultAdminUser();
+    await Promise.all(importForumBoard());
+    // const stream = ForumBoard.synchronize();
+    // stream.on('error', err => {
+    //   console.error('ForumBoard sync error:', err);
+    // });
+  } catch (err) {
+    console.error('Error in dummy data initialization:', err);
+  }
 }

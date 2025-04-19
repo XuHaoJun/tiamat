@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
-import mongoosastic from 'mongoosastic';
+import mongoosePaginate from 'mongoose-paginate-v2';
 import contentToText from '../util/contentToText';
 import elasticsearchConfig from '../configs/elasticsearch';
 
@@ -98,7 +97,5 @@ discussionSchema.index({
 });
 
 discussionSchema.plugin(mongoosePaginate);
-
-discussionSchema.plugin(mongoosastic, elasticsearchConfig);
 
 export default mongoose.model('Discussion', discussionSchema);

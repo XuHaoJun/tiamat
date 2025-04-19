@@ -184,26 +184,26 @@ module.exports = {
     new webpack.optimize.ModuleConcatenationPlugin(),
     new WebpackBundleSizeAnalyzerPlugin('./plain-report.txt'),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(zh-tw|en)/),
-    new SWPrecacheWebpackPlugin({
-      cacheId: 'tiamat',
-      filename: 'precache-service-worker.js',
-      staticFileGlobs: ['dist/**/*.{js,css}'],
-      dontCacheBustUrlsMatching: /^(?!.*(vendor\.js)).*\.(js|css)$/,
-      stripPrefixMulti: {
-        'dist/': '',
-        'assets/': '',
-      },
-      runtimeCaching: [
-        {
-          urlPattern: /^https?:\/\/(.+)\/api/,
-          handler: 'networkFirst',
-        },
-        {
-          urlPattern: /^https?:\/\/(.+)\/(?!.*(api|\.)).*$/,
-          handler: 'networkFirst',
-        },
-      ],
-      verbose: true,
-    }),
+    // new SWPrecacheWebpackPlugin({
+    //   cacheId: 'tiamat',
+    //   filename: 'precache-service-worker.js',
+    //   staticFileGlobs: ['dist/**/*.{js,css}'],
+    //   dontCacheBustUrlsMatching: /^(?!.*(vendor\.js)).*\.(js|css)$/,
+    //   stripPrefixMulti: {
+    //     'dist/': '',
+    //     'assets/': '',
+    //   },
+    //   runtimeCaching: [
+    //     {
+    //       urlPattern: /^https?:\/\/(.+)\/api/,
+    //       handler: 'networkFirst',
+    //     },
+    //     {
+    //       urlPattern: /^https?:\/\/(.+)\/(?!.*(api|\.)).*$/,
+    //       handler: 'networkFirst',
+    //     },
+    //   ],
+    //   verbose: true,
+    // }),
   ],
 };

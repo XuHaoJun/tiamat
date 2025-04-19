@@ -6,29 +6,34 @@ import cdr from 'lodash/tail';
 import RootWiki from '../models/rootWiki';
 import Wiki from '../models/wiki';
 
-export function getWiki(req, res) {
-  const { id, name, rootWikiId } = req.params;
-  if (!id && (!name && !rootWikiId)) {
-    res.status(403).send(new Error(`unknown params.${req.params}`));
-    return;
+export async function getWiki(req, res) {
+  try {
+    const { id, name, rootWikiId } = req.params;
+    if (!id && (!name && !rootWikiId)) {
+      res.status(403).send(new Error(`unknown params.${req.params}`));
+      return;
+    }
+    
+    let query;
+    if (id) {
+      query = { _id: id };
+    } else {
+      query = { name, rootWiki: rootWikiId };
+    }
+    
+    const wiki = await Wiki.findOne(query)
+      .populate('wikiDataForm')
+      .exec();
+      
+    if (!wiki) {
+      res.status(404).send('Not found.');
+      return;
+    }
+    
+    res.json({ wiki });
+  } catch (err) {
+    res.status(403).send(err);
   }
-  let query;
-  if (id) {
-    query = { _id: id };
-  } else {
-    query = { name, rootWiki: rootWikiId };
-  }
-  Wiki.findOne(query)
-    .populate('wikiDataForm')
-    .exec((err, wiki) => {
-      if (err) {
-        res.status(403).send(err);
-      } else if (!wiki) {
-        res.status(404).send('Not found.');
-      } else {
-        res.json({ wiki });
-      }
-    });
 }
 
 function pathToMongoQuery(path = []) {
@@ -109,102 +114,105 @@ function rootWikiGroupTreeToMongoQuery(rootWikiGroupTree, rootField = 'rootWikiG
 //   );
 // }
 
-export function getWikis(req, res) {
-  const { rootWikiId } = req.params;
-  const reqQuery = req.query;
-  const { rootWikiGroupTree } = reqQuery;
-  const page = Number.parseInt(req.query.page, 10) || 1;
-  const limit = Number.parseInt(req.query.limit, 10) || 10;
-  const sort = '-updatedAt';
-  if (!rootWikiId) {
-    res.status(403).send(new Error('query rootWiki must have.'));
-    return;
-  }
-  let query = {
-    rootWiki: rootWikiId,
-  };
-  if (rootWikiGroupTree === 'null') {
-    query.rootWikiGroupTree = null;
-  } else if (rootWikiGroupTree && rootWikiGroupTree !== 'all') {
-    const q = rootWikiGroupTreeToMongoQuery(rootWikiGroupTree);
-    query = Object.assign(query, q);
-  }
-  const populate = {
-    path: 'wikiDataForm',
-  };
-  Wiki.paginate(
-    query,
-    {
-      page,
-      limit,
-      sort,
-      populate,
-    },
-    (err, result) => {
-      if (err) {
-        res.status(403).send(err);
-      } else {
-        res.json({ wikis: result.docs });
-      }
-    }
-  );
-}
-
-export function addWiki(req, res) {
-  const wikiForm = req.body.wiki;
-  const { rootWikiId } = wikiForm;
-  const newWiki = new Wiki({
-    name: wikiForm.name,
-    content: wikiForm.content,
-    rootWiki: wikiForm.rootWikiId,
-  });
-  RootWiki.findOne({ _id: rootWikiId }).exec((err1, rootWiki) => {
-    if (err1) {
-      res.status(403).send(err1);
+export async function getWikis(req, res) {
+  try {
+    const { rootWikiId } = req.params;
+    const reqQuery = req.query;
+    const { rootWikiGroupTree } = reqQuery;
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 10;
+    const sort = '-updatedAt';
+    
+    if (!rootWikiId) {
+      res.status(403).send(new Error('query rootWiki must have.'));
       return;
     }
+    
+    let query = {
+      rootWiki: rootWikiId,
+    };
+    
+    if (rootWikiGroupTree === 'null') {
+      query.rootWikiGroupTree = null;
+    } else if (rootWikiGroupTree && rootWikiGroupTree !== 'all') {
+      const q = rootWikiGroupTreeToMongoQuery(rootWikiGroupTree);
+      query = Object.assign(query, q);
+    }
+    
+    const populate = {
+      path: 'wikiDataForm',
+    };
+    
+    const result = await Wiki.paginate(
+      query,
+      {
+        page,
+        limit,
+        sort,
+        populate,
+      }
+    );
+    
+    res.json({ wikis: result.docs });
+  } catch (err) {
+    res.status(403).send(err);
+  }
+}
+
+export async function addWiki(req, res) {
+  try {
+    const wikiForm = req.body.wiki;
+    const { rootWikiId } = wikiForm;
+    
+    const newWiki = new Wiki({
+      name: wikiForm.name,
+      content: wikiForm.content,
+      rootWiki: wikiForm.rootWikiId,
+    });
+    
+    const rootWiki = await RootWiki.findOne({ _id: rootWikiId }).exec();
+    
     if (!rootWiki) {
       res.status(403).send('rootWiki not found');
       return;
     }
-    newWiki.save((err, saved) => {
-      if (err) {
-        res.status(403).send(err);
-        return;
-      }
-      res.json({ wiki: saved });
-    });
-  });
+    
+    const saved = await newWiki.save();
+    res.json({ wiki: saved });
+  } catch (err) {
+    res.status(403).send(err);
+  }
 }
 
 // TODO
 // add user bind.
 // add validate.
-export function updateWiki(req, res) {
-  const _id = req.params.id;
-  const { user, wiki } = req.body;
-  const { content, data } = wiki;
-  if (!_id || (!content && !data)) {
-    res.status(403).send(new Error('incorrect format.'));
-    return;
+export async function updateWiki(req, res) {
+  try {
+    const _id = req.params.id;
+    const { user, wiki } = req.body;
+    const { content, data } = wiki;
+    
+    if (!_id || (!content && !data)) {
+      res.status(403).send(new Error('incorrect format.'));
+      return;
+    }
+    
+    const getNextUpdate = () => {
+      let nextUpdate = { updatedAt: Date.now() };
+      if (content) {
+        nextUpdate = { content, ...nextUpdate };
+      }
+      if (data) {
+        nextUpdate = { data, ...nextUpdate };
+      }
+      return nextUpdate;
+    };
+    
+    const nextUpdate = getNextUpdate();
+    const updated = await Wiki.findByIdAndUpdate(_id, nextUpdate, { new: true }).exec();
+    res.json({ wiki: updated });
+  } catch (err) {
+    res.status(403).send(err);
   }
-  const getNextUpdate = () => {
-    let nextUpdate = { updatedAt: Date.now() };
-    if (content) {
-      nextUpdate = { content, ...nextUpdate };
-    }
-    if (data) {
-      nextUpdate = { data, ...nextUpdate };
-    }
-    return nextUpdate;
-  };
-  const nextUpdate = getNextUpdate();
-  const update = { $set: nextUpdate };
-  Wiki.findByIdAndUpdate(_id, update, { upsert: false, new: true }).exec((err, updatedWiki) => {
-    if (err) {
-      res.status(403).send(err);
-    } else {
-      res.json({ wiki: updatedWiki });
-    }
-  });
 }

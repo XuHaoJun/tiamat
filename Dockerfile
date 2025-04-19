@@ -1,11 +1,11 @@
-FROM node:9.11.2-alpine AS base-stage
+FROM node:22.14.0-alpine3.21 AS base-stage
 WORKDIR /app
 
 #
 ## Dependencies Stage
 FROM base-stage AS dependencies-stage
 # for node-gyp build 
-RUN apk add --no-cache build-base python2 python3
+RUN apk add --no-cache build-base python3
 COPY package.json yarn.lock ./
 # 只安裝 production 相關模組，並複製出來，準備給 Release Stage 使用
 RUN yarn install --frozen-lockfile --production
@@ -31,7 +31,7 @@ RUN npm run build:all
 #
 ## Release Stage 
 FROM base-stage AS release-stage
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 COPY --from=build-stage /app/assets assets
 COPY --from=build-stage /app/package.json package.json

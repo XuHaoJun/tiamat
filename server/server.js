@@ -12,7 +12,7 @@ import Loadable from 'react-loadable';
 import passport from 'passport';
 
 import Oauth2Client from './models/oauth2Client';
-import syncElasticsearch from './util/syncElasticsearch';
+// import syncElasticsearch from './util/syncElasticsearch';
 import apiRoutes from './apiRoutes';
 import renderClientRoute from './renderClientRoute';
 
@@ -60,15 +60,12 @@ mongoose.connection.on('error', error => {
 mongoose.connection.on('connected', () => {
   // feed some dummy data in DB.
   dummyData();
-  syncElasticsearch();
+  // syncElasticsearch();
   Oauth2Client.getAppClient();
 });
 
 mongoose.connect(
   appConfig.mongoDB.url,
-  {
-    useNewUrlParser: true,
-  }
 );
 
 process.on('SIGINT', () => {

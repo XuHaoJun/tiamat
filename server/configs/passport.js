@@ -14,52 +14,38 @@ import AccessToken from '../models/oauth2AccessToken';
 import facebookConfig from './oauth2/facebook';
 import googleConfig from './oauth2/google';
 
-function userAuth(emailOri, password, done) {
+async function userAuth(emailOri, password, done) {
   const email = emailOri.toLowerCase();
-  User.findOne(
-    {
-      email,
-    },
-    (err, user) => {
-      if (err) {
-        return done(err);
-      }
-      if (!user) {
-        return done(null, false, { message: `Email ${email} not found.` });
-      }
-      return user.comparePassword(password, (err2, isMatch) => {
-        if (isMatch) {
-          return done(null, user);
-        }
-        return done(null, false, { message: 'Invalid email or password.' });
-      });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return done(null, false, { message: `Email ${email} not found.` });
     }
-  );
+    const isMatch = await user.comparePassword(password);
+    if (isMatch) {
+      return done(null, user);
+    }
+    return done(null, false, { message: 'Invalid email or password.' });
+  } catch (err) {
+    return done(err);
+  }
 }
 
-function clientAuth(id, secret, done) {
-  Client.findOne(
-    {
-      _id: id,
-    },
-    (err, client) => {
-      if (err) {
-        return done(err);
-      }
-      if (!client) {
-        return done(null, false);
-      }
-      if (client.secret !== secret) {
-        return done(null, false);
-      }
-      return done(null, client);
+async function clientAuth(id, secret, done) {
+  try {
+    const client = await Client.findOne({ _id: id });
+    if (!client || client.secret !== secret) {
+      return done(null, false);
     }
-  );
+    return done(null, client);
+  } catch (err) {
+    return done(err);
+  }
 }
 
 // TODO
 // support multi passport.
-function findOrInsertUser(oauth2Info) {
+async function findOrInsertUser(oauth2Info) {
   const { providerName, accessToken, refreshToken, profile, cb } = oauth2Info;
   const thirdUserId = profile.id;
   const query = {
@@ -80,13 +66,13 @@ function findOrInsertUser(oauth2Info) {
   const newUser = new User(userArgs);
   const update = { $setOnInsert: newUser };
   const opts = { new: true, upsert: true };
-  return User.findOneAndUpdate(query, update, opts)
-    .then(user => {
-      cb(null, user);
-    })
-    .catch(err => {
-      cb(err, null);
-    });
+  
+  try {
+    const user = await User.findOneAndUpdate(query, update, opts);
+    cb(null, user);
+  } catch (err) {
+    cb(err, null);
+  }
 }
 
 export default function config() {
@@ -127,83 +113,62 @@ export default function config() {
     );
   }
 
-  //   Don't need validate again token, just trust json web token(https://tools.ietf.org/html/rfc7519)
-  // that will verify it, and either trust token's json payload(userid, clientid....) for auth.
-  //   Token generally store in browser indexedDB(default) and it's follow same-origin policy,
-  // that will protect your token from XSS attack.
   passport.use(
     'bearer-jwt',
-    new BearerStrategy((tokenString, done) => {
-      AccessToken.verify(tokenString, (err, payload) => {
-        if (err) {
-          done(err);
-        } else {
-          const { target, sub, scope } = payload;
-          if (!target || !sub || !scope) {
-            done(null, false);
-          } else {
-            if (target === 'client') {
-              Client.findOne({ _id: sub })
-                .exec()
-                .then(client => {
-                  if (!client) {
-                    done(null, false);
-                  } else {
-                    done(null, client, scope);
-                  }
-                  return null;
-                })
-                .catch(er => {
-                  done(er);
-                  return er;
-                });
-            } else if (target === 'user') {
-              User.findById(sub)
-                .select({ password: 0 })
-                .exec()
-                .then(user => {
-                  if (!user) {
-                    done(null, false);
-                  } else {
-                    done(null, user, scope);
-                  }
-                  return null;
-                })
-                .catch(er => {
-                  done(er);
-                  return er;
-                });
-            } else {
-              done(null, false);
-            }
-          }
+    new BearerStrategy(async (tokenString, done) => {
+      try {
+        const payload = await AccessToken.verify(tokenString);
+        const { target, sub, scope } = payload;
+        
+        if (!target || !sub || !scope) {
+          return done(null, false);
         }
-      });
+        
+        if (target === 'client') {
+          const client = await Client.findOne({ _id: sub });
+          if (!client) {
+            return done(null, false);
+          }
+          return done(null, client, scope);
+        } else if (target === 'user') {
+          const user = await User.findById(sub).select({ password: 0 });
+          if (!user) {
+            return done(null, false);
+          }
+          return done(null, user, scope);
+        }
+        return done(null, false);
+      } catch (err) {
+        return done(err);
+      }
     })
   );
 
   passport.use(
     'bearer',
-    new BearerStrategy((tokenString, done) => {
-      // TODO
-      // improve performance by find user or client on demand
-      return AccessToken.findOne({ token: tokenString })
-        .populate('user')
-        .populate('client')
-        .exec((err, token) => {
-          if (err) {
-            return done(err);
-          }
-          if (!token) {
-            return done(null, false);
-          } else if (token.user) {
-            return done(null, token.user, token.scope);
-          } else if (token.client) {
-            return done(null, token.client, token.scope);
-          } else {
-            return done(null, false);
-          }
-        });
+    new BearerStrategy(async (tokenString, done) => {
+      try {
+        const token = await AccessToken.findOne({ token: tokenString })
+          .populate('user')
+          .populate('client')
+          .exec();
+          
+        if (!token) {
+          return done(null, false);
+        }
+        
+        if (token.user) {
+          return done(null, token.user, token.scope);
+        }
+        
+        if (token.client) {
+          return done(null, token.client, token.scope);
+        }
+        
+        return done(null, false);
+      } catch (err) {
+        return done(err);
+      }
     })
   );
 }

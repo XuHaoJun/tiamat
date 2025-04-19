@@ -33,7 +33,8 @@ export function fetchForumBoards(
         return forumBoards;
       })
       .catch(err => {
-        return Promise.resolve(dispatch(addError(err.response.data))).then(() => {
+        const errorMessage = (err.response && err.response.data) || err.message || 'An error occurred';
+        return Promise.resolve(dispatch(addError(errorMessage))).then(() => {
           return Promise.reject(err);
         });
       });
@@ -48,7 +49,8 @@ export function fetchForumBoardById(_id) {
         return res.forumBoard;
       })
       .catch(err => {
-        return Promise.resolve(dispatch(addError(err.response.data))).then(() => {
+        const errorMessage = (err.response && err.response.data) || err.message || 'An error occurred';
+        return Promise.resolve(dispatch(addError(errorMessage))).then(() => {
           return Promise.reject(err);
         });
       });
@@ -63,7 +65,8 @@ export function addForumBoardRequest(forumBoard) {
         return res.forumBoard;
       })
       .catch(err => {
-        return Promise.resolve(dispatch(addError(err.response.data))).then(() => {
+        const errorMessage = (err.response && err.response.data) || err.message || 'An error occurred';
+        return Promise.resolve(dispatch(addError(errorMessage))).then(() => {
           return Promise.reject(err);
         });
       });

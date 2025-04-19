@@ -270,47 +270,48 @@ function normalizeQuery(query) {
   return q;
 }
 
-export function getDiscussionByTest(req, res) {
-  const reqQuery = normalizeQuery(req.query);
-  const { test: testInput, sort: sortInput, select } = reqQuery;
-  const test = testInput || { updatedAt: { $lte: new Date() } };
-  const sort = sortInput || { updatedAt: -1 };
-  const vali = validateTest(test) && validateSort(sort);
-  if (!vali) {
-    res.status(403).send(testSchema);
-  } else {
-    Discussion.find(test, select)
+export async function getDiscussionByTest(req, res) {
+  try {
+    const reqQuery = normalizeQuery(req.query);
+    const { test: testInput, sort: sortInput, select } = reqQuery;
+    const test = testInput || { updatedAt: { $lte: new Date() } };
+    const sort = sortInput || { updatedAt: -1 };
+    
+    if (!validateTest(test) || !validateSort(sort)) {
+      res.status(403).send(testSchema);
+      return;
+    }
+
+    const discussions = await Discussion.find(test, select)
       .sort(sort)
       .limit(1)
-      .exec((err, discussions) => {
-        if (err) {
-          res.status(403).send(err);
-          return;
-        }
-        if (discussions.length === 0) {
-          res.status(404).send('Not Found');
-        } else {
-          res.json({ discussion: discussions[0] });
-        }
-      });
+      .exec();
+
+    if (!discussions || discussions.length === 0) {
+      res.status(404).send('Not Found');
+      return;
+    }
+
+    res.json({ discussion: discussions[0] });
+  } catch (err) {
+    res.status(403).send(err);
   }
 }
 
-export function getDiscussionById(req, res) {
+export async function getDiscussionById(req, res) {
   const reqQuery = req.query;
   const select = normalizeSelect(reqQuery.select) || {};
-  Discussion.findById(req.params.id)
+  try {
+    const discussion = await Discussion.findById(req.params.id)
     .select(select)
-    .exec((err, discussion) => {
-      if (err) {
-        res.status(403).send(err);
-        return;
-      }
-      res.json({ discussion });
-    });
+    .exec();
+    res.json({ discussion })
+  } catch(err) {
+    res.status(403).send(err);
+  }
 }
 
-export function getChildDiscussions(req, res) {
+export async function getChildDiscussions(req, res) {
   const { id: parentDiscussionId } = req.params;
   if (!parentDiscussionId) {
     res.status(403).send(new Error('must have parentDiscussionId'));
@@ -326,22 +327,24 @@ export function getChildDiscussions(req, res) {
         _id: parentDiscussionId,
       }
     : {};
-  Discussion.find()
-    .or(queryBase)
-    .or(withParentQuery)
-    .select(select)
-    .exec((err, discussions) => {
-      if (err) {
-        res.status(403).send(err);
-      } else if (discussions.length === 0) {
-        res.status(404).end();
-      } else {
-        res.json({ discussions });
-      }
-    });
+  try {
+    const discussions = await Discussion.find()
+      .or(queryBase)
+      .or(withParentQuery)
+      .select(select)
+      .exec();
+    
+    if (discussions.length === 0) {
+      res.status(404).end();
+    } else {
+      res.json({ discussions });
+    }
+  } catch (err) {
+    res.status(403).send(err);
+  }
 }
 
-export function getDiscussions(req, res) {
+export async function getDiscussions(req, res) {
   const { parentDiscussionId } = req.query;
   if (!parentDiscussionId) {
     res.status(403).send(new Error('must have parentDiscussionId'));
@@ -352,32 +355,30 @@ export function getDiscussions(req, res) {
   const query = {
     parentDiscussion: parentDiscussionId,
   };
-  Discussion.find(query)
-    .select(select)
-    .exec((err, discussions) => {
-      if (err) {
-        res.status(403).send(err);
-        return;
-      }
-      res.json({ discussions });
-    });
+  try {
+    const discussions = await Discussion.find(query)
+      .select(select)
+      .exec();
+    res.json({ discussions });
+  } catch (err) {
+    res.status(403).send(err);
+  }
 }
 
-export function getDiscussionsWithChild(req, res) {
-  Discussion.findOne({ _id: req.params.id })
-    .populate({
-      path: 'childDiscussions',
-      options: {
-        sort: {
-          updatedAt: -1,
+export async function getDiscussionsWithChild(req, res) {
+  try {
+    const discussion = await Discussion.findOne({ _id: req.params.id })
+      .populate({
+        path: 'childDiscussions',
+        options: {
+          sort: {
+            updatedAt: -1,
+          },
         },
-      },
-    })
-    .exec((err, discussion) => {
-      if (err) {
-        res.status(403).send(err);
-        return;
-      }
-      res.json({ discussion });
-    });
+      })
+      .exec();
+    res.json({ discussion });
+  } catch (err) {
+    res.status(403).send(err);
+  }
 }

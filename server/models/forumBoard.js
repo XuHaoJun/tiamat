@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
-import mongoosastic from 'mongoosastic';
+import mongoosePaginate from 'mongoose-paginate-v2';
 import elasticsearchConfig from '../configs/elasticsearch';
 
 const Schema = mongoose.Schema;
@@ -38,7 +37,5 @@ forumBoardSchema.index({ groups: 1, name: 1 });
 forumBoardSchema.index({ groups: 1, _id: 1 });
 
 forumBoardSchema.plugin(mongoosePaginate);
-
-forumBoardSchema.plugin(mongoosastic, elasticsearchConfig);
 
 export default mongoose.model('ForumBoard', forumBoardSchema);

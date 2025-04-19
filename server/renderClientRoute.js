@@ -46,19 +46,19 @@ function getChunkManifest() {
   return _chunkManifestCache;
 }
 
-const ServiceWorkerScript = () => {
-  const body = `(function() {
-    if (
-      location &&
-      location.protocol === "https:" &&
-      navigator &&
-      navigator.serviceWorker
-    ) {
-      navigator.serviceWorker.register("/precache-service-worker.js");
-    }
-  })();`;
-  return <script dangerouslySetInnerHTML={{ __html: body }} />;
-};
+// const ServiceWorkerScript = () => {
+//   const body = `(function() {
+//     if (
+//       location &&
+//       location.protocol === "https:" &&
+//       navigator &&
+//       navigator.serviceWorker
+//     ) {
+//       navigator.serviceWorker.register("/precache-service-worker.js");
+//     }
+//   })();`;
+//   return <script dangerouslySetInnerHTML={{ __html: body }} />;
+// };
 
 const ForceHttpsScript = () => {
   const body = `(function() {
@@ -191,7 +191,7 @@ const Head = ({ jssSheets, helmet }) => {
       ) : null}
       {process.env.NODE_ENV === 'production' ? (
         <React.Fragment>
-          <ServiceWorkerScript />
+          {/* <ServiceWorkerScript /> */}
           <ForceHttpsScript />
         </React.Fragment>
       ) : null}
